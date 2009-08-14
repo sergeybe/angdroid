@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Angband2" default="angband-debug">
+
+    <!-- Please don't edit this file. Edit build.properties instead of -->
+
+    <!--
+    <property environment="env"/>
+
+    <property name="ndk-location" value="${env.ANDROID_NDK_ROOT}" />
+    <property name="sdk-location" value="${env.ANDROID_HOME}" />
+    -->
+    <property file="local.properties"/>
+    <property file="build.properties"/>
+    <property file="default.properties"/>
+
+    <path id="android.antlibs">
+        <pathelement path="${sdk-location}/tools/lib/anttasks.jar" />
+        <pathelement path="${sdk-location}/tools/lib/sdklib.jar" />
+        <pathelement path="${sdk-location}/tools/lib/androidprefs.jar" />
+        <pathelement path="${sdk-location}/tools/lib/apkbuilder.jar" />
+        <pathelement path="${sdk-location}/tools/lib/jarutils.jar" />
+    </path>
+
+    <taskdef name="setup"
+        classname="com.android.ant.SetupTask"
+        classpathref="android.antlibs"/>
+
+    <setup/>
+
+    <condition property="is.exist.jni.header">
+        <available file="angdroid.h" type="file" filepath="jni"/>
+    </condition>
+
+    <target name="angband-javah" depends="compile" unless="is.exist.jni.header">
+        <javah outputFile="jni/angdroid.h"
+            classpath="${out-classes-location}"
+            bootclasspath="${android-jar}"
+            verbose="true">
+            <class name="org.angdroid.angband2.TermView" />
+            <class name="org.angdroid.angband2.AngbandActivity" />
+        </javah>
+    </target>
+
+    <condition property="is.set.apps.link">
+        <available file="angband" type="dir" filepath="${ndk-location}/apps/"/>
+    </condition>
+
+    <condition property="is.set.sources.link">
+        <available file="angband" type="dir" filepath="${ndk-location}/sources/"/>
+    </condition>
+
+    <target name="link.apps" unless="is.set.apps.link">
+        <symlink link="${ndk-location}/apps/angband" resource="${basedir}"/>
+    </target>
+
+    <target name="link.source" unless="is.set.sources.link">
+        <symlink link="${ndk-location}/sources/angband" resource="${basedir}"/>
+    </target>
+
+    <target name="links" depends="link.apps, link.source" />
+
+    <target name="angband-lib" depends="angband-javah">
+        <exec executable="make">
+            <arg value="-f"/>
+            <arg value="${ndk-location}/GNUmakefile"/>
+            <arg value="-C"/>
+            <arg value="${ndk-location}"/>
+            <arg value="APP=angband" />
+        </exec>
+    </target>
+
+    <condition property="is.created.zip.resource">
+            <available file="zip" type="file" filepath="${resource-folder}/raw/"/>
+    </condition>
+
+    <target name="angband-resources" unless="is.created.zip.resource">
+        <zip destfile="${resource-folder}/raw/zip" basedir="../../lib"
+            excludes="**/Makefile **/*.glade **/*.fon **/*.bmp **/*.png **/*.wav xtra/sound/sound.cfg xtra/font/copying.txt"
+        />
+    </target>
+
+    <target name="clean">
+        <delete dir="bin"/>
+        <delete dir="gen"/>
+        <delete dir="libs"/>
+        <delete file="${resource-folder}/raw/zip"/>
+    </target>
+
+
+    <target name="angband-release" depends="angband-resources, angband-lib, release" />
+    <target name="angband-debug" depends="angband-resources, angband-lib, debug" />
+
+</project>

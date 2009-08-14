@@ -1,0 +1,26 @@
+Index: src/h-basic.h
+===================================================================
+--- src/h-basic.h	(revision 1626)
++++ src/h-basic.h	(working copy)
+@@ -75,7 +75,7 @@
+  * Basically, SET_UID should *only* be set for "Unix" machines.
+  */
+ #if !defined(MACH_O_CARBON) && !defined(WINDOWS) && \
+-    !defined(RISCOS) && !defined(GAMEBOY) && !defined(NDS)
++    !defined(RISCOS) && !defined(GAMEBOY) && !defined(NDS) && !defined(ANDROID)
+ # define SET_UID
+ 
+ /* Without autoconf, turn on some things */
+Index: src/util.c
+===================================================================
+--- src/util.c	(revision 1626)
++++ src/util.c	(working copy)
+@@ -1424,7 +1424,7 @@
+ 
+ 
+ 		/* End "macro trigger" */
+-		if (parse_under && (ke.key >=0 && ke.key <= 32))
++		if (parse_under && (iscntrl(ke.key) || ke.key == ' '))
+ 		{
+ 			/* Strip this key */
+ 			ke.type = EVT_NONE;

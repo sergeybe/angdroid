@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Angband</string>
+    <string name="version">0.0.0.1</string>
+    <string name="menu_preferences">Preferences</string>
+    <string name="menu_help">Help</string>
+    <string name="angband_help">Angband Help</string>
+    <string name="preferences">Preferences</string>
+    <string name="description">Angband is a dungeon-crawling roguelike RPG game.</string>
+</resources>
