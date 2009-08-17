@@ -233,7 +233,7 @@ static errr Term_user_and(int n)
 	/* XXX XXX XXX */
 
 	/* Unknown */
-	return (1);
+	return 1;
 }
 
 
@@ -301,7 +301,7 @@ static errr Term_xtra_and(int n, int v)
 			}
 			else Term_keypress(key);
 			
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_FLUSH:
@@ -318,7 +318,7 @@ static errr Term_xtra_and(int n, int v)
 			LOGD("TERM_XTRA_FLUSH");
 			(*env)->CallIntMethod(env, TermViewObj, TermView_clearKeyBuffer);
 
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_CLEAR:
@@ -333,7 +333,7 @@ static errr Term_xtra_and(int n, int v)
 			 */
 			LOGD("TERM_XTRA_CLEAR");
 			(*env)->CallVoidMethod(env, TermViewObj, TermView_clear);
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_SHAPE:
@@ -350,7 +350,7 @@ static errr Term_xtra_and(int n, int v)
 			LOGD("TERM_XTRA_SHAPE");
 			(*env)->CallVoidMethod(env, TermViewObj, TermView_setCursorVisible, v);
 			
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_FROSH:
@@ -367,7 +367,7 @@ static errr Term_xtra_and(int n, int v)
 			 * necessary flushing issues.
 			 */
 			LOGD("TERM_XTRA_FROSH");
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_FRESH:
@@ -385,7 +385,7 @@ static errr Term_xtra_and(int n, int v)
 			 */
 			LOGD("TERM_XTRA_FRESH");
 			(*env)->CallVoidMethod(env, TermViewObj, TermView_postInvalidate);
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_NOISE:
@@ -399,7 +399,7 @@ static errr Term_xtra_and(int n, int v)
 			 */
 			LOGD("TERM_XTRA_NOISE");
 			(*env)->CallVoidMethod(env, TermViewObj, TermView_noise);
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_BORED:
@@ -410,7 +410,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is optional, and normally not important
 			 */
 			LOGD("TERM_XTRA_BORED");
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_REACT:
@@ -427,7 +427,7 @@ static errr Term_xtra_and(int n, int v)
 			 */
 			LOGD("TERM_XTRA_REACT");
 			
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_ALIVE:
@@ -446,7 +446,7 @@ static errr Term_xtra_and(int n, int v)
 			 * on UNIX machines, to allow proper "suspending".
 			 */
 			LOGD("TERM_XTRA_ALIVE");
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_LEVEL:
@@ -467,7 +467,7 @@ static errr Term_xtra_and(int n, int v)
 			 * one "term_data" structure is supported by this file.
 			 */
 			LOGD("TERM_XTRA_LEVEL");
-			return (0);
+			return 0;
 		}
 
 		case TERM_XTRA_DELAY:
@@ -486,12 +486,12 @@ static errr Term_xtra_and(int n, int v)
 			if (v > 0)
 				usleep((unsigned int)1000 * v);
 			
-			return (0);
+			return 0;
 		}
 	}
 
 	/* Unknown or Unhandled action */
-	return (1);
+	return 1;
 }
 
 
@@ -521,7 +521,7 @@ static errr Term_curs_and(int x, int y)
 	(*env)->CallVoidMethod(env, TermViewObj, TermView_setCursorXY, x , y);
 
 	/* Success */
-	return (0);
+	return 0;
 }
 
 
@@ -542,7 +542,7 @@ static errr Term_wipe_and(int x, int y, int n)
 	(*env)->CallVoidMethod(env, TermViewObj, TermView_wipe, x , y , n);
 
 	/* Success */
-	return (0);
+	return 0;
 }
 
 
@@ -598,7 +598,7 @@ static errr Term_text_and(int x, int y, int n, byte a, const char *cp)
 	(*env)->DeleteLocalRef(env, array);
 
 	/* Success */
-	return (ret);
+	return ret;
 }
 
 /*
@@ -637,7 +637,7 @@ static errr Term_pict_and(int x, int y, int n, const byte *ap, const char *cp,
 	/* XXX XXX XXX */
 
 	/* Success */
-	return (0);
+	return 0;
 }
 
 
@@ -775,7 +775,7 @@ errr init_and(void)
 	}
 
 	/* Success */
-	return (0);
+	return 0;
 }
 
 /*
