@@ -26,6 +26,8 @@ import java.util.zip.ZipInputStream;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -75,14 +77,24 @@ public class AngbandActivity extends Activity {
 	protected void onResume() {
 		Log.d("Angband", "onResume");
 		super.onResume();
-		term.onResume();
+
+		SharedPreferences pref = getSharedPreferences(Preferences.NAME,
+				MODE_PRIVATE);
+
+		term.setVibrate(pref.getBoolean(Preferences.KEY_VIBRATE, false));
 	}
 
 	@Override
 	protected void onPause() {
 		Log.d("Angband", "onPause");
 		super.onPause();
-		term.onPause();
+
+		Editor editor = getSharedPreferences(Preferences.NAME, MODE_PRIVATE)
+				.edit();
+
+		editor.putBoolean(Preferences.KEY_VIBRATE, term.getVibrate());
+
+		editor.commit();
 	}
 
 	@Override
@@ -137,5 +149,4 @@ public class AngbandActivity extends Activity {
 			Log.v("Angband", "error extracting files: " + e);
 		}
 	}
-
 }

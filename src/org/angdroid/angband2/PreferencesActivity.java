@@ -26,8 +26,10 @@ public class PreferencesActivity extends PreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
+		getPreferenceManager().setSharedPreferencesName(Preferences.NAME);
+
 		// Load the preferences from an XML resource
-		addPreferencesFromResource(R.layout.preferences);
+		addPreferencesFromResource(R.xml.preferences);
 	}
 }
