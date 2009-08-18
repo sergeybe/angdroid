@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<PreferenceCategory android:title="@string/interface1">
+		<CheckBoxPreference 
+			android:key="angband.vibrate"
+			android:defaultValue="false" 
+			android:title="@string/preferences_vibrate_title"
+			android:summary="@string/preferences_vibrate_summary" />
+	</PreferenceCategory>
+
+</PreferenceScreen>

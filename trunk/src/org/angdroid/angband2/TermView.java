@@ -92,6 +92,7 @@ public class TermView extends View implements Runnable {
 	private int char_width = 6;
 
 	private Vibrator vibrator;
+	private boolean vibrate;
 
 	private Thread thread;
 
@@ -312,7 +313,9 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void noise() {
-		vibrator.vibrate(50);
+		if (vibrate) {
+			vibrator.vibrate(50);
+		}
 	}
 
 	public int text(final int x, final int y, final int n, final byte a,
@@ -416,5 +419,13 @@ public class TermView extends View implements Runnable {
 		initGame();
 		playGame();
 		finishGame();
+	}
+
+	public void setVibrate(boolean vibrate) {
+		this.vibrate = vibrate;
+	}
+
+	public boolean getVibrate() {
+		return vibrate;
 	}
 }
