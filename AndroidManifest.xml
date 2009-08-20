@@ -7,7 +7,7 @@
 		<activity android:name=".AngbandActivity" android:label="@string/app_name"
 			android:screenOrientation="landscape"
 			android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-			android:configChanges="keyboardHidden" android:multiprocess="false" android:finishOnTaskLaunch="true" android:clearTaskOnLaunch="true">
+			android:configChanges="keyboardHidden" android:multiprocess="false" android:finishOnTaskLaunch="true" android:clearTaskOnLaunch="true" android:launchMode="singleTop" android:icon="@drawable/icon">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />

@@ -4,6 +4,7 @@
     <string name="version">0.0.0.1</string>
     <string name="menu_preferences">Preferences</string>
     <string name="menu_help">Help</string>
+    <string name="menu_quit">Quit</string>
     <string name="angband_help">Angband Help</string>
     <string name="preferences">Preferences</string>
     <string name="interface1">Interface</string>

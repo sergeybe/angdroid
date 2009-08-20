@@ -69,6 +69,9 @@ public class AngbandActivity extends Activity {
 			intent = new Intent(this, PreferencesActivity.class);
 			startActivity(intent);
 			break;
+		case '3':
+			finish();
+			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
