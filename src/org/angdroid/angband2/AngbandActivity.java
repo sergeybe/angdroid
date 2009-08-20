@@ -34,6 +34,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 public class AngbandActivity extends Activity {
 
@@ -84,6 +85,12 @@ public class AngbandActivity extends Activity {
 		SharedPreferences pref = getSharedPreferences(Preferences.NAME,
 				MODE_PRIVATE);
 
+		if (pref.getBoolean(Preferences.KEY_FULLSCREEN, true)) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		} else {
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+		
 		term.setVibrate(pref.getBoolean(Preferences.KEY_VIBRATE, false));
 	}
 
@@ -91,13 +98,6 @@ public class AngbandActivity extends Activity {
 	protected void onPause() {
 		Log.d("Angband", "onPause");
 		super.onPause();
-
-		Editor editor = getSharedPreferences(Preferences.NAME, MODE_PRIVATE)
-				.edit();
-
-		editor.putBoolean(Preferences.KEY_VIBRATE, term.getVibrate());
-
-		editor.commit();
 	}
 
 	@Override

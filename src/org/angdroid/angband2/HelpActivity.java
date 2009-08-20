@@ -19,7 +19,9 @@
 package org.angdroid.angband2;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -36,5 +38,19 @@ public class HelpActivity extends Activity {
 		settings.setUseWideViewPort(false);
 		help.loadUrl("file:///android_asset/help.html");
 		help.computeScroll();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		SharedPreferences pref = getSharedPreferences(Preferences.NAME,
+				MODE_PRIVATE);
+
+		if (pref.getBoolean(Preferences.KEY_FULLSCREEN, true)) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		} else {
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
 	}
 }

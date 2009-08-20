@@ -11,4 +11,6 @@
     <string name="description">Angband is a dungeon-crawling roguelike RPG game.</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Enable or disable vibration in game</string>
+    <string name="preferences_fullscreen_title">Full screen</string>
+    <string name="preferences_fullscreen_summary">Enable or disable game in full screen</string>
 </resources>
