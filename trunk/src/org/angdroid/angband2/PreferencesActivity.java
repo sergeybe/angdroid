@@ -18,8 +18,10 @@
 
 package org.angdroid.angband2;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.view.WindowManager;
 
 public class PreferencesActivity extends PreferenceActivity {
 
@@ -31,5 +33,19 @@ public class PreferencesActivity extends PreferenceActivity {
 
 		// Load the preferences from an XML resource
 		addPreferencesFromResource(R.xml.preferences);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		SharedPreferences pref = getSharedPreferences(Preferences.NAME,
+				MODE_PRIVATE);
+
+		if (pref.getBoolean(Preferences.KEY_FULLSCREEN, true)) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		} else {
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
 	}
 }
