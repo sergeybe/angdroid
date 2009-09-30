@@ -70,6 +70,7 @@ public class AngbandActivity extends Activity {
 			startActivity(intent);
 			break;
 		case '3':
+			term.finish();
 			finish();
 			break;
 		}

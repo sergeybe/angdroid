@@ -97,6 +97,7 @@
  */
 
 /* JVM enviroment */
+static JavaVM *jvm;
 static JNIEnv *env;
 
 /* Classes */
@@ -288,6 +289,12 @@ static errr Term_xtra_and(int n, int v)
 			if (key == -1)
 			{
 				save_game();
+				
+				if ((*jvm)->DetachCurrentThread(jvm) < 0)
+				{
+					LOGE("Can't deattach current thread!");
+				}
+				quit("Quit from game thread");
 				return 0;
 			}
 			
@@ -920,6 +927,11 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_initGame
 	init_stuff();
 
 	env = env1;
+
+	if ((*env)->GetJavaVM(env, &jvm) < 0)
+	{
+		LOGE("Error: Can't get JavaVM!");
+	}
 
 	/* Save objects */
 	TermViewObj = obj1;

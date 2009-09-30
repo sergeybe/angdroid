@@ -45,19 +45,9 @@
         <available file="angband" type="dir" filepath="${ndk-location}/apps/"/>
     </condition>
 
-    <condition property="is.set.sources.link">
-        <available file="angband" type="dir" filepath="${ndk-location}/sources/"/>
-    </condition>
-
-    <target name="link.apps" unless="is.set.apps.link">
+    <target name="setup" unless="is.set.apps.link">
         <symlink link="${ndk-location}/apps/angband" resource="${basedir}"/>
     </target>
-
-    <target name="link.source" unless="is.set.sources.link">
-        <symlink link="${ndk-location}/sources/angband" resource="${basedir}"/>
-    </target>
-
-    <target name="links" depends="link.apps, link.source" />
 
     <target name="angband-lib" depends="angband-javah">
         <exec executable="make">
