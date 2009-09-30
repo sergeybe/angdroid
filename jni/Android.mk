@@ -3,10 +3,10 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := angband
-LOCAL_CFLAGS := -I$(LOCAL_PATH)/../.. -DUSE_AND \
--DDEFAULT_PATH='"/data/data/org.angdroid.angband2/files"'
+LOCAL_CFLAGS := -DUSE_AND -DDEFAULT_PATH='"/data/data/org.angdroid.angband2/files"'
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../..
 
-LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -llog
+LOCAL_LDLIBS := -llog
 
 LOCAL_SRC_FILES := \
 angdroid.c \
