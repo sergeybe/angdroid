@@ -93,6 +93,7 @@ public class TermView extends View implements Runnable {
 
 	private Vibrator vibrator;
 	private boolean vibrate;
+	private boolean always_run = true;
 
 	private Thread thread;
 
@@ -247,8 +248,19 @@ public class TermView extends View implements Runnable {
 			c = (x * 3) / getWidth();
 			r = (y * 3) / getHeight();
 
-			addToKeyBuffer((2 - r) * 3 + c + '1');
+			if (always_run && wait) {
+				synchronized (keybuffer) {
+					keybuffer.offer(46); // '.' command
+					keybuffer.offer((2 - r) * 3 + c + '1');
 
+					if (wait) {
+						Log.d("Angband", "Wake up!!!");
+						keybuffer.notify();
+					}
+				}
+			} else {
+				addToKeyBuffer((2 - r) * 3 + c + '1');
+			}
 			return true;
 		}
 		return false;
@@ -403,7 +415,7 @@ public class TermView extends View implements Runnable {
 	public void onPause() {
 
 		game_running = false;
-
+		/*
 		synchronized (keybuffer) {
 
 			keybuffer.clear();
@@ -412,6 +424,23 @@ public class TermView extends View implements Runnable {
 			if (wait) {
 				keybuffer.notify();
 			}
+		}
+		*/
+	}
+
+	public void finish() {
+		game_running = false;
+
+		synchronized (keybuffer) {
+			keybuffer.clear();
+			keybuffer.offer(-1);
+			if (wait) {
+				keybuffer.notify();
+			}
+		}
+		try {
+		thread.join();
+		} catch (Exception e) {
 		}
 	}
 
