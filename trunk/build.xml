@@ -77,6 +77,16 @@
     </target>
 
 
+    <target name="obfuscate" depends="compile.incremental">
+	<proguard>
+	    -libraryjars ${android.jar}: ${external-libs-folder}
+	    -injars      ${out-classes-location}
+	    -outjars     ${obfuscate-location}/classes.min.jar
+	    -keep public class * extends android.app.Activity
+	    -optimizations !code/simplification/cast
+       </proguard>
+    </target>
+    
     <target name="angband-release" depends="angband-resources, angband-lib, release" />
     <target name="angband-debug" depends="angband-resources, angband-lib, debug" />
 
