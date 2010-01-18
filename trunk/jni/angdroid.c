@@ -854,7 +854,7 @@ static void init_stuff(void)
 	if (!suffix(path, PATH_SEP)) my_strcat(path, PATH_SEP, sizeof(path));
 
 	/* Prepare the filepaths */
-	init_file_paths(path);
+	init_file_paths(path, path, path);
 
 	if (!file_exists(path))
 	{
