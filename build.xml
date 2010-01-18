@@ -77,7 +77,7 @@
     </target>
 
 
-    <target name="obfuscate" depends="compile.incremental">
+    <target name="obfuscate" depends="angband-release">
 	<proguard>
 	    -libraryjars ${android.jar}: ${external-libs-folder}
 	    -injars      ${out-classes-location}

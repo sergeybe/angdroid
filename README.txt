@@ -10,7 +10,7 @@ For build code you should use Ant 1.7.1. See here http://ant.anache.org/.
 
 ...
 ndk-location=/home/user/Java/android-ndk-1.6_r1/
-sdk-location=/home/user/Java/android-sdk-linux_x86-1.6_r1
+sdk-location=/home/user/Java/android-sdk-linux/
 ...
 
 The ndk-location and sdk-location properties should point to Android NDK and Android SDK.
