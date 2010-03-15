@@ -386,7 +386,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void setCursorXY(final int x, final int y) {
-		Log.d("Angband", "setCursor() x =" + x + " y=" + y);
+		Log.d("Angband", "setCursor() x = " + x + ", y = " + y);
 		synchronized (bitmap) {
 			this.cur_x = x;
 			this.cur_y = y;
