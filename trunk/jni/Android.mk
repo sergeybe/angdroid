@@ -66,7 +66,6 @@ angdroid.c \
 ../../x-spell.c \
 ../../xtra2.c \
 ../../xtra3.c \
-../../z-bitflag.c \
 ../../z-file.c \
 ../../z-form.c \
 ../../z-msg.c \
