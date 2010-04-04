@@ -323,7 +323,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is required, but may not be "essential".
 			 */
 			LOGD("TERM_XTRA_FLUSH");
-			(*env)->CallIntMethod(env, TermViewObj, TermView_clearKeyBuffer);
+			(*env)->CallVoidMethod(env, TermViewObj, TermView_clearKeyBuffer);
 
 			return 0;
 		}
