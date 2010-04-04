@@ -117,17 +117,18 @@ public class AngbandActivity extends Activity {
 		ZipEntry ze;
 		try {
 			while ((ze = zis.getNextEntry()) != null) {
-				if (ze.isDirectory()) {
-					continue;
-				}
 				String ze_name = ze.getName();
 				Log.v("Angband", "extracting " + ze_name);
 
 				String filename = abs_path + "/" + ze_name;
 				File myfile = new File(filename);
 
+				if (ze.isDirectory()) {
+					myfile.mkdirs();
+					continue;
+				}
+
 				byte contents[] = new byte[(int) ze.getSize()];
-				(new File(myfile.getParent())).mkdirs();
 
 				if (!myfile.createNewFile()) {
 					Log.v("Angband",
