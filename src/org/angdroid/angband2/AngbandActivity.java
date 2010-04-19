@@ -2,7 +2,7 @@
  * File: AngbandActivity.java
  * Purpose: Generic ui functions in Android application
  *
- * Copyright (c) 2009 David Barr, Sergey Belinsky
+ * Copyright (c) 2010 David Barr, Sergey Belinsky
  * 
  * This work is free software; you can redistribute it and/or modify it
  * under the terms of either:
@@ -104,7 +104,6 @@ public class AngbandActivity extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// Dirty hack for BACK key
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			term.addToKeyBuffer(keyCode);
 			return true;
 		}
 		return super.onKeyDown(keyCode, event);

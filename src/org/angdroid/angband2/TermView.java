@@ -2,7 +2,7 @@
  * File: TermView.java
  * Purpose: Terminal-base view for Android application
  *
- * Copyright (c) 2009 David Barr, Sergey Belinsky
+ * Copyright (c) 2010 David Barr, Sergey Belinsky
  * 
  * This work is free software; you can redistribute it and/or modify it
  * under the terms of either:
@@ -49,6 +49,7 @@ public class TermView extends View implements Runnable {
 	static final int ARROW_UP = 0x8D;
 
 	private boolean ctrl_mod = false;
+	private boolean ctrl_key_pressed;
 	private boolean wait = false;
 
 	Queue<Integer> keybuffer = new LinkedList<Integer>();
@@ -176,6 +177,7 @@ public class TermView extends View implements Runnable {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
+		Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_UP:
 			key = ARROW_UP;
@@ -190,13 +192,11 @@ public class TermView extends View implements Runnable {
 			key = ARROW_RIGHT;
 			break;
 		case KeyEvent.KEYCODE_DPAD_CENTER:
-			if (!ctrl_mod) {
-				ctrl_mod = !ctrl_mod;
+			ctrl_mod = true;
+			ctrl_key_pressed = false;
 				return true;
-			}
-			ctrl_mod = false;
 		case KeyEvent.KEYCODE_BACK:
-			key = '`'; // escape key on double-dpad_center
+			key = '`'; // escape key on back button
 			break;
 		case KeyEvent.KEYCODE_ENTER:
 			key = '\r';
@@ -215,7 +215,7 @@ public class TermView extends View implements Runnable {
 			if (key <= 127) {
 				if (key >= 'a' && key <= 'z' && ctrl_mod) {
 					key = key - 'a' + 1;
-					ctrl_mod = false;
+					ctrl_key_pressed = true;
 				}
 			}
 		}
@@ -235,6 +235,18 @@ public class TermView extends View implements Runnable {
 
 		return super.onKeyDown(keyCode, event);
 	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+			ctrl_mod = false;
+			if(!ctrl_key_pressed) {
+				addToKeyBuffer('\r');
+			}
+		}
+		return super.onKeyUp(keyCode, event);
+	}
+
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -269,7 +281,7 @@ public class TermView extends View implements Runnable {
 	public void addToKeyBuffer(int key) {
 		synchronized (keybuffer) {
 
-			Log.v("Angband", "key = " + key);
+			Log.v("Angband", "add key = " + key);
 			keybuffer.offer(key);
 
 			if (wait) {
@@ -307,7 +319,7 @@ public class TermView extends View implements Runnable {
 
 		if (keybuffer.peek() != null) {
 			key = keybuffer.poll();
-			Log.w("Angband", "Key=" + key);
+			Log.w("Angband", "process key = " + key);
 			return key;
 		}
 
