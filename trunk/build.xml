@@ -72,8 +72,9 @@
     <target name="clean">
         <delete dir="bin"/>
         <delete dir="gen"/>
+        <delete dir="libs"/>
         <delete file="${resource-folder}/raw/zip"/>
-        <delete dir="${ndk-location}/out/apps/angband/"/>
+        <delete dir="${ndk-location}/out/apps/angband"/>
     </target>
 
 
