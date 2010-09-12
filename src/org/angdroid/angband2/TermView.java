@@ -3,7 +3,7 @@
  * Purpose: Terminal-base view for Android application
  *
  * Copyright (c) 2010 David Barr, Sergey Belinsky
- * 
+ *
  * This work is free software; you can redistribute it and/or modify it
  * under the terms of either:
  *
@@ -73,7 +73,7 @@ public class TermView extends View implements Runnable {
 	0xFF00FFFF,/* TERM_L_BLUE */
 	0xFFC08040,/* TERM_L_UMBER */
 
-    /* 
+	/*
 		max colors has increased from 16 to 28
 		as of rev 1862
 		http://trac.rephial.org/changeset/1862/trunk/src/z-term.h
@@ -435,7 +435,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	// Call native method from library
-	native void initGame();
+	native void initGame(String filesPath);
 
 	native void playGame();
 
@@ -478,7 +478,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void run() {
-		initGame();
+		initGame(AngbandActivity.getAngbandFilesDirectory());
 		playGame();
 		finishGame();
 	}

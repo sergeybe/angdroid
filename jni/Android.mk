@@ -3,7 +3,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := angband
-LOCAL_CFLAGS := -DUSE_AND -DDEFAULT_PATH='"/data/data/org.angdroid.angband2/files"'
+LOCAL_CFLAGS := -DUSE_AND
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../..
 
 LOCAL_LDLIBS := -llog
