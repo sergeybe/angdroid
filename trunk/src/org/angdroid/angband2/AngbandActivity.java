@@ -34,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.os.Environment;
 
 public class AngbandActivity extends Activity {
 
@@ -110,7 +111,10 @@ public class AngbandActivity extends Activity {
 	}
 
 	void extractAngbandResources() {
-		String abs_path = getFilesDir().getAbsolutePath();
+		File f = new File(getAngbandFilesDirectory());
+		f.mkdirs();
+		String abs_path = f.getAbsolutePath();
+
 		InputStream is = getResources().openRawResource(R.raw.zip);
 		ZipInputStream zis = new ZipInputStream(is);
 		ZipEntry ze;
@@ -151,5 +155,12 @@ public class AngbandActivity extends Activity {
 		} catch (Exception e) {
 			Log.v("Angband", "error extracting files: " + e);
 		}
+	}
+
+	public static String  getAngbandFilesDirectory() {
+		return 
+			Environment.getExternalStorageDirectory()
+			+ "/"
+			+ "Android/data/org.android.angband2/files";
 	}
 }

@@ -837,7 +837,7 @@ static void and_sound(int v)
  */
 
 
-static void init_stuff(void)
+static void init_stuff(const char *files_path)
 {
 	char path[1024];
 
@@ -845,7 +845,7 @@ static void init_stuff(void)
 	/* This must in some way prepare the "path" variable */
 	/* so that it points at the "lib" directory.  Every */
 	/* machine handles this in a different way... */
-	my_strcpy(path, DEFAULT_PATH, sizeof(path));
+	my_strcpy(path, files_path, sizeof(path));
 
 	/* Make sure it's terminated */
 	path[511] = '\0';
@@ -900,7 +900,7 @@ static errr and_get_cmd(cmd_context context, bool wait)
 #ifdef ANDROID
 
 JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_initGame
-    (JNIEnv *env1, jobject obj1)
+	(JNIEnv *env1, jobject obj1, jstring filesPath)
 {
 
 	LOGD("initGame");
@@ -923,15 +923,19 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_initGame
 
 #endif /* SET_UID */
 
-	/* Initialize some stuff */
-	init_stuff();
-
 	env = env1;
 
 	if ((*env)->GetJavaVM(env, &jvm) < 0)
 	{
 		LOGE("Error: Can't get JavaVM!");
 	}
+
+	const char *copy_path = (*env)->GetStringUTFChars(env, filesPath, 0);
+
+	/* Initialize some stuff */
+	init_stuff(copy_path);
+
+	(*env)->ReleaseStringUTFChars(env, filesPath, copy_path);
 
 	/* Save objects */
 	TermViewObj = obj1;
