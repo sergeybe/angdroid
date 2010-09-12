@@ -66,12 +66,33 @@ public class TermView extends View implements Runnable {
 	0xFF804000,/* TERM_UMBER */
 	0xFF606060,/* TERM_L_DARK */
 	0xFFC0C0C0,/* TERM_L_WHITE */
-	0xFFFF00FF,/* TERM_VIOLET */
-	0xFFFFFF00,/* TERM_YELLOW */
+	0xFFDD00FF,/* TERM_L_PURPLE */
+	0xFFCCCC00,/* TERM_YELLOW */
 	0xFFFF4040,/* TERM_L_RED */
 	0xFF00FF00,/* TERM_L_GREEN */
 	0xFF00FFFF,/* TERM_L_BLUE */
-	0xFFC08040 /* TERM_L_UMBER */
+	0xFFC08040,/* TERM_L_UMBER */
+
+    /* 
+		max colors has increased from 16 to 28
+		as of rev 1862
+		http://trac.rephial.org/changeset/1862/trunk/src/z-term.h
+
+		todo: fine tune RGB values using a test display function
+	*/
+
+	0xFF9900AA,/* TERM_PURPLE */
+	0xFFAA00CC,/* TERM_VIOLET */
+	0xFF0099BB,/* TERM_TEAL */
+	0xFFCCCC22,/* TERM_MUD */
+	0xFFFFFF00,/* TERM_L_YELLOW */
+	0xFFCC00DD,/* TERM_MAGENTA */
+	0xFF00CCEE,/* TERM_L_TEAL */
+	0xFFBB00DD,/* TERM_L_VIOLET */
+	0xFFFF20FF,/* TERM_L_PINK */
+	0xFFAAAA66,/* TERM_MUSTARD */
+	0xFF101099,/* TERM_BLUE_SLATE */
+	0xFF0010FF /* TERM_DEEP_L_BLUE */
 	};
 
 	Typeface tf;
