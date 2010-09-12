@@ -66,7 +66,6 @@ angdroid.c \
 ../../x-spell.c \
 ../../xtra2.c \
 ../../xtra3.c \
-../../z-bitflag.c \
 ../../z-file.c \
 ../../z-form.c \
 ../../z-msg.c \
@@ -87,7 +86,9 @@ angdroid.c \
 ../../object/obj-power.c \
 ../../object/obj-ui.c \
 ../../object/obj-util.c \
-../../object/randart.c
+../../object/randart.c \
+#../../z-bitflag.c # exists in svn head, but not in angband-3.1.2v2
+# see http://trac.rephial.org/browser/tags/angband-3.1.2v2/src
 
 #include $(BUILD_STATIC_LIBRARY)
 include $(BUILD_SHARED_LIBRARY)
