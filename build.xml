@@ -50,7 +50,7 @@
     </target>
 
     <target name="angband-lib" depends="angband-javah">
-        <exec executable="make">
+        <exec executable="make" failonerror="true">
             <arg value="-f"/>
             <arg value="${ndk-location}/GNUmakefile"/>
             <arg value="-C"/>
