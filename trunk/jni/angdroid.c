@@ -899,7 +899,7 @@ static errr and_get_cmd(cmd_context context, bool wait)
 
 #ifdef ANDROID
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_initGame
+JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_initGame
 	(JNIEnv *env1, jobject obj1, jstring filesPath)
 {
 
@@ -962,7 +962,7 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_initGame
 	init_display();
 }
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_playGame(JNIEnv *env, jobject obj)
+JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_playGame(JNIEnv *env, jobject obj)
 {
 	LOGD("playGame()");
 
@@ -970,7 +970,7 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_playGame(JNIEnv *env,
 	play_game();
 }
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband2_TermView_finishGame(JNIEnv *env, jobject obj)
+JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_finishGame(JNIEnv *env, jobject obj)
 {
 	LOGD("finishGame()");
 
