@@ -16,7 +16,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  */
 
-package org.angdroid.angband2;
+package org.angdroid.angband;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -161,6 +161,6 @@ public class AngbandActivity extends Activity {
 		return 
 			Environment.getExternalStorageDirectory()
 			+ "/"
-			+ "Android/data/org.android.angband2/files";
+			+ "Android/data/org.angdroid.angband/files";
 	}
 }

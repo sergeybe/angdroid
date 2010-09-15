@@ -16,7 +16,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  */
 
-package org.angdroid.angband2;
+package org.angdroid.angband;
 
 import java.util.LinkedList;
 import java.util.Queue;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Angband2" default="angband-debug">
+<project name="Angband" default="angband-debug">
 
     <!-- Please don't edit this file. Edit build.properties instead of -->
 
@@ -36,8 +36,8 @@
             classpath="${out-classes-location}"
             bootclasspath="${android-jar}"
             verbose="true">
-            <class name="org.angdroid.angband2.TermView" />
-            <class name="org.angdroid.angband2.AngbandActivity" />
+            <class name="org.angdroid.angband.TermView" />
+            <class name="org.angdroid.angband.AngbandActivity" />
         </javah>
     </target>
 
@@ -74,7 +74,9 @@
         <delete dir="gen"/>
         <delete dir="libs"/>
         <delete file="${resource-folder}/raw/zip"/>
-        <delete dir="${ndk-location}/out/apps/angband"/>
+	<delete includeemptydirs="true">
+	  <fileset dir="${ndk-location}/out/apps/angband" includes="**/*"/>
+	</delete>
     </target>
 
 

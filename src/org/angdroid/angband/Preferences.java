@@ -1,4 +1,4 @@
-package org.angdroid.angband2;
+package org.angdroid.angband;
 
 final public class Preferences {
 
