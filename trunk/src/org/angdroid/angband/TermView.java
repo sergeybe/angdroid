@@ -123,10 +123,11 @@ public class TermView extends View implements Runnable {
 	private Thread thread;
 
 	boolean game_running = false;
+	boolean in_menu = false;
 	private boolean cursor_visible;
 
 	// Load native library
-	static {
+	private static void LoadNativeCode() {
 		System.loadLibrary("angband");
 	}
 
@@ -192,7 +193,9 @@ public class TermView extends View implements Runnable {
 
 		game_running = true;
 		quit_and_save_seq = 0;
+		in_menu = false;
 
+		LoadNativeCode();
 		thread = new Thread(this);
 		thread.start();
 	}
@@ -465,10 +468,21 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void onResume() {
+		in_menu = false;
 	}
 
 	public void onPause() {
 		// this is the only guaranteed safe place to save state according to SDK docs
+		signalAngbandExit();
+	}
+
+	public void signalMenu() {
+		in_menu = true;
+	}
+
+	public void signalAngbandExit() {
+		if (in_menu) return;
+
 		// send quit command to angband 
 		game_running = false;
 		synchronized (keybuffer) {
@@ -507,8 +521,8 @@ public class TermView extends View implements Runnable {
 		else {
 			// todo: AlertDialog asking user to exit or restart
 			// for now, just quit
-			unloadGame();
-			myActivity.finish();
+			unloadGame(); // oops this kills the whole app!
+			myActivity.finish(); // never gets here.
 		}
 	}
 }
