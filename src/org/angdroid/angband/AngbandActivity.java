@@ -52,6 +52,7 @@ public class AngbandActivity extends Activity {
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
+		term.signalMenu();
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = new MenuInflater(getApplication());
 		inflater.inflate(R.menu.main, menu);
@@ -71,7 +72,7 @@ public class AngbandActivity extends Activity {
 			startActivity(intent);
 			break;
 		case '3':
-			term.onPause();
+			term.signalAngbandExit();
 			finish();
 			break;
 		}
