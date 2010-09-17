@@ -82,6 +82,7 @@
 #include "angdroid.h"
 #include <jni.h>
 #include <android/log.h>
+#include <pthread.h>
 
 #define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "Angband", __VA_ARGS__)
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "Angband", __VA_ARGS__)
@@ -117,6 +118,10 @@ static jmethodID TermView_postInvalidate;
 static jmethodID TermView_setCursorXY;
 static jmethodID TermView_setCursorVisible;
 static jmethodID TermView_clearKeyBuffer;
+static jmethodID TermView_exitGame;
+
+//pthread_t game_thread;
+char android_files_path[1024];
 
 /*
  * Extra data to associate with each "window"
@@ -285,7 +290,7 @@ static errr Term_xtra_and(int n, int v)
 			 */
 			
 			key = (*env)->CallIntMethod(env, TermViewObj, TermView_getch, v);
-			
+			/* old exit technique
 			if (key == -1)
 			{
 				save_game();
@@ -297,6 +302,7 @@ static errr Term_xtra_and(int n, int v)
 				quit("Quit from game thread");
 				return 0;
 			}
+			*/
 			
 			if (v == 0)
 			{
@@ -749,6 +755,12 @@ static void hook_quit(cptr str)
 
 	LOGD("hook_quit()");
 
+	(*env)->CallVoidMethod(env, TermViewObj, TermView_exitGame);
+
+	LOGD("DetatchCurrentThread (bye)");
+
+	(*jvm)->DetachCurrentThread(jvm);
+
 	pthread_exit(NULL);
 }
 
@@ -837,29 +849,29 @@ static void and_sound(int v)
  */
 
 
-static void init_stuff(const char *files_path)
+static void init_stuff()
 {
-	char path[1024];
-
 	/* Prepare the path XXX XXX XXX */
 	/* This must in some way prepare the "path" variable */
 	/* so that it points at the "lib" directory.  Every */
 	/* machine handles this in a different way... */
-	my_strcpy(path, files_path, sizeof(path));
+	// passed in android_files_path;
 
 	/* Make sure it's terminated */
-	path[511] = '\0';
+	android_files_path[511] = '\0';
 
 	/* Hack -- Add a path separator (only if needed) */
-	if (!suffix(path, PATH_SEP)) my_strcat(path, PATH_SEP, sizeof(path));
+	if (!suffix(android_files_path, PATH_SEP)) my_strcat(android_files_path, PATH_SEP, sizeof(android_files_path));
+
+	LOGD(android_files_path);
 
 	/* Prepare the filepaths */
-	init_file_paths(path, path, path);
+	init_file_paths(android_files_path, android_files_path, android_files_path);
 
-	if (!file_exists(path))
+	if (!file_exists(android_files_path))
 	{
 		/* Warning */
-		plog_fmt("Unable to open the '%s' file.", path);
+		plog_fmt("Unable to open the '%s' file.", android_files_path);
 		quit("The Angband 'lib' folder is probably missing or misplaced.");
 	}
 
@@ -899,10 +911,10 @@ static errr and_get_cmd(cmd_context context, bool wait)
 
 #ifdef ANDROID
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_initGame
-	(JNIEnv *env1, jobject obj1, jstring filesPath)
-{
 
+
+void initGame ()
+{
 	LOGD("initGame");
 
 	plog_aux = hook_plog;
@@ -923,25 +935,9 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_initGame
 
 #endif /* SET_UID */
 
-	env = env1;
-
-	if ((*env)->GetJavaVM(env, &jvm) < 0)
-	{
-		LOGE("Error: Can't get JavaVM!");
-	}
-
-	const char *copy_path = (*env)->GetStringUTFChars(env, filesPath, 0);
-
 	/* Initialize some stuff */
-	init_stuff(copy_path);
+	init_stuff();
 
-	(*env)->ReleaseStringUTFChars(env, filesPath, copy_path);
-
-	/* Save objects */
-	TermViewObj = obj1;
-
-	/* Get TermView class */
-	TermViewClass = (*env)->GetObjectClass(env, TermViewObj);
 
 	/* TermView Methods */
 	TermView_text = (*env)->GetMethodID(env, TermViewClass, "text", "(IIIB[B)I");
@@ -954,6 +950,7 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_initGame
 	TermView_setCursorXY = (*env)->GetMethodID(env, TermViewClass, "setCursorXY", "(II)V");
 	TermView_setCursorVisible = (*env)->GetMethodID(env, TermViewClass, "setCursorVisible", "(I)V");
 	TermView_clearKeyBuffer = (*env)->GetMethodID(env, TermViewClass, "clearKeyBuffer", "()V");
+	TermView_exitGame = (*env)->GetMethodID(env, TermViewClass, "exitGame", "()V");
 
 	/* Set up the command hook */
 	cmd_get_hook = and_get_cmd;
@@ -962,21 +959,83 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_initGame
 	init_display();
 }
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_playGame(JNIEnv *env, jobject obj)
+void* thread_main(void* foo)
 {
-	LOGD("playGame()");
+	//int res = (*jvm)->AttachCurrentThread(jvm, &env, NULL);
+
+	/* Get TermView class */
+	TermViewClass = (*env)->GetObjectClass(env, TermViewObj);
+
+	initGame();
 
 	/* Start main loop of game */
+	LOGD("play_game()");
 	play_game();
-}
-
-JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_finishGame(JNIEnv *env, jobject obj)
-{
-	LOGD("finishGame()");
 
 	/* Free resources */
+	LOGD("cleanup_angband()");
 	cleanup_angband();
+
+	/* todo: more cleanup required for restart
+	ANGBAND_DIR_APEX = NULL;
+	ANGBAND_DIR_EDIT = NULL;
+	ANGBAND_DIR_FILE = NULL;
+	ANGBAND_DIR_HELP = NULL;
+        ANGBAND_DIR_INFO = NULL;
+	ANGBAND_DIR_SAVE = NULL;
+	ANGBAND_DIR_PREF = NULL;
+	ANGBAND_DIR_USER = NULL;
+	ANGBAND_DIR_XTRA = NULL;
+
+	ANGBAND_DIR_XTRA_FONT = NULL;
+        ANGBAND_DIR_XTRA_GRAF = NULL;
+        ANGBAND_DIR_XTRA_SOUND = NULL;
+	ANGBAND_DIR_XTRA_HELP = NULL;
+	ANGBAND_DIR_XTRA_ICON = NULL;
+
+	z_info = NULL;
+	*/
+
+	LOGD("quit()");
+	quit("exit normally");
+
+	return foo;
 }
+
+JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
+	(JNIEnv *env1, jobject obj1, jstring filesPath)
+{
+	int iret;
+
+	if ((*env1)->GetJavaVM(env1, &jvm) < 0)
+	{
+		LOGE("Error: Can't get JavaVM!");
+	}
+
+	LOGD("startGame()");
+
+	const char *copy_path = (*env1)->GetStringUTFChars(env1, filesPath, 0);
+	my_strcpy(android_files_path, copy_path, strlen(copy_path)+1);
+	(*env1)->ReleaseStringUTFChars(env1, filesPath, copy_path);
+
+	/* Save objects */
+	TermViewObj = obj1;
+
+	//iret = pthread_create(&game_thread, NULL, thread_main, (void*) NULL);	
+
+	env = env1;
+	thread_main(env);
+}
+
+
+JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_unloadGame
+	(JNIEnv *env1, jobject obj1)
+{
+  	// this is just an awful way to force the native library out of memory.
+	char* foo = "abc";
+	mem_realloc((void*)foo,9999999);	
+}
+
 
 #endif
 

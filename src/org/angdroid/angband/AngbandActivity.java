@@ -48,7 +48,7 @@ public class AngbandActivity extends Activity {
 
 		setContentView(R.layout.main);
 		term = (TermView) findViewById(R.id.term);
-
+		term.setActivity(this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -71,7 +71,7 @@ public class AngbandActivity extends Activity {
 			startActivity(intent);
 			break;
 		case '3':
-			term.finish();
+			term.onPause();
 			finish();
 			break;
 		}
@@ -99,6 +99,7 @@ public class AngbandActivity extends Activity {
 	protected void onPause() {
 		Log.d("Angband", "onPause");
 		super.onPause();
+		term.onPause();
 	}
 
 	@Override

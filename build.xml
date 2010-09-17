@@ -77,6 +77,7 @@
 	<delete includeemptydirs="true">
 	  <fileset dir="${ndk-location}/out/apps/angband" includes="**/*"/>
 	</delete>
+	<delete file="jni/angdroid.h"/>
     </target>
 
 

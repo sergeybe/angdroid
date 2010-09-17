@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.app.Activity;
 
 public class TermView extends View implements Runnable {
 
@@ -51,6 +52,8 @@ public class TermView extends View implements Runnable {
 	private boolean ctrl_mod = false;
 	private boolean ctrl_key_pressed;
 	private boolean wait = false;
+	private int quit_and_save_seq = 0;
+	private Activity myActivity = null;
 
 	Queue<Integer> keybuffer = new LinkedList<Integer>();
 
@@ -156,8 +159,6 @@ public class TermView extends View implements Runnable {
 		vibrator = (Vibrator) context
 				.getSystemService(Context.VIBRATOR_SERVICE);
 
-		thread = new Thread(this);
-
 		setFocusableInTouchMode(true);
 	}
 
@@ -190,7 +191,9 @@ public class TermView extends View implements Runnable {
 		canvas = new Canvas(bitmap);
 
 		game_running = true;
+		quit_and_save_seq = 0;
 
+		thread = new Thread(this);
 		thread.start();
 	}
 
@@ -213,6 +216,7 @@ public class TermView extends View implements Runnable {
 			key = ARROW_RIGHT;
 			break;
 		case KeyEvent.KEYCODE_DPAD_CENTER:
+		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
 			ctrl_mod = true;
 			ctrl_key_pressed = false;
 				return true;
@@ -301,10 +305,7 @@ public class TermView extends View implements Runnable {
 
 	public void addToKeyBuffer(int key) {
 		synchronized (keybuffer) {
-
-			Log.v("Angband", "add key = " + key);
 			keybuffer.offer(key);
-
 			if (wait) {
 				Log.d("Angband", "Wake up!!!");
 				keybuffer.notify();
@@ -337,6 +338,15 @@ public class TermView extends View implements Runnable {
 				Log.d("Angband", "The getch() wait exception" + e);
 			}
 		}
+		else if (!game_running) {
+			Log.d("Angband", "game not running");
+			switch((quit_and_save_seq++)%4) {
+				case 0: return 24; // Esc
+				case 1: return 0; 
+				case 2: return 96; // Ctrl-X (Quit)
+				case 3: return 0; 
+			}
+		}
 
 		if (keybuffer.peek() != null) {
 			key = keybuffer.poll();
@@ -367,6 +377,14 @@ public class TermView extends View implements Runnable {
 			final byte[] cp) {
 
 		move(x, y);
+
+		/* handy for debugging
+		StringBuffer result = new StringBuffer();
+		for (int i=0; i < n; i++) {
+			result.append(new String(new byte[] {cp[i]}));
+		}
+		Log.d("Angband","text"+result.toString());
+		*/
 
 		fore.setColor(colors[a]);
 
@@ -434,60 +452,63 @@ public class TermView extends View implements Runnable {
 		}
 	}
 
-	// Call native method from library
-	native void initGame(String filesPath);
-
-	native void playGame();
-
-	native void finishGame();
-
-	public void onResume() {
-		game_running = true;
-	}
-
-	public void onPause() {
-
-		game_running = false;
-		/*
-		synchronized (keybuffer) {
-
-			keybuffer.clear();
-			keybuffer.offer(-1);
-
-			if (wait) {
-				keybuffer.notify();
-			}
-		}
-		*/
-	}
-
-	public void finish() {
-		game_running = false;
-
-		synchronized (keybuffer) {
-			keybuffer.clear();
-			keybuffer.offer(-1);
-			if (wait) {
-				keybuffer.notify();
-			}
-		}
-		try {
-		thread.join();
-		} catch (Exception e) {
-		}
-	}
-
-	public void run() {
-		initGame(AngbandActivity.getAngbandFilesDirectory());
-		playGame();
-		finishGame();
-	}
-
 	public void setVibrate(boolean vibrate) {
 		this.vibrate = vibrate;
 	}
 
 	public boolean getVibrate() {
 		return vibrate;
+	}
+
+	public void setActivity(Activity a) {
+		this.myActivity = a;
+	}
+
+	public void onResume() {
+	}
+
+	public void onPause() {
+		// this is the only guaranteed safe place to save state according to SDK docs
+		// send quit command to angband 
+		game_running = false;
+		synchronized (keybuffer) {
+			keybuffer.notify();
+		}
+
+		try {
+			thread.join();
+		} catch (Exception e) {
+			Log.d("Angband",e.toString());
+		}		
+	}
+
+	// Call native methods from library
+	native void startGame(String filesPath);
+	native void unloadGame();
+
+	public void exitGame() {
+		//this is called from native thread just before exiting
+
+		// paranoia
+		game_running = false;
+		synchronized (keybuffer) {
+			keybuffer.notify();
+		}
+
+		// this thread will unload the app on the Java side
+		// eventually asking the user first.
+		thread = new Thread(this);
+		thread.start();
+	}
+	public void run() {
+		if (game_running) {
+			startGame(AngbandActivity.getAngbandFilesDirectory());
+		}
+		else {
+			// todo: AlertDialog asking user to exit or restart
+			// for now, just quit
+			unloadGame();
+			myActivity.finish();
+		}
 	}
 }
