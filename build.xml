@@ -41,14 +41,6 @@
         </javah>
     </target>
 
-    <condition property="is.set.apps.link">
-        <available file="angband" type="dir" filepath="${ndk-location}/apps/"/>
-    </condition>
-
-    <target name="setup" unless="is.set.apps.link">
-        <symlink link="${ndk-location}/apps/angband" resource="${basedir}"/>
-    </target>
-
     <target name="angband-lib" depends="angband-javah">
         <exec executable="${ndk-location}/ndk-build" failonerror="true">
 	</exec>
