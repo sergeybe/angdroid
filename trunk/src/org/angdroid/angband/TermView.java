@@ -317,22 +317,7 @@ public class TermView extends View implements Runnable {
 
 		Integer key = null;
 
-		if (v == 1 && !signal_game_exit) {
-			// Wait key press
-			try {
-				Log.d("Angband", "Wait keypress BEFORE");
-				synchronized (keybuffer) {
-					wait = true;
-					keybuffer.clear();
-					keybuffer.wait();
-					wait = false;
-				}
-				Log.d("Angband", "Wait keypress AFTER");
-			} catch (Exception e) {
-				Log.d("Angband", "The getch() wait exception" + e);
-			}
-		}
-		else if (signal_game_exit) {
+		if (signal_game_exit) {
 			switch((quit_key_seq++)%4) {
 				case 0: return 24; // Esc
 				case 1: return 0; 
@@ -341,10 +326,27 @@ public class TermView extends View implements Runnable {
 			}
 		}
 
+		//peek before wait -- fix issue #3 keybuffer loss
 		if (keybuffer.peek() != null) {
 			key = keybuffer.poll();
 			Log.w("Angband", "process key = " + key);
 			return key;
+		}		
+
+		if (v == 1) {
+			// Wait key press
+			try {
+				Log.d("Angband", "Wait keypress BEFORE");
+				synchronized (keybuffer) {
+					wait = true;
+					//keybuffer.clear(); //not necessary
+					keybuffer.wait();
+					wait = false;
+				}
+				Log.d("Angband", "Wait keypress AFTER");
+			} catch (Exception e) {
+				Log.d("Angband", "The getch() wait exception" + e);
+			}
 		}
 
 		return 0;
