@@ -50,13 +50,18 @@
     </target>
 
     <target name="angband-lib" depends="angband-javah">
-        <exec executable="make" failonerror="true">
-            <arg value="-f"/>
-            <arg value="${ndk-location}/GNUmakefile"/>
-            <arg value="-C"/>
-            <arg value="${ndk-location}"/>
-            <arg value="APP=angband" />
-        </exec>
+        <exec executable="${ndk-location}/ndk-build" failonerror="true">
+	</exec>
+    </target>
+
+    <target name="loader-lib" depends="angband-javah">
+        <exec executable="${ndk-location}/ndk-build" 
+	      failonerror="true"
+	      dir="loader">
+	</exec>
+	<copy file="loader/libs/armeabi/libloader.so" 
+	      tofile="libs/armeabi/libloader.so"
+	      overwrite="true"/>
     </target>
 
     <condition property="is.created.zip.resource">
@@ -66,20 +71,19 @@
     <target name="angband-resources" unless="is.created.zip.resource">
         <zip destfile="${resource-folder}/raw/zip" basedir="../../lib"
             excludes="**/Makefile **/*.glade **/*.fon **/*.bmp **/*.png **/*.wav xtra/sound/sound.cfg xtra/font/copying.txt"
-        />
+             />
     </target>
 
     <target name="clean">
         <delete dir="bin"/>
         <delete dir="gen"/>
         <delete dir="libs"/>
+        <delete dir="obj"/>
+        <delete dir="loader/obj"/>
+        <delete dir="loader/libs"/>
         <delete file="${resource-folder}/raw/zip"/>
-	<delete includeemptydirs="true">
-	  <fileset dir="${ndk-location}/out/apps/angband" includes="**/*"/>
-	</delete>
 	<delete file="jni/angdroid.h"/>
     </target>
-
 
     <target name="obfuscate" depends="angband-release">
 	<proguard>
@@ -91,7 +95,7 @@
        </proguard>
     </target>
     
-    <target name="angband-release" depends="angband-resources, angband-lib, release" />
-    <target name="angband-debug" depends="angband-resources, angband-lib, debug" />
+    <target name="angband-release" depends="angband-resources, angband-lib, loader-lib, release" />
+    <target name="angband-debug" depends="angband-resources, angband-lib, loader-lib, debug" />
 
 </project>
