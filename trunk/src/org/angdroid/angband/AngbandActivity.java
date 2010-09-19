@@ -48,11 +48,9 @@ public class AngbandActivity extends Activity {
 
 		setContentView(R.layout.main);
 		term = (TermView) findViewById(R.id.term);
-		term.setActivity(this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
-		term.signalMenu();
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = new MenuInflater(getApplication());
 		inflater.inflate(R.menu.main, menu);
@@ -72,7 +70,7 @@ public class AngbandActivity extends Activity {
 			startActivity(intent);
 			break;
 		case '3':
-			term.signalAngbandExit();
+			term.onPause();
 			finish();
 			break;
 		}
@@ -94,6 +92,8 @@ public class AngbandActivity extends Activity {
 		}
 		
 		term.setVibrate(pref.getBoolean(Preferences.KEY_VIBRATE, false));
+
+		term.onResume();
 	}
 
 	@Override

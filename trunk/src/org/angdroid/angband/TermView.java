@@ -33,7 +33,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.app.Activity;
 
 public class TermView extends View implements Runnable {
 
@@ -52,8 +51,7 @@ public class TermView extends View implements Runnable {
 	private boolean ctrl_mod = false;
 	private boolean ctrl_key_pressed;
 	private boolean wait = false;
-	private int quit_and_save_seq = 0;
-	private Activity myActivity = null;
+	private int quit_key_seq = 0;
 
 	Queue<Integer> keybuffer = new LinkedList<Integer>();
 
@@ -119,16 +117,15 @@ public class TermView extends View implements Runnable {
 	private Vibrator vibrator;
 	private boolean vibrate;
 	private boolean always_run = true;
-
-	private Thread thread;
-
-	boolean game_running = false;
-	boolean in_menu = false;
 	private boolean cursor_visible;
 
+	private Thread thread;
+	boolean game_thread_running = false;
+	boolean signal_game_exit = false;
+
 	// Load native library
-	private static void LoadNativeCode() {
-		System.loadLibrary("angband");
+	static {
+		System.loadLibrary("loader");
 	}
 
 	public TermView(Context context) {
@@ -191,13 +188,7 @@ public class TermView extends View implements Runnable {
 
 		canvas = new Canvas(bitmap);
 
-		game_running = true;
-		quit_and_save_seq = 0;
-		in_menu = false;
-
-		LoadNativeCode();
-		thread = new Thread(this);
-		thread.start();
+		startAngband();
 	}
 
 	@Override
@@ -326,7 +317,7 @@ public class TermView extends View implements Runnable {
 
 		Integer key = null;
 
-		if (v == 1 && game_running) {
+		if (v == 1 && !signal_game_exit) {
 			// Wait key press
 			try {
 				Log.d("Angband", "Wait keypress BEFORE");
@@ -341,9 +332,8 @@ public class TermView extends View implements Runnable {
 				Log.d("Angband", "The getch() wait exception" + e);
 			}
 		}
-		else if (!game_running) {
-			Log.d("Angband", "game not running");
-			switch((quit_and_save_seq++)%4) {
+		else if (signal_game_exit) {
+			switch((quit_key_seq++)%4) {
 				case 0: return 24; // Esc
 				case 1: return 0; 
 				case 2: return 96; // Ctrl-X (Quit)
@@ -423,9 +413,12 @@ public class TermView extends View implements Runnable {
 			float y = (row + 1) * char_height;
 			String str = c + "";
 
-			canvas
-					.drawRect(x, y - char_height + 2, x + char_width, y + 2,
-							back);
+			canvas.drawRect(
+				x,
+				y - char_height + 2,
+				x + char_width, y + 2,
+				back
+			);
 			canvas.drawText(str, x, y, fore);
 
 			col++;
@@ -463,28 +456,34 @@ public class TermView extends View implements Runnable {
 		return vibrate;
 	}
 
-	public void setActivity(Activity a) {
-		this.myActivity = a;
-	}
-
 	public void onResume() {
-		in_menu = false;
+		Log.d("Angband","Termview.onResume()");
+		startAngband();
 	}
 
 	public void onPause() {
-		// this is the only guaranteed safe place to save state according to SDK docs
-		signalAngbandExit();
+		Log.d("Angband","Termview.onPause()");
+		// this is the only guaranteed safe place to save state 
+		// according to SDK docs
+		quitAngband();
 	}
 
-	public void signalMenu() {
-		in_menu = true;
+	public void startAngband() {
+		// sanity checks: thread must not already be running
+		// and we must have a valid canvas to draw upon.
+		if (!game_thread_running && canvas != null) {
+			game_thread_running = true;
+			signal_game_exit = false;
+			quit_key_seq = 0;
+
+			thread = new Thread(this);
+			thread.start();
+		}
 	}
 
-	public void signalAngbandExit() {
-		if (in_menu) return;
-
-		// send quit command to angband 
-		game_running = false;
+	public void quitAngband() {
+		// signal keybuffer to send quit command to angband 
+		signal_game_exit = true;
 		synchronized (keybuffer) {
 			keybuffer.notify();
 		}
@@ -493,36 +492,17 @@ public class TermView extends View implements Runnable {
 			thread.join();
 		} catch (Exception e) {
 			Log.d("Angband",e.toString());
-		}		
+		}
 	}
 
 	// Call native methods from library
 	native void startGame(String filesPath);
-	native void unloadGame();
-
-	public void exitGame() {
-		//this is called from native thread just before exiting
-
-		// paranoia
-		game_running = false;
-		synchronized (keybuffer) {
-			keybuffer.notify();
-		}
-
-		// this thread will unload the app on the Java side
-		// eventually asking the user first.
-		thread = new Thread(this);
-		thread.start();
-	}
 	public void run() {
-		if (game_running) {
-			startGame(AngbandActivity.getAngbandFilesDirectory());
-		}
-		else {
-			// todo: AlertDialog asking user to exit or restart
-			// for now, just quit
-			unloadGame(); // oops this kills the whole app!
-			myActivity.finish(); // never gets here.
-		}
+		startGame(AngbandActivity.getAngbandFilesDirectory());
+	}
+
+	public void onExitGame() {
+		//this is called from native thread just before exiting
+		game_thread_running = false;
 	}
 }
