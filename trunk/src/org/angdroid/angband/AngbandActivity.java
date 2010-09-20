@@ -19,6 +19,8 @@
 package org.angdroid.angband;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
@@ -154,6 +156,26 @@ public class AngbandActivity extends Activity {
 				zis.closeEntry();
 			}
 			zis.close();
+
+			// copy version 0.15 save file to sdcard
+			File oldsave = new File(getFilesDir().getAbsolutePath() +
+						"/lib/save/PLAYER");
+			//Log.v("Angband","old save path = " + oldsave.getAbsolutePath());
+			if (oldsave.exists()) {
+			    Log.v("Angband", "0.15 save files exists; copying");
+			    File newsave = new File(getAngbandFilesDirectory() +
+					       "/save/PLAYER");
+			    FileReader in = new FileReader(oldsave);
+			    FileWriter out = new FileWriter(newsave,false);
+			    int c;
+
+			    while ((c = in.read()) != -1)
+				out.write(c);
+
+			    in.close();
+			    out.close();
+			    oldsave.delete();
+			}
 		} catch (Exception e) {
 			Log.v("Angband", "error extracting files: " + e);
 		}
