@@ -69,7 +69,7 @@
     <target name="clean">
         <delete dir="bin"/>
         <delete dir="gen"/>
-        <delete dir="libs"/>
+        <delete dir="libs/armeabi"/>
         <delete dir="obj"/>
         <delete dir="loader/obj"/>
         <delete dir="loader/libs"/>
