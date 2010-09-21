@@ -230,21 +230,20 @@ public class AngbandActivity extends Activity {
 			+ "Android/data/org.angdroid.angband/files/lib";
 	}
 
-    public void onStart() {
-	super.onStart();
-	// test key
-	FlurryAgent.onStartSession(this, "382WWKEB1V2HZN1UJYBP");
+	public void onStart() {
+		super.onStart();
+		// test key
+		FlurryAgent.onStartSession(this, "382WWKEB1V2HZN1UJYBP");
 
-	// release key
-	//FlurryAgent.onStartSession(this, "GFZUMCZCJ2J9WNYI8XAV");
+		// release key
+		//FlurryAgent.onStartSession(this, "GFZUMCZCJ2J9WNYI8XAV");
 
-	// your code
-    }
+		// your code
+	}
 
-    public void onStop() {
-	super.onStop();
-	FlurryAgent.onEndSession(this);
-	// your code
-    }
-
+	public void onStop() {
+		super.onStop();
+		FlurryAgent.onEndSession(this);
+		// your code
+	}
 }
