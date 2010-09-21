@@ -201,6 +201,7 @@ public class AngbandActivity extends Activity {
 			//deleteDir(new File(oldf + "/user")); // user prefs here
 			deleteDir(new File(oldf + "/user/delete.me"));
 			deleteDir(new File(oldf + "/xtra"));
+			deleteDir(new File(oldf + "/readme.txt"));
 
 		} catch (Exception e) {
 			Log.v("Angband", "error extracting files: " + e);
