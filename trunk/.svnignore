@@ -2,6 +2,6 @@ build.properties
 .classpath
 .project
 bin
-libs
 jni/angdroid.h
 res/raw/zip
+gen
