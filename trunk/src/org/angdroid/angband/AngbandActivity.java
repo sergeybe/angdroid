@@ -124,6 +124,7 @@ public class AngbandActivity extends Activity {
 		InputStream is = getResources().openRawResource(R.raw.zip);
 		ZipInputStream zis = new ZipInputStream(is);
 		ZipEntry ze;
+		boolean filesExist = false;
 		try {
 			while ((ze = zis.getNextEntry()) != null) {
 				String ze_name = ze.getName();
@@ -142,6 +143,7 @@ public class AngbandActivity extends Activity {
 				if (!myfile.createNewFile()) {
 					Log.v("Angband",
 							"file exists. not extracting any more files.");
+					filesExist = true;
 					break;
 				}
 
@@ -159,35 +161,72 @@ public class AngbandActivity extends Activity {
 			}
 			zis.close();
 
+			if (filesExist) return; // bail out, we're aleady installed
+
 			// copy version 0.15 save file to sdcard
 			File oldsave = new File(getFilesDir().getAbsolutePath() +
 						"/lib/save/PLAYER");
 			//Log.v("Angband","old save path = " + oldsave.getAbsolutePath());
-			if (oldsave.exists()) {
-			    Log.v("Angband", "0.15 save files exists; copying");
-			    File newsave = new File(getAngbandFilesDirectory() +
-					       "/save/PLAYER");
-			    FileReader in = new FileReader(oldsave);
-			    FileWriter out = new FileWriter(newsave,false);
-			    int c;
+			// restore does not work from 0.15, disable for now
+			if (false && oldsave.exists()) {
+				Log.v("Angband", "0.15 save files exists; copying");
+				File newsave = new File(getAngbandFilesDirectory() +
+							"/save/PLAYER");
+				FileReader in = new FileReader(oldsave);
+				FileWriter out = new FileWriter(newsave,false);
+				int c;
 
-			    while ((c = in.read()) != -1)
-				out.write(c);
+				while ((c = in.read()) != -1)
+					out.write(c);
 
-			    in.close();
-			    out.close();
-			    oldsave.delete();
+				in.close();
+				out.close();
+				oldsave.delete();
 			}
+
+			// delete unused old files 
+			String oldf = getFilesDir().getAbsolutePath() + "/lib";
+			deleteDir(new File(oldf + "/apex"));
+			//deleteDir(new File(oldf + "/bone")); // bones are user data
+			deleteDir(new File(oldf + "/bone/.keep"));
+			deleteDir(new File(oldf + "/bone/delete.me"));
+			deleteDir(new File(oldf + "/data"));
+			deleteDir(new File(oldf + "/edit"));
+			deleteDir(new File(oldf + "/file"));
+			deleteDir(new File(oldf + "/help"));
+			deleteDir(new File(oldf + "/info"));
+			deleteDir(new File(oldf + "/pref"));
+			//deleteDir(oldf + "/save"); // leave save for downgrade
+			deleteDir(new File(oldf + "/save/delete.me"));
+			//deleteDir(new File(oldf + "/user")); // user prefs here
+			deleteDir(new File(oldf + "/user/delete.me"));
+			deleteDir(new File(oldf + "/xtra"));
+
 		} catch (Exception e) {
 			Log.v("Angband", "error extracting files: " + e);
 		}
+	}
+
+	public static boolean deleteDir(File dir) {
+		if (dir.isDirectory()) {
+			String[] children = dir.list();
+			for (int i=0; i<children.length; i++) {
+				boolean success = deleteDir(new File(dir, children[i]));
+				if (!success) {
+					return false;
+				}
+			}
+		}
+		// The directory is now empty so delete it
+		Log.d("Angband", "delete old file: "+dir.getAbsolutePath());
+		return dir.delete();
 	}
 
 	public static String  getAngbandFilesDirectory() {
 		return 
 			Environment.getExternalStorageDirectory()
 			+ "/"
-			+ "Android/data/org.angdroid.angband/files";
+			+ "Android/data/org.angdroid.angband/files/lib";
 	}
 
     public void onStart() {
