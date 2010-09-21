@@ -478,6 +478,8 @@ public class TermView extends View implements Runnable {
 			signal_game_exit = false;
 			quit_key_seq = 0;
 
+			clearKeyBuffer();
+
 			thread = new Thread(this);
 			thread.start();
 		}
