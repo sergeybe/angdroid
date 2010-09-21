@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Typeface;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -111,8 +112,12 @@ public class TermView extends View implements Runnable {
 	int cur_x = 0;
 	int cur_y = 0;
 
+	private int screen_height = 320;
+	private int screen_width = 480;
 	private int char_height = 12;
 	private int char_width = 6;
+	private int font_text_size = 12;
+	private int font_text_scrunch = 0;
 
 	private Vibrator vibrator;
 	private boolean vibrate;
@@ -139,10 +144,8 @@ public class TermView extends View implements Runnable {
 	}
 
 	protected void initTermView(Context context) {
-		tf = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
+		Log.d("Angband", "initTermView");
 		fore = new Paint();
-		fore.setTypeface(tf);
-		fore.setTextSize(12);
 		fore.setTextAlign(Paint.Align.LEFT);
 		fore.setColor(colors[1]);
 
@@ -167,16 +170,50 @@ public class TermView extends View implements Runnable {
 		int x = cur_x * char_width;
 		int y = (cur_y + 1) * char_height;
 
+		// due to font "scrunch", cursor is sometimes a px too wide
+		int cl = Math.max(x-1,0);
+		int cr = Math.min(x+char_width-1,screen_width-1);
+		int ct = Math.max(y-char_height+2,0);
+		int cb = Math.min(y+2,screen_height-1);
+
 		if (cursor_visible) {
-			canvas.drawRect(x - 1, y - char_height + 2, x + char_width - 1,
-					y + 2, cursor);
+			canvas.drawRect(cl, ct, cr, cb, cursor);
 		}
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		Log.d("Angband", "onMeasure");
-		setMeasuredDimension(480, 320);
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		screen_width = getMeasuredWidth();
+		screen_height = getMeasuredHeight();
+		setMeasuredDimension(screen_width,screen_height);
+
+		char_height = screen_height/height;
+		char_width = screen_width/width;
+
+		if (tf == null) {
+			if (char_width <= 6) {
+				char_height -= 1;
+				font_text_scrunch = 0;
+				tf = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
+			}
+			else {
+				font_text_scrunch = char_height/10;
+				tf = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+			}
+		}
+
+		font_text_size = char_height-font_text_scrunch;
+		fore.setTypeface(tf);
+
+		fore.setTextSize(font_text_size);
+		//fore.setAntiAlias(false);  // these don't seem to have any effect, why?
+		//fore.setDither(false);
+		//fore.setSubpixelText(false);
+
+		Log.d("Angband", "onMeasure "+screen_width+","+screen_height
+			+","+char_height+","+char_width+","+font_text_size
+			+","+font_text_scrunch);
 	}
 
 	@Override
@@ -187,6 +224,7 @@ public class TermView extends View implements Runnable {
 		bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
 
 		canvas = new Canvas(bitmap);
+		//canvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.DITHER_FLAG|Paint.ANTI_ALIAS_FLAG|Paint.SUBPIXEL_TEXT_FLAG,0)); // this seems to have no effect, why?
 
 		startAngband();
 	}
@@ -259,9 +297,16 @@ public class TermView extends View implements Runnable {
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
 			ctrl_mod = false;
+
+			// I think the overloaded control key + menu feature is annoying
+			// todo: move to preference
 			if(!ctrl_key_pressed) {
 				addToKeyBuffer('\r');
 			}
+		}
+		// emoticon key on Samsung Epic 4G (todo move to Preference)
+		else if (keyCode == 97) {
+			ctrl_mod = false;
 		}
 		return super.onKeyUp(keyCode, event);
 	}
@@ -396,7 +441,9 @@ public class TermView extends View implements Runnable {
 		synchronized (bitmap) {
 			float x = col * char_width;
 			float y = (row + 1) * char_height;
-			canvas.drawRect(x, y - char_height + 2, x + char_width * n, y + 2,
+			canvas.drawRect(x, 
+					y - char_height + 2, 
+					x + char_width * n, y + 2,
 					back);
 		}
 	}
@@ -409,19 +456,14 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void putchar(final char c) {
+		wipe(row, col, 1);
 		synchronized (bitmap) {
 
 			float x = col * char_width;
 			float y = (row + 1) * char_height;
 			String str = c + "";
 
-			canvas.drawRect(
-				x,
-				y - char_height + 2,
-				x + char_width, y + 2,
-				back
-			);
-			canvas.drawText(str, x, y, fore);
+			canvas.drawText(str, x, y-font_text_scrunch, fore);
 
 			col++;
 			if (col >= 80) {
