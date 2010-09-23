@@ -117,7 +117,8 @@ public class TermView extends View implements Runnable {
 	private int char_height = 12;
 	private int char_width = 6;
 	private int font_text_size = 12;
-	private int font_text_scrunch = 0;
+	private int font_width_scrunch = 0;
+	private int font_height_scrunch = 0;
 
 	private Vibrator vibrator;
 	private boolean vibrate;
@@ -167,10 +168,10 @@ public class TermView extends View implements Runnable {
 		if (bitmap != null) {
 			canvas.drawBitmap(bitmap, 0, 0, null);
 		}
-		int x = cur_x * char_width;
+		int x = cur_x * (char_width) + font_width_scrunch;
 		int y = (cur_y + 1) * char_height;
 
-		// due to font "scrunch", cursor is sometimes a px too wide
+		// due to font "scrunch", cursor is sometimes a bit too big
 		int cl = Math.max(x-1,0);
 		int cr = Math.min(x+char_width-1,screen_width-1);
 		int ct = Math.max(y-char_height+2,0);
@@ -194,16 +195,18 @@ public class TermView extends View implements Runnable {
 		if (tf == null) {
 			if (char_width <= 6) {
 				char_height -= 1;
-				font_text_scrunch = 0;
+				font_height_scrunch = 0;
+				font_width_scrunch = 0;
 				tf = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
 			}
 			else {
-				font_text_scrunch = char_height/10;
+				font_height_scrunch = char_height/10;
+				font_width_scrunch = char_width/10;
 				tf = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
 			}
 		}
 
-		font_text_size = char_height-font_text_scrunch;
+		font_text_size = char_height-font_height_scrunch;
 		fore.setTypeface(tf);
 
 		fore.setTextSize(font_text_size);
@@ -213,14 +216,13 @@ public class TermView extends View implements Runnable {
 
 		Log.d("Angband", "onMeasure "+screen_width+","+screen_height
 			+","+char_height+","+char_width+","+font_text_size
-			+","+font_text_scrunch);
+			+","+font_height_scrunch);
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		Log.d("Angband", "onSizeChanged");
 		super.onSizeChanged(w, h, oldw, oldh);
-
+		 
 		bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
 
 		canvas = new Canvas(bitmap);
@@ -441,10 +443,13 @@ public class TermView extends View implements Runnable {
 		synchronized (bitmap) {
 			float x = col * char_width;
 			float y = (row + 1) * char_height;
-			canvas.drawRect(x, 
-					y - char_height + 2, 
-					x + char_width * n, y + 2,
-					back);
+			canvas.drawRect(
+				x, 
+				y - char_height + 2, 
+				x + (char_width) * n + font_width_scrunch, 
+				y + 2,
+				back
+			);
 		}
 	}
 
@@ -459,11 +464,16 @@ public class TermView extends View implements Runnable {
 		wipe(row, col, 1);
 		synchronized (bitmap) {
 
-			float x = col * char_width;
+			float x = col * (char_width);
 			float y = (row + 1) * char_height;
 			String str = c + "";
 
-			canvas.drawText(str, x, y-font_text_scrunch, fore);
+			canvas.drawText (
+				str,
+				x, 
+				y-font_height_scrunch, 
+				fore
+			);
 
 			col++;
 			if (col >= 80) {
@@ -515,7 +525,9 @@ public class TermView extends View implements Runnable {
 	public void startAngband() {
 		// sanity checks: thread must not already be running
 		// and we must have a valid canvas to draw upon.
+		Log.d("Angband","startAngband()");
 		if (!game_thread_running && canvas != null) {
+			Log.d("Angband","startAngband().reallyStarting");
 			game_thread_running = true;
 			signal_game_exit = false;
 			quit_key_seq = 0;
@@ -549,6 +561,7 @@ public class TermView extends View implements Runnable {
 
 	public void onExitGame() {
 		//this is called from native thread just before exiting
+		Log.d("Angband","onExitGame()");
 		game_thread_running = false;
 	}
 }
