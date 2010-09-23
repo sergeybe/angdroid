@@ -222,6 +222,17 @@ public class TermView extends View implements Runnable {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
+
+		// fix for blank splash/title screen at startup:
+		// for some reason we occasionally get a portrait orientation
+		// size change which creates a new canvas by mistake.
+		if (h > w) {
+			Log.d("Angband", "onSizeChanged.rejected");
+			return; // ignore portrait until we actually implement it!
+		}
+		else {
+			Log.d("Angband", "onSizeChanged");
+		}
 		 
 		bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
 
