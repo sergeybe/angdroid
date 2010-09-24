@@ -14,8 +14,8 @@ patch -i android/android.patch
 3. Create build.properties file and add ndk-location and sdk-location properties:
 
 ...
-ndk-location=/home/user/Java/android-ndk-1.6_r1/
-sdk-location=/home/user/Java/android-sdk-linux/
+ndk-location=/home/user/Java/android-ndk-r4b
+sdk-location=/home/user/Java/android-sdk-linux_86
 ...
 
 The ndk-location and sdk-location properties should point to Android NDK and Android SDK.
