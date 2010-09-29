@@ -337,10 +337,32 @@ public class TermView extends View implements Runnable {
 			c = (x * 3) / getWidth();
 			r = (y * 3) / getHeight();
 
+			boolean rogueLike = (isRoguelikeKeysEnabled()==1);
+			int key = (2 - r) * 3 + c + '1';
+
+			if (rogueLike) {
+				switch(key) {
+				case '1': key = 'b'; break;
+				case '2': key = 'j'; break;
+				case '3': key = 'n'; break;
+				case '4': key = 'h'; break;
+				case '5': key = ' '; break;
+				case '6': key = 'l'; break;
+				case '7': key = 'y'; break;
+				case '8': key = 'k'; break;
+				case '9': key = 'u'; break;
+				}
+			}
+
 			if (always_run && wait) {
 				synchronized (keybuffer) {
-					keybuffer.offer(46); // '.' command
-					keybuffer.offer((2 - r) * 3 + c + '1');
+					if (rogueLike) {
+						key = Character.toUpperCase(key);
+					}
+					else {
+						keybuffer.offer(46); // '.' command
+					}
+					keybuffer.offer(key);
 
 					if (wait) {
 						Log.d("Angband", "Wake up!!!");
@@ -348,7 +370,7 @@ public class TermView extends View implements Runnable {
 					}
 				}
 			} else {
-				addToKeyBuffer((2 - r) * 3 + c + '1');
+				addToKeyBuffer(key);
 			}
 			return true;
 		}
@@ -517,9 +539,15 @@ public class TermView extends View implements Runnable {
 	public void setVibrate(boolean vibrate) {
 		this.vibrate = vibrate;
 	}
-
 	public boolean getVibrate() {
 		return vibrate;
+	}
+
+	public void setAlwaysRun(boolean alwaysRun) {
+		this.always_run = alwaysRun;
+	}
+	public boolean getAlwaysRun() {
+		return always_run;
 	}
 
 	public void onResume() {
@@ -580,6 +608,7 @@ public class TermView extends View implements Runnable {
 
 	// Call native methods from library
 	native void startGame(String pluginPath, String filesPath, String arguments);
+	native int isRoguelikeKeysEnabled();
 	public void run() {	    
 
 	    String pluginPath = AngbandActivity.getActivityFilesDirectory()+"/../lib/lib"+AngbandActivity.getActivePluginName()+".so";

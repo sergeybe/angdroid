@@ -101,9 +101,8 @@ public class AngbandActivity extends Activity {
 		}
 		
 		term.setVibrate(pref.getBoolean(Preferences.KEY_VIBRATE, false));
-
+		term.setAlwaysRun(pref.getBoolean(Preferences.KEY_ALWAYSRUN, true));
 		
-
 		term.onResume();
 	}
 
