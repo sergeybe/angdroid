@@ -16,6 +16,7 @@
 #define LOG(msg) (__android_log_write(ANDROID_LOG_DEBUG, "Angband", (msg)));
 
 void( * startGame ) (JNIEnv*, jobject, jstring, jstring, jstring) = NULL; 
+jint( * isRoguelikeKeysEnabled ) (JNIEnv*, jobject) = NULL;
 JNIEnv* pass_env1; 
 jobject pass_obj1;
 jstring pass_pluginPath;
@@ -24,6 +25,8 @@ jstring pass_arguments;
 
 static JavaVM *jvm;
 static JNIEnv *env;
+static void* handle = NULL;
+pthread_mutex_t mu = PTHREAD_MUTEX_INITIALIZER;
 
 void* run_angband(void* foo)
 {
@@ -34,8 +37,10 @@ void* run_angband(void* foo)
 JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	(JNIEnv *env1, jobject obj1, jstring pluginPath, jstring libPath, jstring arguments)
 {
-	void* handle;
-        pthread_t game_thread;
+	pthread_t game_thread;
+
+	// begin synchronize
+	pthread_mutex_lock (&mu);
 
 	pass_env1 = env1;
 	pass_obj1 = obj1;
@@ -48,7 +53,6 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	if ((*env1)->GetJavaVM(env1, &jvm) < 0){
 		LOGE("Error: Can't get JavaVM!");
 	}
-
 	(*jvm)->AttachCurrentThread(jvm, &env1, NULL);
 	*/
 
@@ -72,12 +76,53 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	// start thread to call entry point
 	pthread_create(&game_thread, NULL, run_angband, (void*) NULL);	
 
+	// end synchronize
+	pthread_mutex_unlock (&mu);
+
 	LOGD("loader.waiting on game_thread");
 	pthread_join(game_thread, NULL); // wait for thread to exit
+
+	// begin synchronize
+	pthread_mutex_lock (&mu);
 
 	LOGD("loader.game_thread is finished");
 	dlclose(handle);           	 // unload angband lib
 
+	// clear pointers
+	handle = NULL;
+	isRoguelikeKeysEnabled = NULL;
+
+	// end synchronize
+	pthread_mutex_unlock (&mu);
+
 	//LOGD("loader.detatch");
 	//(*jvm)->DetachCurrentThread(jvm);
+}
+
+JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled
+	(JNIEnv *env1, jobject obj1)
+{
+	jint rl = 0;
+	// begin synchronize
+	pthread_mutex_lock (&mu);
+
+	if (handle) {
+		if (!isRoguelikeKeysEnabled)
+		  	// find entry point
+		  	isRoguelikeKeysEnabled = dlsym(handle, "Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled");   
+
+		if (isRoguelikeKeysEnabled)
+			rl = isRoguelikeKeysEnabled(env1, obj1);
+		else
+			LOGE("dlsym failed on Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled");
+	}
+	else {
+		LOGE("dlopen failed -- isRoguelikeKeysEnabled");
+		rl =  0;
+	}
+
+	// end synchronize
+	pthread_mutex_unlock (&mu);
+
+	return rl;
 }

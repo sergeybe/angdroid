@@ -970,6 +970,18 @@ void initGame ()
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
+JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled
+	(JNIEnv *env1, jobject obj1)
+{
+	jint rl = 0;
+#ifdef ANGDROID_ANGBAND_PLUGIN
+	if (op_ptr && OPT(rogue_like_commands)) rl=1;
+#else
+	if (rogue_like_commands) rl=1;
+#endif
+	return rl;
+}
+
 JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	(JNIEnv *env1, jobject obj1, jstring pluginPath, jstring libPath, jstring arguments)
 {
