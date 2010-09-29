@@ -19,7 +19,7 @@
     <string name="preferences_alwaysrun_summary">Always run when using touch directional commands</string>
     <string-array name="gamePlugins">
       <item>Vanilla 3.1.2v2</item>
-      <item>Vanilla 3.0.6s</item>
+      <item>Vanilla 3.0.6 squelch+borg</item>
       <!-- <item>ToME 2.5.3</item> -->
     </string-array>
     <string-array name="gamePluginValues">
