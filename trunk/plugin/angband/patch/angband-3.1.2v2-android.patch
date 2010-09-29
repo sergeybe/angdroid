@@ -1,7 +1,21 @@
-Index: src/h-basic.h
-===================================================================
---- src/h-basic.h	(revision 3.1.2v2)
-+++ src/h-basic.h	(working copy)
+diff -Nru --strip-trailing-cr angband-3.1.2v2/src/death.c angband-3.1.2v2-android/src/death.c
+--- angband-3.1.2v2/src/death.c	2009-12-17 21:18:20.000000000 -0800
++++ angband-3.1.2v2-android/src/death.c	2010-09-28 20:21:15.105802516 -0700
+@@ -489,7 +489,10 @@
+ 
+ 		if (c.key == ESCAPE || cursor == (menu->count -1))
+ 		{
+-			if (get_check("Do you want to quit? "))
++			// hack to allow KTRL('X') to exit the game here
++			char opts[4] = {'y', 'n', KTRL('X'), '\0'};
++			char gckey = get_char("Do you want to quit?", &opts[0], 2, 'n');
++			if (gckey == KTRL('X') || gckey == 'y' || gckey == 'Y')
+ 				break;
+ 		}
+ 		else if (c.type == EVT_SELECT && death_actions[cursor].action)
+diff -Nru --strip-trailing-cr angband-3.1.2v2/src/h-basic.h angband-3.1.2v2-android/src/h-basic.h
+--- angband-3.1.2v2/src/h-basic.h	2009-11-15 23:13:13.000000000 -0800
++++ angband-3.1.2v2-android/src/h-basic.h	2010-09-28 20:21:15.101793487 -0700
 @@ -75,7 +75,7 @@
   * Basically, SET_UID should *only* be set for "Unix" machines.
   */
@@ -11,32 +25,15 @@ Index: src/h-basic.h
  # define SET_UID
  
  /* Without autoconf, turn on some things */
-Index: src/util.c
-===================================================================
---- src/util.c	(revision 3.1.2v2)
-+++ src/util.c	(working copy)
+diff -Nru --strip-trailing-cr angband-3.1.2v2/src/util.c angband-3.1.2v2-android/src/util.c
+--- angband-3.1.2v2/src/util.c	2010-01-23 03:27:55.000000000 -0800
++++ angband-3.1.2v2-android/src/util.c	2010-09-28 20:21:15.105802516 -0700
 @@ -1421,7 +1421,7 @@
-
-
-		/* End "macro trigger" */
+ 
+ 
+ 		/* End "macro trigger" */
 -		if (parse_under && (ke.key >=0 && ke.key <= 32))
 +		if (parse_under && (iscntrl(ke.key) || ke.key == ' '))
-		{
-			/* Strip this key */
-			ke.type = EVT_NONE;
-Index: src/death.c
-===================================================================
---- src/death.c	(revision 3.1.2v2)
-+++ src/death.c	(working copy)
-@@ -489,7 +489,10 @@
- 
-		if (c.key == ESCAPE || cursor == (menu->count -1))
-		{
--			if (get_check("Do you want to quit? "))
-+			// hack to allow KTRL('X') to exit the game here
-+			char opts[4] = {'y', 'n', KTRL('X'), '\0'};
-+			char gckey = get_char("Do you want to quit?", &opts[0], 2, 'n');
-+			if (gckey == KTRL('X') || gckey == 'y' || gckey == 'Y')
-				break;
-		}
-		else if (c.type == EVT_SELECT && death_actions[cursor].action)
+ 		{
+ 			/* Strip this key */
+ 			ke.type = EVT_NONE;

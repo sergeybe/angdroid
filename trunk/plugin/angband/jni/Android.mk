@@ -3,91 +3,93 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := angband
-LOCAL_CFLAGS := -DUSE_AND
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../..
+LOCAL_CFLAGS := -DUSE_AND -DANGDROID_ANGBAND_PLUGIN
+
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include \
+$(LOCAL_PATH)/../extsrc/src
 
 LOCAL_LDLIBS := -llog
 
 LOCAL_SRC_FILES := \
-angdroid.c \
-../../player/calcs.c \
-../../player/timed.c \
-../../player/util.c \
-../../attack.c \
-../../birth.c \
-../../button.c \
-../../cave.c \
-../../cmd0.c \
-../../cmd1.c \
-../../cmd2.c \
-../../cmd3.c \
-../../cmd4.c \
-../../cmd5.c \
-../../cmd-know.c \
-../../cmd-obj.c \
-../../death.c \
-../../debug.c \
-../../dungeon.c \
-../../effects.c \
-../../files.c \
-../../game-cmd.c \
-../../game-event.c \
-../../generate.c \
-../../history.c \
-../../init1.c \
-../../init2.c \
-../../load.c \
-../../load-old.c \
-../../option.c \
-../../pathfind.c \
-../../prefs.c \
-../../randname.c \
-../../save.c \
-../../savefile.c \
-../../score.c \
-../../signals.c \
-../../snd-sdl.c \
-../../spells1.c \
-../../spells2.c \
-../../squelch.c \
-../../store.c \
-../../tables.c \
-../../target.c \
-../../trap.c \
-../../ui-birth.c \
-../../ui.c \
-../../ui-event.c \
-../../ui-menu.c \
-../../util.c \
-../../variable.c \
-../../wizard.c \
-../../wiz-spoil.c \
-../../wiz-stats.c \
-../../x-spell.c \
-../../xtra2.c \
-../../xtra3.c \
-../../z-file.c \
-../../z-form.c \
-../../z-msg.c \
-../../z-quark.c \
-../../z-rand.c \
-../../z-term.c \
-../../z-type.c \
-../../z-util.c \
-../../z-virt.c \
-../../monster/melee1.c \
-../../monster/melee2.c \
-../../monster/monster1.c \
-../../monster/monster2.c \
-../../object/identify.c \
-../../object/obj-desc.c \
-../../object/obj-info.c \
-../../object/obj-make.c \
-../../object/obj-power.c \
-../../object/obj-ui.c \
-../../object/obj-util.c \
-../../object/randart.c \
-#../../z-bitflag.c # exists in svn head, but not in angband-3.1.2v2
+../../common/angdroid.c \
+../extsrc/src/player/calcs.c \
+../extsrc/src/player/timed.c \
+../extsrc/src/player/util.c \
+../extsrc/src/attack.c \
+../extsrc/src/birth.c \
+../extsrc/src/button.c \
+../extsrc/src/cave.c \
+../extsrc/src/cmd0.c \
+../extsrc/src/cmd1.c \
+../extsrc/src/cmd2.c \
+../extsrc/src/cmd3.c \
+../extsrc/src/cmd4.c \
+../extsrc/src/cmd5.c \
+../extsrc/src/cmd-know.c \
+../extsrc/src/cmd-obj.c \
+../extsrc/src/death.c \
+../extsrc/src/debug.c \
+../extsrc/src/dungeon.c \
+../extsrc/src/effects.c \
+../extsrc/src/files.c \
+../extsrc/src/game-cmd.c \
+../extsrc/src/game-event.c \
+../extsrc/src/generate.c \
+../extsrc/src/history.c \
+../extsrc/src/init1.c \
+../extsrc/src/init2.c \
+../extsrc/src/load.c \
+../extsrc/src/load-old.c \
+../extsrc/src/option.c \
+../extsrc/src/pathfind.c \
+../extsrc/src/prefs.c \
+../extsrc/src/randname.c \
+../extsrc/src/save.c \
+../extsrc/src/savefile.c \
+../extsrc/src/score.c \
+../extsrc/src/signals.c \
+../extsrc/src/snd-sdl.c \
+../extsrc/src/spells1.c \
+../extsrc/src/spells2.c \
+../extsrc/src/squelch.c \
+../extsrc/src/store.c \
+../extsrc/src/tables.c \
+../extsrc/src/target.c \
+../extsrc/src/trap.c \
+../extsrc/src/ui-birth.c \
+../extsrc/src/ui.c \
+../extsrc/src/ui-event.c \
+../extsrc/src/ui-menu.c \
+../extsrc/src/util.c \
+../extsrc/src/variable.c \
+../extsrc/src/wizard.c \
+../extsrc/src/wiz-spoil.c \
+../extsrc/src/wiz-stats.c \
+../extsrc/src/x-spell.c \
+../extsrc/src/xtra2.c \
+../extsrc/src/xtra3.c \
+../extsrc/src/z-file.c \
+../extsrc/src/z-form.c \
+../extsrc/src/z-msg.c \
+../extsrc/src/z-quark.c \
+../extsrc/src/z-rand.c \
+../extsrc/src/z-term.c \
+../extsrc/src/z-type.c \
+../extsrc/src/z-util.c \
+../extsrc/src/z-virt.c \
+../extsrc/src/monster/melee1.c \
+../extsrc/src/monster/melee2.c \
+../extsrc/src/monster/monster1.c \
+../extsrc/src/monster/monster2.c \
+../extsrc/src/object/identify.c \
+../extsrc/src/object/obj-desc.c \
+../extsrc/src/object/obj-info.c \
+../extsrc/src/object/obj-make.c \
+../extsrc/src/object/obj-power.c \
+../extsrc/src/object/obj-ui.c \
+../extsrc/src/object/obj-util.c \
+../extsrc/src/object/randart.c \
+#../extsrc/src/z-bitflag.c # exists in svn head, but not in angband-3.1.2v2
 # see http://trac.rephial.org/browser/tags/angband-3.1.2v2/src
 
 #include $(BUILD_STATIC_LIBRARY)
