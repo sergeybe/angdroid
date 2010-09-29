@@ -13,19 +13,40 @@
     <property file="build.properties"/>
     <property file="default.properties"/>
 
-    <path id="android.antlibs">
-        <pathelement path="${sdk-location}/tools/lib/anttasks.jar" />
-        <pathelement path="${sdk-location}/tools/lib/sdklib.jar" />
-        <pathelement path="${sdk-location}/tools/lib/androidprefs.jar" />
-        <pathelement path="${sdk-location}/tools/lib/apkbuilder.jar" />
-        <pathelement path="${sdk-location}/tools/lib/jarutils.jar" />
-    </path>
+    <target name="obfuscate" depends="angband-release">
+	<proguard>
+	    -libraryjars ${android.jar}: ${external-libs-folder}
+	    -injars      ${out-classes-location}
+	    -outjars     ${obfuscate-location}/classes.min.jar
+	    -keep public class * extends android.app.Activity
+	    -optimizations !code/simplification/cast
+       </proguard>
+    </target>
+    
+    <target name="angband-release" depends="plugin-resources, plugin-libs, release" />
+    <target name="angband-debug"   depends="plugin-resources, plugin-libs, debug" />
 
-    <taskdef name="setup"
-        classname="com.android.ant.SetupTask"
-        classpathref="android.antlibs"/>
+<!--
+    ************************************************************************
+    *                                                                      *
+    *  Plugins                                                             *
+    *                                                                      *
+    ************************************************************************
+-->
 
-    <setup/>
+    <target name="plugin-resources">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="angband"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="angband306"/>
+	</ant>
+<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="tome"/>
+	</ant>
+-->
+    </target>
 
     <condition property="is.exist.jni.header">
         <available file="angdroid.h" type="file" filepath="plugin/include"/>
@@ -39,20 +60,6 @@
             <class name="org.angdroid.angband.TermView" />
             <class name="org.angdroid.angband.AngbandActivity" />
         </javah>
-    </target>
-
-    <target name="angband-resources">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
-	    <property name="plugin.name" value="angband"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
-	    <property name="plugin.name" value="angband306"/>
-	</ant>
-<!--
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
-	    <property name="plugin.name" value="tome"/>
-	</ant>
--->
     </target>
 
     <target name="plugin-libs" depends="angband-javah">
@@ -72,6 +79,28 @@
 -->
     </target>
 
+    <target name="plugin-src">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="angband306"/>
+	    <property name="src.url.base" value="http://rephial.org/downloads/3.0"/>
+	    <property name="src.url.file" value="angband-3.0.6-src.tar.gz"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="angband"/>
+	    <property name="src.url.base" value="http://rephial.org/downloads/3.1"/>
+	    <property name="src.url.file" value="angband-3.1.2v2-src.tar.gz"/>
+	</ant>
+    </target>
+
+
+<!--
+    ************************************************************************
+    *                                                                      *
+    *  Clean                                                               *
+    *                                                                      *
+    ************************************************************************
+-->
+
     <target name="clean-plugins">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="loader"/>
@@ -87,19 +116,6 @@
 	</ant>
     </target>
 
-    <target name="plugin-src">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
-	    <property name="plugin.name" value="angband306"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/3.0"/>
-	    <property name="src.url.file" value="angband-3.0.6-src.tar.gz"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
-	    <property name="plugin.name" value="angband"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/3.1"/>
-	    <property name="src.url.file" value="angband-3.1.2v2-src.tar.gz"/>
-	</ant>
-    </target>
-
     <target name="clean" depends="clean-plugins">
         <delete dir="bin"/>
         <delete dir="gen"/>
@@ -107,17 +123,27 @@
 	<delete file="plugin/include/angdroid.h"/>
     </target>
 
-    <target name="obfuscate" depends="angband-release">
-	<proguard>
-	    -libraryjars ${android.jar}: ${external-libs-folder}
-	    -injars      ${out-classes-location}
-	    -outjars     ${obfuscate-location}/classes.min.jar
-	    -keep public class * extends android.app.Activity
-	    -optimizations !code/simplification/cast
-       </proguard>
-    </target>
-    
-    <target name="angband-release" depends="angband-resources, plugin-libs, release" />
-    <target name="angband-debug"   depends="angband-resources, plugin-libs, debug" />
+
+<!--
+    ************************************************************************
+    *                                                                      *
+    *  Android SDK Setup                                                   *
+    *                                                                      *
+    ************************************************************************
+-->
+
+    <path id="android.antlibs">
+        <pathelement path="${sdk-location}/tools/lib/anttasks.jar" />
+        <pathelement path="${sdk-location}/tools/lib/sdklib.jar" />
+        <pathelement path="${sdk-location}/tools/lib/androidprefs.jar" />
+        <pathelement path="${sdk-location}/tools/lib/apkbuilder.jar" />
+        <pathelement path="${sdk-location}/tools/lib/jarutils.jar" />
+    </path>
+
+    <taskdef name="setup"
+        classname="com.android.ant.SetupTask"
+        classpathref="android.antlibs"/>
+
+    <setup/>
 
 </project>
