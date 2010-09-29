@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AngbandPlugin" default="plugin-lib">
+
+    <target name="plugin-lib">
+        <exec executable="${ndk-location}/ndk-build" 
+	      failonerror="true"
+	      dir="plugin/${plugin.name}">
+	</exec>
+	<copy file="plugin/${plugin.name}/libs/armeabi/lib${plugin.name}.so" 
+	      tofile="libs/armeabi/lib${plugin.name}.so"
+	      overwrite="true"/>
+    </target>
+
+    <condition property="is.created.zip.resource">
+            <available file="zip${plugin.name}" type="file" filepath="${resource-folder}/raw/"/>
+    </condition>
+
+    <target name="plugin-resources" unless="is.created.zip.resource">
+        <zip destfile="${resource-folder}/raw/zip${plugin.name}" basedir="plugin/${plugin.name}/extsrc/lib"
+            excludes="**/Makefile **/Makefile.am **/Makefile.in **/delete.me **/*.glade **/*.bmp **/*.png **/*.wav xtra/font/*.* xtra/sound/*.* xtra/help/*.* xtra/graf/*.*" />
+    </target>
+
+    <target name="clean">
+        <delete dir="plugin/${plugin.name}/libs"/>
+        <delete dir="plugin/${plugin.name}/obj"/>
+        <delete file="${resource-folder}/raw/zip${plugin.name}"/>
+    </target>
+
+    <target name="get-patch-plugin-src">
+         <delete>
+	     <fileset dir="plugin/${plugin.name}/extsrc/" 
+		      includes="**/*"
+		      excludes="${src.url.file}"/>
+	 </delete>
+        <exec executable="wget" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
+	    <arg value="-c"/>
+	    <arg value="${src.url.base}/${src.url.file}"/>
+	</exec>        
+        <exec executable="tar" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
+	    <arg value="--strip-components=1"/>
+	    <arg value="-xzf"/>
+	    <arg value="${src.url.file}"/>
+	</exec>        
+	<apply executable="patch" dir="${basedir}/plugin/${plugin.name}/extsrc/" failonerror="true">
+	    <arg value="-p1"/>
+	    <arg value="-i"/>
+	    <fileset dir="plugin/${plugin.name}/patch/" 
+		      includes="*.patch"/>
+	</apply>
+<!--
+        <exec executable="patch" failonerror="true">
+	    <arg value="-dplugin/angband306/extsrc/"/>
+	    <arg value="-i../patch/angband-3.0.6-android.patch"/>
+	    <arg value="-p2"/>
+	</exec>
+        <exec executable="patch" failonerror="true">
+	    <arg value="-dplugin/angband306/extsrc/"/>
+	    <arg value="-i../patch/angband-3.0.6-squelch.patch"/>
+	</exec>
+-->
+    </target>
+
+</project>
