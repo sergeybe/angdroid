@@ -1,0 +1,6926 @@
+diff -Nru --strip-trailing-cr angband-3.0.6/lib/edit/object.txt angband-3.0.6-squelch/lib/edit/object.txt
+--- angband-3.0.6/lib/edit/object.txt	2005-06-16 12:33:24.000000000 -0700
++++ angband-3.0.6-squelch/lib/edit/object.txt	2005-10-08 12:08:37.000000000 -0700
+@@ -1732,7 +1732,7 @@
+ D:It recharges a wand or a staff.
+ D:  If successful, a wand or staff gains 2+1d(60/((level of
+ D: wand/staff)+2)+1) charges; failure occurs 1 time in (160-(level of
+-D: wand/staff)-(10*(# of charges)))/15, and uncharges the wand or staff.
++D: wand/staff)-(10*(# of charges)))/15, and destroys the wand or staff.
+ 
+ N:207:Banishment
+ G:?:w
+diff -Nru --strip-trailing-cr angband-3.0.6/src/birth.c angband-3.0.6-squelch/src/birth.c
+--- angband-3.0.6/src/birth.c	2005-02-08 05:07:05.000000000 -0800
++++ angband-3.0.6-squelch/src/birth.c	2005-09-19 23:29:33.000000000 -0700
+@@ -1081,6 +1081,25 @@
+ 		op_ptr->opt[OPT_SCORE + (i - OPT_CHEAT)] = op_ptr->opt[i];
+ 	}
+ 
++	/* Always reset squelch bits. No adult_retain_squelch option. */
++	if (TRUE)
++	{
++		for (i = 0; i < z_info->k_max; i++)
++		{
++			k_info[i].squelch = SQUELCH_NEVER;
++		}
++		/*Clear the squelch bytes*/
++		for (i = 0; i < SQUELCH_BYTES; i++)
++		{
++			squelch_level[i] = SQUELCH_NONE;
++		}
++		/* Clear the ego-item squelching flags */
++		for (i = 0; i < z_info->e_max; i++)
++		{
++			e_info[i].squelch = FALSE;
++		}
++	}
++
+ 	/* Clear */
+ 	Term_clear();
+ 
+@@ -1698,6 +1717,33 @@
+ 		if (player_birth_aux()) break;
+ 	}
+ 
++	/* Make a note file if that option is set */
++ 	if (adult_take_notes)
++ 	{
++
++ 	  	/* Variables */
++ 	  	char long_day[25];
++ 	  	time_t ct = time((time_t*)0);
++
++ 	  	/* Open the file (notes_file and notes_fname are global) */
++ 	  	notes_file = my_fopen_temp(notes_fname, sizeof(notes_fname));
++
++		if (!notes_file) quit("Can't create the notes file");
++
++ 	  	/* Get date */
++ 	  	(void)strftime(long_day, 25, "%m/%d/%Y at %I:%M %p", localtime(&ct));
++
++ 	  	/* Add in "character start" information */
++ 	  	fprintf(notes_file, "%s the %s %s\n", op_ptr->full_name,
++								p_name + rp_ptr->name,
++								c_name + cp_ptr->name);
++ 	  	fprintf(notes_file, "Began the quest to kill Morgoth on %s\n",long_day);
++ 	  	fprintf(notes_file, "============================================================\n");
++		fprintf(notes_file, "                   CHAR.  \n");
++		fprintf(notes_file, "|   TURN  | DEPTH |LEVEL| EVENT\n");
++		fprintf(notes_file, "============================================================\n");
++
++ 	}
+ 
+ 	/* Note player birth in the message recall */
+ 	message_add(" ", MSG_GENERIC);
+diff -Nru --strip-trailing-cr angband-3.0.6/src/cave.c angband-3.0.6-squelch/src/cave.c
+--- angband-3.0.6/src/cave.c	2005-02-06 06:28:26.000000000 -0800
++++ angband-3.0.6-squelch/src/cave.c	2005-09-19 23:29:33.000000000 -0700
+@@ -734,6 +734,10 @@
+  * tiles should be handled differently.  One possibility would be to
+  * extend feature_type with attr/char definitions for the different states.
+  */
++
++/* Hack for purple dot squelch graphics. This is broken! */
++#define GRAF_BROKEN_BONE 392
++
+ void map_info(int y, int x, byte *ap, char *cp, byte *tap, char *tcp)
+ {
+ 	byte a;
+@@ -750,6 +754,8 @@
+ 	s16b image = p_ptr->image;
+ 
+ 	int floor_num = 0;
++	bool sq_flag = FALSE;
++	bool do_purple_dot = TRUE;
+ 
+ 	/* Monster/Player */
+ 	m_idx = cave_m_idx[y][x];
+@@ -846,9 +852,11 @@
+ 	/* Objects */
+ 	for (o_ptr = get_first_object(y, x); o_ptr; o_ptr = get_next_object(o_ptr))
+ 	{
++
+ 		/* Memorized objects */
+ 		if (o_ptr->marked)
+ 		{
++
+ 			/* Hack -- object hallucination */
+ 			if (image)
+ 			{
+@@ -860,17 +868,54 @@
+ 				break;
+ 			}
+ 
+-			/* Normal attr */
+-			a = object_attr(o_ptr);
++			/*autosquelch insert*/
++			sq_flag = ((mark_squelch_items) &&
++				       (k_info[o_ptr->k_idx].squelch == SQUELCH_ALWAYS) &&
++ 				       (k_info[o_ptr->k_idx].aware));
+ 
+-			/* Normal char */
+-			c = object_char(o_ptr);
++			/*hack - never allow quest items to appear as dot*/
++			if ((!sq_flag))
++			{
++				/* Normal attr */
++				a = object_attr(o_ptr);
+ 
+-			/* First marked object */
+-			if (!show_piles) break;
++				/* Normal char */
++				c = object_char(o_ptr);
+ 
+-			/* Special stack symbol */
+-			if (++floor_num > 1)
++				/*found a non-squelchable item, unless showing piles, display this one*/
++				if (!show_piles) break;
++
++				/*if only one item in a pile is not squelchable, show that one*/
++				do_purple_dot = FALSE;
++
++			}
++			else if (do_purple_dot)
++			{
++				if (use_graphics)
++				{
++					/* Special squelch character HACK */
++					/* Colour of Blade of Chaos */
++					/*This can't be right, but I am not sure what to do for graphics*/
++					a = k_info[GRAF_BROKEN_BONE].x_attr;
++					/* Symbol of floor */
++					c = k_info[GRAF_BROKEN_BONE].x_char;
++				}
++				else
++				{
++					/* Special squelch character HACK */
++					/* Colour of Blade of Chaos */
++					a = TERM_VIOLET;
++					/* Symbol of floor */
++					c = f_info[1].x_char;
++				}
++			}
++
++			/* Special stack symbol, unless everything in the pile is squelchable */
++			if ((++floor_num > 1) &&
++				(use_graphics ? ((a != k_info[GRAF_BROKEN_BONE].x_attr) ||
++				                 (c != k_info[GRAF_BROKEN_BONE].x_char)) :
++								((a != TERM_VIOLET) ||
++								 (c != f_info[1].x_char))))
+ 			{
+ 				object_kind *k_ptr;
+ 
+@@ -888,7 +933,6 @@
+ 		}
+ 	}
+ 
+-
+ 	/* Monsters */
+ 	if (m_idx > 0)
+ 	{
+@@ -990,6 +1034,24 @@
+ 
+ 		/* Get the "player" attr */
+ 		a = r_ptr->x_attr;
++		if ((hp_changes_color) && (arg_graphics == GRAPHICS_NONE))
++		{
++			switch(p_ptr->chp * 10 / p_ptr->mhp)
++				{
++				case 10:
++				case  9:	a = TERM_WHITE  ;	break;
++				case  8:
++				case  7:	a = TERM_YELLOW ;	break;
++				case  6:
++				case  5:	a = TERM_ORANGE ;	break;
++				case  4:
++				case  3:	a = TERM_L_RED  ;	break;
++				case  2:
++				case  1:
++				case  0:	a = TERM_RED    ;	break;
++				default:	a = TERM_WHITE  ;	break;
++				}
++		}
+ 
+ 		/* Get the "player" char */
+ 		c = r_ptr->x_char;
+diff -Nru --strip-trailing-cr angband-3.0.6/src/cmd1.c angband-3.0.6-squelch/src/cmd1.c
+--- angband-3.0.6/src/cmd1.c	2005-02-23 13:00:45.000000000 -0800
++++ angband-3.0.6-squelch/src/cmd1.c	2005-09-19 23:29:33.000000000 -0700
+@@ -499,6 +499,14 @@
+ 	/* It can't be carried */
+ 	if (!inven_carry_okay(o_ptr)) return (FALSE);
+ 
++	/*object is marked to not pickup*/
++	if ((k_info[o_ptr->k_idx].squelch == NO_SQUELCH_NEVER_PICKUP) &&
++		object_aware_p(o_ptr)) return (FALSE);
++
++	/*object is marked to not pickup*/
++	if ((k_info[o_ptr->k_idx].squelch == NO_SQUELCH_ALWAYS_PICKUP) &&
++		object_aware_p(o_ptr)) return (TRUE);
++
+ 	/* No inscription */
+ 	if (!o_ptr->note) return (FALSE);
+ 
+@@ -575,10 +583,14 @@
+ 	int can_pickup = 0;
+ 	int not_pickup = 0;
+ 
++	/* Automatically destroy squelched items in pile if necessary */
++	do_squelch_pile(py, px);
+ 
+ 	/* Scan the pile of objects */
+ 	for (this_o_idx = cave_o_idx[py][px]; this_o_idx; this_o_idx = next_o_idx)
+ 	{
++		bool do_not_pickup = FALSE;
++
+ 		/* Get the object */
+ 		o_ptr = &o_list[this_o_idx];
+ 
+@@ -591,6 +603,14 @@
+ 		/* Hack -- disturb */
+ 		disturb(0, 0);
+ 
++		/* End loop if squelched stuff reached */
++		if ((k_info[o_ptr->k_idx].squelch == SQUELCH_ALWAYS) &&
++			(k_info[o_ptr->k_idx].aware))
++		{
++			next_o_idx = 0;
++			continue;
++		}
++
+ 		/* Pick up gold */
+ 		if (o_ptr->tval == TV_GOLD)
+ 		{
+@@ -619,6 +639,14 @@
+ 			continue;
+ 		}
+ 
++		/*some items are marked to never pickup*/
++		if ((k_info[o_ptr->k_idx].squelch == NO_SQUELCH_NEVER_PICKUP)
++			&& object_aware_p(o_ptr))
++		{
++			do_not_pickup = TRUE;
++		}
++
++
+ 		/* Test for auto-pickup */
+ 		if (auto_pickup_okay(o_ptr))
+ 		{
+diff -Nru --strip-trailing-cr angband-3.0.6/src/cmd2.c angband-3.0.6-squelch/src/cmd2.c
+--- angband-3.0.6/src/cmd2.c	2005-02-23 13:05:26.000000000 -0800
++++ angband-3.0.6-squelch/src/cmd2.c	2005-09-19 23:29:33.000000000 -0700
+@@ -391,6 +391,13 @@
+ 
+ 		/* Let the Chest drop items */
+ 		chest_death(y, x, o_idx);
++
++		/*squelch chest if autosquelch calls for it*/
++		if ((squelch_level[CHEST_INDEX]) == SQUELCH_OPENED_CHESTS)
++		{
++			delete_object_idx(o_idx);
++			msg_print("Chest squelched after it was opened.");
++		}
+ 	}
+ 
+ 	/* Result */
+@@ -2581,10 +2588,7 @@
+ 				cptr note_dies = " dies.";
+ 
+ 				/* Some monsters get "destroyed" */
+-				if ((r_ptr->flags3 & (RF3_DEMON)) ||
+-				    (r_ptr->flags3 & (RF3_UNDEAD)) ||
+-				    (r_ptr->flags2 & (RF2_STUPID)) ||
+-				    (strchr("Evg", r_ptr->d_char)))
++				if (monster_nonliving(r_ptr))
+ 				{
+ 					/* Special note at death */
+ 					note_dies = " is destroyed.";
+@@ -2870,10 +2874,7 @@
+ 				cptr note_dies = " dies.";
+ 
+ 				/* Some monsters get "destroyed" */
+-				if ((r_ptr->flags3 & (RF3_DEMON)) ||
+-				    (r_ptr->flags3 & (RF3_UNDEAD)) ||
+-				    (r_ptr->flags2 & (RF2_STUPID)) ||
+-				    (strchr("Evg", r_ptr->d_char)))
++				if(monster_nonliving(r_ptr))
+ 				{
+ 					/* Special note at death */
+ 					note_dies = " is destroyed.";
+diff -Nru --strip-trailing-cr angband-3.0.6/src/cmd3.c angband-3.0.6-squelch/src/cmd3.c
+--- angband-3.0.6/src/cmd3.c	2005-02-23 13:05:38.000000000 -0800
++++ angband-3.0.6-squelch/src/cmd3.c	2005-09-19 23:29:33.000000000 -0700
+@@ -383,6 +383,24 @@
+ 	inven_drop(item, amt);
+ }
+ 
++/*
++ * An "item_tester_hook" for destroying objects
++ */
++static bool item_tester_hook_destroy(const object_type *o_ptr)
++{
++
++	if (artifact_p(o_ptr))
++	{
++    	/* Ignore known or sensed artifacts */
++    	if ((object_known_p(o_ptr)) ||
++			(o_ptr->discount == INSCRIP_SPECIAL) ||
++		    (o_ptr->discount == INSCRIP_TERRIBLE) ||
++		    (o_ptr->discount == INSCRIP_INDESTRUCTIBLE)) return (FALSE);
++	}
++
++	return (TRUE);
++}
++
+ 
+ 
+ /*
+@@ -391,18 +409,19 @@
+ void do_cmd_destroy(void)
+ {
+ 	int item, amt;
++	int old_number;
++	int old_charges = 0;
+ 
+ 	object_type *o_ptr;
++	object_type *i_ptr, object_type_body;
+ 
+-	object_type *i_ptr;
+-	object_type object_type_body;
+-
+-	char o_name[120];
++	char o_name[80];
+ 
+ 	char out_val[160];
+ 
+ 	cptr q, s;
+ 
++	item_tester_hook = item_tester_hook_destroy;
+ 
+ 	/* Get an item */
+ 	q = "Destroy which item? ";
+@@ -427,31 +446,103 @@
+ 	/* Allow user abort */
+ 	if (amt <= 0) return;
+ 
+-	/* Get local object */
+-	i_ptr = &object_type_body;
+-
+-	/* Obtain a local object */
++	i_ptr =&object_type_body;
+ 	object_copy(i_ptr, o_ptr);
+ 
+-	if ((o_ptr->tval == TV_WAND) ||
+-	    (o_ptr->tval == TV_STAFF) ||
+-	    (o_ptr->tval == TV_ROD))
++	i_ptr->number = amt;
++
++	if (((o_ptr->tval == TV_WAND) || 
++		(o_ptr->tval == TV_STAFF) || 
++		(o_ptr->tval == TV_ROD)))
+ 	{
+ 		/* Calculate the amount of destroyed charges */
+ 		i_ptr->pval = o_ptr->pval * amt / o_ptr->number;
+ 	}
+ 
+-	/* Set quantity */
++	/* temporary value for holding the destroyed part of a stack */
+ 	i_ptr->number = amt;
+ 
+-	/* Describe the destroyed object */
++	/*now describe with correct amount*/
+ 	object_desc(o_name, sizeof(o_name), i_ptr, TRUE, 3);
+ 
+ 	/* Verify destruction */
+ 	if (verify_destroy)
+ 	{
+-		strnfmt(out_val, sizeof(out_val), "Really destroy %s? ", o_name);
+-		if (!get_check(out_val)) return;
++		int result;
++
++		/* Check for known ego-items */
++		strnfmt(out_val, sizeof(out_val), "Really Destroy %s? ", o_name);
++
++		/* Check for known ego-items */
++		if (ego_item_p(o_ptr) && object_known_p(o_ptr))
++		{
++			result = get_check_other(out_val, 'E');
++
++			/* returned "no"*/
++			if (!result) return;
++
++			/*return of 2 sets ego item type to squelch*/
++			else if (result == 2)
++			{
++				/* get the ego item type */
++				ego_item_type *e_ptr = &e_info[o_ptr->name2];
++
++				/* set to squelch */
++				e_ptr->squelch = TRUE;
++
++				/* message */
++				msg_format("Ego-item type %s is now set to be squelched upon identification.", e_name + e_ptr->name);
++			}
++		}
++
++		/* Check for aware objects */
++		else if (object_aware_p(o_ptr) &&
++		    	!(k_info[o_ptr->k_idx].flags3 & (TR3_INSTA_ART)))
++		{
++
++			result = get_check_other(out_val, 's');
++
++			/* returned "no"*/
++			if (!result) return;
++
++			/*return of 2 sets item to squelch*/
++			else if (result == 2)
++			{
++				object_kind *k_ptr = &k_info[o_ptr->k_idx];
++				char o_name2[80];
++
++				/*make a fake object so we can give a proper message*/
++				object_type *i_ptr;
++				object_type object_type_body;
++
++				/* Get local object */
++				i_ptr = &object_type_body;
++
++				/* Wipe the object */
++				object_wipe(i_ptr);
++
++				/* Create the object */
++				object_prep(i_ptr, o_ptr->k_idx);
++
++				/*make it plural*/
++				i_ptr->number = 2;
++
++				/*now describe with correct amount*/
++				object_desc(o_name2, sizeof(o_name2), i_ptr, FALSE, 0);
++
++				/*set to squelch*/
++				k_ptr->squelch = SQUELCH_ALWAYS;
++
++				/* Message - no good routine for extracting the plain name*/
++				msg_format("All %^s will always be squelched.", o_name2);
++
++				/*Mark the view to be updated*/
++				p_ptr->update |= (PU_FORGET_VIEW | PU_UPDATE_VIEW);;
++			}
++		}
++
++		/* Unaware object, simple yes/no prompt */
++		else if (!get_check(out_val)) return;
+ 	}
+ 
+ 	/* Take a turn */
+@@ -494,9 +585,13 @@
+ 	}
+ 
+ 	/* Message */
+-	message_format(MSG_DESTROY, 0, "You destroy %s.", o_name);
++	msg_format("You destroy %s.", o_name);
++
++	/*hack, restore the proper number of charges after the messages have printed
++	 * so the proper number of charges are destroyed*/
++	if (old_charges) o_ptr->pval = old_charges;
+ 
+-	/* Reduce the charges of rods/wands/staves */
++	/* Reduce the charges of rods/wands */
+ 	reduce_charges(o_ptr, amt);
+ 
+ 	/* Eliminate the item (from the pack) */
+diff -Nru --strip-trailing-cr angband-3.0.6/src/cmd4.c angband-3.0.6-squelch/src/cmd4.c
+--- angband-3.0.6/src/cmd4.c	2004-12-12 03:54:06.000000000 -0800
++++ angband-3.0.6-squelch/src/cmd4.c	2005-09-19 23:29:33.000000000 -0700
+@@ -10,6 +10,8 @@
+ 
+ #include "angband.h"
+ 
++/*max length of note output*/
++#define LINEWRAP    75
+ 
+ /*
+  *  Header and footer marker string for pref file dumps
+@@ -1043,6 +1045,9 @@
+ 		/* Window flags */
+ 		prt("(W) Window flags", 12, 5);
+ 
++		/* Squelch menus */
++		prt("(S) Item Squelch and Autoinscribe Menus", 13, 5);
++
+ 		/* Load and Append */
+ 		prt("(L) Load a user pref file", 14, 5);
+ 		prt("(A) Append options to a file", 15, 5);
+@@ -1108,6 +1113,12 @@
+ 			do_cmd_options_win();
+ 		}
+ 
++		/* Squelching and autoinscription menus */
++		else if ((ch == 'S') || (ch == 's'))
++		{
++			do_cmd_squelch_autoinsc();
++		} 
++
+ 		/* Load a user pref file */
+ 		else if ((ch == 'L') || (ch == 'l'))
+ 		{
+@@ -2722,27 +2733,149 @@
+ 	screen_load();
+ }
+ 
+-
+-/*
+- * Note something in the message recall
+- */
+-void do_cmd_note(void)
++ /*
++  * Take notes.  There are two ways this can happen, either in the
++  * message recall or a file.  The command can also be passed a string,
++  * which will automatically be written. -CK-
++  */
++void do_cmd_note(char *note, int what_depth)
+ {
+-	char tmp[80];
++ 	char buf[120];
+ 
+-	/* Default */
+-	strcpy(tmp, "");
++ 	/* Default */
++ 	strcpy(buf, "");
++
++ 	/* If a note is passed, use that, otherwise accept user input. */
++ 	if (streq(note, ""))
++	{
+ 
+-	/* Input */
+-	if (!get_string("Note: ", tmp, sizeof(tmp))) return;
++ 	  	if (!get_string("Note: ", buf, 70)) return;
+ 
+-	/* Ignore empty notes */
+-	if (!tmp[0] || (tmp[0] == ' ')) return;
++ 	}
+ 
+-	/* Add the note to the message recall */
+-	msg_format("Note: %s", tmp);
+-}
++	else my_strcpy(buf, note, sizeof(buf));
++
++ 	/* Ignore empty notes */
++ 	if (!buf[0] || (buf[0] == ' ')) return;
++
++	/* If the note taking option is on, write it to the file, otherwise write to
++ 	 * the message recall.
++ 	 */
++ 	if (adult_take_notes)
++	{
++		int length, length_info;
++        char info_note[40];
++ 	  	char depths[10];
+ 
++		/*Artifacts use depth artifact created.  All others
++	 	 *use player depth.
++	 	 */
++
++		/*get depth for recording\
++		 *mark if item is a quest reward or a chest item
++		 */
++ 	    if (what_depth == 0)
++ 	    {
++ 			strcpy(depths, " Town");
++ 	    }
++		else if (depth_in_feet)
++ 	    {
++ 			strnfmt(depths, sizeof(depths), " %4d", what_depth * 50);
++ 	    }
++		else
++ 	    {
++ 		strnfmt(depths, sizeof(depths), " %4d", what_depth);
++		}
++
++ 	  	/* Make preliminary part of note */
++     	strnfmt(info_note, sizeof(info_note), "|%9lu| %s | %2d  | ", turn, depths, p_ptr->lev);
++
++		/*write the info note*/
++		fprintf(notes_file, info_note);
++
++		/*get the length of the notes*/
++		length_info = strlen(info_note);
++		length = strlen(buf);
++
++		/*break up long notes*/
++		if((length + length_info) > LINEWRAP)
++		{
++			bool keep_going = TRUE;
++			int startpoint = 0;
++			int endpoint, n;
++
++			while (keep_going)
++			{
++
++				/*don't print more than the set linewrap amount*/
++				endpoint = startpoint + LINEWRAP - strlen(info_note) + 1;
++
++				/*find a breaking point*/
++				while (TRUE)
++				{
++					/*are we at the end of the line?*/
++					if (endpoint >= length)
++					{
++						/*print to the end*/
++						endpoint = length;
++						keep_going = FALSE;
++						break;
++					}
++
++					/* Mark the most recent space or dash in the string */
++					else if ((buf[endpoint] == ' ') ||
++				    		 (buf[endpoint] == '-')) break;
++
++					/*no spaces in the line, so break in the middle of text*/
++					else if (endpoint == startpoint)
++					{
++						endpoint = startpoint + LINEWRAP - strlen(info_note) + 1;
++						break;
++					}
++
++					/* check previous char */
++					endpoint--;
++				}
++
++				/*make a continued note if applicable*/
++				if (startpoint) fprintf(notes_file, "|  continued...   |     |  ");
++
++				/* Write that line to file */
++				for (n = startpoint; n <= endpoint; n++)
++				{
++					char ch;
++
++					/* Ensure the character is printable */
++					ch = (isprint(buf[n]) ? buf[n] : ' ');
++
++					/* Write out the character */
++					fprintf(notes_file, "%c", ch);
++
++				}
++
++				/*break the line*/
++				fprintf(notes_file, "\n");
++
++				/*prepare for the next line*/
++				startpoint = endpoint + 1;
++			}
++
++		}
++
++ 	 	/* Add note to buffer */
++ 	 	else
++		{
++			fprintf(notes_file, "%s", buf);
++
++			/*break the line*/
++			fprintf(notes_file, "\n");
++		}
++
++
++ 	}
++
++ 	else msg_format("Note: %s", buf);
++}
+ 
+ /*
+  * Mention the current version
+diff -Nru --strip-trailing-cr angband-3.0.6/src/defines.h angband-3.0.6-squelch/src/defines.h
+--- angband-3.0.6/src/defines.h	2005-06-18 10:37:15.000000000 -0700
++++ angband-3.0.6-squelch/src/defines.h	2005-09-19 23:29:33.000000000 -0700
+@@ -56,7 +56,7 @@
+ #define VERSION_MAJOR	3
+ #define VERSION_MINOR	0
+ #define VERSION_PATCH	5
+-#define VERSION_EXTRA	0
++#define VERSION_EXTRA	3
+ 
+ 
+ /*
+@@ -226,6 +226,11 @@
+ #define QUARK_MAX	512
+ 
+ /*
++ * OPTION: Maximum number of autoinscriptions(see "object1.c")
++ */
++#define AUTOINSCRIPTIONS_MAX 216
++
++/*
+  * OPTION: Maximum number of messages to remember (see "util.c")
+  * Default: assume maximal memorization of 2048 total messages
+  */
+@@ -294,7 +299,10 @@
+  */
+ #define NASTY_MON	50		/* 1/chance of inflated monster level */
+ 
+-
++/*
++ * Special note used to mark the end of the notes section in the savefile
++ */
++#define NOTES_MARK "@@@@@@@ No more notes @@@@@@@"
+ 
+ /*
+  * Refueling constants
+@@ -302,6 +310,18 @@
+ #define FUEL_TORCH	5000	/* Maximum amount of fuel in a torch */
+ #define FUEL_LAMP	15000   /* Maximum amount of fuel in a lantern */
+ 
++/*
++ * Returns the current length of the text in the buffer.
++ */
++#define EDITING_BUFFER_LEN(T) \
++((T)->max_size - (T)->gap_size)
++ 
++/*
++ * Returns a character in the buffer. Use it instead of direct access.
++ */
++#define EDITING_BUFFER_GET(T,i) \
++(((i) < (T)->pos) ? (T)->buf[(i)]: (T)->buf[(i) + (T)->gap_size])
++
+ 
+ /*
+  * More maximum values
+@@ -348,6 +368,7 @@
+ #define PY_MAX_GOLD	999999999L	/* Maximum gold */
+ #define PY_MAX_LEVEL	50		/* Maximum level */
+ 
++
+ /*
+  * Player "food" crucial values
+  */
+@@ -535,10 +556,10 @@
+ #define COL_SPEED		49	/* "Slow (-NN)" or "Fast (+NN)" */
+ 
+ #define ROW_STUDY		(Term->hgt - 1)
+-#define COL_STUDY		64	/* "Study" */
++#define COL_STUDY		60	/* "Study" */
+ 
+ #define ROW_DEPTH		(Term->hgt - 1)
+-#define COL_DEPTH		70	/* "Lev NNN" / "NNNN ft" */
++#define COL_DEPTH		71	/* "Lev NNN" / "NNNN ft" */
+ 
+ #define ROW_OPPOSE_ELEMENTS	(Term->hgt - 1)
+ #define COL_OPPOSE_ELEMENTS	80	/* "Acid Elec Fire Cold Pois" */
+@@ -1424,6 +1445,42 @@
+  */
+ #define SV_BOOK_MIN_GOOD	4
+ 
++
++/* Squelch Modes for k_info->squelch -- from NPP */
++
++ 
++#define SQUELCH_NEVER               0 /*allow pickup, but defer to OPT_always_pickup*/
++#define NO_SQUELCH_NEVER_PICKUP     1 /*never pickup, override OPT_always_pickup*/ 
++#define NO_SQUELCH_ALWAYS_PICKUP    2/*always pickup, override pickup and floor query options*/
++#define SQUELCH_ALWAYS              3 /*destroy when player walks over*/
++#define SQUELCH_HEAD                0
++#define SQUELCH_TAIL                3
++
++/* * These are the various levels of quality squelching supported by the game.
++ * Less concisely: * 0 ---> No squelching
++ * 1 ---> Squelch cursed items * 2 ---> Squelch average and worse items
++ * 3 ---> Squelch good and worse items
++ * 4 ---> squelch all but artifacts
++ * 5 ---> squelch open chests
++ */
++
++#define SQUELCH_NONE            0
++#define SQUELCH_CURSED          1
++#define SQUELCH_AVERAGE         2
++#define SQUELCH_GOOD_STRONG     3
++#define SQUELCH_GOOD_WEAK       4
++#define SQUELCH_ALL             5
++#define SQUELCH_OPENED_CHESTS   6 /*chests*/
++
++
++/*others are defines in squelch.c, static int do_qual_squelch,
++ *but this one is used in chest opening. JG*/
++#define CHEST_INDEX     19
++
++/*number of bytes used in squelch sub-quality array*/
++#define SQUELCH_BYTES    24
++
++
+ /*
+  * Special "sval" value -- unknown "sval"
+  */
+@@ -1575,6 +1632,7 @@
+  */
+ #define PN_COMBINE		0x00000001L	/* Combine the pack */
+ #define PN_REORDER		0x00000002L	/* Reorder the pack */
++#define PN_AUTOINSCRIBE	0x00000004L /* Autoinscribe items */
+ /* xxx (many) */
+ 
+ 
+@@ -2470,9 +2528,9 @@
+ #define OPT_auto_more				71
+ #define OPT_smart_monsters			72
+ #define OPT_smart_packs				73
++#define OPT_hp_changes_color        74
+ /* xxx */
+-/* xxx */
+-/* xxx */
++#define OPT_mark_squelch_items      76
+ /* xxx */
+ /* xxx */
+ /* xxx */
+@@ -2486,6 +2544,8 @@
+ #define OPT_birth_no_artifacts      (OPT_BIRTH+6)
+ #define OPT_birth_rand_artifacts    (OPT_BIRTH+7)
+ #define OPT_birth_no_stacking       (OPT_BIRTH+8)
++#define OPT_birth_take_notes		(OPT_BIRTH+9)
++
+ /* xxx xxx */
+ #define OPT_cheat_peek				(OPT_CHEAT+0)
+ #define OPT_cheat_hear				(OPT_CHEAT+1)
+@@ -2503,6 +2563,8 @@
+ #define OPT_adult_no_artifacts		(OPT_ADULT+6)
+ #define OPT_adult_rand_artifacts	(OPT_ADULT+7)
+ #define OPT_adult_no_stacking		(OPT_ADULT+8)
++#define OPT_adult_take_notes		(OPT_ADULT+9)
++
+ /* xxx xxx */
+ #define OPT_score_peek				(OPT_SCORE+0)
+ #define OPT_score_hear				(OPT_SCORE+1)
+@@ -2590,9 +2652,9 @@
+ #define auto_more				op_ptr->opt[OPT_auto_more]
+ #define smart_monsters			op_ptr->opt[OPT_smart_monsters]
+ #define smart_packs				op_ptr->opt[OPT_smart_packs]
++#define hp_changes_color        op_ptr->opt[OPT_hp_changes_color]
+ /* xxx */
+-/* xxx */
+-/* xxx */
++#define mark_squelch_items      op_ptr->opt[OPT_mark_squelch_items]
+ /* xxx */
+ /* xxx */
+ /* xxx */
+@@ -2623,6 +2685,7 @@
+ #define adult_no_artifacts		op_ptr->opt[OPT_adult_no_artifacts]
+ #define adult_rand_artifacts	op_ptr->opt[OPT_adult_rand_artifacts]
+ #define adult_no_stacking		op_ptr->opt[OPT_adult_no_stacking]
++#define adult_take_notes		op_ptr->opt[OPT_adult_take_notes]
+ /* xxx xxx */
+ #define score_peek				op_ptr->opt[OPT_score_peek]
+ #define score_hear				op_ptr->opt[OPT_score_hear]
+@@ -2649,6 +2712,12 @@
+  */
+ #define term_screen	(angband_term[0])
+ 
++#define monster_nonliving(M) \
++    (((M)->flags3 & (RF3_DEMON))  || \
++     ((M)->flags3 & (RF3_UNDEAD)) || \
++     (strchr("Evg", (M)->d_char)))
++
++
+ 
+ /*
+  * Determine if a given inventory item is "aware"
+@@ -3184,6 +3253,13 @@
+ #define ACT_MAX                 50
+ 
+ /*
++ * These are the return values of squelch_itemp()
++ */
++#define SQUELCH_FAILED -1
++#define SQUELCH_NO      0
++#define SQUELCH_YES     1
++
++/*
+  * HACK - define if the source contains the cleanup_angband() function.
+  */
+ #define HAS_CLEANUP
+diff -Nru --strip-trailing-cr angband-3.0.6/src/dungeon.c angband-3.0.6-squelch/src/dungeon.c
+--- angband-3.0.6/src/dungeon.c	2005-03-05 01:40:06.000000000 -0800
++++ angband-3.0.6-squelch/src/dungeon.c	2005-10-05 09:41:59.000000000 -0700
+@@ -16,7 +16,7 @@
+ /*
+  * Return a "feeling" (or NULL) about an item.  Method 1 (Heavy).
+  */
+-static int value_check_aux1(const object_type *o_ptr)
++int value_check_aux1(const object_type *o_ptr)
+ {
+ 	/* Artifacts */
+ 	if (artifact_p(o_ptr))
+@@ -124,6 +124,8 @@
+ 	/* Check everything */
+ 	for (i = 0; i < INVEN_TOTAL; i++)
+ 	{
++		int squelch = SQUELCH_NO;
++
+ 		bool okay = FALSE;
+ 
+ 		o_ptr = &inventory[i];
+@@ -183,6 +185,12 @@
+ 		/* Skip non-feelings */
+ 		if (!feel) continue;
+ 
++		/* Squelch it? */
++		if (i < INVEN_WIELD)
++		{
++			squelch = squelch_itemp(o_ptr, feel, FALSE);
++		}
++
+ 		/* Stop everything */
+ 		if (disturb_minor) disturb(0, 0);
+ 
+@@ -203,10 +211,11 @@
+ 		/* Message (inventory) */
+ 		else
+ 		{
+-			msg_format("You feel the %s (%c) in your pack %s %s...",
++			msg_format("You feel the %s (%c) in your pack %s %s... %s",
+ 			           o_name, index_to_label(i),
+ 			           ((o_ptr->number == 1) ? "is" : "are"),
+-			           inscrip_text[feel - INSCRIP_NULL]);
++			           inscrip_text[feel - INSCRIP_NULL],
++					   squelch_to_label(squelch));
+ 		}
+ 
+ 		/* Sense the object */
+@@ -215,6 +224,9 @@
+ 		/* The object has been "sensed" */
+ 		o_ptr->ident |= (IDENT_SENSE);
+ 
++		/* Squelch it if necessary */
++		do_squelch_item(squelch, i, o_ptr);
++
+ 
+ 		/* Combine / Reorder the pack (later) */
+ 		p_ptr->notice |= (PN_COMBINE | PN_REORDER);
+@@ -1760,7 +1772,7 @@
+ 		/* Take notes */
+ 		case ':':
+ 		{
+-			do_cmd_note();
++			do_cmd_note("", p_ptr->depth);
+ 			break;
+ 		}
+ 
+@@ -2180,6 +2192,25 @@
+ 
+ 		/*** Clean up ***/
+ 
++#if 0 /* TODO */
++		/* Check for greater vault squares */
++		if ((cave_info[p_ptr->py][p_ptr->px] & (CAVE_G_VAULT)) &&
++		    (g_vault_name[0] != '\0'))
++		{
++			if (adult_take_notes)
++			{
++		    	char note[120];
++		    	char *fmt = "You enter the %s";
++
++		    	strnfmt(note, sizeof(note), fmt, g_vault_name);
++
++		    	do_cmd_note(note, p_ptr->depth);
++		  	}
++
++		  	g_vault_name[0] = '\0';
++		}
++#endif
++
+ 		/* Significant */
+ 		if (p_ptr->energy_use)
+ 		{
+@@ -2924,6 +2955,22 @@
+ 		/* Handle "quit and save" */
+ 		if (!p_ptr->playing && !p_ptr->is_dead) break;
+ 
++#if 0 /* TODO: add global. */
++		/* Handle lost greater vaults */
++		if (g_vault_name[0] != '\0')
++		{
++			if (adult_take_notes)
++			{
++		    	char note[120];
++				char *fmt = "Left the level without entering the %s";
++
++		   		strnfmt(note, sizeof(note), fmt, g_vault_name);
++				do_cmd_note(note, p_ptr->depth);
++		  	}
++
++		  	g_vault_name[0] = '\0';
++		}
++#endif
+ 
+ 		/* Erase the old cave */
+ 		wipe_o_list();
+diff -Nru --strip-trailing-cr angband-3.0.6/src/externs.h angband-3.0.6-squelch/src/externs.h
+--- angband-3.0.6/src/externs.h	2005-02-08 02:46:02.000000000 -0800
++++ angband-3.0.6-squelch/src/externs.h	2005-10-05 09:40:48.000000000 -0700
+@@ -239,6 +239,11 @@
+ extern int text_out_wrap;
+ extern int text_out_indent;
+ extern bool use_transparency;
++extern char notes_fname[1024];
++extern FILE *notes_file;
++extern autoinscription* inscriptions;
++extern u16b inscriptions_count;
++
+ 
+ 
+ /*
+@@ -344,7 +349,7 @@
+ extern void do_cmd_macros(void);
+ extern void do_cmd_visuals(void);
+ extern void do_cmd_colors(void);
+-extern void do_cmd_note(void);
++extern void do_cmd_note(char *note, int what_depth);
+ extern void do_cmd_version(void);
+ extern void do_cmd_feeling(void);
+ extern void do_cmd_load_screen(void);
+@@ -369,6 +374,7 @@
+ 
+ /* dungeon.c */
+ extern void play_game(bool new_game);
++extern int value_check_aux1(const object_type *o_ptr);
+ 
+ /* files.c */
+ extern void html_screenshot(cptr name);
+@@ -460,6 +466,7 @@
+ extern void reset_visuals(bool prefs);
+ extern void object_flags(const object_type *o_ptr, u32b *f1, u32b *f2, u32b *f3);
+ extern void object_flags_known(const object_type *o_ptr, u32b *f1, u32b *f2, u32b *f3);
++/* extern void strip_name(char *buf, int k_idx); */
+ extern void object_desc(char *buf, size_t max, const object_type *o_ptr, int pref, int mode);
+ extern void object_desc_spoil(char *buf, size_t max, const object_type *o_ptr, int pref, int mode);
+ extern void describe_item_activation(const object_type *o_ptr);
+@@ -583,6 +590,7 @@
+ extern void stair_creation(void);
+ extern bool enchant(object_type *o_ptr, int n, int eflag);
+ extern bool enchant_spell(int num_hit, int num_dam, int num_ac);
++extern int do_ident_item(int item, object_type *o_ptr);
+ extern bool ident_spell(void);
+ extern bool identify_fully(void);
+ extern bool recharge(int num);
+@@ -637,6 +645,22 @@
+ extern bool brand_bolts(void);
+ extern void ring_of_power(int dir);
+ 
++/* squlech.c */
++extern byte squelch_level[SQUELCH_BYTES];
++extern void do_cmd_squelch_autoinsc(void);
++extern int squelch_itemp(object_type *o_ptr, byte feeling, bool fullid);
++extern int do_squelch_item(int squelch, int item, object_type *o_ptr);
++extern void rearrange_stack(int y, int x);
++extern void do_squelch_pile(int y, int x);
++extern int get_autoinscription_index(s16b k_idx);
++extern void autoinscribe_ground(void);
++extern void autoinscribe_pack(void);
++extern int remove_autoinscription(s16b kind);
++extern int add_autoinscription(s16b kind, cptr inscription);
++extern int apply_autoinscription(object_type *o_ptr);
++extern char *squelch_to_label(int squelch);
++
++
+ /* store.c */
+ extern void do_cmd_store(void);
+ extern void store_shuffle(int which);
+@@ -706,6 +730,7 @@
+ extern bool askfor_aux(char *buf, size_t len);
+ extern bool get_string(cptr prompt, char *buf, size_t len);
+ extern s16b get_quantity(cptr prompt, int max);
++extern int get_check_other(cptr prompt, char other);
+ extern bool get_check(cptr prompt);
+ extern bool get_com(cptr prompt, char *command);
+ extern void pause_line(int row);
+@@ -722,6 +747,17 @@
+ extern byte gamma_table[256];
+ #endif /* SUPPORT_GAMMA */
+ 
++extern void editing_buffer_init(editing_buffer *eb_ptr, const char *buf, size_t max_size);
++extern void editing_buffer_destroy(editing_buffer *eb_ptr);
++extern int editing_buffer_put_chr(editing_buffer *eb_ptr, char ch);
++extern int editing_buffer_set_position(editing_buffer *eb_ptr, size_t new_pos);
++extern void editing_buffer_display(editing_buffer *eb_ptr, int x, int y, byte col);
++extern int editing_buffer_delete(editing_buffer *eb_ptr);
++extern void editing_buffer_clear(editing_buffer *eb_ptr);
++extern void editing_buffer_get_all(editing_buffer *eb_ptr, char buf[], size_t max_size);
++extern int editing_buffer_put_str(editing_buffer *eb_ptr, const char *str, int n);
++
++
+ /* xtra1.c */
+ extern void cnv_stat(int val, char *out_val);
+ extern s16b modify_stat_value(int value, int amount);
+diff -Nru --strip-trailing-cr angband-3.0.6/src/files.c angband-3.0.6-squelch/src/files.c
+--- angband-3.0.6/src/files.c	2005-06-18 10:51:18.000000000 -0700
++++ angband-3.0.6-squelch/src/files.c	2005-09-20 00:52:08.000000000 -0700
+@@ -299,7 +299,7 @@
+  */
+ errr process_pref_file_command(char *buf)
+ {
+-	long i, n1, n2;
++	long i, n1, n2, sq;
+ 
+ 	char *zz[16];
+ 
+@@ -339,6 +339,53 @@
+ 		}
+ 	}
+ 
++	/* Process "B:<k_idx>:inscription */
++	else if (buf[0] == 'B')
++	{
++		if(2 == tokenize(buf + 2, 2, zz))
++		{
++			add_autoinscription(strtol(zz[0], NULL, 0), zz[1]);
++			return (0);
++		}
++	}
++
++	/* Process "Q:<idx>:<tval>:<sval>:<y|n>"  -- squelch bits   */
++	/* and     "Q:<idx>:<val>"                -- squelch levels */
++	/* and     "Q:<val>"                      -- auto_destroy   */
++	else if (buf[0] == 'Q')
++	{
++		i = tokenize(buf+2, 4, zz);
++		if (i == 2)
++		{
++			n1 = strtol(zz[0], NULL, 0);
++			n2 = strtol(zz[1], NULL, 0);
++			squelch_level[n1] = n2;
++			return(0);
++		}
++		else if (i == 4)
++		{
++			i = strtol(zz[0], NULL, 0);
++			n1 = strtol(zz[1], NULL, 0);
++			n2 = strtol(zz[2], NULL, 0);
++			sq = strtol(zz[3], NULL, 0);
++			if ((k_info[i].tval == n1) && (k_info[i].sval == n2))
++			{
++				k_info[i].squelch = sq;
++				return(0);
++			}
++			else
++			{
++				for (i = 1; i < z_info->k_max; i++)
++				{
++					if ((k_info[i].tval == n1) && (k_info[i].sval == n2))
++					{
++						k_info[i].squelch = sq;
++						return(0);
++					}
++				}
++			}
++		}
++	}
+ 
+ 	/* Process "K:<num>:<a>/<c>"  -- attr/char for object kinds */
+ 	else if (buf[0] == 'K')
+@@ -1345,35 +1392,26 @@
+ 	            format("%10s", depths));
+ 
+ 
+-	/* Gold */
+-	Term_putstr(col, 15, -1, TERM_WHITE, "Gold");
++	/* Maximum depth */
++	Term_putstr(col, 15, -1, TERM_WHITE, "Turns");
++
+ 	Term_putstr(col+8, 15, -1, TERM_L_GREEN,
++	            format("%10d", turn));
++
++
++	/* Gold */
++	Term_putstr(col, 16, -1, TERM_WHITE, "Gold");
++	Term_putstr(col+8, 16, -1, TERM_L_GREEN,
+ 	            format("%10ld", p_ptr->au));
+ 
+ 	/* Burden */
+ 	strnfmt(buf, sizeof(buf), "%ld.%ld lbs",
+ 	        p_ptr->total_weight / 10L,
+ 	        p_ptr->total_weight % 10L);
+-	Term_putstr(col, 16, -1, TERM_WHITE, "Burden");
+-	Term_putstr(col+8, 16, -1, TERM_L_GREEN,
++	Term_putstr(col, 17, -1, TERM_WHITE, "Burden");
++	Term_putstr(col+8, 17, -1, TERM_L_GREEN,
+ 	            format("%10s", buf));
+ 
+-	/* Speed (without temporary effects) */
+-	Term_putstr(col, 17, -1, TERM_WHITE, "Speed");
+-	tmp = p_ptr->pspeed;
+-	if (p_ptr->fast) tmp -= 10;
+-	if (p_ptr->slow) tmp += 10;
+-	if (p_ptr->searching) tmp += 10;
+-	if (tmp != 110)
+-	{
+-		Term_putstr(col+8, 17, -1, TERM_L_GREEN,
+-		            format("%+10d", tmp - 110));
+-	}
+-	else
+-	{
+-		Term_putstr(col+12, 17, -1, TERM_L_GREEN, "Normal");
+-	}
+-
+ 
+ 	/* Middle */
+ 	col = 26;
+@@ -1444,11 +1482,27 @@
+ 	Term_putstr(col, 15, -1, TERM_WHITE, "Shots");
+ 	Term_putstr(col+5, 15, -1, TERM_L_BLUE, format("%13s", buf));
+ 
+-
+ 	/* Infra */
+ 	strnfmt(buf, sizeof(buf), "%d ft", p_ptr->see_infra * 10);
+-	Term_putstr(col, 17, -1, TERM_WHITE, "Infra");
+-	Term_putstr(col+5, 17, -1, TERM_L_BLUE, format("%13s", buf));
++	Term_putstr(col, 16, -1, TERM_WHITE, "Infra");
++	Term_putstr(col+5, 16, -1, TERM_L_BLUE, format("%13s", buf));
++
++	/* Speed (without temporary effects) */
++	Term_putstr(col, 17, -1, TERM_WHITE, "Speed");
++	tmp = p_ptr->pspeed;
++	if (p_ptr->fast) tmp -= 10;
++	if (p_ptr->slow) tmp += 10;
++	if (p_ptr->searching) tmp += 10;
++	if (tmp != 110)
++	{
++		Term_putstr(col+5, 17, -1, TERM_L_GREEN,
++		            format("%+13d", tmp - 110));
++	}
++	else
++	{
++		Term_putstr(col+5, 17, -1, TERM_L_GREEN, 
++		            format("%13s", "Normal"));
++	}
+ 
+ 
+ 	/* Right */
+@@ -2291,6 +2345,41 @@
+ 		fprintf(fff, "\n\n");
+ 	}
+ 
++	/*dump notes to character file*/
++	if (adult_take_notes)
++	{
++ 	 	int holder;
++
++		/*close the notes file for writing*/
++		my_fclose(notes_file);
++
++		/*get the path for the notes file*/
++		notes_file = my_fopen(notes_fname, "r");
++
++		do
++		{
++
++			/*get a character from the notes file*/
++			holder = getc(notes_file);
++
++			/*output it to the character dump, unless end of file char*/
++			if (holder != EOF) fprintf(fff, "%c", holder);
++
++		}
++		while (holder != EOF);
++
++		/*aesthetics*/
++		fprintf(fff, "============================================================\n");
++
++		fprintf(fff, "\n\n");
++
++		/*close it for reading*/
++		my_fclose(notes_file);
++
++		/*re-open for appending*/
++		notes_file = my_fopen(notes_fname, "a");
++
++	}
+ 
+ 	/* Dump options */
+ 	fprintf(fff, "  [Options]\n\n");
+@@ -4347,6 +4436,12 @@
+ 	/* Forget the high score fd */
+ 	highscore_fd = -1;
+ 
++	/* Clean up the notes file */
++	if (adult_take_notes)
++	{
++		my_fclose(notes_file);
++		fd_kill(notes_fname);
++	}
+ 
+ 	/* Hack -- Decrease "icky" depth */
+ 	character_icky--;
+diff -Nru --strip-trailing-cr angband-3.0.6/src/init2.c angband-3.0.6-squelch/src/init2.c
+--- angband-3.0.6/src/init2.c	2005-01-16 06:35:57.000000000 -0800
++++ angband-3.0.6-squelch/src/init2.c	2005-09-19 23:29:33.000000000 -0700
+@@ -1337,6 +1337,26 @@
+ 
+ #endif /* USE_SCRIPT */
+ 
++static void autoinscribe_clean(void)
++{
++	if(inscriptions)
++	{
++		FREE(inscriptions);
++   	}
++ 
++	inscriptions = 0;
++	inscriptions_count = 0;
++}
++
++void autoinscribe_init(void)
++{
++	/* Paranoia */
++	autoinscribe_clean();
++ 
++	C_MAKE(inscriptions, AUTOINSCRIPTIONS_MAX, autoinscription);
++}
++
++
+ /*
+  * Initialize some other arrays
+  */
+@@ -1353,6 +1373,9 @@
+ 	/* Initialize the "quark" package */
+ 	(void)quarks_init();
+ 
++	/* Initialize autoinscriptions */
++	(void)autoinscribe_init();
++
+ 	/* Initialize the "message" package */
+ 	(void)messages_init();
+ 
+diff -Nru --strip-trailing-cr angband-3.0.6/src/load.c angband-3.0.6-squelch/src/load.c
+--- angband-3.0.6/src/load.c	2005-05-07 05:30:37.000000000 -0700
++++ angband-3.0.6-squelch/src/load.c	2005-09-19 23:29:33.000000000 -0700
+@@ -10,7 +10,6 @@
+ 
+ #include "angband.h"
+ 
+-
+ /*
+  * This file loads savefiles from Angband 2.9.X.
+  *
+@@ -61,6 +60,8 @@
+ static u32b	x_check = 0L;
+ 
+ 
++static int rd_squelch();
++
+ /*
+  * Hack -- Show information on the screen, one line at a time.
+  *
+@@ -1077,6 +1078,9 @@
+ 	/* Future use */
+ 	strip_bytes(40);
+ 
++    /* Read item-quality squelch sub-menu */
++	if (rd_squelch()) return -1;
++
+ 	/* Read the randart version */
+ 	rd_u32b(&randart_version);
+ 
+@@ -1281,8 +1285,131 @@
+ 
+ }
+ 
++/*
++ * Read the notes. Every new savefile has at least NOTES_MARK.
++ * Old files do not, so check version number.
++ */
++static int rd_notes(void)
++{
++	int alive = (!p_ptr->is_dead || arg_wizard);
++	char tmpstr[100];
++
++	if (older_than(3, 0, 5) ||
++			(sf_major == 3 && sf_minor == 0 && sf_patch == 5 && sf_extra < 2))
++	{
++		// Backwards compatibility: no mark exists.
++
++		// Fiddle the value.
++		op_ptr->opt[OPT_adult_take_notes] = FALSE;
++		adult_take_notes = FALSE;
++
++		return 0;
++	}
++
++	else if (alive && adult_take_notes)
++	{
++		/* Create the tempfile (notes_file & notes_fname are global) */
++		notes_file = my_fopen_temp(notes_fname, sizeof(notes_fname));
++
++		if (!notes_file)
++		{
++			note("Can't create a temporary file for notes");
++			return (-1);
++		}
++
++		/* Append the notes in the savefile to the tempfile*/
++		while (TRUE)
++		{
++
++			rd_string(tmpstr, sizeof(tmpstr));
++			/* Found the end? */
++			if (strstr(tmpstr, NOTES_MARK))
++			break;
++			fprintf(notes_file, "%s\n", tmpstr);
++		}
++
++	}
++	/* Ignore the notes */
++	else
++	{
++		while (TRUE)
++		{
++
++			rd_string(tmpstr, sizeof(tmpstr));
++
++			/* Found the end? */
++			if (strstr(tmpstr, NOTES_MARK))
++			{
++				break;
++			}
++		}
++	}
++
++	return 0;
++}
++
++/*
++ * Read squelch and autoinscription submenu for all known objects 
++ * Not present prior to 3.0.5.3 (3.0.6-alpha-3)
++ */
++static int rd_squelch(void)
++{
++	int i;
++	byte tmp8u;
++	u16b file_e_max;
++
++    if (older_than(3, 0, 5) ||
++            (sf_major == 3 && sf_minor == 0 && sf_patch == 5 && sf_extra < 3))
++    {
++		return 0;
++	}
++    /* Read item-quality squelch sub-menu */
++    for (i = 0; i < SQUELCH_BYTES; i++) rd_byte(&squelch_level[i]);
++
++	/* Read the number of saved ego-item types */
++	rd_u16b(&file_e_max);
++
++    /* Read ego-item squelch settings */
++    for (i = 0; i < z_info->e_max; i++)
++    {
++        ego_item_type *e_ptr = &e_info[i];
++
++        tmp8u = 0;
+ 
++        if (i < file_e_max) rd_byte(&tmp8u);
+ 
++        // if(!p_ptr->is_dead)
++		{
++			e_ptr->squelch |= (tmp8u & 0x01);
++		}
++        e_ptr->everseen |= (tmp8u & 0x02);
++
++        /* Hack - Repair the savefile */
++        if (!e_ptr->everseen) e_ptr->squelch = FALSE;
++    }
++    /* Read possible extra elements */
++    while (i < file_e_max)
++    {   
++        rd_byte(&tmp8u);
++        i++;
++    }
++
++	/*Read  the current number of auto-inscriptions*/
++	rd_u16b(&inscriptions_count);
++
++	/*Write the autoinscriptions array*/
++	for(i = 0; i < inscriptions_count; i++)
++	{
++		char tmp[80];
++
++		rd_s16b(&inscriptions[i].kind_idx);
++
++		rd_string(tmp, 80);
++
++		inscriptions[i].inscription_idx = quark_add(tmp);
++	}
++	return 0;
++}
+ 
+ /*
+  * Read the player inventory
+@@ -1804,6 +1931,17 @@
+ 
+ 		k_ptr->aware = (tmp8u & 0x01) ? TRUE: FALSE;
+ 		k_ptr->tried = (tmp8u & 0x02) ? TRUE: FALSE;
++		k_ptr->everseen = (tmp8u & 0x08) ? TRUE: FALSE;
++
++		/* No squelch settings for older save files. */
++		if (older_than(3, 0, 5) ||
++			(sf_major == 3 && sf_minor == 0 && sf_patch == 5 && sf_extra < 3))
++		{
++				continue;
++		}
++		/* Read the squelch setting */
++		rd_byte(&k_ptr->squelch);
++
+ 	}
+ 	if (arg_fiddle) note("Loaded Object Memory");
+ 
+@@ -1864,6 +2002,8 @@
+ 		if (arg_fiddle) note("Loaded Random Artifacts");
+ 	}
+ 
++	if (rd_notes()) return (-1);
++	if (arg_fiddle) note("Loaded Notes");
+ 
+ 	/* Important -- Initialize the sex */
+ 	sp_ptr = &sex_info[p_ptr->psex];
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.am angband-3.0.6-squelch/src/Makefile.am
+--- angband-3.0.6/src/Makefile.am	2005-02-05 11:33:14.000000000 -0800
++++ angband-3.0.6-squelch/src/Makefile.am	2005-09-19 23:29:34.000000000 -0700
+@@ -20,7 +20,7 @@
+   xtra1.c xtra2.c spells1.c spells2.c \
+   melee1.c melee2.c save.c files.c \
+   cmd1.c cmd2.c cmd3.c cmd4.c cmd5.c cmd6.c \
+-  store.c birth.c load.c \
++  squelch.c store.c birth.c load.c \
+   wizard1.c wizard2.c \
+   main-cap.c main-gcu.c main-x11.c main-xaw.c main.c \
+   main-win.c main-xpj.c main-vcs.c main-gtk.c \
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.ami angband-3.0.6-squelch/src/Makefile.ami
+--- angband-3.0.6/src/Makefile.ami	2002-09-19 17:04:42.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.ami	2005-09-19 23:29:34.000000000 -0700
+@@ -22,7 +22,7 @@
+   cmd1.o cmd2.o cmd3.o cmd4.o cmd5.o cmd6.o
+ 
+ OBJS2 = \
+-  store.o birth.o load.o \
++  squelch.o store.o birth.o load.o \
+   wizard1.o wizard2.o obj-info.o \
+   generate.o dungeon.o init1.o init2.o randart.o \
+   script.o use-obj.o x-spell.o l-misc.o l-monst.o l-object.o \
+@@ -110,6 +110,7 @@
+ spells1.o: spells1.c $(INCS)
+ spells2.o: spells2.c $(INCS)
+ store.o: store.c $(INCS)
++squelch.o: squelch.c $(INCS)
+ tables.o: tables.c $(INCS)
+ util.o: util.c $(INCS)
+ variable.o: variable.c $(INCS)
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.bcc angband-3.0.6-squelch/src/Makefile.bcc
+--- angband-3.0.6/src/Makefile.bcc	2003-09-04 15:01:17.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.bcc	2005-09-19 23:29:34.000000000 -0700
+@@ -67,7 +67,7 @@
+   init2.obj randart.obj load.obj \
+   melee1.obj melee2.obj monster1.obj monster2.obj \
+   object1.obj object2.obj save.obj spells1.obj \
+-  spells2.obj store.obj tables.obj util.obj \
++  spells2.obj squelch.obj store.obj tables.obj util.obj \
+   variable.obj wizard1.obj wizard2.obj xtra1.obj \
+   xtra2.obj z-form.obj z-rand.obj z-term.obj \
+   z-util.obj z-virt.obj \
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.cyg angband-3.0.6-squelch/src/Makefile.cyg
+--- angband-3.0.6/src/Makefile.cyg	2003-09-04 15:01:17.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.cyg	2005-10-08 23:43:48.000000000 -0700
+@@ -56,6 +56,7 @@
+ 	spells1.o \
+ 	spells2.o \
+ 	store.o \
++	squelch.o \
+ 	tables.o \
+ 	util.o \
+ 	variable.o \
+@@ -278,6 +279,9 @@
+ store.o: store.c $(INCS)
+ 	$(CC) $(CFLAGS) $(INCDIRS) -c -o $@ $<
+ 
++squelch.o: squelch.c $(INCS)
++	$(CC) $(CFLAGS) $(INCDIRS) -c -o $@ $<
++
+ tables.o: tables.c $(INCS)
+ 	$(CC) $(CFLAGS) $(INCDIRS) -c -o $@ $<
+ 
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.dos angband-3.0.6-squelch/src/Makefile.dos
+--- angband-3.0.6/src/Makefile.dos	2003-08-10 06:36:35.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.dos	2005-09-19 23:29:34.000000000 -0700
+@@ -54,6 +54,7 @@
+   save.o \
+   spells1.o \
+   spells2.o \
++  squelch.o \
+   store.o \
+   tables.o \
+   util.o \
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.emx angband-3.0.6-squelch/src/Makefile.emx
+--- angband-3.0.6/src/Makefile.emx	2002-09-19 17:04:42.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.emx	2005-09-19 23:29:34.000000000 -0700
+@@ -65,7 +65,7 @@
+ 	xtra1.o xtra2.o spells1.o spells2.o \
+ 	melee1.o melee2.o save.o files.o \
+ 	cmd1.o cmd2.o cmd3.o cmd4.o cmd5.o cmd6.o \
+-	store.o birth.o load.o \
++	squelch.o store.o birth.o load.o \
+ 	wizard1.o wizard2.o \
+ 	generate.o dungeon.o init1.o init2.o randart.o \
+ 	obj-info.o
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.gtk angband-3.0.6-squelch/src/Makefile.gtk
+--- angband-3.0.6/src/Makefile.gtk	2003-09-04 15:01:17.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.gtk	2005-09-19 23:29:34.000000000 -0700
+@@ -24,7 +24,7 @@
+   xtra1.c xtra2.c spells1.c spells2.c \
+   melee1.c melee2.c save.c files.c \
+   cmd1.c cmd2.c cmd3.c cmd4.c cmd5.c cmd6.c \
+-  store.c birth.c load.c \
++  squelch.o store.c birth.c load.c \
+   wizard1.c wizard2.c \
+   generate.c dungeon.c init1.c init2.c randart.c \
+   main-gtk.c maid-x11.c main.c \
+@@ -40,7 +40,7 @@
+   xtra1.o xtra2.o spells1.o spells2.o \
+   melee1.o melee2.o save.o files.o \
+   cmd1.o cmd2.o cmd3.o cmd4.o cmd5.o cmd6.o \
+-  store.o birth.o load.o \
++  squelch.o store.o birth.o load.o \
+   wizard1.o wizard2.o \
+   generate.o dungeon.o init1.o init2.o randart.o \
+   main-gtk.o maid-x11.o main.o \
+@@ -162,6 +162,7 @@
+ 		lua/lauxlib.h lua/lua.h lua/lualib.h lua/tolua.h
+ spells1.o: spells1.c $(INCS)
+ spells2.o: spells2.c $(INCS)
++squelch.o: squelch.c $(INCS)
+ store.o: store.c $(INCS)
+ tables.o: tables.c $(INCS)
+ use-obj.o: use-obj.c $(INCS)
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.ibm angband-3.0.6-squelch/src/Makefile.ibm
+--- angband-3.0.6/src/Makefile.ibm	2003-08-10 06:37:03.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.ibm	2005-09-19 23:29:34.000000000 -0700
+@@ -53,6 +53,7 @@
+   save.o \
+   spells1.o \
+   spells2.o \
++  squelch.o \
+   store.o \
+   tables.o \
+   util.o \
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.in angband-3.0.6-squelch/src/Makefile.in
+--- angband-3.0.6/src/Makefile.in	2005-06-18 10:38:22.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.in	2005-09-19 23:29:33.000000000 -0700
+@@ -103,7 +103,7 @@
+   xtra1.c xtra2.c spells1.c spells2.c \
+   melee1.c melee2.c save.c files.c \
+   cmd1.c cmd2.c cmd3.c cmd4.c cmd5.c cmd6.c \
+-  store.c birth.c load.c \
++  squelch.c store.c birth.c load.c \
+   wizard1.c wizard2.c \
+   main-cap.c main-gcu.c main-x11.c main-xaw.c main.c \
+   main-win.c main-xpj.c main-vcs.c main-gtk.c \
+@@ -146,7 +146,7 @@
+ 	spells1.$(OBJEXT) spells2.$(OBJEXT) melee1.$(OBJEXT) \
+ 	melee2.$(OBJEXT) save.$(OBJEXT) files.$(OBJEXT) cmd1.$(OBJEXT) \
+ 	cmd2.$(OBJEXT) cmd3.$(OBJEXT) cmd4.$(OBJEXT) cmd5.$(OBJEXT) \
+-	cmd6.$(OBJEXT) store.$(OBJEXT) birth.$(OBJEXT) load.$(OBJEXT) \
++	cmd6.$(OBJEXT) squelch.$(OBJEXT) store.$(OBJEXT) birth.$(OBJEXT) load.$(OBJEXT) \
+ 	wizard1.$(OBJEXT) wizard2.$(OBJEXT) main-cap.$(OBJEXT) \
+ 	main-gcu.$(OBJEXT) main-x11.$(OBJEXT) main-xaw.$(OBJEXT) \
+ 	main.$(OBJEXT) main-win.$(OBJEXT) main-xpj.$(OBJEXT) \
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.lcc angband-3.0.6-squelch/src/Makefile.lcc
+--- angband-3.0.6/src/Makefile.lcc	2002-12-07 08:43:07.000000000 -0800
++++ angband-3.0.6-squelch/src/Makefile.lcc	2005-10-09 09:03:08.000000000 -0700
+@@ -18,8 +18,7 @@
+ CC     = $(LCC_PATH)\bin\lcc.exe
+ RC     = $(LCC_PATH)\bin\lrc.exe
+ LIBS   = $(LCC_PATH)\lib\winmm.lib
+-CFLAGS = -I$(LCC_PATH)\include -I$(SRCDIR)\lua
+-
++CFLAGS = -I$(LCC_PATH)\include -I$(SRCDIR)\lua -g2
+ 
+ OBJS=\
+ 	z-virt.obj \
+@@ -37,43 +36,46 @@
+ 	use-obj.obj \
+ 	tables.obj \
+ 	store.obj \
++	squelch.obj \
+ 	spells2.obj \
+ 	spells1.obj \
+ 	script.obj \
+ 	save.obj \
+ 	readdib.obj \
+ 	randart.obj \
++	obj-info.obj \
+ 	object2.obj \
+ 	object1.obj \
+-	obj-info.obj \
+ 	monster2.obj \
+ 	monster1.obj \
+ 	melee2.obj \
+ 	melee1.obj \
+ 	main-win.obj \
+-	main.obj \
+ 	l-ui.obj \
+-	tolua_tt.obj \
+-	tolua_tm.obj \
+-	tolua_rg.obj \
+-	tolua_lb.obj \
+-	tolua_gp.obj \
+-	tolua_eh.obj \
+-	tolua_bd.obj \
++	toluabind.obj \
++	tolua_to.obj \
++	tolua_push.obj \
++	tolua_map.obj \
++	tolua_is.obj \
++	tolua_event.obj \
+ 	lzio.obj \
+ 	lvm.obj \
+ 	lundump.obj \
+ 	ltm.obj \
++	ltablib.obj \
+ 	ltable.obj \
+ 	lstrlib.obj \
+ 	lstring.obj \
+ 	lstate.obj \
+ 	lparser.obj \
++	lopcodes.obj \
+ 	lobject.obj \
+ 	lmem.obj \
+ 	llex.obj \
++	liolib.obj \
+ 	lgc.obj \
+ 	lfunc.obj \
++	ldump.obj \
+ 	ldo.obj \
+ 	ldebug.obj \
+ 	ldblib.obj \
+@@ -103,10 +105,13 @@
+ 	birth.obj \
+ 	angband.res
+ 
+-angband.exe:	$(OBJS)
++LIBS=winmm.lib SHELL32.lib
++EXE=angband.exe
++
++$(EXE):	$(OBJS) Makefile
+ 	$(LINKER)  -subsystem windows -o $(ANGBAND_PATH)\angband.exe $(OBJS) $(LIBS)
+ 
+-# Build Z-VIRT.C
++# Build z-virt.c
+ Z-VIRT_C=\
+ 	$(SRCDIR)\z-virt.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -120,7 +125,7 @@
+ z-virt.obj: $(Z-VIRT_C) $(SRCDIR)\z-virt.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\z-virt.c
+ 
+-# Build Z-UTIL.C
++# Build z-util.c
+ Z-UTIL_C=\
+ 	$(SRCDIR)\z-util.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -132,7 +137,7 @@
+ z-util.obj: $(Z-UTIL_C) $(SRCDIR)\z-util.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\z-util.c
+ 
+-# Build Z-TERM.C
++# Build z-term.c
+ Z-TERM_C=\
+ 	$(SRCDIR)\z-term.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -146,7 +151,7 @@
+ z-term.obj: $(Z-TERM_C) $(SRCDIR)\z-term.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\z-term.c
+ 
+-# Build Z-RAND.C
++# Build z-rand.c
+ Z-RAND_C=\
+ 	$(SRCDIR)\z-rand.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -158,7 +163,7 @@
+ z-rand.obj: $(Z-RAND_C) $(SRCDIR)\z-rand.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\z-rand.c
+ 
+-# Build Z-FORM.C
++# Build z-form.c
+ Z-FORM_C=\
+ 	$(SRCDIR)\z-form.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -174,7 +179,7 @@
+ z-form.obj: $(Z-FORM_C) $(SRCDIR)\z-form.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\z-form.c
+ 
+-# Build XTRA2.C
++# Build xtra2.c
+ XTRA2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -200,7 +205,7 @@
+ xtra2.obj: $(XTRA2_C) $(SRCDIR)\xtra2.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\xtra2.c
+ 
+-# Build XTRA1.C
++# Build xtra1.c
+ XTRA1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -228,7 +233,7 @@
+ xtra1.obj: $(XTRA1_C) $(SRCDIR)\xtra1.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\xtra1.c
+ 
+-# Build X-SPELL.C
++# Build x-spell.c
+ X-SPELL_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -250,11 +255,13 @@
+ 	$(SRCDIR)\defines.h\
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
++	$(SRCDIR)\script.h\
++	$(SRCDIR)\angband.h\
+ 
+ x-spell.obj: $(X-SPELL_C) $(SRCDIR)\x-spell.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\x-spell.c
+ 
+-# Build WIZARD2.C
++# Build wizard2.c
+ WIZARD2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -282,7 +289,7 @@
+ wizard2.obj: $(WIZARD2_C) $(SRCDIR)\wizard2.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\wizard2.c
+ 
+-# Build WIZARD1.C
++# Build wizard1.c
+ WIZARD1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -308,7 +315,7 @@
+ wizard1.obj: $(WIZARD1_C) $(SRCDIR)\wizard1.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\wizard1.c
+ 
+-# Build VARIABLE.C
++# Build variable.c
+ VARIABLE_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -334,7 +341,7 @@
+ variable.obj: $(VARIABLE_C) $(SRCDIR)\variable.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\variable.c
+ 
+-# Build UTIL.C
++# Build util.c
+ UTIL_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -360,7 +367,7 @@
+ util.obj: $(UTIL_C) $(SRCDIR)\util.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\util.c
+ 
+-# Build USE-OBJ.C
++# Build use-obj.c
+ USE-OBJ_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -386,7 +393,7 @@
+ use-obj.obj: $(USE-OBJ_C) $(SRCDIR)\use-obj.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\use-obj.c
+ 
+-# Build TABLES.C
++# Build tables.c
+ TABLES_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -412,7 +419,7 @@
+ tables.obj: $(TABLES_C) $(SRCDIR)\tables.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\tables.c
+ 
+-# Build STORE.C
++# Build store.c
+ STORE_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -434,11 +441,39 @@
+ 	$(SRCDIR)\defines.h\
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
++	$(SRCDIR)\script.h\
++	$(SRCDIR)\angband.h\
+ 
+ store.obj: $(STORE_C) $(SRCDIR)\store.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\store.c
+ 
+-# Build SPELLS2.C
++# Build squelch.c
++SQUELCH_C=\
++	$(SRCDIR)\angband.h\
++	$(SRCDIR)\h-basic.h\
++	$(SRCDIR)\h-config.h\
++	$(SRCDIR)\h-system.h\
++	$(SRCDIR)\h-type.h\
++	$(SRCDIR)\h-define.h\
++	$(SRCDIR)\z-util.h\
++	$(SRCDIR)\h-basic.h\
++	$(SRCDIR)\z-virt.h\
++	$(SRCDIR)\h-basic.h\
++	$(SRCDIR)\z-form.h\
++	$(SRCDIR)\h-basic.h\
++	$(SRCDIR)\z-rand.h\
++	$(SRCDIR)\h-basic.h\
++	$(SRCDIR)\z-term.h\
++	$(SRCDIR)\h-basic.h\
++	$(SRCDIR)\config.h\
++	$(SRCDIR)\defines.h\
++	$(SRCDIR)\types.h\
++	$(SRCDIR)\externs.h\
++
++squelch.obj: $(SQUELCH_C) $(SRCDIR)\squelch.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\squelch.c
++
++# Build spells2.c
+ SPELLS2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -464,7 +499,7 @@
+ spells2.obj: $(SPELLS2_C) $(SRCDIR)\spells2.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\spells2.c
+ 
+-# Build SPELLS1.C
++# Build spells1.c
+ SPELLS1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -486,11 +521,13 @@
+ 	$(SRCDIR)\defines.h\
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
++	$(SRCDIR)\script.h\
++	$(SRCDIR)\angband.h\
+ 
+ spells1.obj: $(SPELLS1_C) $(SRCDIR)\spells1.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\spells1.c
+ 
+-# Build SCRIPT.C
++# Build script.c
+ SCRIPT_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -516,14 +553,17 @@
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lualib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\tolua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
+ 
+ script.obj: $(SCRIPT_C) $(SRCDIR)\script.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\script.c
+ 
+-# Build SAVE.C
++# Build save.c
+ SAVE_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -549,14 +589,14 @@
+ save.obj: $(SAVE_C) $(SRCDIR)\save.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\save.c
+ 
+-# Build READDIB.C
++# Build readdib.c
+ READDIB_C=\
+ 	$(SRCDIR)\readdib.h\
+ 
+ readdib.obj: $(READDIB_C) $(SRCDIR)\readdib.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\readdib.c
+ 
+-# Build RANDART.C
++# Build randart.c
+ RANDART_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -584,8 +624,8 @@
+ randart.obj: $(RANDART_C) $(SRCDIR)\randart.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\randart.c
+ 
+-# Build OBJECT2.C
+-OBJECT2_C=\
++# Build obj-info.c
++OBJ-INFO_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -607,11 +647,11 @@
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
+ 
+-object2.obj: $(OBJECT2_C) $(SRCDIR)\object2.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\object2.c
++obj-info.obj: $(OBJ-INFO_C) $(SRCDIR)\obj-info.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\obj-info.c
+ 
+-# Build OBJECT1.C
+-OBJECT1_C=\
++# Build object2.c
++OBJECT2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -633,11 +673,11 @@
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
+ 
+-object1.obj: $(OBJECT1_C) $(SRCDIR)\object1.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\object1.c
++object2.obj: $(OBJECT2_C) $(SRCDIR)\object2.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\object2.c
+ 
+-# Build OBJ-INFO.C
+-OBJ-INFO_C=\
++# Build object1.c
++OBJECT1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -659,10 +699,10 @@
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
+ 
+-obj-info.obj: $(OBJ-INFO_C) $(SRCDIR)\obj-info.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\obj-info.c
++object1.obj: $(OBJECT1_C) $(SRCDIR)\object1.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\object1.c
+ 
+-# Build MONSTER2.C
++# Build monster2.c
+ MONSTER2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -688,7 +728,7 @@
+ monster2.obj: $(MONSTER2_C) $(SRCDIR)\monster2.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\monster2.c
+ 
+-# Build MONSTER1.C
++# Build monster1.c
+ MONSTER1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -714,7 +754,7 @@
+ monster1.obj: $(MONSTER1_C) $(SRCDIR)\monster1.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\monster1.c
+ 
+-# Build MELEE2.C
++# Build melee2.c
+ MELEE2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -740,7 +780,7 @@
+ melee2.obj: $(MELEE2_C) $(SRCDIR)\melee2.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\melee2.c
+ 
+-# Build MELEE1.C
++# Build melee1.c
+ MELEE1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -766,7 +806,7 @@
+ melee1.obj: $(MELEE1_C) $(SRCDIR)\melee1.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\melee1.c
+ 
+-# Build MAIN-WIN.C
++# Build main-win.c
+ MAIN-WIN_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -793,35 +833,12 @@
+ main-win.obj: $(MAIN-WIN_C) $(SRCDIR)\main-win.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\main-win.c
+ 
+-# Build MAIN.C
+-MAIN_C=\
+-	$(SRCDIR)\angband.h\
+-	$(SRCDIR)\h-basic.h\
+-	$(SRCDIR)\h-config.h\
+-	$(SRCDIR)\h-system.h\
+-	$(SRCDIR)\h-type.h\
+-	$(SRCDIR)\h-define.h\
+-	$(SRCDIR)\z-util.h\
+-	$(SRCDIR)\h-basic.h\
+-	$(SRCDIR)\z-virt.h\
+-	$(SRCDIR)\h-basic.h\
+-	$(SRCDIR)\z-form.h\
+-	$(SRCDIR)\h-basic.h\
+-	$(SRCDIR)\z-rand.h\
+-	$(SRCDIR)\h-basic.h\
+-	$(SRCDIR)\z-term.h\
+-	$(SRCDIR)\h-basic.h\
+-	$(SRCDIR)\config.h\
+-	$(SRCDIR)\defines.h\
+-	$(SRCDIR)\types.h\
+-	$(SRCDIR)\externs.h\
+-
+-main.obj: $(MAIN_C) $(SRCDIR)\main.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\main.c
+-
+-# Build L-UI.C
++# Build l-ui.c
+ L-UI_C=\
+ 	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -846,103 +863,103 @@
+ l-ui.obj: $(L-UI_C) $(SRCDIR)\l-ui.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\l-ui.c
+ 
+-# Build TOLUA_TT.C
+-TOLUA_TT_C=\
++# Build toluabind.c
++TOLUABIND_C=\
+ 	$(SRCDIR)\lua\tolua.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\tolua_tt.h\
+-	$(SRCDIR)\lua\tolua_tm.h\
+-	$(SRCDIR)\lua\tolua_eh.h\
+-	$(SRCDIR)\lua\tolua_rg.h\
+-
+-tolua_tt.obj: $(TOLUA_TT_C) $(SRCDIR)\lua\tolua_tt.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_tt.c
+-
+-# Build TOLUA_TM.C
+-TOLUA_TM_C=\
+-	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lauxlib.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\tolua_tm.h\
+-	$(SRCDIR)\lua\tolua_tt.h\
+-	$(SRCDIR)\lua\tolua_rg.h\
+ 
+-tolua_tm.obj: $(TOLUA_TM_C) $(SRCDIR)\lua\tolua_tm.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_tm.c
++toluabind.obj: $(TOLUABIND_C) $(SRCDIR)\lua\toluabind.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\toluabind.c
+ 
+-# Build TOLUA_RG.C
+-TOLUA_RG_C=\
++# Build tolua_to.c
++TOLUA_TO_C=\
+ 	$(SRCDIR)\lua\tolua.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\tolua_rg.h\
+-	$(SRCDIR)\lua\tolua_tm.h\
+-	$(SRCDIR)\lua\tolua_tt.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 
+-tolua_rg.obj: $(TOLUA_RG_C) $(SRCDIR)\lua\tolua_rg.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_rg.c
++tolua_to.obj: $(TOLUA_TO_C) $(SRCDIR)\lua\tolua_to.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_to.c
+ 
+-# Build TOLUA_LB.C
+-TOLUA_LB_C=\
++# Build tolua_push.c
++TOLUA_PUSH_C=\
+ 	$(SRCDIR)\lua\tolua.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\tolua_rg.h\
+-	$(SRCDIR)\lua\tolua_tm.h\
+-	$(SRCDIR)\lua\tolua_tt.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
+ 
+-tolua_lb.obj: $(TOLUA_LB_C) $(SRCDIR)\lua\tolua_lb.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_lb.c
++tolua_push.obj: $(TOLUA_PUSH_C) $(SRCDIR)\lua\tolua_push.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_push.c
+ 
+-# Build TOLUA_GP.C
+-TOLUA_GP_C=\
++# Build tolua_map.c
++TOLUA_MAP_C=\
+ 	$(SRCDIR)\lua\tolua.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\tolua_tm.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\tolua_event.h\
++	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lauxlib.h\
+ 
+-tolua_gp.obj: $(TOLUA_GP_C) $(SRCDIR)\lua\tolua_gp.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_gp.c
++tolua_map.obj: $(TOLUA_MAP_C) $(SRCDIR)\lua\tolua_map.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_map.c
+ 
+-# Build TOLUA_EH.C
+-TOLUA_EH_C=\
++# Build tolua_is.c
++TOLUA_IS_C=\
+ 	$(SRCDIR)\lua\tolua.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\tolua_eh.h\
+-	$(SRCDIR)\lua\tolua_rg.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
+ 
+-tolua_eh.obj: $(TOLUA_EH_C) $(SRCDIR)\lua\tolua_eh.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_eh.c
++tolua_is.obj: $(TOLUA_IS_C) $(SRCDIR)\lua\tolua_is.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_is.c
+ 
+-# Build TOLUA_BD.C
+-TOLUA_BD_C=\
++# Build tolua_event.c
++TOLUA_EVENT_C=\
+ 	$(SRCDIR)\lua\tolua.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 
+-tolua_bd.obj: $(TOLUA_BD_C) $(SRCDIR)\lua\tolua_bd.c
+-	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_bd.c
++tolua_event.obj: $(TOLUA_EVENT_C) $(SRCDIR)\lua\tolua_event.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\tolua_event.c
+ 
+-# Build LZIO.C
++# Build lzio.c
+ LZIO_C=\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lmem.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
+ 
+ lzio.obj: $(LZIO_C) $(SRCDIR)\lua\lzio.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lzio.c
+ 
+-# Build LVM.C
++# Build lvm.c
+ LVM_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lapi.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\llimits.h\
+-	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\ldebug.h\
+ 	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lfunc.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lgc.h\
+@@ -957,8 +974,6 @@
+ 	$(SRCDIR)\lua\ltable.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\ltm.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\lvm.h\
+ 	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+@@ -967,12 +982,22 @@
+ lvm.obj: $(LVM_C) $(SRCDIR)\lua\lvm.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lvm.c
+ 
+-# Build LUNDUMP.C
++# Build lundump.c
+ LUNDUMP_C=\
+-	$(SRCDIR)\lua\lfunc.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ldebug.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lfunc.h\
++	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lmem.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+@@ -981,56 +1006,72 @@
+ 	$(SRCDIR)\lua\lstring.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lundump.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lzio.h\
+ 
+ lundump.obj: $(LUNDUMP_C) $(SRCDIR)\lua\lundump.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lundump.c
+ 
+-# Build LTM.C
++# Build ltm.c
+ LTM_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lmem.h\
+-	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\ltm.h\
+ 	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lstring.h\
++	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\ltable.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
+ 
+ ltm.obj: $(LTM_C) $(SRCDIR)\lua\ltm.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\ltm.c
+ 
+-# Build LTABLE.C
++# Build ltablib.c
++LTABLIB_C=\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lualib.h\
++	$(SRCDIR)\lua\lua.h\
++
++ltablib.obj: $(LTABLIB_C) $(SRCDIR)\lua\ltablib.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\ltablib.c
++
++# Build ltable.c
+ LTABLE_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lmem.h\
+-	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\ldebug.h\
++	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ltm.h\
+ 	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lgc.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lmem.h\
++	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lstring.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\ltable.h\
+@@ -1039,7 +1080,7 @@
+ ltable.obj: $(LTABLE_C) $(SRCDIR)\lua\ltable.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\ltable.c
+ 
+-# Build LSTRLIB.C
++# Build lstrlib.c
+ LSTRLIB_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lauxlib.h\
+@@ -1050,19 +1091,22 @@
+ lstrlib.obj: $(LSTRLIB_C) $(SRCDIR)\lua\lstrlib.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lstrlib.c
+ 
+-# Build LSTRING.C
++# Build lstring.c
+ LSTRING_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lmem.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lstring.h\
+ 	$(SRCDIR)\lua\lobject.h\
+@@ -1071,18 +1115,26 @@
+ lstring.obj: $(LSTRING_C) $(SRCDIR)\lua\lstring.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lstring.c
+ 
+-# Build LSTATE.C
++# Build lstate.c
+ LSTATE_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\ldebug.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lfunc.h\
++	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lgc.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llex.h\
+@@ -1098,13 +1150,11 @@
+ 	$(SRCDIR)\lua\ltable.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\ltm.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lstate.h\
+ 
+ lstate.obj: $(LSTATE_C) $(SRCDIR)\lua\lstate.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lstate.c
+ 
+-# Build LPARSER.C
++# Build lparser.c
+ LPARSER_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lcode.h\
+@@ -1112,11 +1162,23 @@
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lopcodes.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lparser.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltable.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\ldebug.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lfunc.h\
+@@ -1129,10 +1191,6 @@
+ 	$(SRCDIR)\lua\lopcodes.h\
+ 	$(SRCDIR)\lua\lparser.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lstring.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
+@@ -1140,36 +1198,69 @@
+ lparser.obj: $(LPARSER_C) $(SRCDIR)\lua\lparser.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lparser.c
+ 
+-# Build LOBJECT.C
+-LOBJECT_C=\
++# Build lopcodes.c
++LOPCODES_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lmem.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lopcodes.h\
+ 	$(SRCDIR)\lua\llimits.h\
++
++lopcodes.obj: $(LOPCODES_C) $(SRCDIR)\lua\lopcodes.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lopcodes.c
++
++# Build lobject.c
++LOBJECT_C=\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lmem.h\
++	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lstring.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lvm.h\
++	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
+ 
+ lobject.obj: $(LOBJECT_C) $(SRCDIR)\lua\lobject.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lobject.c
+ 
+-# Build LMEM.C
++# Build lmem.c
+ LMEM_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\ldebug.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lmem.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+@@ -1179,49 +1270,70 @@
+ lmem.obj: $(LMEM_C) $(SRCDIR)\lua\lmem.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lmem.c
+ 
+-# Build LLEX.C
++# Build llex.c
+ LLEX_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\llex.h\
++	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
+-	$(SRCDIR)\lua\lmem.h\
+-	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\llex.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lparser.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltable.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lstring.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\ltable.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\luadebug.h\
+ 	$(SRCDIR)\lua\lzio.h\
+ 
+ llex.obj: $(LLEX_C) $(SRCDIR)\lua\llex.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\llex.c
+ 
+-# Build LGC.C
++# Build liolib.c
++LIOLIB_C=\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lualib.h\
++	$(SRCDIR)\lua\lua.h\
++
++liolib.obj: $(LIOLIB_C) $(SRCDIR)\lua\liolib.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\liolib.c
++
++# Build lgc.c
+ LGC_C=\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\ldebug.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lfunc.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lgc.h\
+@@ -1237,53 +1349,90 @@
+ 	$(SRCDIR)\lua\ltable.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\ltm.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lstate.h\
+ 
+ lgc.obj: $(LGC_C) $(SRCDIR)\lua\lgc.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lgc.c
+ 
+-# Build LFUNC.C
++# Build lfunc.c
+ LFUNC_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lfunc.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lgc.h\
++	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lmem.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 
+ lfunc.obj: $(LFUNC_C) $(SRCDIR)\lua\lfunc.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lfunc.c
+ 
+-# Build LDO.C
++# Build ldump.c
++LDUMP_C=\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lopcodes.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lundump.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
++
++ldump.obj: $(LDUMP_C) $(SRCDIR)\lua\ldump.c
++	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\ldump.c
++
++# Build ldo.c
+ LDO_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\ldebug.h\
+ 	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+ 	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lfunc.h\
++	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lgc.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lmem.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lopcodes.h\
++	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lparser.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltable.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lstate.h\
+@@ -1291,10 +1440,7 @@
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\ltable.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\ltm.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\lundump.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
+@@ -1307,33 +1453,39 @@
+ ldo.obj: $(LDO_C) $(SRCDIR)\lua\ldo.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\ldo.c
+ 
+-# Build LDEBUG.C
++# Build ldebug.c
+ LDEBUG_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lapi.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lcode.h\
+ 	$(SRCDIR)\lua\llex.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lopcodes.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lparser.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltable.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\ldebug.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lfunc.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lobject.h\
+@@ -1343,29 +1495,27 @@
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
+ 	$(SRCDIR)\lua\ltable.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lvm.h\
++	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\ltm.h\
+ 
+ ldebug.obj: $(LDEBUG_C) $(SRCDIR)\lua\ldebug.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\ldebug.c
+ 
+-# Build LDBLIB.C
++# Build ldblib.c
+ LDBLIB_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lauxlib.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lualib.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 
+ ldblib.obj: $(LDBLIB_C) $(SRCDIR)\lua\ldblib.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\ldblib.c
+ 
+-# Build LCODE.C
++# Build lcode.c
+ LCODE_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lcode.h\
+@@ -1373,20 +1523,29 @@
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lopcodes.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lparser.h\
++	$(SRCDIR)\lua\llimits.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltable.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
++	$(SRCDIR)\lua\ldebug.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\llex.h\
+ 	$(SRCDIR)\lua\lmem.h\
+ 	$(SRCDIR)\lua\llimits.h\
+@@ -1394,48 +1553,51 @@
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lopcodes.h\
+ 	$(SRCDIR)\lua\lparser.h\
++	$(SRCDIR)\lua\ltable.h\
+ 
+ lcode.obj: $(LCODE_C) $(SRCDIR)\lua\lcode.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lcode.c
+ 
+-# Build LBASELIB.C
++# Build lbaselib.c
+ LBASELIB_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lauxlib.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lualib.h\
+ 	$(SRCDIR)\lua\lua.h\
+ 
+ lbaselib.obj: $(LBASELIB_C) $(SRCDIR)\lua\lbaselib.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lbaselib.c
+ 
+-# Build LAUXLIB.C
++# Build lauxlib.c
+ LAUXLIB_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lauxlib.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
+-	$(SRCDIR)\lua\lua.h\
+ 
+ lauxlib.obj: $(LAUXLIB_C) $(SRCDIR)\lua\lauxlib.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lauxlib.c
+ 
+-# Build LAPI.C
++# Build lapi.c
+ LAPI_C=\
+ 	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\lua\lapi.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\llimits.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\ldo.h\
+-	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ldebug.h\
+ 	$(SRCDIR)\lua\lstate.h\
+-	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lua.h\
+-	$(SRCDIR)\lua\luadebug.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\ldo.h\
++	$(SRCDIR)\lua\lobject.h\
++	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lfunc.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\lgc.h\
+@@ -1451,8 +1613,9 @@
+ 	$(SRCDIR)\lua\ltable.h\
+ 	$(SRCDIR)\lua\lobject.h\
+ 	$(SRCDIR)\lua\ltm.h\
++	$(SRCDIR)\lua\lundump.h\
+ 	$(SRCDIR)\lua\lobject.h\
+-	$(SRCDIR)\lua\lstate.h\
++	$(SRCDIR)\lua\lzio.h\
+ 	$(SRCDIR)\lua\lvm.h\
+ 	$(SRCDIR)\lua\ldo.h\
+ 	$(SRCDIR)\lua\lobject.h\
+@@ -1461,9 +1624,12 @@
+ lapi.obj: $(LAPI_C) $(SRCDIR)\lua\lapi.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\lua\lapi.c
+ 
+-# Build L-SPELL.C
++# Build l-spell.c
+ L-SPELL_C=\
+ 	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -1488,9 +1654,12 @@
+ l-spell.obj: $(L-SPELL_C) $(SRCDIR)\l-spell.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\l-spell.c
+ 
+-# Build L-RANDOM.C
++# Build l-random.c
+ L-RANDOM_C=\
+ 	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -1515,9 +1684,12 @@
+ l-random.obj: $(L-RANDOM_C) $(SRCDIR)\l-random.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\l-random.c
+ 
+-# Build L-PLAYER.C
++# Build l-player.c
+ L-PLAYER_C=\
+ 	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -1542,9 +1714,12 @@
+ l-player.obj: $(L-PLAYER_C) $(SRCDIR)\l-player.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\l-player.c
+ 
+-# Build L-OBJECT.C
++# Build l-object.c
+ L-OBJECT_C=\
+ 	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -1569,7 +1744,7 @@
+ l-object.obj: $(L-OBJECT_C) $(SRCDIR)\l-object.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\l-object.c
+ 
+-# Build LOAD.C
++# Build load.c
+ LOAD_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1595,9 +1770,12 @@
+ load.obj: $(LOAD_C) $(SRCDIR)\load.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\load.c
+ 
+-# Build L-MONST.C
++# Build l-monst.c
+ L-MONST_C=\
+ 	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -1622,9 +1800,12 @@
+ l-monst.obj: $(L-MONST_C) $(SRCDIR)\l-monst.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\l-monst.c
+ 
+-# Build L-MISC.C
++# Build l-misc.c
+ L-MISC_C=\
+ 	$(SRCDIR)\lua\tolua.h\
++	$(SRCDIR)\lua\lua.h\
++	$(SRCDIR)\lua\lauxlib.h\
++	$(SRCDIR)\lua\lua.h\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+ 	$(SRCDIR)\h-config.h\
+@@ -1645,11 +1826,13 @@
+ 	$(SRCDIR)\defines.h\
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
++	$(SRCDIR)\script.h\
++	$(SRCDIR)\angband.h\
+ 
+ l-misc.obj: $(L-MISC_C) $(SRCDIR)\l-misc.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\l-misc.c
+ 
+-# Build INIT2.C
++# Build init2.c
+ INIT2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1679,7 +1862,7 @@
+ init2.obj: $(INIT2_C) $(SRCDIR)\init2.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\init2.c
+ 
+-# Build INIT1.C
++# Build init1.c
+ INIT1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1707,7 +1890,7 @@
+ init1.obj: $(INIT1_C) $(SRCDIR)\init1.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\init1.c
+ 
+-# Build GENERATE.C
++# Build generate.c
+ GENERATE_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1729,11 +1912,13 @@
+ 	$(SRCDIR)\defines.h\
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
++	$(SRCDIR)\script.h\
++	$(SRCDIR)\angband.h\
+ 
+ generate.obj: $(GENERATE_C) $(SRCDIR)\generate.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\generate.c
+ 
+-# Build FILES.C
++# Build files.c
+ FILES_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1759,7 +1944,7 @@
+ files.obj: $(FILES_C) $(SRCDIR)\files.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\files.c
+ 
+-# Build DUNGEON.C
++# Build dungeon.c
+ DUNGEON_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1781,11 +1966,13 @@
+ 	$(SRCDIR)\defines.h\
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
++	$(SRCDIR)\script.h\
++	$(SRCDIR)\angband.h\
+ 
+ dungeon.obj: $(DUNGEON_C) $(SRCDIR)\dungeon.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\dungeon.c
+ 
+-# Build CMD6.C
++# Build cmd6.c
+ CMD6_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1813,7 +2000,7 @@
+ cmd6.obj: $(CMD6_C) $(SRCDIR)\cmd6.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\cmd6.c
+ 
+-# Build CMD5.C
++# Build cmd5.c
+ CMD5_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1841,7 +2028,7 @@
+ cmd5.obj: $(CMD5_C) $(SRCDIR)\cmd5.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\cmd5.c
+ 
+-# Build CMD4.C
++# Build cmd4.c
+ CMD4_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1867,7 +2054,7 @@
+ cmd4.obj: $(CMD4_C) $(SRCDIR)\cmd4.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\cmd4.c
+ 
+-# Build CMD3.C
++# Build cmd3.c
+ CMD3_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1893,7 +2080,7 @@
+ cmd3.obj: $(CMD3_C) $(SRCDIR)\cmd3.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\cmd3.c
+ 
+-# Build CMD2.C
++# Build cmd2.c
+ CMD2_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1919,7 +2106,7 @@
+ cmd2.obj: $(CMD2_C) $(SRCDIR)\cmd2.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\cmd2.c
+ 
+-# Build CMD1.C
++# Build cmd1.c
+ CMD1_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1945,7 +2132,7 @@
+ cmd1.obj: $(CMD1_C) $(SRCDIR)\cmd1.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\cmd1.c
+ 
+-# Build CAVE.C
++# Build cave.c
+ CAVE_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1971,7 +2158,7 @@
+ cave.obj: $(CAVE_C) $(SRCDIR)\cave.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\cave.c
+ 
+-# Build BIRTH.C
++# Build birth.c
+ BIRTH_C=\
+ 	$(SRCDIR)\angband.h\
+ 	$(SRCDIR)\h-basic.h\
+@@ -1993,14 +2180,20 @@
+ 	$(SRCDIR)\defines.h\
+ 	$(SRCDIR)\types.h\
+ 	$(SRCDIR)\externs.h\
++	$(SRCDIR)\script.h\
++	$(SRCDIR)\angband.h\
+ 
+ birth.obj: $(BIRTH_C) $(SRCDIR)\birth.c
+ 	$(CC) -c $(CFLAGS) $(SRCDIR)\birth.c
+ 
+ # Build angband.res
+ ANGBAND_RC=\
+-	$(SRCDIR)\angband.ico\
+ 
+ angband.res:	$(ANGBAND_RC) $(SRCDIR)\angband.rc
+-	$(RC) -I$(SRCDIR) $(SRCDIR)\angband.rc
++	$(LCCROOT)\bin\lrc.exe -I$(SRCDIR) -I$(LCC_PATH)\include -I$(SRCDIR)\lua  $(SRCDIR)\angband.rc
++
++link:
++	$(LINKER)  -subsystem windows -o $(ANGBAND_PATH)\angband.exe $(OBJS) $(LIBS)
+ 
++clean:
++	del $(OBJS) angband.exe
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.lsl angband-3.0.6-squelch/src/Makefile.lsl
+--- angband-3.0.6/src/Makefile.lsl	2003-09-04 15:01:17.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.lsl	2005-09-19 23:29:33.000000000 -0700
+@@ -9,7 +9,7 @@
+   xtra1.c xtra2.c spells1.c spells2.c \
+   melee1.c melee2.c save.c files.c \
+   cmd1.c cmd2.c cmd3.c cmd4.c cmd5.c cmd6.c \
+-  store.c birth.c load.c \
++  squelch.c store.c birth.c load.c \
+   wizard1.c wizard2.c obj-info.c \
+   generate.c dungeon.c init1.c init2.c randart.c \
+   main-lsl.c main.c
+@@ -34,7 +34,7 @@
+   xtra1.o xtra2.o spells1.o spells2.o \
+   melee1.o melee2.o save.o files.o \
+   cmd1.o cmd2.o cmd3.o cmd4.o cmd5.o cmd6.o \
+-  store.o birth.o load.o \
++  squelch.o store.o birth.o load.o \
+   wizard1.o wizard2.o obj-info.o \
+   generate.o dungeon.o init1.o init2.o randart.o \
+   main-lsl.o main.o \
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.osx angband-3.0.6-squelch/src/Makefile.osx
+--- angband-3.0.6/src/Makefile.osx	2005-06-18 10:49:53.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.osx	2005-09-19 23:29:33.000000000 -0700
+@@ -22,6 +22,10 @@
+ # DEREZ = $(TOOLDIR)/DeRez
+ SETFILE = $(TOOLDIR)/SetFile
+ 
++ifeq ($(OPT),)
++OPT=-O2
++endif
++
+ LUAOBJS = \
+   lua/lapi.o lua/ldebug.o lua/lmem.o lua/lstrlib.o lua/lvm.o \
+   lua/lauxlib.o lua/ldo.o lua/lobject.o lua/ltable.o lua/lzio.o \
+@@ -46,7 +50,7 @@
+   xtra1.c xtra2.c spells1.c spells2.c \
+   melee1.c melee2.c save.c files.c \
+   cmd1.c cmd2.c cmd3.c cmd4.c cmd5.c cmd6.c \
+-  store.c birth.c load.c \
++  squelch.c store.c birth.c load.c \
+   wizard1.c wizard2.c obj-info.c \
+   generate.c dungeon.c init1.c init2.c randart.c \
+   main-crb.c \
+@@ -61,7 +65,7 @@
+   xtra1.o xtra2.o spells1.o spells2.o \
+   melee1.o melee2.o save.o files.o \
+   cmd1.o cmd2.o cmd3.o cmd4.o cmd5.o cmd6.o \
+-  store.o birth.o load.o \
++  squelch.o store.o birth.o load.o \
+   wizard1.o wizard2.o obj-info.o \
+   generate.o dungeon.o init1.o init2.o randart.o \
+   main-crb.o \
+@@ -71,7 +75,7 @@
+   $(LUAOBJS)
+ 
+ CFLAGS = \
+-	-Wall -O2 -fpascal-strings -DMACH_O_CARBON \
++	-Wall $(OPT) -fpascal-strings -DMACH_O_CARBON \
+ 	-DPRIVATE_USER_PATH=\"~/Library/Preferences\" -DUSE_PRIVATE_PATHS
+ LIBS = -framework CoreFoundation -framework QuickTime -framework Carbon
+ 
+@@ -250,6 +254,7 @@
+ 		lua/lauxlib.h lua/lua.h lua/lualib.h lua/tolua.h
+ spells1.o: spells1.c $(INCS)
+ spells2.o: spells2.c $(INCS)
++squelch.o: squelch.c $(INCS)
+ store.o: store.c $(INCS)
+ tables.o: tables.c $(INCS)
+ use-obj.o: use-obj.c $(INCS)
+@@ -292,7 +297,7 @@
+ 	lua/tolua -n spell -o l-spell.c l-spell.pkg
+ 
+ 
+-PACKAGE_NAME = Angband-306
++PACKAGE_NAME = Angband-306-alpha3
+ 
+ dist: install install-tiles $(SOUNDSRCS)
+ 	mkdir disttemp
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.ros angband-3.0.6-squelch/src/Makefile.ros
+--- angband-3.0.6/src/Makefile.ros	2003-08-10 06:38:30.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.ros	2005-09-19 23:29:33.000000000 -0700
+@@ -44,7 +44,7 @@
+   xtra1.o xtra2.o spells1.o spells2.o \
+   melee1.o melee2.o files.o \
+   cmd1.o cmd2.o cmd3.o cmd4.o cmd5.o cmd6.o \
+-  store.o birth.o save.o load.o \
++  squelch.o store.o birth.o save.o load.o \
+   wizard1.o wizard2.o obj-info.o \
+   generate.o dungeon.o init1.o init2.o randart.o \
+   main-ros.o main.o \
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.std angband-3.0.6-squelch/src/Makefile.std
+--- angband-3.0.6/src/Makefile.std	2005-02-23 10:29:08.000000000 -0800
++++ angband-3.0.6-squelch/src/Makefile.std	2005-09-19 23:29:33.000000000 -0700
+@@ -61,7 +61,7 @@
+   xtra1.c xtra2.c spells1.c spells2.c \
+   melee1.c melee2.c save.c files.c \
+   cmd1.c cmd2.c cmd3.c cmd4.c cmd5.c cmd6.c \
+-  store.c birth.c load.c \
++  squelch.c store.c birth.c load.c \
+   wizard1.c wizard2.c obj-info.c \
+   generate.c dungeon.c init1.c init2.c randart.c \
+   main-cap.c main-gcu.c main-x11.c main-xaw.c main.c \
+@@ -78,7 +78,7 @@
+   xtra1.o xtra2.o spells1.o spells2.o \
+   melee1.o melee2.o save.o files.o \
+   cmd1.o cmd2.o cmd3.o cmd4.o cmd5.o cmd6.o \
+-  store.o birth.o load.o \
++  squelch.o store.o birth.o load.o \
+   wizard1.o wizard2.o obj-info.o \
+   generate.o dungeon.o init1.o init2.o randart.o \
+   main-cap.o main-gcu.o main-x11.o main-xaw.o main.o \
+@@ -391,6 +391,7 @@
+ 		lua/lauxlib.h lua/lua.h lua/lualib.h lua/tolua.h
+ spells1.o: spells1.c $(INCS)
+ spells2.o: spells2.c $(INCS)
++squelch.o: squelch.c $(INCS)
+ store.o: store.c $(INCS)
+ tables.o: tables.c $(INCS)
+ use-obj.o: use-obj.c $(INCS)
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.wat angband-3.0.6-squelch/src/Makefile.wat
+--- angband-3.0.6/src/Makefile.wat	2002-09-19 17:04:42.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.wat	2005-09-19 23:29:33.000000000 -0700
+@@ -23,7 +23,7 @@
+   xtra1.obj xtra2.obj spells1.obj spells2.obj melee1.obj melee2.obj &
+   load.obj save.obj files.obj &
+   cmd1.obj cmd2.obj cmd3.obj cmd4.obj cmd5.obj cmd6.obj &
+-  store.obj birth.obj wizard1.obj wizard2.obj &
++  squelch.obj store.obj birth.obj wizard1.obj wizard2.obj &
+   generate.obj dungeon.obj init1.obj init2.obj randart.obj &
+   obj-info.obj &
+   main-ibm.obj main.obj
+diff -Nru --strip-trailing-cr angband-3.0.6/src/Makefile.win angband-3.0.6-squelch/src/Makefile.win
+--- angband-3.0.6/src/Makefile.win	2002-09-19 17:04:42.000000000 -0700
++++ angband-3.0.6-squelch/src/Makefile.win	2005-09-19 23:29:33.000000000 -0700
+@@ -24,7 +24,7 @@
+   xtra1.c xtra2.c spells1.c spells2.c \
+   melee1.c melee2.c save.c files.c \
+   cmd1.c cmd2.c cmd3.c cmd4.c cmd5.c cmd6.c \
+-  store.c birth.c load.c \
++  squelch.c store.c birth.c load.c \
+   wizard1.c wizard2.c obj-info.c \
+   generate.c dungeon.c init1.c init2.c randart.c \
+   main-win.c readdib.c itsybits.c
+@@ -36,7 +36,7 @@
+   xtra1.obj xtra2.obj spells1.obj spells2.obj \
+   melee1.obj melee2.obj save.obj files.obj \
+   cmd1.obj cmd2.obj cmd3.obj cmd4.obj cmd5.obj cmd6.obj \
+-  store.obj birth.obj load.obj \
++  squelch.obj store.obj birth.obj load.obj \
+   wizard1.obj wizard2.obj obj-info.obj \
+   generate.obj dungeon.obj init1.obj init2.obj randart.obj \
+   main-win.obj readdib.obj itsybits.obj
+@@ -48,7 +48,7 @@
+   xtra1.o32 xtra2.o32 spells1.o32 spells2.o32 \
+   melee1.o32 melee2.o32 save.o32 files.o32 \
+   cmd1.o32 cmd2.o32 cmd3.o32 cmd4.o32 cmd5.o32 cmd6.o32 \
+-  store.o32 birth.o32 load.o32 \
++  squelch.o32 store.o32 birth.o32 load.o32 \
+   wizard1.o32 wizard2.o32 obj-info.o32 \
+   generate.o32 dungeon.o32 init1.o32 init2.o32 randart.o32 \
+   main-win.o32 readdib.o32 itsybits.o32
+@@ -164,7 +164,7 @@
+ xtra1 xtra2 spells1 spells2 +
+ melee1 melee2 save files +
+ cmd1 cmd2 cmd3 cmd4 cmd5 cmd6 +
+-store birth load +
++squelch store birth load +
+ wizard1 wizard2 obj-info +
+ generate dungeon init1 init2 randart +
+ main-win readdib itsybits,+
+@@ -195,7 +195,7 @@
+ xtra1.o32 xtra2.o32 spells1.o32 spells2.o32 +
+ melee1.o32 melee2.o32 save.o32 files.o32 +
+ cmd1.o32 cmd2.o32 cmd3.o32 cmd4.o32 cmd5.o32 cmd6.o32 +
+-store.o32 birth.o32 load.o32 +
++squelch.o32 store.o32 birth.o32 load.o32 +
+ wizard1.o32 wizard2.o32 obj-info.o32 +
+ generate.o32 dungeon.o32 init1.o32 init2.o32 randart.o32 +
+ main-win.o32 readdib.o32 itsybits.o32,+
+diff -Nru --strip-trailing-cr angband-3.0.6/src/object1.c angband-3.0.6-squelch/src/object1.c
+--- angband-3.0.6/src/object1.c	2005-05-22 10:58:00.000000000 -0700
++++ angband-3.0.6-squelch/src/object1.c	2005-09-19 23:29:32.000000000 -0700
+@@ -624,6 +624,30 @@
+ } while (0)
+ 
+ 
++/*
++ * Strip an "object name" into a buffer.
++ */
++void strip_name(char *buf, int k_idx)
++{
++	char *t;
++
++	object_kind *k_ptr = &k_info[k_idx];
++
++	cptr str = (k_name + k_ptr->name);
++
++
++	/* Skip past leading characters */
++	while ((*str == ' ') || (*str == '&')) str++;
++
++	/* Copy useful chars */
++	for (t = buf; *str; str++)
++	{
++		if (*str != '~') *t++ = *str;
++	}
++
++	/* Terminate the new name */
++	*t = '\0';
++}
+ 
+ 
+ /*
+@@ -745,6 +769,8 @@
+ 	/* Allow flavors to be hidden when aware */
+ 	if (aware && !show_flavors) flavor = FALSE;
+ 
++	if(aware) k_ptr->everseen = TRUE;
++
+ 	/* Object is in the inventory of a store */
+ 	if (o_ptr->ident & IDENT_STORE)
+ 	{
+@@ -756,6 +782,8 @@
+ 		known = TRUE;
+ 	}
+ 
++	if (aware) k_ptr->everseen = TRUE;
++
+ 	/* Assume no name appending */
+ 	append_name = FALSE;
+ 
+@@ -1104,6 +1132,10 @@
+ 
+ 			object_desc_chr_macro(t, ' ');
+ 			object_desc_str_macro(t, (e_name + e_ptr->name));
++
++			/* Hack - Now we know about the ego-item type */
++			e_info[o_ptr->name2].everseen = TRUE;
++
+ 		}
+ 	}
+ 
+diff -Nru --strip-trailing-cr angband-3.0.6/src/object2.c angband-3.0.6-squelch/src/object2.c
+--- angband-3.0.6/src/object2.c	2005-03-13 06:26:40.000000000 -0800
++++ angband-3.0.6-squelch/src/object2.c	2005-09-19 23:47:12.000000000 -0700
+@@ -341,7 +341,8 @@
+ 			if (!o_ptr->k_idx) continue;
+ 
+ 			/* Hack -- High level objects start out "immune" */
+-			if (k_ptr->level > cur_lev) continue;
++			if (k_ptr->level > cur_lev && (k_ptr->squelch != SQUELCH_ALWAYS))
++				continue;
+ 
+ 			/* Monster */
+ 			if (o_ptr->held_m_idx)
+@@ -356,7 +357,8 @@
+ 				x = m_ptr->fx;
+ 
+ 				/* Monsters protect their objects */
+-				if (rand_int(100) < 90) continue;
++				if ((rand_int(100) < 90) && (k_ptr->squelch != SQUELCH_ALWAYS))
++					continue;
+ 			}
+ 
+ 			/* Dungeon */
+@@ -368,11 +370,17 @@
+ 			}
+ 
+ 			/* Nearby objects start out "immune" */
+-			if ((cur_dis > 0) && (distance(py, px, y, x) < cur_dis)) continue;
++			if ((cur_dis > 0) && (distance(py, px, y, x) < cur_dis) &&
++										(k_ptr->squelch != SQUELCH_ALWAYS))
++				continue;
+ 
+ 			/* Saving throw */
+ 			chance = 90;
+ 
++			/* Squelched items get compacted */
++			if ((k_ptr->aware) && (k_ptr->squelch == SQUELCH_ALWAYS)) chance = 0;
++
++
+ 			/* Hack -- only compact artifacts in emergencies */
+ 			if (artifact_p(o_ptr) && (cnt < 1000)) chance = 100;
+ 
+@@ -780,10 +788,11 @@
+  */
+ void object_aware(object_type *o_ptr)
+ {
++	bool flag = k_info[o_ptr->k_idx].aware;
+ 	/* Fully aware of the effects */
+ 	k_info[o_ptr->k_idx].aware = TRUE;
+-
+-	/* MEGA-HACK - scrolls can change the graphics when becoming aware */
++	
++	/* Scrolls can change the graphics when becoming aware */
+ 	if (o_ptr->tval == TV_SCROLL)
+ 	{
+ 		/* Redraw map */
+@@ -792,6 +801,20 @@
+ 		/* Window stuff */
+ 		p_ptr->window |= (PW_OVERHEAD | PW_MAP);
+ 	}
++
++	/* If newly aware and squelched, must rearrange stacks */
++	if ((!flag) && (k_info[o_ptr->k_idx].squelch == SQUELCH_ALWAYS))
++	{
++		int x, y;
++		for (x = 0; x < DUNGEON_WID;  x++)
++		{
++			for (y = 0; y < DUNGEON_HGT;  y++)
++			{
++				rearrange_stack(y, x);
++			}
++		}
++	}
++
+ }
+ 
+ 
+@@ -2695,6 +2718,17 @@
+ 		o_ptr->to_d = a_ptr->to_d;
+ 		o_ptr->weight = a_ptr->weight;
+ 
++		/* Hack - mark the depth of artifact creation for the notes function
++		 * Probably a bad idea to use this flag.  It is used when making
++		 * ego-items, which currently fails when an item is an artifact. 
++		 * If this changes, it could cause some major bugs.
++		 */
++		if (p_ptr->depth)
++		{
++			o_ptr->xtra1 = p_ptr->depth;
++		}
++
++
+ 		/* Hack -- extract the "broken" flag */
+ 		if (!a_ptr->cost) o_ptr->ident |= (IDENT_BROKEN);
+ 
+@@ -3171,6 +3205,9 @@
+ 		/* Link the floor to the object */
+ 		cave_o_idx[y][x] = o_idx;
+ 
++		/* Rearrange to reflect squelching */
++		rearrange_stack(y, x);
++
+ 		/* Notice */
+ 		note_spot(y, x);
+ 
+@@ -3908,6 +3945,8 @@
+ 
+ 	object_type *j_ptr;
+ 
++	/* Apply an autoinscription */
++	apply_autoinscription(o_ptr);
+ 
+ 	/* Check for combining */
+ 	for (j = 0; j < INVEN_PACK; j++)
+diff -Nru --strip-trailing-cr angband-3.0.6/src/save.c angband-3.0.6-squelch/src/save.c
+--- angband-3.0.6/src/save.c	2004-02-05 12:25:15.000000000 -0800
++++ angband-3.0.6-squelch/src/save.c	2005-09-19 23:29:32.000000000 -0700
+@@ -81,7 +81,6 @@
+  */
+ static int data_fd = -1;
+ 
+-
+ /*
+  * Hack -- current block type
+  */
+@@ -828,8 +827,11 @@
+ 
+ 	if (k_ptr->aware) tmp8u |= 0x01;
+ 	if (k_ptr->tried) tmp8u |= 0x02;
++	if(k_ptr->everseen) tmp8u |= 0x08;
+ 
+ 	wr_byte(tmp8u);
++
++	wr_byte(k_ptr->squelch);
+ }
+ 
+ 
+@@ -1000,6 +1002,7 @@
+ 	for (i = 0; i < 60; i++) wr_byte(0);
+ }
+ 
++static void wr_squelch();
+ 
+ /*
+  * Write some "extra" info
+@@ -1104,6 +1107,7 @@
+ 	/* Future use */
+ 	for (i = 0; i < 10; i++) wr_u32b(0L);
+ 
++	wr_squelch();
+ 
+ 	/* Random artifact version */
+ 	wr_u32b(RANDART_VERSION);
+@@ -1185,6 +1189,84 @@
+ 	}
+ }
+ 
++/*
++ * Write the notes into the savefile. Every savefile has at least NOTES_MARK.
++ */
++static void wr_notes(void)
++{
++	char end_note[80];
++
++	/* Paranoia */
++	if (adult_take_notes && notes_file)
++	{
++    	char tmpstr[100];
++
++    	my_fclose(notes_file);
++
++      	/* Re-open for readding */
++    	notes_file = my_fopen(notes_fname, "r");
++
++    	while (TRUE)
++    	{
++			/* Read the note from the tempfile */
++			if (my_fgets(notes_file, tmpstr, sizeof(tmpstr)))
++			{
++				/* Found the end */
++				break;
++			}
++
++			/* Paranoia */
++			if (strcmp(tmpstr, NOTES_MARK) == 0) continue;
++
++      		/* Write it into the savefile */
++      		wr_string(tmpstr);
++    	}
++
++    	my_fclose(notes_file);
++
++    	/* Re-open for appending */
++    	notes_file = my_fopen(notes_fname, "a");
++  	}
++
++	my_strcpy(end_note, NOTES_MARK, sizeof(end_note));
++
++  	/* Always write NOTES_MARK */
++  	wr_string(end_note);
++}
++
++/*
++ * Write autoinscribe & squelch item-quality submenu to the savefile
++ */
++static void wr_squelch() 
++{
++	int i;
++    for (i = 0; i < SQUELCH_BYTES; i++) wr_byte(squelch_level[i]);
++
++    /* Save the current number of ego-item types */
++    wr_u16b(z_info->e_max);
++
++    /* Save ego-item squelch settings */
++    for (i = 0; i < z_info->e_max; i++)
++    {
++        ego_item_type *e_ptr = &e_info[i];
++        byte tmp8u = 0;
++
++        if (e_ptr->squelch) tmp8u |= 0x01;
++        if (e_ptr->everseen) tmp8u |= 0x02;
++
++        wr_byte(tmp8u);
++    }
++
++    /*Write the current number of auto-inscriptions*/
++    wr_u16b(inscriptions_count);
++
++    /*Write the autoinscriptions array*/
++    for(i = 0; i < inscriptions_count; i++)
++    {
++        wr_s16b(inscriptions[i].kind_idx);
++        wr_string(quark_str(inscriptions[i].inscription_idx));
++    }
++}
+ 
+ /*
+  * The cave grid flags that get saved in the savefile
+@@ -1491,6 +1573,8 @@
+ 		wr_randarts();
+ 	}
+ 
++	/* Copy the notes into the savefile */
++	wr_notes();
+ 
+ 	/* Write the inventory */
+ 	for (i = 0; i < INVEN_TOTAL; i++)
+diff -Nru --strip-trailing-cr angband-3.0.6/src/spells1.c angband-3.0.6-squelch/src/spells1.c
+--- angband-3.0.6/src/spells1.c	2005-05-08 01:20:08.000000000 -0700
++++ angband-3.0.6-squelch/src/spells1.c	2005-09-19 23:29:32.000000000 -0700
+@@ -508,6 +508,36 @@
+ 		/* Leaving */
+ 		p_ptr->leaving = TRUE;
+ 
++		/* Write a note */
++		if (adult_take_notes)
++		{
++			time_t ct = time((time_t*)0);
++			char long_day[25];
++			char buf[120];
++
++ 		  	/* Get time */
++ 		  	(void)strftime(long_day, 25, "%m/%d/%Y at %I:%M %p", localtime(&ct));
++
++ 		  	/* Add note */
++
++		  	fprintf(notes_file, "============================================================\n");
++
++			/*killed by */
++ 		  	sprintf(buf, "Killed by %s.", p_ptr->died_from);
++
++			/* Write message */
++            do_cmd_note(buf,  p_ptr->depth);
++
++			/* date and time*/
++			sprintf(buf, "Killed on %s.", long_day);
++
++			/* Write message */
++            do_cmd_note(buf,  p_ptr->depth);
++
++			fprintf(notes_file, "============================================================\n");
++
++		}
++
+ 		/* Dead */
+ 		return;
+ 	}
+@@ -3402,20 +3432,15 @@
+ 				{
+ 					msg_print("You keep hold of your life force!");
+ 				}
++				else if (p_ptr->hold_life)
++				{
++					msg_print("You feel your life slipping away!");
++					lose_exp(200 + (p_ptr->exp/1000) * MON_DRAIN_LIFE);
++				}
+ 				else
+ 				{
+-					s32b d = 200 + (p_ptr->exp / 100) * MON_DRAIN_LIFE;
+-
+-					if (p_ptr->hold_life)
+-					{
+-						msg_print("You feel your life slipping away!");
+-						lose_exp(d / 10);
+-					}
+-					else
+-					{
+-						msg_print("You feel your life draining away!");
+-						lose_exp(d);
+-					}
++					msg_print("You feel your life draining away!");
++					lose_exp(200 + (p_ptr->exp/100) * MON_DRAIN_LIFE);
+ 				}
+ 			}
+ 			take_hit(dam, killer);
+@@ -3460,20 +3485,15 @@
+ 				{
+ 					msg_print("You keep hold of your life force!");
+ 				}
++				else if (p_ptr->hold_life)
++				{
++					msg_print("You feel your life slipping away!");
++					lose_exp(500 + (p_ptr->exp/1000) * MON_DRAIN_LIFE);
++				}
+ 				else
+ 				{
+-					s32b d = 5000 + (p_ptr->exp / 100) * MON_DRAIN_LIFE;
+-
+-					if (p_ptr->hold_life)
+-					{
+-						msg_print("You feel your life slipping away!");
+-						lose_exp(d / 10);
+-					}
+-					else
+-					{
+-						msg_print("You feel your life draining away!");
+-						lose_exp(d);
+-					}
++					msg_print("You feel your life draining away!");
++					lose_exp(5000 + (p_ptr->exp/100) * MON_DRAIN_LIFE);
+ 				}
+ 			}
+ 			take_hit(dam, killer);
+diff -Nru --strip-trailing-cr angband-3.0.6/src/spells2.c angband-3.0.6-squelch/src/spells2.c
+--- angband-3.0.6/src/spells2.c	2005-05-07 09:16:29.000000000 -0700
++++ angband-3.0.6-squelch/src/spells2.c	2005-09-28 12:33:52.000000000 -0700
+@@ -233,24 +233,30 @@
+ 	/* Simply identify and know every item */
+ 	for (i = 0; i < INVEN_TOTAL; i++)
+ 	{
++		int squelch;
+ 		object_type *o_ptr = &inventory[i];
+ 
+ 		/* Skip non-objects */
+ 		if (!o_ptr->k_idx) continue;
+ 
+ 		/* Aware and Known */
+-		object_aware(o_ptr);
+-		object_known(o_ptr);
+-	}
++		if(object_known_p(o_ptr)) continue;
+ 
+-	/* Recalculate bonuses */
+-	p_ptr->update |= (PU_BONUS);
++		/* Identify it and get the squelch setting */
++		squelch = do_ident_item(i, o_ptr);
+ 
+-	/* Combine / Reorder the pack (later) */
+-	p_ptr->notice |= (PN_COMBINE | PN_REORDER);
++		/*
++		* If the object was squelched, keep analyzing
++		* the same slot (the inventory was displaced). -DG-
++		*/
++		if (squelch != SQUELCH_YES || i < INVEN_WIELD) continue;
+ 
+-	/* Window stuff */
+-	p_ptr->window |= (PW_INVEN | PW_EQUIP | PW_PLAYER_0 | PW_PLAYER_1);
++		/* Now squelch the object */
++		do_squelch_item(squelch, i, o_ptr);
++
++		/* repeat with same slot */
++		i--;
++	}
+ }
+ 
+ 
+@@ -1886,9 +1892,9 @@
+ {
+ 	int item;
+ 
+-	object_type *o_ptr;
++	int squelch;
+ 
+-	char o_name[80];
++	object_type *o_ptr;
+ 
+ 	cptr q, s;
+ 
+@@ -1913,55 +1919,13 @@
+ 	}
+ 
+ 
+-	/* Identify it */
+-	object_aware(o_ptr);
+-	object_known(o_ptr);
+ 
+-	/* Recalculate bonuses */
+-	p_ptr->update |= (PU_BONUS);
+ 
+-	/* Combine / Reorder the pack (later) */
+-	p_ptr->notice |= (PN_COMBINE | PN_REORDER);
++    /* Identify the object and get squelch setting */
++    squelch = do_ident_item(item, o_ptr);
+ 
+-	/* Window stuff */
+-	p_ptr->window |= (PW_INVEN | PW_EQUIP | PW_PLAYER_0 | PW_PLAYER_1);
+-
+-	/* Description */
+-	object_desc(o_name, sizeof(o_name), o_ptr, TRUE, 3);
+-
+-	/* Possibly play a sound depending on object quality. */
+-	if (o_ptr->pval < 0) 
+-	{
+-		/* This is a bad item. */
+-		sound(MSG_IDENT_BAD);
+-	} 
+-	else if (o_ptr->name1 != 0)
+-	{
+-		/* We have a good artifact. */
+-		sound(MSG_IDENT_ART);
+-	}
+-	else if (o_ptr->name2 != 0)
+-	{
+-		/* We have a good ego item. */
+-		sound(MSG_IDENT_EGO);
+-	}
+-
+-	/* Describe */
+-	if (item >= INVEN_WIELD)
+-	{
+-		msg_format("%^s: %s (%c).",
+-		           describe_use(item), o_name, index_to_label(item));
+-	}
+-	else if (item >= 0)
+-	{
+-		msg_format("In your pack: %s (%c).",
+-		           o_name, index_to_label(item));
+-	}
+-	else
+-	{
+-		msg_format("On the ground: %s.",
+-		           o_name);
+-	}
++    /* Now squelch it if needed */
++    do_squelch_item(squelch, item, o_ptr);
+ 
+ 	/* Something happened */
+ 	return (TRUE);
+@@ -1977,11 +1941,10 @@
+ bool identify_fully(void)
+ {
+ 	int item;
++	int squelch;
+ 
+ 	object_type *o_ptr;
+ 
+-	char o_name[80];
+-
+ 	cptr q, s;
+ 
+ 
+@@ -2005,65 +1968,27 @@
+ 		o_ptr = &o_list[0 - item];
+ 	}
+ 
+-
+-	/* Identify it */
+-	object_aware(o_ptr);
+-	object_known(o_ptr);
++	/* Identify the object and get the squelch setting */
++	squelch = do_ident_item(item, o_ptr);
+ 
+ 	/* Mark the item as fully known */
+ 	o_ptr->ident |= (IDENT_MENTAL);
+ 
+-	/* Recalculate bonuses */
+-	p_ptr->update |= (PU_BONUS);
+-
+-	/* Combine / Reorder the pack (later) */
+-	p_ptr->notice |= (PN_COMBINE | PN_REORDER);
+-
+-	/* Window stuff */
+-	p_ptr->window |= (PW_INVEN | PW_EQUIP | PW_PLAYER_0 | PW_PLAYER_1);
+-
+ 	/* Handle stuff */
+ 	handle_stuff();
+ 
+-	/* Description */
+-	object_desc(o_name, sizeof(o_name), o_ptr, TRUE, 3);
+-
+-	/* Possibly play a sound depending on object quality. */
+-	if (o_ptr->pval < 0) 
+-	{
+-		/* This is a bad item. */
+-		sound(MSG_IDENT_BAD);
+-	} 
+-	else if (o_ptr->name1 != 0)
+-	{
+-		/* We have a good artifact. */
+-		sound(MSG_IDENT_ART);
+-	}
+-	else if (o_ptr->name2 != 0)
++	/* Now squelch it if needed */
++	if (squelch == SQUELCH_YES)
+ 	{
+-		/* We have a good ego item. */
+-		sound(MSG_IDENT_EGO);
++		do_squelch_item(squelch, item, o_ptr);
+ 	}
+ 
+-	/* Describe */
+-	if (item >= INVEN_WIELD)
+-	{
+-		msg_format("%^s: %s (%c).",
+-		           describe_use(item), o_name, index_to_label(item));
+-	}
+-	else if (item >= 0)
+-	{
+-		msg_format("In your pack: %s (%c).",
+-		           o_name, index_to_label(item));
+-	}
+ 	else
+ 	{
+-		msg_format("On the ground: %s.",
+-		           o_name);
++		/* Describe it fully */
++		object_info_screen(o_ptr);
+ 	}
+ 
+-	/* Describe it fully */
+-	object_info_screen(o_ptr);
+ 
+ 	/* Success */
+ 	return (TRUE);
+@@ -2092,6 +2017,15 @@
+  * Recharge a wand or staff from the pack or on the floor.
+  *
+  * It is harder to recharge high level, and highly charged wands.
++ *
++ * XXX XXX XXX Beware of "sliding index errors".
++ *
++ * Should probably not "destroy" over-charged items, unless we
++ * "replace" them by, say, a broken stick or some such.  The only
++ * reason this is okay is because "scrolls of recharging" appear
++ * BEFORE all staves/wands in the inventory.  Note that the
++ * new "auto_sort_pack" option would correctly handle replacing
++ * the "broken" wand with any other item (i.e. a broken stick).
+  */
+ bool recharge(int num)
+ {
+@@ -2127,15 +2061,16 @@
+ 	lev = k_info[o_ptr->k_idx].level;
+ 
+ 	/* Recharge power */
+-	i = (num + 100 - lev - (10 * o_ptr->pval)) / 15;
++	i = (num + 100 - lev - (10 * (o_ptr->pval / o_ptr->number))) / 15;
+ 
+ 	/* Back-fire */
+ 	if ((i <= 1) || (rand_int(i) == 0))
+ 	{
++		msg_print("The recharge backfires!");
+ 		msg_print("There is a bright flash of light.");
+ 
+-		/* Drain the power */
+-		o_ptr->pval = 0;
++		/* Reduce the charges of rods/wands/staves */
++		reduce_charges(o_ptr, 1);
+ 
+ 		/* *Identified* items keep the knowledge about the charges */
+ 		if (!(o_ptr->ident & IDENT_MENTAL))
+@@ -2144,8 +2079,20 @@
+ 			o_ptr->ident &= ~(IDENT_KNOWN);
+ 		}
+ 
+-		/* We know that the item is empty */
+-		o_ptr->ident |= IDENT_EMPTY;
++		/* Reduce and describe inventory */
++		if (item >= 0)
++		{
++			inven_item_increase(item, -1);
++			inven_item_describe(item);
++			inven_item_optimize(item);
++		}
++		/* Reduce and describe floor item */
++		else
++		{
++			floor_item_increase(0 - item, -1);
++			floor_item_describe(0 - item);
++			floor_item_optimize(0 - item);
++		}
+ 	}
+ 
+ 	/* Recharge */
+@@ -3922,3 +3869,108 @@
+ 		}
+ 	}
+ }
++
++/*
++ * Execute some common code of the identify spells.
++ * "item" is used to print the slot occupied by an object in equip/inven.
++ * ANY negative value assigned to "item" can be used for specifying an object
++ * on the floor (they don't have a slot, example: the code used to handle
++ * GF_MASS_IDENTIFY in project_o).
++ * It returns the value returned by squelch_itemp.
++ * The object is NOT squelched here.
++ */
++int do_ident_item(int item, object_type *o_ptr)
++{
++	char o_name[80];
++	int squelch = SQUELCH_NO;
++
++	/* Identify it */
++	object_aware(o_ptr);
++	object_known(o_ptr);
++
++	/* Apply an autoinscription, if necessary */
++	apply_autoinscription(o_ptr);
++
++	/* Squelch it? */
++	if (item < INVEN_WIELD) squelch = squelch_itemp(o_ptr, 0, TRUE);
++
++	/* Recalculate bonuses */
++	p_ptr->update |= (PU_BONUS);
++
++	/* Combine / Reorder the pack (later) */
++	p_ptr->notice |= (PN_COMBINE | PN_REORDER);
++
++	/* Window stuff */
++	p_ptr->window |= (PW_INVEN | PW_EQUIP | PW_PLAYER_0 | PW_PLAYER_1);
++
++	/* Description */
++	object_desc(o_name, sizeof(o_name), o_ptr, TRUE, 3);
++
++	/* Possibly play a sound depending on object quality. */
++	if (o_ptr->pval < 0) 
++	{
++		/* This is a bad item. */
++		sound(MSG_IDENT_BAD);
++	} 
++	else if (o_ptr->name1 != 0)
++	{
++		/* We have a good artifact. */
++		sound(MSG_IDENT_ART);
++	}
++	else if (o_ptr->name2 != 0)
++	{
++		/* We have a good ego item. */
++		sound(MSG_IDENT_EGO);
++	}
++
++	/* Describe */
++	if (item >= INVEN_WIELD)
++	{
++		msg_format("%^s: %s (%c).",
++			describe_use(item), o_name, index_to_label(item));
++	}
++	else if (item >= 0)
++	{
++		msg_format("In your pack: %s (%c).  %s",
++			o_name, index_to_label(item),
++			squelch_to_label(squelch));
++ 	}
++	else
++	{
++		msg_format("On the ground: %s.  %s", o_name,
++			squelch_to_label(squelch));
++	}
++
++	/*
++	 * If the item was an artifact, and if the auto-note is selected,
++	 * write a message.
++	 */
++   	if ((adult_take_notes) && artifact_p(o_ptr) && o_ptr->xtra1 > 0)
++	{
++		int artifact_depth;
++        	char note[120];
++		char shorter_desc[120];
++
++		/* Get a shorter description to fit the notes file */
++		object_desc(shorter_desc, sizeof(shorter_desc), o_ptr, TRUE, 0);
++
++		/* Build note and write */
++       	sprintf(note, "Found %s", shorter_desc);
++
++		artifact_depth = o_ptr->xtra1;
++		artifact_depth = p_ptr->depth;
++
++       	do_cmd_note(note, artifact_depth);
++
++		/*
++		 * Mark item creation depth 0, which will indicate the artifact
++		 * has been previously identified.  This prevents an artifact
++		 * from showing up on the notes list twice ifthe artifact had
++		 * been previously identified.  JG
++		 */
++		o_ptr->xtra1 = 0 ;
++	}
++
++	return (squelch);
++}
++
+diff -Nru --strip-trailing-cr angband-3.0.6/src/squelch.c angband-3.0.6-squelch/src/squelch.c
+--- angband-3.0.6/src/squelch.c	1969-12-31 16:00:00.000000000 -0800
++++ angband-3.0.6-squelch/src/squelch.c	2005-09-19 23:29:32.000000000 -0700
+@@ -0,0 +1,1923 @@
++
++#include "angband.h"
++
++static void do_qual_squelch(void);
++static int do_ego_item_squelch(void);
++
++typedef struct tval_insc_desc tval_insc_desc;
++
++struct tval_insc_desc
++{
++	int        tval;
++	cptr       desc;
++};
++
++
++
++
++/*
++ * This stores the various squelch levels for the secondary squelching.
++ * It is currently hardcoded at 24 bytes, but since there are only 20
++ * applicable tvals there shouldn't be a problem.
++ */
++
++byte squelch_level[SQUELCH_BYTES];
++
++#define LINES_PER_COLUMN   19
++
++/*
++ * These are the base types for automatic squelching on creation.
++ * I've combined some of the tvals to make this list a little more
++ * reasonable.
++ */
++
++#define TYPE_AMMO    1
++#define TYPE_BOW     2
++#define TYPE_WEAPON1 3
++#define TYPE_WEAPON2 4
++#define TYPE_BODY    5
++#define TYPE_CLOAK   6
++#define TYPE_SHIELD  7
++#define TYPE_HELM    8
++#define TYPE_GLOVES  9
++#define TYPE_BOOTS   10
++#define TYPE_RING    11
++#define TYPE_STAFF   12
++#define TYPE_WAND    13
++#define TYPE_ROD     14
++#define TYPE_SCROLL  15
++#define TYPE_POTION  16
++#define TYPE_AMULET  17
++#define TYPE_BOOK    18
++#define TYPE_FOOD    19
++#define TYPE_MISC    20
++
++
++
++/*
++ * This (admittedly hacky) stores the mapping from tval to typeval
++ * and is reinitialized every time do_cmd_squelch is called.  This
++ * can certainly be done more cleanly.
++ */
++static int tv_to_type[100];
++
++/*
++ * These structures are lifted from wizard2.c where they were used in
++ * the 'create item' command.  I have adapted them for my code.
++ */
++
++typedef struct tval_desc
++{
++	int        tval;
++	cptr       desc;
++} tval_desc;
++
++static char head[4] =
++{ 'a', 'A', '0', ':' };
++
++/*
++ * Here are the categories for squelch-on-creation.
++ */
++static tval_desc typevals[] =
++{
++  {TYPE_AMMO, "Missiles"},
++  {TYPE_BOW, "Missile Launchers"},
++  {TYPE_WEAPON1, "Weapons (Swords)"},
++  {TYPE_WEAPON2, "Weapons (Non Swords)"},
++  {TYPE_BODY, "Body Armor"},
++  {TYPE_CLOAK, "Cloaks"},
++  {TYPE_SHIELD, "Shields"},
++  {TYPE_HELM, "Helmets"},
++  {TYPE_GLOVES, "Gloves"},
++  {TYPE_BOOTS, "Boots"},
++  {TYPE_AMULET, "Amulets"},
++  {TYPE_RING, "Rings"},
++  {TYPE_STAFF, "Staves"},
++  {TYPE_WAND, "Wands"},
++  {TYPE_ROD, "Rods"},
++  {TYPE_SCROLL, "Scrolls"},
++  {TYPE_POTION, "Potions"},
++  {TYPE_BOOK, "Magic Books"},
++  {TYPE_FOOD, "Food Items"},
++  {TYPE_MISC, "Miscellaneous"},
++  {0, NULL}
++
++};
++
++/*
++ * Here are the categories for squelch-on-identification.
++ * This array is lifted (and edited_ from wizard2.c, hence
++ * the spacy formatting.
++ */
++
++static tval_desc tvals[] =
++{
++	{ TV_SWORD,             "Sword"                },
++	{ TV_POLEARM,           "Polearm"              },
++	{ TV_HAFTED,            "Hafted Weapon"        },
++	{ TV_BOW,               "Bow"                  },
++	{ TV_ARROW,             "Arrows"               },
++	{ TV_BOLT,              "Bolts"                },
++	{ TV_SHOT,              "Shots"                },
++	{ TV_SHIELD,            "Shield"               },
++	{ TV_CROWN,             "Crown"                },
++	{ TV_HELM,              "Helm"                 },
++	{ TV_GLOVES,            "Gloves"               },
++	{ TV_BOOTS,             "Boots"                },
++	{ TV_CLOAK,             "Cloak"                },
++	{ TV_DRAG_ARMOR,        "Dragon Scale Mail"    },
++	{ TV_HARD_ARMOR,        "Hard Armor"           },
++	{ TV_SOFT_ARMOR,        "Soft Armor"           },
++	{ TV_DIGGING,           "Diggers"              },
++	{ TV_RING,              "Rings"                },
++	{ TV_AMULET,            "Amulets"              },
++	{ TV_CHEST,             "Open Chests"		   },
++	{ TV_LITE, 				"Lite Sources"		   },
++	{0, NULL}
++};
++
++static cptr get_autoinscription(s16b kind_idx)
++{
++	int i;
++
++	for(i = 0; i < inscriptions_count; i++)
++	{
++		if(kind_idx == inscriptions[i].kind_idx)
++		{
++			return quark_str(inscriptions[i].inscription_idx);
++		}
++	}
++
++	return 0;
++}
++
++static int do_cmd_autoinscribe_item(s16b k_idx)
++{
++	char tmp[80] = "";
++	cptr curInscription = get_autoinscription(k_idx);
++
++	if(curInscription)
++	{
++		strncpy(tmp, curInscription, sizeof(tmp));
++		tmp[sizeof(tmp) - 1] = 0;
++	}
++
++	/* Get a new inscription (possibly empty) */
++	if(get_string("Autoinscription: ", tmp, sizeof(tmp)))
++	{
++		/* Save the inscription */
++		add_autoinscription(k_idx, tmp);
++
++		/* Inscribe stuff */
++		p_ptr->notice |= (PN_AUTOINSCRIBE);
++		p_ptr->window |= (PW_INVEN | PW_EQUIP);
++
++		return 1;
++	}
++
++	return 0;
++}
++
++
++
++/*
++ * This subroutine actually handles the squelching menus.
++ */
++
++static int do_cmd_squelch_aux(void)
++{
++	int i, j, temp, num, max_num;
++	int tval, sval, squelch;
++	int col, row;
++	int typeval;
++	cptr tval_desc2;
++	char ch, sq;
++
++	int choice[60];
++
++	char ftmp[80];
++	FILE *fff;
++	char buf[80];
++
++	/* Clear screen */
++	Term_clear();
++
++	/*
++	 * Print all typeval's and their descriptions
++	 *
++	 * This uses the above arrays.  I combined a few of the
++	 * tvals into single typevals.
++	 */
++
++	for (num = 0; (num<60) && typevals[num].tval; num++)
++	{
++		row = 3 + (num % 20);
++		col = 30 * (num / 20);
++		ch = head[num/26] +num%26;
++		prt(format("[%c] %s", ch, typevals[num].desc), row, col);
++
++	}
++
++	/* Me need to know the maximal possible tval_index */
++	max_num = num;
++
++	prt("Commands:", 3, 30);
++	prt("[a-t]: Go to item squelching and autoinscribing sub-menu.", 5, 30);
++	prt("Q    : Go to quality squelching sub-menu*.", 6, 30);
++	prt("E    : Go to ego-item squelching sub_menu.", 7, 30);
++	prt("S    : Save squelch values to pref file.", 8, 30);
++	prt("L    : Load squelch values from pref file.", 9, 30);
++	prt("B    : Save autoinscriptions to pref file.", 10, 30);
++	prt("G    : Load autoinscriptions from pref file.", 11, 30);
++
++
++	prt("ESC  : Back to options menu.", 12, 30);
++	prt("     :*includes squelching opened chests.", 14, 30);
++
++	/* Choose! */
++	if (!get_com("Item Squelching and Autoinscription Main Menu: ", &ch)) return (0);
++
++	if (ch=='Q')
++	{
++	  	/* Switch to secondary squelching menu */
++	  	do_qual_squelch();
++	}
++
++	else if (ch=='E')
++	{
++		/* Switch to ego-item squelching menu */
++		do_ego_item_squelch();
++	}
++
++	else if (ch=='S')
++	{
++	 	/* Prompt */
++	  	prt("Command: Dump Squelch Info", 17, 30);
++
++	  	/* Prompt */
++	  	prt("File: ", 18, 30);
++
++	  	/* Default filename */
++	  	sprintf(ftmp, "%s.squ", op_ptr->base_name);
++
++	  	/* Get a filename */
++	  	if (askfor_aux(ftmp, 80))
++	    {
++
++	      	/* Build the filename */
++	      	path_build(buf, 1024, ANGBAND_DIR_USER, ftmp);
++
++	      	/* Drop priv's */
++	      	safe_setuid_drop();
++
++	      	/* Append to the file */
++	      	fff = my_fopen(buf, "a");
++
++	      	/* Grab priv's */
++	      	safe_setuid_grab();
++
++	      	/* Test for success */
++	      	if (fff)
++			{
++
++		  		/* Skip some lines */
++		  		fprintf(fff, "\n\n");
++
++		  		/* Start dumping */
++		  		fprintf(fff, "# Squelch bits\n\n");
++
++		  		/* Dump squelch bits */
++		  		for (i = 1; i < z_info->k_max; i++)
++		 		{
++		      		tval = k_info[i].tval;
++		      		sval = k_info[i].sval;
++		      		squelch = (k_info[i].squelch);
++
++		     		 /* Dump the squelch info */
++		      		if (tval || sval)
++						fprintf(fff, "Q:%d:%d:%d:%d\n", i, tval, sval, squelch);
++		 		 }
++
++		 		 fprintf(fff, "\n\n# squelch_level array\n\n");
++
++		  		 for(i = 0 ; i < SQUELCH_BYTES; i++)
++			  		fprintf(fff, "Q:%d:%d\n", i, squelch_level[i]);
++
++		  		 /* All done */
++		  		 fprintf(fff, "\n\n\n\n");
++
++		  		 /* Close */
++		  		 my_fclose(fff);
++
++		  		 /* Ending message */
++		  		 prt("Squelch file saved successfully.  (Hit a key.)", 17, 30);
++		  		 get_com("", &sq);
++			}
++
++	    }
++	}
++
++	else if (ch=='L')
++	{
++	 	/* Prompt */
++	 	prt("Command: Load squelch info from file", 16, 30);
++
++	 	/* Prompt */
++	 	prt("File: ", 17, 30);
++
++	 	/* Default filename */
++	 	sprintf(ftmp, "%s.squ", op_ptr->base_name);
++
++	 	/* Ask for a file (or cancel) */
++	 	if (askfor_aux(ftmp, 80))
++	  	{
++	    	/* Process the given filename */
++	    	if (process_pref_file(ftmp))
++	    	{
++	    		/* Mention failure */
++	      		prt("Failed to load squelch file!  (Hit a key.)", 17, 30);
++	    	}
++	    	else
++	    	{
++	      		/* Mention success */
++	      		prt("Squelch data loaded!  (Hit a key.)", 17, 30);
++	    	}
++			get_com("", &sq);
++	  	}
++
++	}
++
++	if (ch=='B')
++	{
++	 	/* Prompt */
++	  	prt("Command: Dump Autoinscribe Info", 16, 30);
++
++	  	/* Prompt */
++	  	prt("File: ", 17, 30);
++
++	  	/* Default filename */
++	  	strcpy(ftmp, op_ptr->base_name);
++
++	  	/* Get a filename */
++	  	if (askfor_aux(ftmp, 80))
++	    {
++	      	/* Build the filename */
++	      	path_build(buf, 1024, ANGBAND_DIR_USER, ftmp);
++
++	      	/* Drop priv's */
++	      	safe_setuid_drop();
++
++	      	/* Overwrite the file */
++	      	fff = my_fopen(buf, "w");
++
++	      	/* Grab priv's */
++	      	safe_setuid_grab();
++
++	      	/* Test for success */
++	      	if (fff && inscriptions)
++			{
++		  		/* Start dumping */
++		  		fprintf(fff, "# Format: B:[Item Kind]:[Inscription]\n\n");
++
++		  		for (i = 0; i < inscriptions_count; i++)
++		 		{
++					object_kind *k_ptr = &k_info[inscriptions[i].kind_idx];
++
++					/* Write a comment for the autoinscription*/
++					fprintf(fff, "# Autoinscription for %s\n",
++						k_name + k_ptr->name);
++					/* Dump the autoinscribe info */
++					fprintf(fff, "B:%d:%s\n\n",
++						inscriptions[i].kind_idx,
++						quark_str(inscriptions[i].inscription_idx));
++		 		}
++
++		  		/* Close */
++		  		my_fclose(fff);
++
++		  		/* Ending message */
++		  		prt("Autoinscribe file saved successfully.  (Hit a key.)", 16, 30);
++	      		get_com("", &sq);
++			}
++	    }
++	}
++	else if (ch=='G')
++	{
++	 	/* Prompt */
++	 	prt("Command: Load Autoinscribe info from file", 16, 30);
++
++	 	/* Prompt */
++	 	prt("File: ", 17, 30);
++
++	 	/* Default filename */
++	 	strcpy(ftmp, op_ptr->base_name);
++
++	 	/* Ask for a file (or cancel) */
++	 	if (askfor_aux(ftmp, 80))
++	  	{
++	    	/* Process the given filename */
++	    	if (process_pref_file(ftmp))
++	    	{
++	    		/* Mention failure */
++	      		prt("Failed to load autoinscribe file!  (Hit a key.)", 16, 30);
++	    	}
++
++	    	else
++	    	{
++	      		/* Mention success */
++	      		prt("Autoinscribe data loaded!  (Hit a key.)", 16, 30);
++	    	}
++			get_com("", &sq);
++	  	}
++	}
++
++
++	else
++ 	{
++		int active = 0;
++
++		/*
++		 * One variable is enough, but I used two to make
++	     * the code more readable -DG
++  		 */
++		int old_active = -1;
++		int display_all = 1;
++
++		/* Analyze choice */
++		num = ch - 'a';
++
++		/* Bail out if choice is illegal */
++		if ((num < 0) || (num >= max_num)) return (0);
++
++		/* Base object type chosen, fill in tval */
++		typeval = typevals[num].tval;
++		tval_desc2 = typevals[num].desc;
++
++		/* Moved out the sorting code of the while loop */
++
++		/* First sort based on value */
++		/* Step 1: Read into choice array */
++
++		for (num = 0, i = 1; (num < 63) && (i < z_info->k_max); i++)
++		{
++			object_kind *k_ptr = &k_info[i];
++
++			if (tv_to_type[k_ptr->tval] == typeval)
++			{
++				if (k_ptr->flags3 & (TR3_INSTA_ART)) continue;
++
++				/*skip empty objects*/
++				if (!k_ptr->name) continue;
++
++				/*hack - sometimes gold shows up*/
++				if (k_ptr->tval == TV_GOLD) continue;
++
++				/*haven't seen the item yet*/
++				if (!k_ptr->everseen) continue;
++
++				choice[num++] = i;
++			}
++		}
++
++		max_num = num;
++
++		/* Step 2: Simple bubble sort */
++		for (i = 0; i < max_num; i++)
++		{
++			for (j = i; j < max_num; j++)
++			{
++				if ((k_info[choice[i]].tval>k_info[choice[j]].tval) ||
++				    ((k_info[choice[i]].tval==k_info[choice[j]].tval) &&
++					 (k_info[choice[i]].cost>k_info[choice[j]].cost)))
++	      		{
++					temp = choice[i];
++					choice[i] = choice[j];
++					choice[j] = temp;
++				}
++			}
++		}
++
++
++		/*** And now we go for k_idx ***/
++
++		/* Clear screen */
++
++		while (TRUE)
++		{
++			if (display_all)
++			Term_clear();
++
++			/*no objects found*/
++			if (!max_num)
++			{
++				if (display_all)
++				c_put_str(TERM_RED, "No known objects of this type.", 5, 0);
++			}
++
++			else
++			{
++
++				byte color;
++
++				for (num = 0; num < max_num; num++)
++				{
++					object_kind *k_ptr = &k_info[choice[num]];
++					cptr curStr;
++
++					/* Reduce flickering */
++					if (!display_all && num != active && num != old_active)
++					continue;
++
++					/* Prepare it */
++					row = 5 + (num % LINES_PER_COLUMN);
++					col = 30 * (num / LINES_PER_COLUMN);
++					ch = head[num / 26] + (num % 26);
++
++					/* Acquire the "name" of object "i" */
++					strip_name(buf, choice[num]);
++
++					/*Print out the autoinscription*/
++					if (num == active)
++					{
++						curStr = get_autoinscription(choice[active]);
++						c_put_str(TERM_WHITE,
++						format("Current Autoinscription: %-40s", curStr ? curStr : "[None]"),
++						4,	39);
++					}
++
++					/*get the color and character*/
++
++					/*
++					 * Items player wants to squelch when they walk over them
++					 */
++					if (k_ptr->squelch == SQUELCH_ALWAYS)
++					{
++						/*use a 'S' for always squelch*/
++						sq = 'S';
++						color = TERM_L_RED;
++					}
++
++					/*
++					 * Items player doesn't want to squelch, but doesn't want to
++					 * auto-destroy either
++					 */
++
++					else if (k_ptr->squelch ==  NO_SQUELCH_NEVER_PICKUP)
++					{
++						/*use a 'S' for always squelch*/
++						sq = 'L';
++						color = TERM_L_GREEN;
++					}
++
++					/*
++					 * Items player always wants to pickup, regardless of
++					 * other options.
++					 */
++
++					else if (k_ptr->squelch ==  NO_SQUELCH_ALWAYS_PICKUP)
++					{
++						/*use a 'S' for always squelch*/
++						sq = 'A';
++						color = TERM_L_UMBER;
++					}
++
++					/* Never Squelch */
++					else
++					{
++						/*use a 'S' for never squelch*/
++						sq = 'N';
++						color = TERM_L_BLUE;
++					}
++
++					/* Print it */
++					c_put_str(((num == active) ? TERM_YELLOW : TERM_WHITE),
++					format("%c)'%c'", ch, sq), row, col);
++					c_put_str(color, buf, row, col + 6);
++				}
++
++		    }
++
++			/*header text*/
++			if (display_all)
++			{
++				c_put_str(TERM_L_BLUE, "CTRL-N: No Squelch - defer to Never_pickup option", 1, 0);
++				prt("Esc   : Return", 1, 55);
++				c_put_str(TERM_L_GREEN, "CTRL-L: Never Pickup", 2, 0);
++				c_put_str(TERM_L_UMBER, "CTRL-A: Always Pickup", 2, 22);
++				prt("+/-     Toggle Selection", 2, 55);
++				c_put_str(TERM_L_RED,"CTRL-S: Squelch", 3, 0);
++				prt("Use direction keys to Navigate list; or enter a letter", 3, 22);
++				/*header text*/
++				c_put_str(TERM_WHITE, "Enter: New autoinscription", 4, 10);
++
++			}
++
++			display_all = 0;
++			old_active = -1;
++
++			/* Choose! */
++			if (!get_com(format("%s : Command? ", tval_desc2), &ch))
++			return (1);
++
++			/* Bugfix - Avoid crashes */
++			if (!max_num) continue;
++
++			/*Switch to Never Squelch Option*/
++			if (ch == KTRL('N'))
++			{
++				k_info[choice[active]].squelch = SQUELCH_NEVER;
++			}
++
++			/*Switch to Never Pickup Option*/
++			else if (ch == KTRL('L'))
++			{
++				k_info[choice[active]].squelch =  NO_SQUELCH_NEVER_PICKUP;
++			}
++
++			/*Switch to Never Pickup Option*/
++			else if (ch == KTRL('A'))
++			{
++				k_info[choice[active]].squelch =  NO_SQUELCH_ALWAYS_PICKUP;
++			}
++
++			/*Switch to Squelch Option*/
++			else if (ch == KTRL('S'))
++			{
++				k_info[choice[active]].squelch =  SQUELCH_ALWAYS;
++			}
++
++			/*toggle choice down one*/
++			else if (ch == '-')
++			{
++
++				/*boundry control*/
++				if (k_info[choice[active]].squelch <= SQUELCH_HEAD)
++				{
++					k_info[choice[active]].squelch = SQUELCH_TAIL;
++				}
++
++				else k_info[choice[active]].squelch -= 1;
++			}
++
++			/*toggle choice up one*/
++			else if (ch == '+')
++			{
++				/*boundry control*/
++				if (k_info[choice[active]].squelch >= SQUELCH_TAIL)
++				{
++					k_info[choice[active]].squelch = SQUELCH_HEAD;
++				}
++
++				else k_info[choice[active]].squelch += 1;
++			}
++
++			else if (ch == '8')
++			{
++				/* Redraw the current active */
++				old_active = active;
++
++				/*move up one row*/
++				active -= 1;
++
++				/*boundry control*/
++				if (active < 0) active = max_num - 1;
++			}
++
++			else if (ch == '2')
++			{
++				/* Redraw the current active */
++				old_active = active;
++
++				/*move down one row*/
++				active += 1;
++
++				/*boundry control*/
++				if (active > (max_num - 1)) active = 0;
++			}
++
++			else if (ch == '6')
++			{
++
++				/*move one column to right, but check first*/
++				if ((active + LINES_PER_COLUMN) <= max_num - 1)
++				{
++					/* Redraw the current active */
++					old_active = active;
++
++					active += LINES_PER_COLUMN;
++				}
++
++				else bell("");
++
++	    	}
++
++			else if (ch == 13)
++			{
++				do_cmd_autoinscribe_item(choice[active]);
++			}
++
++			else if (ch == '4')
++			{
++
++				/*move one column to left, but check first*/
++				if ((active - LINES_PER_COLUMN) >= 0)
++				{
++					/* Redraw the current active */
++					old_active = active;
++
++					active -= LINES_PER_COLUMN;
++				}
++
++
++				else bell("");
++
++				}
++
++			else
++			{
++				/*save the old choice*/
++				int old_num = active;
++
++				/* Analyze choice */
++				active = -1;
++				if ((ch >= head[0]) && (ch < head[0] + 26))		active = ch - head[0];
++				if ((ch >= head[1]) && (ch < head[1] + 26))		active = ch - head[1] + 26;
++				if ((ch >= head[2]) && (ch < head[2] + 17))		active = ch - head[2] + 52;
++
++				/* Bail out if choice is "illegal" */
++				if ((active < 0) || (active >= max_num)) active = old_num;
++				else old_active = old_num;
++			}
++		}
++	}
++
++
++	/* And return successful */
++	return (1);
++}
++
++/*
++ * This command handles the secondary squelch menu.
++ */
++static void do_qual_squelch(void)
++{
++	int i, num, max_num, index;
++	int col, row;
++	char ch;
++	/* the index for the rings*/
++	#define RING_INDEX  17
++	/* the index for the amulets*/
++	#define AMULET_INDEX  18
++	/* - open chest TVAL in defines*/
++
++	char squelch_str[7] = "NCVGWAO";
++
++	int old_index = -1;
++	int display_all = 1;
++
++	index = 0;
++	while (1)
++	{
++		/* Clear screen */
++		if (display_all) Term_clear();
++
++	  	/* Print all tval's and their descriptions */
++	  	for (num = 0; (num<60) && tvals[num].tval; num++)
++	    {
++			/* Reduce flickering */
++			if (!display_all && num != index && num != old_index)
++			continue;
++
++
++			row = 2 + (num % 22);
++			col = 30 * (num / 22);
++	      	c_put_str(TERM_WHITE, format("(%c): %s", squelch_str[squelch_level[num]], tvals[num].desc), row, col);
++	    }
++
++		if (display_all)
++		{
++
++		  	/* Print out the rest of the screen */
++			prt("Secondary Squelching Menu", 0,0);
++
++			prt("Legend:", 2, 30);
++
++		  	prt("N  : Squelch Nothing", 4, 30);
++		  	prt("C  : Squelch Cursed Items", 5, 30);
++		  	prt("V  : Squelch Average and Below", 6, 30);
++		  	prt("G  : Squelch Good (Strong Pseudo_ID and Identify)", 7, 30);
++			prt("W  : Squelch Good (Weak Pseudo-ID)", 8, 30);
++		  	prt("A  : Squelch All but Artifacts", 9, 30);
++		  	prt("O  : Squelch Chests After Opening", 10, 30);
++
++		  	prt("Commands:", 12, 30);
++			prt("Arrows: Move and adjust settings", 14, 30);
++			prt("ncvgao : Change a single setting", 15, 30);
++			prt("NCVGWAO : Change all allowable settings", 16, 30);
++			prt("ESC   : Exit Secondary Menu", 17, 30);
++		  	prt("Rings:   N, C or A only", 19, 30);
++			prt("Amulets: N, C or A only", 20, 30);
++			prt("Opened Chests: N or O only", 21, 30);
++		}
++
++		display_all = 0;
++		old_index = -1;
++
++
++		/* Need to know maximum index */
++		max_num=num;
++
++		/* Place the cursor */
++		move_cursor(index+ 2, 1);
++
++		/* Get a key */
++		ch = inkey();
++
++		/* Analyze */
++		switch (ch)
++		{
++	    	case ESCAPE:
++	    	{
++				return;
++	    	}
++
++    		case 'n':
++			{
++	  			squelch_level[index] = SQUELCH_NONE;
++      			break;
++			}
++	    	case 'N':
++			{
++	      		for (i=0; i < SQUELCH_BYTES; i++)
++		  		{
++					squelch_level[i] = SQUELCH_NONE;
++	      		}
++				display_all = 1;
++	      		break;
++			}
++
++    		case 'c':
++			{
++      			if (index != CHEST_INDEX) squelch_level[index] = SQUELCH_CURSED;
++      			break;
++			}
++
++    		case 'C':
++			{
++	      		for (i = 0; i < SQUELCH_BYTES; i++)
++			  	{
++					/*HACK - don't check chests as cursed*/
++					if (i != CHEST_INDEX) squelch_level[i] = SQUELCH_CURSED;
++	      	  	}
++				display_all = 1;
++      			break;
++			}
++
++	    	case 'v':
++			{
++		  		if ((index != CHEST_INDEX) && (index != AMULET_INDEX)
++					&& (index != RING_INDEX)) squelch_level[index] = SQUELCH_AVERAGE;
++	      		break;
++			}
++
++	    	case 'V':
++			{
++	      		for (i = 0; i < SQUELCH_BYTES ; i++)
++				{
++					if ((i != CHEST_INDEX) && (i != AMULET_INDEX)
++						&& (i != RING_INDEX)) squelch_level[i] = SQUELCH_AVERAGE;
++	      		}
++				display_all = 1;
++	      		break;
++			}
++
++	    	case 'g':
++			{
++	      		if ((index != CHEST_INDEX) && (index != AMULET_INDEX)
++						&& (index != RING_INDEX)) squelch_level[index] = SQUELCH_GOOD_STRONG;
++	      		break;
++			}
++
++	    	case 'G':
++			{
++	      		for (i = 0; i < SQUELCH_BYTES; i++)
++				{
++					if ((i != CHEST_INDEX) && (i != AMULET_INDEX)
++						&& (i != RING_INDEX)) squelch_level[i] = SQUELCH_GOOD_STRONG;
++	      		}
++				display_all = 1;
++      			break;
++			}
++
++			case 'w':
++			{
++      			if ((index != CHEST_INDEX) && (index != AMULET_INDEX)
++					&& (index != RING_INDEX)) squelch_level[index] = SQUELCH_GOOD_WEAK;
++      			break;
++			}
++    		case 'W':
++			{
++      			for (i = 0; i < SQUELCH_BYTES; i++)
++				{
++					if ((i != CHEST_INDEX) && (i != AMULET_INDEX)
++						&& (i != RING_INDEX)) squelch_level[i] = SQUELCH_GOOD_WEAK;
++      			}
++				display_all = 1;
++      			break;
++			}
++
++    		case 'a':
++			{
++      			if (index != CHEST_INDEX) squelch_level[index] = SQUELCH_ALL;
++      			break;
++			}
++
++    		case 'A':
++			{
++      			for (i = 0; i < SQUELCH_BYTES; i++)
++		  		{
++					/*HACK - don't check chests as destroy all*/
++					if (i != CHEST_INDEX) squelch_level[i] = SQUELCH_ALL;
++      	  		}
++				display_all = 1;
++      			break;
++			}
++
++			/*hack "O" works from anywhere only on open chests*/
++			case 'O':
++			case 'o':
++			{
++				squelch_level[(CHEST_INDEX)] = SQUELCH_OPENED_CHESTS;
++				display_all = 1;
++				break;
++			}
++    		case '-':
++    		case '8':
++      		{
++				old_index = index;
++
++				index = (max_num + index - 1) % max_num;
++				break;
++      		}
++
++    		case ' ':
++    		case '\n':
++    		case '\r':
++    		case '2':
++      		{
++				old_index = index;
++
++				index = (index + 1) % max_num;
++				break;
++      		}
++
++    		case '4':
++      		{
++				/*HACK - only allowable  options to be toggled through*/
++
++				/*first do the rings and amulets*/
++				if ((index == AMULET_INDEX) || (index == RING_INDEX))
++				{
++					/*amulets and rings can only be none, cursed, and all but artifact*/
++					if (squelch_level[index] > 1) squelch_level[index] = SQUELCH_CURSED;
++					else squelch_level[index] = SQUELCH_NONE;
++					break;
++				}
++
++				/* now do the chests*/
++				else if (index == CHEST_INDEX)
++				{
++					squelch_level[index] = SQUELCH_NONE;
++					break;
++				}
++
++				/*then toggle all else*/
++				else
++				{
++					if (squelch_level [index] >= SQUELCH_ALL) squelch_level [index] = SQUELCH_GOOD_WEAK;
++					else if (squelch_level [index] > 0)  squelch_level [index] -= 1;
++					else squelch_level [index] = 0;
++					break;
++				}
++    		}
++
++    		case '6':
++     		{
++				/*HACK - only allowable  options to be toggled through*/
++
++				/*first do the rings and amulets*/
++				if ((index == AMULET_INDEX) || (index == RING_INDEX))
++				{
++					/*amulets and rings can only be none, cursed, and all but artifact*/
++					if (squelch_level[index] > 0) squelch_level[index] = SQUELCH_ALL;
++					else squelch_level[index] = SQUELCH_CURSED;
++					break;
++				}
++
++				/* now do the chests*/
++				else if (index == CHEST_INDEX)
++				{
++					squelch_level[index] = SQUELCH_OPENED_CHESTS;
++					break;
++				}
++
++				/*then toggle all else*/
++				else
++				{
++					if (squelch_level [index] >= SQUELCH_ALL) squelch_level [index] = SQUELCH_ALL;
++					else squelch_level [index] += 1;
++					break;
++				}
++      		}
++
++    		default:
++    		{
++				bell("");
++				break;
++    		}
++		}
++	}
++
++	return;
++}
++
++#define MAX_EGO_ROWS 19
++
++static tval_desc raw_tvals[] =
++{
++	{TV_SKELETON, "Skeletons"},
++	{TV_BOTTLE, "Bottles"},
++	{TV_JUNK, "Junk"},
++	{TV_SPIKE, "Spikes"},
++	{TV_CHEST, "Chests"},
++	{TV_SHOT, "Shots"},
++	{TV_ARROW, "Arrows"},
++	{TV_BOLT, "Bolts"},
++	{TV_BOW, "Launchers"},
++	{TV_DIGGING, "Diggers"},
++	{TV_HAFTED, "Maces"},
++	{TV_POLEARM, "Polearms"},
++	{TV_SWORD, "Swords"},
++	{TV_BOOTS, "Boots"},
++	{TV_GLOVES, "Gloves"},
++	{TV_HELM, "Helmets"},
++	{TV_CROWN, "Crowns"},
++	{TV_SHIELD, "Shields"},
++	{TV_CLOAK, "Cloaks"},
++	{TV_SOFT_ARMOR, "Soft Armor"},
++	{TV_HARD_ARMOR, "Hard Armor"},
++	{TV_DRAG_ARMOR, "DSMails"},
++	{TV_LITE, "Lites"},
++	{TV_AMULET, "Amulets"},
++	{TV_RING, "Rings"},
++	{TV_STAFF, "Staves"},
++	{TV_WAND, "Wands"},
++	{TV_ROD, "Rods"},
++	{TV_SCROLL, "Scrolls"},
++	{TV_POTION, "Potions"},
++	{TV_FLASK, "Flaskes"},
++	{TV_FOOD, "Food"},
++	{TV_MAGIC_BOOK, "Magic Books"},
++	{TV_PRAYER_BOOK, "Prayer Books"},
++};
++
++#define NUM_RAW_TVALS (sizeof(raw_tvals) / sizeof(raw_tvals[0]))
++
++/*
++ * Skip common prefixes in ego-item names.
++ */
++static const char *strip_ego_name(const char *name)
++{
++ 	if (prefix(name, "of the "))	return name + 7;
++ 	if (prefix(name, "of "))	return name + 3;
++ 	return name;
++}
++
++/*
++ * Utility function used to find/sort tval names.
++ */
++static int tval_comp_func(const void *a_ptr, const void *b_ptr)
++{
++	int a = ((tval_desc *)a_ptr)->tval;
++	int b = ((tval_desc *)b_ptr)->tval;
++	return a - b;
++}
++
++/*
++ * Display an ego-item type on the screen.
++ */
++static void display_ego_item(ego_item_type *e_ptr, int y, int x, bool active)
++{
++	int tval_table[EGO_TVALS_MAX], i, n = 0;
++	char buf[100];
++	const char *str, *name;
++
++	/* Fast appending, and easier to code ;) */
++ 	editing_buffer ebuf, *ebuf_ptr = &ebuf;
++
++	/* Copy the valid tvals of this ego-item type */
++	for (i = 0; i < EGO_TVALS_MAX; i++)
++	{
++    	/* Ignore "empty" entries */
++    	if (e_ptr->tval[i] < 1) continue;
++
++    	tval_table[n++] = e_ptr->tval[i];
++	}
++
++	/* Hack - Sort the tvals using bubbles */
++	for (i = 0; i < n; i++)
++	{
++    	int j;
++
++    	for (j = i + 1; j < n; j++)
++    	{
++    		if (tval_table[i] > tval_table[j])
++      		{
++				int temp = tval_table[i];
++				tval_table[i] = tval_table[j];
++				tval_table[j] = temp;
++      		}
++    	}
++  	}
++
++	/* Initialize the editing_buffer structure */
++	editing_buffer_init(ebuf_ptr, "[ ] ", 100);
++
++	/* Concatenate the tval' names */
++	for (i = 0; i < n; i++)
++	{
++    	/* Fast searching */
++    	tval_desc key, *result;
++
++    	/* Find the tval's name using binary search */
++    	key.tval = tval_table[i];
++    	key.desc = NULL;
++    	result = bsearch(&key, raw_tvals, NUM_RAW_TVALS, sizeof(raw_tvals[0]),
++							tval_comp_func);
++    	if (result) name = result->desc;
++    	/* Paranoia */
++    	else	name = "????";
++
++    	/* Append the respective separator first, if any */
++    	if (i > 0)
++    	{
++    	  if (i < n - 1)	editing_buffer_put_str(ebuf_ptr, ", ", -1);
++    	  else		editing_buffer_put_str(ebuf_ptr, " and ", -1);
++    	}
++    	/* Append the name */
++    	editing_buffer_put_str(ebuf_ptr, name, -1);
++  	}
++
++	/* Append one  extra space */
++	editing_buffer_put_chr(ebuf_ptr, ' ');
++
++	/* Hack - Find common ego-item name' prefixes */
++	name = e_name + e_ptr->name;
++	str = strip_ego_name(name);
++
++ 	/* Append the prefix to the buffer, if any */
++ 	editing_buffer_put_str(ebuf_ptr, name, str - name);
++
++ 	/* Get the buffer */
++ 	editing_buffer_get_all(ebuf_ptr, buf, sizeof(buf));
++
++  	/* Free resources */
++ 	editing_buffer_destroy(ebuf_ptr);
++
++ 	/* Show the buffer */
++ 	c_put_str(active ? TERM_YELLOW: TERM_WHITE, buf, y, x);
++
++  	if (e_ptr->squelch) c_put_str(TERM_L_RED, "*", y, x + 1);
++
++  	/* Show the stripped ego-item name with another colour */
++  	c_put_str(e_ptr->squelch ? TERM_L_RED: TERM_L_BLUE, str, y, x + strlen(buf));
++}
++
++/*
++ * Utility function used for sorting an array of ego-item indices by
++ * ego-item name.
++ */
++static int ego_comp_func(const void *a_ptr, const void *b_ptr)
++{
++  	s16b a = *(s16b *)a_ptr;
++  	s16b b = *(s16b *)b_ptr;
++
++  	/* Note the removal of common prefixes */
++  	return strcmp(strip_ego_name(e_name + e_info[a].name),
++ 				  strip_ego_name(e_name + e_info[b].name));
++}
++
++/*
++ * Handle the squelching of ego-items.
++*/
++static int do_ego_item_squelch(void)
++{
++	int i, idx, max_num = 0, first, last, active, old_active;
++	bool display_all;
++	char ch, *msg;
++	ego_item_type *e_ptr;
++ 	s16b *choice;
++
++	/* Hack - Used to sort the tval table for the first time */
++	static bool sort_tvals = TRUE;
++
++	/* Sort the tval table if needed */
++	if (sort_tvals)
++	{
++	  qsort(raw_tvals, NUM_RAW_TVALS, sizeof(raw_tvals[0]), tval_comp_func);
++	  sort_tvals = FALSE;
++	}
++
++ 	/* Alloc the array of ego indices */
++ 	C_MAKE(choice, alloc_ego_size, s16b);
++
++ 	/* Get the valid ego-items */
++ 	for (i = 0; i < alloc_ego_size; i++)
++ 	{
++    	idx = alloc_ego_table[i].index;
++
++    	e_ptr = &e_info[idx];
++
++    	/* Only valid known ego-items allowed */
++    	if (!e_ptr->name || !e_ptr->everseen) continue;
++
++    	/* Append the index */
++    	choice[max_num++] = idx;
++	}
++
++  	/* Quickly sort the array by ego-item name */
++  	qsort(choice, max_num, sizeof(choice[0]), ego_comp_func);
++
++  	/* Display the whole screen */
++  	display_all = TRUE;
++  	active = 0;
++  	old_active = -1;
++
++  	/* Determine the first ego-item to display in the screen */
++  	first = 0;
++
++  	/* Determine the last ego-item to display in the screen */
++  	/* Note that if "max_num" is 0, "last" will be -1 */
++  	last = MIN(first + MAX_EGO_ROWS - 1, max_num - 1);
++
++  	while(1)
++  	{
++    	if (display_all)
++    	{
++    		/* Clear the screen */
++   		 	Term_clear();
++
++    		/* Header */
++    		c_put_str(TERM_WHITE, "[ ]:", 1, 0);
++    		c_put_str(TERM_L_RED, "*", 1, 1);
++    		c_put_str(TERM_L_RED, "Squelch", 1, 5);
++
++    		c_put_str(TERM_WHITE, "[ ]:", 1, 15);
++    		c_put_str(TERM_L_BLUE, "No squelch", 1, 20);
++
++    		/* No ego-items */
++    		msg = "You have not seen any ego-items yet.";
++    		if (max_num < 1) c_put_str(TERM_RED, msg, 3, 0);
++
++      		/* Hack - Make the UI more friendly if needed */
++      		if (first > 0) c_put_str(TERM_WHITE, "-more-", 2, 4);
++      		if (last < max_num - 1) c_put_str(TERM_WHITE, "-more-", 22, 4);
++
++      		/* Page foot */
++      		msg = "Navigation: 2, 8, 3, 9, 1, 7 or movement keys"
++			" - Shorcut: First letter";
++
++      		c_put_str(TERM_WHITE, msg, 23, 0);
++    	}
++
++    	/* Only show a portion of the list */
++    	for (i = first; i <= last; i++)
++    	{
++      		/* Avoid flickering */
++      		if (!display_all && (i != active) && (i != old_active)) continue;
++
++      		e_ptr = &e_info[choice[i]];
++
++      		/* Show the entry */
++      		display_ego_item(e_ptr, i - first + 3, 0, i == active);
++    	}
++
++    	/* Reset some flags */
++    	display_all = FALSE;
++    	old_active = -1;
++
++    	/* Get a command */
++    	msg = "Command? (SPACE, RET: Toggle selection - ESC: Return) ";
++    	if (!get_com(msg, &ch)) break;
++
++    	/* Avoid crash */
++    	if (max_num < 1) continue;
++
++    	/* Get the selected ego-item type */
++    	e_ptr = &e_info[choice[active]];
++
++    	/* Process the command */
++    	switch (ch)
++    	{
++      		case ' ':
++      		case '\r':
++      		case '\n':
++			{
++	  			/* Toggle the "squelch" flag */
++	  			e_ptr->squelch = !e_ptr->squelch;
++	  			break;
++			}
++      		case '2':
++			{
++	  			/* Advance a position */
++	  			old_active = active;
++	  			active = MIN(active + 1, max_num - 1);
++	  			if (active > last)
++	  			{
++	    			++first;
++	    			++last;
++	    			/* Redraw all */
++	    			display_all = 1;
++	  			}
++	  			break;
++			}
++      		case '8':
++			{
++				/* Retrocede a position */
++	  			old_active = active;
++	  			active = MAX(active - 1, 0);
++	  			if (active < first)
++	  			{
++	    			--first;
++	    			--last;
++
++					/* Redraw all */
++	    			display_all = 1;
++	  			}
++
++				break;
++			}
++
++			case '3':
++			{
++	  			/* Advance one "screen" */
++	  			active = MIN(active + MAX_EGO_ROWS, max_num - 1);
++	  			last = MIN(last + MAX_EGO_ROWS, max_num - 1);
++	  			first = MAX(last - MAX_EGO_ROWS + 1, 0);
++
++	  			/* Redraw all */
++	  			display_all = 1;
++	  			break;
++			}
++
++			case '9':
++			{
++	  			/* Retrocede one "screen" */
++	 			active = MAX(active - MAX_EGO_ROWS, 0);
++	  			first = MAX(first - MAX_EGO_ROWS, 0);
++	  			last = MIN(first + MAX_EGO_ROWS - 1, max_num - 1);
++
++	  			/* Redraw all */
++	  			display_all = 1;
++	  			break;
++			}
++      		case '1':
++			{
++	  			/* Go the last ego-item */
++	  			active = last = max_num - 1;
++	  			first = MAX(last - MAX_EGO_ROWS + 1, 0);
++
++				/* Redraw all */
++	  			display_all = 1;
++	  			break;
++			}
++
++			case '7':
++			{
++	  			/* Go to the first ego-item */
++	  			active = first = 0;
++	  			last = MIN(first + MAX_EGO_ROWS - 1, max_num - 1);
++
++	  			/* Redraw all */
++	  			display_all = 1;
++	  			break;
++			}
++
++			/* Compare with the first letter of ego-item names */
++			default:
++			{
++				const char *name;
++
++				/* Ignore strange characters */
++			  	if (!isgraph((unsigned char)ch)) break;
++
++				/* Check for seen ego-items */
++				for (i = 0; i < max_num; i++)
++				{
++				  	/* Get the ego-item */
++				  	e_ptr = &e_info[choice[i]];
++
++					/* Get its name */
++					name = e_name + e_ptr->name;
++
++					/* Strip the name */
++					name = strip_ego_name(name);
++
++					/* Compare first letter, case insen. */
++					if (toupper((unsigned char)name[0]) ==
++					    toupper((unsigned char)ch)) break;
++				}
++
++				/* Found one? */
++				if (i >= max_num) break;
++
++				/* Jump there */
++				active = i;
++				/* Adjust visual bounds */
++				/* Try to put the found ego in the first row */
++				last = MIN(active + MAX_EGO_ROWS - 1,
++				    max_num - 1);
++				first = MAX(last - MAX_EGO_ROWS + 1, 0);
++				/* Redraw all */
++				display_all = 1;
++				break;
++			}
++    	}
++  	}
++ 	/* Free resources */
++ 	FREE(choice);
++ 	return 0;
++}
++
++
++/*
++ * Hack -- initialize the mapping from tvals to typevals.
++ * This is currently called every time the squelch menus are
++ * accessed.  This can certainly be improved.
++ */
++
++void init_tv_to_type(void)
++{
++  tv_to_type[TV_SKELETON]=TYPE_MISC;
++  tv_to_type[TV_BOTTLE]=TYPE_MISC;
++  tv_to_type[TV_JUNK]=TYPE_MISC;
++  tv_to_type[TV_SPIKE]=TYPE_MISC;
++  tv_to_type[TV_CHEST]=TYPE_MISC;
++  tv_to_type[TV_SHOT]=TYPE_AMMO;
++  tv_to_type[TV_ARROW]=TYPE_AMMO;
++  tv_to_type[TV_BOLT]=TYPE_AMMO;
++  tv_to_type[TV_BOW]=TYPE_BOW;
++  tv_to_type[TV_DIGGING]=TYPE_WEAPON2;
++  tv_to_type[TV_HAFTED]=TYPE_WEAPON2;
++  tv_to_type[TV_POLEARM]=TYPE_WEAPON2;
++  tv_to_type[TV_SWORD]=TYPE_WEAPON1;
++  tv_to_type[TV_BOOTS]=TYPE_BOOTS;
++  tv_to_type[TV_GLOVES]=TYPE_GLOVES;
++  tv_to_type[TV_HELM]=TYPE_HELM;
++  tv_to_type[TV_CROWN]=TYPE_HELM;
++  tv_to_type[TV_SHIELD]=TYPE_SHIELD;
++  tv_to_type[TV_CLOAK]=TYPE_CLOAK;
++  tv_to_type[TV_SOFT_ARMOR]=TYPE_BODY;
++  tv_to_type[TV_HARD_ARMOR]=TYPE_BODY;
++  tv_to_type[TV_DRAG_ARMOR]=TYPE_BODY;
++  tv_to_type[TV_LITE]=TYPE_MISC;
++  tv_to_type[TV_AMULET]=TYPE_AMULET;
++  tv_to_type[TV_RING]=TYPE_RING;
++  tv_to_type[TV_STAFF]=TYPE_STAFF;
++  tv_to_type[TV_WAND]=TYPE_WAND;
++  tv_to_type[TV_ROD]=TYPE_ROD;
++  tv_to_type[TV_SCROLL]=TYPE_SCROLL;
++  tv_to_type[TV_POTION]=TYPE_POTION;
++  tv_to_type[TV_FLASK]=TYPE_MISC;
++  tv_to_type[TV_FOOD]=TYPE_FOOD;
++  tv_to_type[TV_MAGIC_BOOK]=TYPE_BOOK;
++  tv_to_type[TV_PRAYER_BOOK]=TYPE_BOOK;
++}
++
++void do_cmd_squelch_autoinsc(void)
++{
++
++	int flag;
++	int x, y;
++	init_tv_to_type();
++
++	flag=1;
++
++	/* Simple loop */
++	while (flag)
++	{
++		flag = do_cmd_squelch_aux();
++	}
++
++	/* Rearrange all the stacks to reflect squelch menus were touched. */
++	for(x = 0; x < DUNGEON_WID; x++)
++	{
++	  	for(y = 0; y < DUNGEON_HGT; y++)
++		{
++	    	rearrange_stack(y, x);
++		}
++	}
++
++	/* Restore the screen */
++	Term_load();
++
++	return;
++}
++
++/*
++ * Determines if an object is going to be squelched on identification.
++ * Input:
++ *  o_ptr   : This is a pointer to the object type being identified.
++ *  feeling : This is the feeling of the object if it is being
++ *            pseudoidentified or 0 if the object is being identified.
++ *  fullid  : Is the object is being identified?
++ *
++ * Output: One of the three above values.
++ */
++
++int squelch_itemp(object_type *o_ptr, byte feelings, bool fullid)
++{
++  	int i, num, result;
++  	byte feel;
++
++  	/* default */
++  	result = SQUELCH_NO;
++
++
++	/* Squelch some ego items if known */
++	if (fullid && (ego_item_p(o_ptr)) && (e_info[o_ptr->name2].squelch))
++	{
++		return ((o_ptr->note) ? SQUELCH_FAILED: SQUELCH_YES);
++	}
++
++  	/* Check to see if the object is eligible for squelching on id. */
++  	num = -1;
++
++	/*find the appropriate squelch group*/
++  	for (i=0; tvals[i].tval; i++)
++  	{
++  		if (tvals[i].tval == o_ptr->tval)
++		{
++
++      		num = i;
++
++    	}
++  	}
++
++	/*never squelched*/
++  	if (num == -1) return result;
++
++  	/*
++   	 * Get the "feeling" of the object.  If the object is being identified
++   	 * get the feeling returned by a heavy pseudoid.
++   	 */
++  	feel = feelings;
++
++	/*handle fully identified objects*/
++  	if (fullid)  feel = value_check_aux1(o_ptr);
++
++  	/* Get result based on the feeling and the squelch_level */
++  	switch (squelch_level[num])
++  	{
++   		case SQUELCH_NONE:
++		{
++      		return result;
++      		break;
++		}
++
++    	case SQUELCH_CURSED:
++		{
++      		result = (((feel==INSCRIP_BROKEN) ||
++		 	(feel==INSCRIP_TERRIBLE) ||
++		 	(feel==INSCRIP_WORTHLESS) ||
++		 	(feel==INSCRIP_CURSED)) ? SQUELCH_YES : SQUELCH_NO);
++      		break;
++		}
++
++   		case SQUELCH_AVERAGE:
++		{
++     		result = (((feel==INSCRIP_BROKEN) ||
++		 	(feel==INSCRIP_TERRIBLE) ||
++		 	(feel==INSCRIP_WORTHLESS) ||
++		 	(feel==INSCRIP_CURSED) ||
++		 	(feel==INSCRIP_AVERAGE)) ? SQUELCH_YES : SQUELCH_NO);
++      		break;
++		}
++
++    	case SQUELCH_GOOD_STRONG:
++		{
++      		result = ((feel==INSCRIP_BROKEN) ||
++		 	(feel==INSCRIP_TERRIBLE) ||
++		 	(feel==INSCRIP_WORTHLESS) ||
++		 	(feel==INSCRIP_CURSED) ||
++		 	(feel==INSCRIP_AVERAGE) ||
++		 	((feel==INSCRIP_GOOD)
++			  && (cp_ptr->flags & CF_PSEUDO_ID_HEAVY))) ? SQUELCH_YES : SQUELCH_NO;
++     		 break;
++		}
++
++		case SQUELCH_GOOD_WEAK:
++		{
++      		result = ((feel==INSCRIP_BROKEN) ||
++		 			   (feel==INSCRIP_TERRIBLE) ||
++		 			   (feel==INSCRIP_WORTHLESS) ||
++		 			   (feel==INSCRIP_CURSED) ||
++		 			   (feel==INSCRIP_AVERAGE) ||
++					   (feel==INSCRIP_GOOD)) ? SQUELCH_YES : SQUELCH_NO;
++     		 break;
++		}
++
++    	case SQUELCH_ALL:
++		{
++      		result = SQUELCH_YES;
++      		break;
++		}
++    }
++
++
++  	if (result==SQUELCH_NO) return result;
++
++  	/* Squelching will fail on an artifact */
++  	if ((artifact_p(o_ptr)) || (o_ptr->note)) result = SQUELCH_FAILED;
++
++  	return result;
++}
++
++/*
++ * This performs the squelch, actually removing the item from the
++ * game.  It returns 1 if the item was squelched, and 0 otherwise.
++ * This return value is never actually used.
++ */
++int do_squelch_item(int squelch, int item, object_type *o_ptr)
++{
++
++  	if (squelch != SQUELCH_YES) return 0;
++
++
++  	if (item >= 0)
++	{
++    	inven_item_increase(item, -o_ptr->number);
++    	inven_item_optimize(item);
++  	}
++
++  	else
++	{
++    	floor_item_increase(0 - item, -o_ptr->number);
++    	floor_item_optimize(0 - item);
++  	}
++
++  	return 1;
++}
++
++void rearrange_stack(int y, int x)
++{
++  s16b o_idx, next_o_idx;
++  s16b first_bad_idx, first_good_idx, cur_bad_idx, cur_good_idx;
++
++  object_type *o_ptr;
++
++  bool sq_flag=FALSE;
++
++  /* Initialize */
++  first_bad_idx = 0;
++  first_good_idx = 0;
++  cur_bad_idx = 0;
++  cur_good_idx = 0;
++
++  /*go through all the objects*/
++  for(o_idx = cave_o_idx[y][x]; o_idx; o_idx = next_o_idx)
++  {
++    	o_ptr = &(o_list[o_idx]);
++    	next_o_idx = o_ptr->next_o_idx;
++
++		/*is it marked for squelching*/
++    	sq_flag = ((k_info[o_ptr->k_idx].squelch == SQUELCH_ALWAYS) &&
++				   (k_info[o_ptr->k_idx].aware));
++
++    	if (sq_flag)
++		{
++      		if (first_bad_idx == 0)
++			{
++				first_bad_idx = o_idx;
++				cur_bad_idx = o_idx;
++      		}
++
++			else
++			{
++				o_list[cur_bad_idx].next_o_idx = o_idx;
++				cur_bad_idx = o_idx;
++      		}
++    	}
++
++		else
++
++		{
++      		if (first_good_idx==0)
++			{
++				first_good_idx = o_idx;
++				cur_good_idx = o_idx;
++			}
++
++			else
++			{
++				o_list[cur_good_idx].next_o_idx = o_idx;
++				cur_good_idx = o_idx;
++      		}
++    	}
++  	}
++
++  	if (first_good_idx != 0)
++	{
++    	cave_o_idx[y][x] = first_good_idx;
++    	o_list[cur_good_idx].next_o_idx = first_bad_idx;
++    	o_list[cur_bad_idx].next_o_idx = 0;
++  	}
++
++	else
++	{
++    	cave_o_idx[y][x] = first_bad_idx;
++  	}
++}
++
++
++
++void do_squelch_pile(int y, int x)
++{
++
++  	s16b o_idx, next_o_idx;
++  	object_type *o_ptr;
++  	bool sq_flag=FALSE;
++
++	for(o_idx = cave_o_idx[y][x]; o_idx; o_idx = next_o_idx)
++	{
++
++    	o_ptr = &(o_list[o_idx]);
++
++    	next_o_idx = o_ptr->next_o_idx;
++
++   		sq_flag =  ((k_info[o_ptr->k_idx].squelch == SQUELCH_ALWAYS) &&
++	   					(k_info[o_ptr->k_idx].aware));
++
++		/*hack - never squelch artifacts*/
++		if artifact_p(o_ptr) sq_flag = FALSE;
++
++		/*always squelch "&nothing*/
++		if (!o_ptr->k_idx) sq_flag = TRUE;
++
++		/*never delete quest items*/
++    	if ((sq_flag))
++		{
++      		delete_object_idx(o_idx);
++		}
++  	}
++}
++
++
++int get_autoinscription_index(s16b k_idx)
++{
++	int i;
++
++	for(i = 0; i < inscriptions_count; i++)
++	{
++		if(k_idx == inscriptions[i].kind_idx)
++		{
++			return i;
++		}
++	}
++
++	return -1;
++}
++
++
++/*Put the autoinscription on an object*/
++int apply_autoinscription(object_type *o_ptr)
++{
++	char o_name[80];
++	cptr note = get_autoinscription(o_ptr->k_idx);
++	cptr existingInscription = quark_str(o_ptr->note);
++
++	/* Don't inscribe unaware objects */
++	if (!note || !object_aware_p(o_ptr))
++	{
++		return 0;
++	}
++
++	/* Don't re-inscribe if it's already correctly inscribed */
++	if(existingInscription && streq(note, existingInscription))
++	{
++		return 0;
++	}
++
++	object_desc(o_name, sizeof(o_name), o_ptr, TRUE, 3);
++
++	o_ptr->note = note[0] == 0 ? 0 : quark_add(note);
++	msg_format("You autoinscribe %s.", o_name);
++
++	return 1;
++}
++
++
++int remove_autoinscription(s16b kind)
++{
++	int i = get_autoinscription_index(kind);
++
++	/* It's not here, */
++	if(i == -1) return 0;
++
++	while(i < inscriptions_count - 1)
++	{
++
++		inscriptions[i] = inscriptions[i+1];
++		i++;
++	}
++
++	inscriptions_count--;
++
++	return 1;
++}
++
++
++
++
++int add_autoinscription(s16b kind, cptr inscription)
++{
++	int index;
++
++	if(kind == 0)
++	{
++		/* paranoia */
++		return 0;
++	}
++
++	if(!inscription || inscription[0] == 0)
++	{
++		return remove_autoinscription(kind);
++	}
++
++	index = get_autoinscription_index(kind);
++
++	if(index == -1)
++	{
++		index = inscriptions_count;
++	}
++
++	if(index >= AUTOINSCRIPTIONS_MAX)
++	{
++		msg_format("This inscription (%s) cannot be added, "
++			"because the inscription array is full!", inscription);
++		return 0;
++	}
++
++	inscriptions[index].kind_idx = kind;
++	inscriptions[index].inscription_idx = quark_add(inscription);
++
++	if(index == inscriptions_count)
++	{
++		/* Only increment count if inscription added to end of array */
++		inscriptions_count++;
++	}
++
++	return 1;
++}
++
++
++void autoinscribe_ground(void)
++{
++	int py = p_ptr->py;
++	int px = p_ptr->px;
++	s16b this_o_idx, next_o_idx = 0;
++
++	/* Scan the pile of objects */
++	for (this_o_idx = cave_o_idx[py][px]; this_o_idx; this_o_idx = next_o_idx)
++	{
++		/* Get the next object */
++		next_o_idx = o_list[this_o_idx].next_o_idx;
++
++		/* Apply an autoinscription */
++		apply_autoinscription(&o_list[this_o_idx]);
++	}
++}
++
++void autoinscribe_pack(void)
++{
++	int i;
++
++	for (i = INVEN_PACK; i > 0; i--)
++	{
++		/* Skip empty items */
++		if(!inventory[i].k_idx) continue;
++
++		apply_autoinscription(&inventory[i]);
++	}
++}
++
++/* Convert the values returned by squelch_itemp to string */
++char *squelch_to_label(int squelch)
++{
++  	if (squelch == SQUELCH_YES) return ("(Squelched)");
++
++	if (squelch == SQUELCH_FAILED) return ("(Squelch Failed)");
++
++	return ("");
++}
++
+diff -Nru --strip-trailing-cr angband-3.0.6/src/store.c angband-3.0.6-squelch/src/store.c
+--- angband-3.0.6/src/store.c	2005-02-23 13:14:45.000000000 -0800
++++ angband-3.0.6-squelch/src/store.c	2005-09-19 23:29:32.000000000 -0700
+@@ -1998,6 +1998,9 @@
+ 		/* Haggle for it */
+ 		if (sell_haggle(i_ptr, &price))
+ 		{
++			/*Do we squelch the item upon identification*/
++			int squelch = SQUELCH_NO;
++
+ 			/* Say "okay" */
+ 			say_comment_accept();
+ 
+@@ -2020,6 +2023,9 @@
+ 			object_aware(o_ptr);
+ 			object_known(o_ptr);
+ 
++			/* Squelch it,  only if there will be items left over! */
++			if (amt < o_ptr->number) squelch = squelch_itemp(o_ptr, 0, TRUE);
++
+ 			/* Combine / Reorder the pack (later) */
+ 			p_ptr->notice |= (PN_COMBINE | PN_REORDER);
+ 
+@@ -2058,12 +2064,25 @@
+ 
+ 			/* Analyze the prices (and comment verbally) */
+ 			purchase_analyze(price, value, dummy);
++			/*
++			 * Check to see if anything left in the pack should be squelched.
++			 * We must make sure to do this before the item is sold
++			 */
++			if (squelch == SQUELCH_YES)
++			{
++				msg_format("In your pack: %s (%c).  %s",
++							o_name, index_to_label(item),
++							squelch_to_label(squelch));
+ 
+-			/* Take the object from the player */
+-			inven_item_increase(item, -amt);
+-			inven_item_describe(item);
+-			inven_item_optimize(item);
+-
++				do_squelch_item(squelch, item, o_ptr);
++			}
++			else 
++			{
++				/* Take the object from the player */
++				inven_item_increase(item, -amt);
++				inven_item_describe(item);
++				inven_item_optimize(item);
++			}
+ 			/* Handle stuff */
+ 			handle_stuff();
+ 
+@@ -2415,7 +2434,7 @@
+ 		/* Take notes */
+ 		case ':':
+ 		{
+-			do_cmd_note();
++			do_cmd_note("", 0);
+ 			break;
+ 		}
+ 
+diff -Nru --strip-trailing-cr angband-3.0.6/src/tables.c angband-3.0.6-squelch/src/tables.c
+--- angband-3.0.6/src/tables.c	2004-09-25 02:50:00.000000000 -0700
++++ angband-3.0.6-squelch/src/tables.c	2005-09-19 23:29:32.000000000 -0700
+@@ -1470,9 +1470,9 @@
+ 	"auto_more",				/* OPT_auto_more */
+ 	"smart_monsters",			/* OPT_smart_monsters */
+ 	"smart_packs",				/* OPT_smart_packs */
++	"hp_changes_color",         /* OPT_hp_changes_color*/
+ 	NULL,						/* xxx */
+-	NULL,						/* xxx */
+-	NULL,						/* xxx */
++	"mark_squelch_items",       /* opt_mark_squelch_items */
+ 	NULL,						/* xxx */
+ 	NULL,						/* xxx */
+ 	NULL,						/* xxx */
+@@ -1533,7 +1533,7 @@
+ 	"birth_no_artifacts",		/* OPT_birth_no_artifacts */
+ 	"birth_rand_artifacts",		/* OPT_birth_rand_artifacts */
+ 	"birth_no_stacking",		/* OPT_birth_no_stacking */
+-	NULL,						/* xxx */
++	"birth_take_notes",			/* OPT_birth_take_notes */
+ 	NULL,						/* xxx */
+ 	NULL,						/* xxx */
+ 	NULL,						/* xxx */
+@@ -1597,7 +1597,7 @@
+ 	"adult_no_artifacts",		/* OPT_adult_no_artifacts */
+ 	"adult_rand_artifacts",		/* OPT_adult_rand_artifacts */
+ 	"adult_no_stacking",		/* OPT_adult_no_stacking */
+-	NULL,						/* xxx */
++	"adult_take_notes",			/* OPT_adult_take_notes */
+ 	NULL,						/* xxx */
+ 	NULL,						/* xxx */
+ 	NULL,						/* xxx */
+@@ -1734,9 +1734,9 @@
+ 	"Automatically clear '-more-' prompts",		/* OPT_auto_more */
+ 	"Monsters behave more intelligently",		/* OPT_smart_monsters */
+ 	"Monsters act smarter in groups (v.slow)",	/* OPT_smart_packs */
++	"Player color indicates low hit points",    /* OPT_hp_changes_color */
+ 	NULL,										/* xxx */
+-	NULL,										/* xxx */
+-	NULL,										/* xxx */
++	"Items marked for squelch appear as dot",   /* OPT_mark_squelch_items */
+ 	NULL,										/* xxx */
+ 	NULL,										/* xxx */
+ 	NULL,										/* xxx */
+@@ -1797,7 +1797,7 @@
+ 	"Birth: Restrict creation of artifacts",	/* OPT_birth_no_artifacts */
+ 	"Birth: Randomize some of the artifacts (beta)",	/* OPT_birth_rand_artifacts */
+ 	"Birth: Don't stack objects on the floor",	/* OPT_birth_no_stacking */
+-	NULL,										/* xxx */
++	"Birth: Have notes written to a file",		/* OPT_birth_take_notes */
+ 	NULL,										/* xxx */
+ 	NULL,										/* xxx */
+ 	NULL,										/* xxx */
+@@ -1861,7 +1861,7 @@
+ 	"Adult: Restrict creation of artifacts",	/* OPT_adult_no_artifacts */
+ 	"Adult: Randomize some of the artifacts (beta)",	/* OPT_adult_rand_artifacts */
+ 	"Adult: Don't stack objects on the floor",	/* OPT_adult_adult_no_stacking */
+-	NULL,										/* xxx */
++	"Adult: Have notes to written to a file",   /* OPT_adult_take_notes */
+ 	NULL,										/* xxx */
+ 	NULL,										/* xxx */
+ 	NULL,										/* xxx */
+@@ -1998,9 +1998,9 @@
+ 	FALSE,		/* OPT_auto_more */
+ 	FALSE,		/* OPT_smart_monsters */
+ 	FALSE,		/* OPT_smart_packs */
++	FALSE,		/* OPT_hp_changes_color */
+ 	FALSE,		/* xxx */
+-	FALSE,		/* xxx */
+-	FALSE,		/* xxx */
++	FALSE,		/* OPT_mark_squelch_items */
+ 	FALSE,		/* xxx */
+ 	FALSE,		/* xxx */
+ 	FALSE,		/* xxx */
+@@ -2061,7 +2061,7 @@
+ 	FALSE,		/* OPT_birth_no_artifacts */
+ 	FALSE,		/* OPT_birth_rand_artifacts */
+ 	FALSE,		/* OPT_birth_no_stacking */
+-	FALSE,		/* xxx */
++	TRUE,		/* OPT_birth_take_notes */
+ 	FALSE,		/* xxx */
+ 	FALSE,		/* xxx */
+ 	FALSE,		/* xxx */
+@@ -2125,7 +2125,7 @@
+ 	FALSE,		/* OPT_adult_no_artifacts */
+ 	FALSE,		/* OPT_adult_rand_artifacts */
+ 	FALSE,		/* OPT_adult_no_stacking */
+-	FALSE,		/* xxx */
++	TRUE,       /* OPT_adult_take_notes */
+ 	FALSE,		/* xxx */
+ 	FALSE,		/* xxx */
+ 	FALSE,		/* xxx */
+@@ -2305,8 +2305,8 @@
+  		OPT_center_player,
+  		OPT_run_avoid_center,
+ 		OPT_show_piles,
+-		OPT_NONE,
+-		OPT_NONE,
++		OPT_hp_changes_color,
++		OPT_mark_squelch_items,
+ 		OPT_NONE,
+ 		OPT_NONE,
+ 		OPT_NONE,
+@@ -2325,7 +2325,7 @@
+ 		OPT_birth_no_artifacts,
+ 		OPT_birth_rand_artifacts,
+ 		OPT_birth_no_stacking,
+-		OPT_NONE,
++		OPT_birth_take_notes,
+ 		OPT_NONE,
+ 		OPT_NONE,
+ 		OPT_NONE,
+diff -Nru --strip-trailing-cr angband-3.0.6/src/types.h angband-3.0.6-squelch/src/types.h
+--- angband-3.0.6/src/types.h	2004-10-31 01:37:36.000000000 -0800
++++ angband-3.0.6-squelch/src/types.h	2005-09-19 23:29:32.000000000 -0700
+@@ -86,6 +86,8 @@
+ typedef struct player_other player_other;
+ typedef struct player_type player_type;
+ typedef struct start_item start_item;
++typedef struct editing_buffer editing_buffer;
++typedef struct autoinscription autoinscription;
+ 
+ 
+ 
+@@ -194,6 +196,11 @@
+ 	bool aware;			/* The player is "aware" of the item's effects */
+ 
+ 	bool tried;			/* The player has "tried" one of the items */
++
++	byte squelch;		/* Squelch setting for the particular item */
++
++	bool everseen;		/* Used to despoilify squelch menus */
++
+ };
+ 
+ 
+@@ -271,6 +278,10 @@
+ 	byte max_pval;		/* Maximum pval */
+ 
+ 	byte xtra;			/* Extra sustain/resist/power */
++
++	bool everseen;		/* Do not spoil squelch menus */
++	bool squelch;		/* Squelch this ego-item */
++
+ };
+ 
+ 
+@@ -1109,3 +1120,43 @@
+ 	byte x_attr;    /* Desired flavor attribute */
+ 	char x_char;    /* Desired flavor character */
+ };
++
++/*
++ * The structure editing_buffer allows to quickly insert and delete text at
++ * every position of a string. It is based on the Emacs editor.
++ * It has a internal buffer, a fake "cursor" and a gap that begins at this
++ * "cursor".
++ * Maybe the most important operation is "set_position". It moves the gap
++ * at any position of the buffer. Because of it, insertions and deletions
++ * are really fast operations.
++ *
++ * This is a representation of the buffer:
++ *
++ * xxxxxxx.ooooxxxx             x: text
++ *         |                    o: gap (it must be '\0')
++ *         pos ("cursor")       .: the character before the "cursor"
++ *
++ * This is the same buffer after moving the "cursor" one position to the left:
++ *
++ * xxxxxxxoooo.xxxx             note the new position of "."
++ *        |
++ *        pos ("cursor")
++ */
++struct editing_buffer
++{
++	/* Public fields, Read ONLY */
++	size_t pos;
++
++	/* Private fields */
++	size_t gap_size, max_size;
++	char *buf;
++};
++
++
++/*Information for object auto-inscribe*/
++struct autoinscription
++{
++    s16b    kind_idx;
++    s16b    inscription_idx;
++};
++
+diff -Nru --strip-trailing-cr angband-3.0.6/src/use-obj.c angband-3.0.6-squelch/src/use-obj.c
+--- angband-3.0.6/src/use-obj.c	2005-05-14 02:26:47.000000000 -0700
++++ angband-3.0.6-squelch/src/use-obj.c	2005-09-19 23:29:32.000000000 -0700
+@@ -717,7 +717,7 @@
+ 	{
+ 		case SV_SCROLL_DARKNESS:
+ 		{
+-			if (!p_ptr->resist_blind)
++			if (!p_ptr->resist_blind&& !p_ptr->resist_dark)
+ 			{
+ 				(void)set_blind(p_ptr->blind + 3 + randint(5));
+ 			}
+@@ -1038,7 +1038,7 @@
+ 	{
+ 		case SV_STAFF_DARKNESS:
+ 		{
+-			if (!p_ptr->resist_blind)
++			if (!p_ptr->resist_blind && !p_ptr->resist_dark)
+ 			{
+ 				if (set_blind(p_ptr->blind + 3 + randint(5))) *ident = TRUE;
+ 			}
+@@ -2057,7 +2057,7 @@
+ 			case ACT_RECHARGE1:
+ 			{
+ 				msg_format("Your %s glows bright yellow...", o_name);
+-				if (!recharge(60)) return FALSE;
++				if(!recharge(60)) return FALSE;
+ 				break;
+ 			}
+ 
+diff -Nru --strip-trailing-cr angband-3.0.6/src/util.c angband-3.0.6-squelch/src/util.c
+--- angband-3.0.6/src/util.c	2004-12-12 03:58:05.000000000 -0800
++++ angband-3.0.6-squelch/src/util.c	2005-09-19 23:29:32.000000000 -0700
+@@ -3705,6 +3705,61 @@
+ 	return (amt);
+ }
+ 
++/*
++ * Hack - duplication of get_check prompt to give option of setting destroyed
++ * option to squelch.
++ *
++ * 0 - No
++ * 1 = Yes
++ * 2 = third option
++ *
++ * The "prompt" should take the form "Query? "
++ *
++ * Note that "[y/n/{char}]" is appended to the prompt.
++ */
++int get_check_other(cptr prompt, char other)
++{
++	char ch;
++
++	char buf[80];
++
++	/*default set to no*/
++	int result = 0;
++
++	/* Paranoia XXX XXX XXX */
++	message_flush();
++
++	/* Hack -- Build a "useful" prompt */
++	strnfmt(buf, 78, "%.70s[y/n/%c] ", prompt, other);
++
++	/* Prompt for it */
++	prt(buf, 0, 0);
++
++	/* Get an acceptable answer */
++	while (TRUE)
++	{
++		ch = inkey();
++		if (quick_messages) break;
++		if (ch == ESCAPE) break;
++		if (strchr("YyNn", ch)) break;
++		if (ch == toupper(other)) break;
++		if (ch == tolower(other)) break;
++		bell("Illegal response to question!");
++	}
++
++	/* Erase the prompt */
++	prt("", 0, 0);
++
++	/* Normal negation */
++	if ((ch == 'Y') || (ch == 'y')) result = 1;
++	/*other option*/
++	else if ((ch == toupper(other)) || (ch == tolower(other))) result = 2;
++	/*all else default to no*/
++
++	/* Success */
++	return (result);
++}
++
+ 
+ /*
+  * Verify something with the user
+@@ -4409,6 +4464,223 @@
+ 
+ #endif /* ALLOW_REPEAT */
+ 
++/*
++ * Initialize a editing_buffer structure. It takes a pointer to a valid
++ * structure, an optional string used to initialize the contents of the
++ * buffer and a maximum buffer size (it must include an extra space for an
++ * ending '\0').
++ */
++void editing_buffer_init(editing_buffer *eb_ptr, const char *buf,
++    size_t max_size)
++{
++  	size_t len = 0;
++
++  	if (!eb_ptr) return;
++
++  	if (buf) len = strlen(buf);
++
++  	/* Alloc a clean buffer */
++  	C_MAKE(eb_ptr->buf, max_size, char);
++
++  	/* Copy the initial string, if any */
++  	if (len > 0) strcpy(eb_ptr->buf, buf);
++
++  	/* Initialize the remaining fields */
++  	eb_ptr->pos = len;
++
++  	/* Important, we keep one space unused to ensure the correctness of the
++   	 * "print" function */
++  	eb_ptr->max_size = max_size - 1;
++  	eb_ptr->gap_size = eb_ptr->max_size - len;
++}
++
++/*
++ * Free the resources used by the editing_buffer structure.
++ */
++void editing_buffer_destroy(editing_buffer *eb_ptr)
++{
++  	/* Destroy the buffer */
++  	if (eb_ptr && eb_ptr->buf)
++  	{
++    	FREE(eb_ptr->buf);
++    	eb_ptr->buf = NULL;
++  	}
++}
++
++/*
++ * Puts a character on the buffer. Returns a non-zero value if it succeds.
++ */
++int editing_buffer_put_chr(editing_buffer *eb_ptr, char ch)
++{
++  	if (!eb_ptr) return 0;
++
++  	/* Do not have space */
++  	if (eb_ptr->gap_size < 1) return 0;
++
++  	/* Copy the character. Advance the "cursor" */
++  	eb_ptr->buf[eb_ptr->pos++] = ch;
++
++  	/* We have less space */
++  	--eb_ptr->gap_size;
++
++  	return 1;
++}
++/*
++ * Changes the position of the "cursor" in the buffer.
++ * Valid values for "new_pos" are from 0 to EDITING_BUFFER_LEN(eb_ptr).
++ * BEWARE: the type of "new_pos" is "size_t" (unsigned).
++ * Returns a non-zero value if it succeds.
++ */
++int editing_buffer_set_position(editing_buffer *eb_ptr, size_t new_pos)
++{
++  	if (!eb_ptr) return 0;
++
++  	/* Valid position? */
++  	if (new_pos > EDITING_BUFFER_LEN(eb_ptr)) return 0;
++
++  	/* Trivial */
++  	if (new_pos == eb_ptr->pos) return 1;
++
++  	/* Easy case, we change only the "cursor" */
++  	if (eb_ptr->gap_size < 1)
++ 	{
++    	eb_ptr->pos = new_pos;
++    	return 1;
++  	}
++
++  	/* Move the gap. Note that if "new_pos" defers of "pos" by +-1, only
++   	 * one character is moved (fast keyboard arrows) */
++
++  	/* First case. "new_pos" is after the gap */
++  	while (eb_ptr->pos < new_pos)
++  	{
++    	eb_ptr->buf[eb_ptr->pos] = eb_ptr->buf[eb_ptr->pos + eb_ptr->gap_size];
++
++		/* Important, keep the gap clean */
++    	eb_ptr->buf[eb_ptr->pos + eb_ptr->gap_size] = '\0';
++    	++eb_ptr->pos;
++  	}
++
++  	/* Second case. "new_pos" is before the gap */
++  	while (eb_ptr->pos > new_pos)
++  	{
++    	--eb_ptr->pos;
++    	eb_ptr->buf[eb_ptr->pos + eb_ptr->gap_size] = eb_ptr->buf[eb_ptr->pos];
++
++		/* Important, keep the gap clean */
++    	eb_ptr->buf[eb_ptr->pos] = '\0';
++  	}
++
++  	return 1;
++}
++
++/*
++ * Hack - Efficient printing function.
++ */
++void editing_buffer_display(editing_buffer *eb_ptr, int x, int y, byte col)
++{
++  	if (!eb_ptr) return;
++
++  	Term_erase(x, y, (int)eb_ptr->max_size);
++
++  	/* Print the beginning of the buffer */
++  	/* In many cases, it is all we have to do */
++
++  	/* Here is the reason why the gap should be "clean" */
++  	/* It ensures an ending '\0' */
++  	Term_putstr(x, y, -1, col, eb_ptr->buf);
++
++  	/* Unless this happens */
++
++  	/* Here is the reason why we reserved one space in editing_buffer_init */
++  	/* Again, it ensures an ending '\0' */
++  	if ((eb_ptr->pos < EDITING_BUFFER_LEN(eb_ptr)) && (eb_ptr->gap_size > 0))
++    	Term_putstr(x + eb_ptr->pos, y, -1, col,
++					eb_ptr->buf + eb_ptr->pos + eb_ptr->gap_size);
++}
++
++/*
++ * Deletes the character under the "cursor". Returns 1 if it succeds.
++ */
++int editing_buffer_delete(editing_buffer *eb_ptr)
++{
++  	if (!eb_ptr) return 0;
++
++  	/* We are at the end of the buffer */
++  	if (eb_ptr->pos == EDITING_BUFFER_LEN(eb_ptr))  return 0;
++
++ 	/* Important, keep the gap clean */
++  	eb_ptr->buf[eb_ptr->pos + eb_ptr->gap_size] = '\0';
++
++  	/* We have more space */
++  	++eb_ptr->gap_size;
++
++  	return 1;
++}
++
++/*
++ * Removes all the contents of the buffer.
++ */
++void editing_buffer_clear(editing_buffer *eb_ptr)
++{
++  	if (!eb_ptr) return;
++
++  	/* Clear the buffer */
++  	C_WIPE(eb_ptr->buf, eb_ptr->max_size, char);
++
++  	/* Reinitialize the remaining fields but "max_size" */
++  	eb_ptr->pos = 0;
++  	eb_ptr->gap_size = eb_ptr->max_size;
++}
++
++/*
++ * Obtains a copy of the contents of the buffer.
++ */
++void editing_buffer_get_all(editing_buffer *eb_ptr, char buf[], size_t max_size)
++{
++  	size_t i, n = EDITING_BUFFER_LEN(eb_ptr);
++  	if (!eb_ptr) return;
++
++  	/* Note the use of EDITING_BUFFER_GET to ignore the gap */
++  	for (i = 0; (i < n) && (i < max_size - 1); i++)
++	{
++    	buf[i] = EDITING_BUFFER_GET(eb_ptr, i);
++	}
++
++  	/* Terminate the string */
++  	buf[i] = '\0';
++}
++
++
++
++
++/*
++ * Inserts a string in the buffer. Returns the number of written characters.
++ * "n" is the maximum number of characters to write, -1 means all the string.
++ */
++int editing_buffer_put_str(editing_buffer *eb_ptr, const char *str, int n)
++{
++	const char *p_str;
++
++	if (!eb_ptr || !str) return 0;
++
++	for (p_str = str; *p_str; p_str++)
++	{
++   		/* We do not have space */
++    	if (eb_ptr->gap_size < 1) break;
++
++    	/* Check max input size */
++   		if ((n >= 0) && (p_str - str >= n)) break;
++
++    	/* Insert the character. Advance the cursor */
++    	eb_ptr->buf[eb_ptr->pos++] = *p_str;
++
++		/* We have less space */
++    	--eb_ptr->gap_size;
++  	}
++
++  	return (p_str - str);
++}
+ 
+ #ifdef SUPPORT_GAMMA
+ 
+@@ -4510,3 +4782,6 @@
+ }
+ 
+ #endif /* SUPPORT_GAMMA */
++
++
++
+diff -Nru --strip-trailing-cr angband-3.0.6/src/variable.c angband-3.0.6-squelch/src/variable.c
+--- angband-3.0.6/src/variable.c	2005-03-05 01:50:56.000000000 -0800
++++ angband-3.0.6-squelch/src/variable.c	2005-09-19 23:29:32.000000000 -0700
+@@ -838,3 +838,15 @@
+  * Use transparent tiles
+  */
+ bool use_transparency = FALSE;
++
++/*
++ * External notes text file
++ */
++char notes_fname[1024] = "";
++FILE *notes_file = NULL;
++
++
++autoinscription* inscriptions = 0;
++u16b inscriptions_count = 0;
++
++
+diff -Nru --strip-trailing-cr angband-3.0.6/src/xtra1.c angband-3.0.6-squelch/src/xtra1.c
+--- angband-3.0.6/src/xtra1.c	2004-06-25 10:14:35.000000000 -0700
++++ angband-3.0.6-squelch/src/xtra1.c	2005-09-19 23:29:32.000000000 -0700
+@@ -652,7 +652,7 @@
+ 	}
+ 
+ 	/* Display the speed */
+-	c_put_str(attr, format("%-14s", buf), row, col);
++	c_put_str(attr, format("%-10s", buf), row, col);
+ }
+ 
+ 
+@@ -660,11 +660,11 @@
+ {
+ 	if (p_ptr->new_spells)
+ 	{
+-		put_str("Study", row, col);
++		put_str(format("Study (%d)", p_ptr->new_spells), row, col);
+ 	}
+ 	else
+ 	{
+-		put_str("     ", row, col);
++		put_str("          ", row, col);
+ 	}
+ }
+ 
+@@ -2817,6 +2817,13 @@
+ 		p_ptr->notice &= ~(PN_REORDER);
+ 		reorder_pack();
+ 	}
++	if(p_ptr->notice & PN_AUTOINSCRIBE)
++	{
++		p_ptr->notice &= ~(PN_AUTOINSCRIBE);
++		autoinscribe_pack();
++		autoinscribe_ground();
++	}
++
+ }
+ 
+ 
+@@ -3002,6 +3009,18 @@
+ 		p_ptr->redraw &= ~(PR_HP);
+ 		prt_cur_hp(ROW_CURHP, COL_CURHP);
+ 		prt_max_hp(ROW_MAXHP, COL_MAXHP);
++
++		/*
++		 * hack:  redraw player, since the player's color
++		 * now indicates approximate health.  Note that
++		 * using this command when graphics mode is on
++		 * causes the character to be a black square.
++		 */
++		if ((hp_changes_color) && (arg_graphics == GRAPHICS_NONE))
++		{
++		 	lite_spot(p_ptr->py, p_ptr->px);
++		}
++
+ 	}
+ 
+ 	if (p_ptr->redraw & (PR_MANA))
+diff -Nru --strip-trailing-cr angband-3.0.6/src/xtra2.c angband-3.0.6-squelch/src/xtra2.c
+--- angband-3.0.6/src/xtra2.c	2005-04-03 01:41:51.000000000 -0800
++++ angband-3.0.6-squelch/src/xtra2.c	2005-09-19 23:29:32.000000000 -0700
+@@ -1724,9 +1724,30 @@
+ 		/* Gain a level */
+ 		p_ptr->lev++;
+ 
+-		/* Save the highest level */
+-		if (p_ptr->lev > p_ptr->max_lev) p_ptr->max_lev = p_ptr->lev;
+ 
++		/* Save the highest level*/
++		if (p_ptr->lev > p_ptr->max_lev)
++		{
++	     	/* update the highest level*/
++			p_ptr->max_lev = p_ptr->lev;
++
++			/* If auto-note taking enabled, write a note to the file every 5th level. */
++            if ((adult_take_notes) && ((p_ptr->lev % 5) == 0))
++
++			{
++
++                    char buf[120];
++
++                   /* Build the message */
++                   sprintf(buf, "Reached level %d", p_ptr->lev);
++
++                   /* Write message */
++                   do_cmd_note(buf,  p_ptr->depth);
++
++           	}
++
++
++		}
+ 		/* Message */
+ 		message_format(MSG_LEVEL, p_ptr->lev, "Welcome to level %d.", p_ptr->lev);
+ 
+@@ -2055,6 +2076,24 @@
+ 	/* Update monster list window */
+ 	p_ptr->window |= PW_MONLIST;
+ 
++
++	/* If the kill is a Unique, and the notes option is on, write a note.*/
++   	if ((r_ptr->flags1 & RF1_UNIQUE) && (adult_take_notes))
++	{
++
++		char note2[120];
++
++ 		const char *mon_race = r_name + r_info[m_ptr->r_idx].name;
++
++		/* Write note */
++   		if( monster_nonliving(r_ptr))
++			strncpy(note2, format("Destroyed %s", mon_race), sizeof (note2));
++		else
++			strncpy(note2, format("Killed %s", mon_race), sizeof (note2));
++
++ 		do_cmd_note(note2, p_ptr->depth);
++	}
++
+ 	/* Only process "Quest Monsters" */
+ 	if (!(r_ptr->flags1 & (RF1_QUESTOR))) return;
+ 
+@@ -2169,10 +2208,7 @@
+ 		}
+ 
+ 		/* Death by Physical attack -- non-living monster */
+-		else if ((r_ptr->flags3 & (RF3_DEMON)) ||
+-		         (r_ptr->flags3 & (RF3_UNDEAD)) ||
+-		         (r_ptr->flags2 & (RF2_STUPID)) ||
+-		         (strchr("Evg", r_ptr->d_char)))
++		else if (monster_nonliving(r_ptr))
+ 		{
+ 			message_format(soundfx, m_ptr->r_idx, "You have destroyed %s.", m_name);
+ 		}
+@@ -3636,13 +3672,13 @@
+ 			/* Allow target */
+ 			if ((cave_m_idx[y][x] > 0) && target_able(cave_m_idx[y][x]))
+ 			{
+-				strcpy(info, "q,t,p,o,+,-,<dir>");
++				strcpy(info, "q,t,p,o,+,-,@,<dir>");
+ 			}
+ 
+ 			/* Dis-allow target */
+ 			else
+ 			{
+-				strcpy(info, "q,p,o,+,-,<dir>");
++				strcpy(info, "q,p,o,+,-,@,<dir>");
+ 			}
+ 
+ 			/* Adjust panel if needed */
+@@ -3735,7 +3771,18 @@
+ 					}
+ 					break;
+ 				}
+-
++				case '@':
++				{
++					// recenter screen on target.
++					// TODO: this only works if you're
++					// using Term 0 'angband'
++					if(modify_panel(angband_term[0], 
++							y-SCREEN_HGT/2, x-SCREEN_WID/2))
++					{
++						handle_stuff();
++					}
++					break;
++				}
+ 				default:
+ 				{
+ 					/* Extract direction */
+@@ -3874,7 +3921,18 @@
+ 					done = TRUE;
+ 					break;
+ 				}
+-
++				case '@':
++				{
++					// recenter screen on target.
++					// TODO: this only works if you're
++					// using Term 0 'angband'
++					if(modify_panel(angband_term[0], 
++							y-SCREEN_HGT/2, x-SCREEN_WID/2))
++					{
++						handle_stuff();
++					}
++					break;
++				}
+ 				default:
+ 				{
+ 					/* Extract a direction */

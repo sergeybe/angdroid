@@ -1,0 +1,40 @@
+diff -Nru --strip-trailing-cr angband-3.0.6/src/defines.h angband-3.0.6-android/src/defines.h
+--- angband-3.0.6/src/defines.h	2005-06-18 10:37:15.000000000 -0700
++++ angband-3.0.6-android/src/defines.h	2010-09-28 20:34:55.072791619 -0700
+@@ -47,7 +47,7 @@
+ /*
+  * Current version string
+  */
+-#define VERSION_STRING	"3.0.6"
++#define VERSION_STRING	"3.0.6 squelch.3, apwborg"
+ 
+ 
+ /*
+diff -Nru --strip-trailing-cr angband-3.0.6/src/h-config.h angband-3.0.6-android/src/h-config.h
+--- angband-3.0.6/src/h-config.h	2003-02-14 13:45:22.000000000 -0800
++++ angband-3.0.6-android/src/h-config.h	2010-09-28 20:34:55.068794463 -0700
+@@ -196,7 +196,7 @@
+  */
+ #if !defined(MACINTOSH) && !defined(WINDOWS) && \
+     !defined(MSDOS) && !defined(USE_EMX) && \
+-    !defined(AMIGA) && !defined(RISCOS) && !defined(VM)
++    !defined(AMIGA) && !defined(RISCOS) && !defined(VM) && !defined(USE_AND)
+ # define SET_UID
+ #endif
+ 
+diff -Nru --strip-trailing-cr angband-3.0.6/src/util.c angband-3.0.6-android/src/util.c
+--- angband-3.0.6/src/util.c	2004-12-12 03:58:05.000000000 -0800
++++ angband-3.0.6-android/src/util.c	2010-09-28 21:14:48.000000000 -0700
+@@ -349,7 +349,12 @@
+ 	int fd;
+ 
+ 	/* Prepare the buffer for mkstemp */
++#ifdef USE_AND
++	my_strcpy(buf, ANGBAND_DIR_USER, max);
++	my_strcat(buf, "/anXXXXXX", max);
++#else
+ 	my_strcpy(buf, "/tmp/anXXXXXX", max);
++#endif
+ 
+ 	/* Secure creation of a temporary file */
+ 	fd = mkstemp(buf);
