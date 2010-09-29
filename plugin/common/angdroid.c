@@ -138,8 +138,10 @@ struct term_data
 	/* Other fields if needed XXX XXX XXX */
 };
 
+#ifdef ANGDROID_ANGBAND_PLUGIN
 #include "textui.h" 
 static game_command cmd = { CMD_NULL, 0 };
+#endif
 
 static bool new_game = FALSE;
 
@@ -865,25 +867,31 @@ static void init_stuff()
 	LOGD(android_files_path);
 
 	/* Prepare the filepaths */
+#ifdef ANGDROID_ANGBAND_PLUGIN
 	init_file_paths(android_files_path, android_files_path, android_files_path);
-
 	if (!file_exists(android_files_path))
 	{
 		/* Warning */
 		plog_fmt("Unable to open the '%s' file.", android_files_path);
 		quit("The Angband 'lib' folder is probably missing or misplaced.");
 	}
+#else
+	init_file_paths(android_files_path);
+#endif
 
 	process_player_name(TRUE);
 
+#ifdef ANGDROID_ANGBAND_PLUGIN
 #ifdef USE_SOUND
 
 	/* Set up sound hook */
 	sound_hook = and_sound;
 
 #endif /* USE_SOUND */
+#endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
+#ifdef ANGDROID_ANGBAND_PLUGIN
 static errr get_init_cmd()
 {
 	/* Wait for response */
@@ -907,11 +915,10 @@ static errr and_get_cmd(cmd_context context, bool wait)
 	else
 		return textui_get_cmd(context, wait);
 }
+#endif /* ANGDROID_ANGBAND_PLUGIN */
+
 
 #ifdef ANDROID
-
-
-
 void initGame ()
 {
 	LOGD("initGame");
@@ -951,15 +958,20 @@ void initGame ()
 	TermView_clearKeyBuffer = (*env)->GetMethodID(env, TermViewClass, "clearKeyBuffer", "()V");
 	TermView_onExitGame = (*env)->GetMethodID(env, TermViewClass, "onExitGame", "()V");
 
+#ifdef ANGDROID_ANGBAND_PLUGIN
 	/* Set up the command hook */
 	cmd_get_hook = and_get_cmd;
 
 	LOGD("init_display()");
 	init_display();
+#else
+	LOGD("init_angband()");
+	init_angband();
+#endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
 JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
-	(JNIEnv *env1, jobject obj1, jstring filesPath)
+	(JNIEnv *env1, jobject obj1, jstring pluginPath, jstring libPath, jstring arguments)
 {
 	env = env1;
 
@@ -972,9 +984,9 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 
 	(*jvm)->AttachCurrentThread(jvm, &env, NULL);
 
-	const char *copy_path = (*env)->GetStringUTFChars(env1, filesPath, 0);
+	const char *copy_path = (*env)->GetStringUTFChars(env1, libPath, 0);
 	my_strcpy(android_files_path, copy_path, strlen(copy_path)+1);
-	(*env)->ReleaseStringUTFChars(env1, filesPath, copy_path);
+	(*env)->ReleaseStringUTFChars(env1, libPath, copy_path);
 
 	/* Save objects */
 	TermViewObj = obj1;
@@ -986,7 +998,14 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 
 	/* Start main loop of game */
 	LOGD("play_game()");
+#ifdef ANGDROID_ANGBAND_PLUGIN
 	play_game();
+#else
+	/* Wait for response */
+	pause_line(Term->hgt - 1);
+
+	play_game(FALSE);
+#endif /* ANGDROID_ANGBAND_PLUGIN */
 
 	/* Free resources */
 	LOGD("cleanup_angband()");

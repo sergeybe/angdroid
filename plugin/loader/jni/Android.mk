@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := loader
 LOCAL_CFLAGS := -DUSE_AND
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../jni
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include
 
 LOCAL_LDLIBS := -llog -ldl
 
