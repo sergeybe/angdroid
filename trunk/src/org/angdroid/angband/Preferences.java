@@ -8,6 +8,8 @@ final public class Preferences {
 
 	static final String KEY_FULLSCREEN = "angband.fullscreen";
 
+	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
+
 	Preferences() {
 	}
 }

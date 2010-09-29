@@ -43,12 +43,20 @@ import com.flurry.android.FlurryAgent;
 public class AngbandActivity extends Activity {
 
 	private TermView term;
+	private static String activityFilesPath;
+	private static SharedPreferences pref;
+	private static String[] gamePluginValues;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		activityFilesPath = getFilesDir().getAbsolutePath();
+		pref = getSharedPreferences(Preferences.NAME,MODE_PRIVATE);
+		gamePluginValues = getResources().getStringArray(R.array.gamePluginValues);
 
-		extractAngbandResources();
+		for(int i = 0; i < gamePluginValues.length; i++) {
+			extractAngbandResources(gamePluginValues[i]);
+		}
 
 		setContentView(R.layout.main);
 		term = (TermView) findViewById(R.id.term);
@@ -86,9 +94,6 @@ public class AngbandActivity extends Activity {
 		Log.d("Angband", "onResume");
 		super.onResume();
 
-		SharedPreferences pref = getSharedPreferences(Preferences.NAME,
-				MODE_PRIVATE);
-
 		if (pref.getBoolean(Preferences.KEY_FULLSCREEN, true)) {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		} else {
@@ -96,6 +101,8 @@ public class AngbandActivity extends Activity {
 		}
 		
 		term.setVibrate(pref.getBoolean(Preferences.KEY_VIBRATE, false));
+
+		
 
 		term.onResume();
 	}
@@ -116,12 +123,21 @@ public class AngbandActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	void extractAngbandResources() {
-		File f = new File(getAngbandFilesDirectory());
+	void extractAngbandResources(String pluginName) {
+		File f = new File(getAngbandFilesDirectory(pluginName));
 		f.mkdirs();
 		String abs_path = f.getAbsolutePath();
 
-		InputStream is = getResources().openRawResource(R.raw.zip);
+		InputStream is = null;
+		if (pluginName.compareTo("angband")==0)
+			is = getResources().openRawResource(R.raw.zipangband);
+		else if (pluginName.compareTo("angband306")==0)
+			is = getResources().openRawResource(R.raw.zipangband306);
+		/*
+		else if (pluginName.compareTo("tome")==0) {
+			is = getResources().openRawResource(R.raw.ziptome);
+		}
+		*/
 		ZipInputStream zis = new ZipInputStream(is);
 		ZipEntry ze;
 		boolean filesExist = false;
@@ -223,11 +239,32 @@ public class AngbandActivity extends Activity {
 		return dir.delete();
 	}
 
-	public static String  getAngbandFilesDirectory() {
+	public static String getAngbandFilesDirectory(String pluginName) {
 		return 
 			Environment.getExternalStorageDirectory()
 			+ "/"
-			+ "Android/data/org.angdroid.angband/files/lib";
+			+ "Android/data/org.angdroid.angband/files/lib"
+			+ pluginName.replace("angband","");
+	}
+	public static String getAngbandFilesDirectory() {
+		return 
+			Environment.getExternalStorageDirectory()
+			+ "/"
+			+ "Android/data/org.angdroid.angband/files/lib"
+			+ getActivePluginName().replace("angband","");
+	}
+	public static String getActivityFilesDirectory() {
+		return activityFilesPath;
+	}
+	public static String getActivePluginName() {
+		String activePluginName;
+		String prefPluginName = pref.getString(Preferences.KEY_GAMEPLUGIN, "");
+		activePluginName = gamePluginValues[0];
+		for(int i = 0; i < gamePluginValues.length; i++) {
+			if (prefPluginName.compareTo(gamePluginValues[i])==0)
+				activePluginName = gamePluginValues[i];
+		}
+		return activePluginName;
 	}
 
 	public void onStart() {
