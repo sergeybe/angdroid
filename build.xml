@@ -28,11 +28,11 @@
     <setup/>
 
     <condition property="is.exist.jni.header">
-        <available file="angdroid.h" type="file" filepath="jni"/>
+        <available file="angdroid.h" type="file" filepath="plugin/include"/>
     </condition>
 
     <target name="angband-javah" depends="compile" unless="is.exist.jni.header">
-        <javah outputFile="jni/angdroid.h"
+        <javah outputFile="plugin/include/angdroid.h"
             classpath="${out-classes-location}"
             bootclasspath="${android-jar}"
             verbose="true">
@@ -41,40 +41,70 @@
         </javah>
     </target>
 
-    <target name="angband-lib" depends="angband-javah">
-        <exec executable="${ndk-location}/ndk-build" failonerror="true">
-	</exec>
+    <target name="angband-resources">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="angband"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="angband306"/>
+	</ant>
+<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="tome"/>
+	</ant>
+-->
     </target>
 
-    <target name="loader-lib" depends="angband-javah">
-        <exec executable="${ndk-location}/ndk-build" 
-	      failonerror="true"
-	      dir="loader">
-	</exec>
-	<copy file="loader/libs/armeabi/libloader.so" 
-	      tofile="libs/armeabi/libloader.so"
-	      overwrite="true"/>
+    <target name="plugin-libs" depends="angband-javah">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="loader"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="angband"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="angband306"/>
+	</ant>
+<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="tome"/>
+	</ant>
+-->
     </target>
 
-    <condition property="is.created.zip.resource">
-            <available file="zip" type="file" filepath="${resource-folder}/raw/"/>
-    </condition>
-
-    <target name="angband-resources" unless="is.created.zip.resource">
-        <zip destfile="${resource-folder}/raw/zip" basedir="../../lib"
-            excludes="**/Makefile **/*.glade **/*.fon **/*.bmp **/*.png **/*.wav xtra/sound/sound.cfg xtra/font/copying.txt"
-             />
+    <target name="clean-plugins">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="loader"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="angband"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="angband306"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="tome"/>
+	</ant>
     </target>
 
-    <target name="clean">
+    <target name="plugin-src">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="angband306"/>
+	    <property name="src.url.base" value="http://rephial.org/downloads/3.0"/>
+	    <property name="src.url.file" value="angband-3.0.6-src.tar.gz"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="angband"/>
+	    <property name="src.url.base" value="http://rephial.org/downloads/3.1"/>
+	    <property name="src.url.file" value="angband-3.1.2v2-src.tar.gz"/>
+	</ant>
+    </target>
+
+    <target name="clean" depends="clean-plugins">
         <delete dir="bin"/>
         <delete dir="gen"/>
         <delete dir="libs/armeabi"/>
-        <delete dir="obj"/>
-        <delete dir="loader/obj"/>
-        <delete dir="loader/libs"/>
-        <delete file="${resource-folder}/raw/zip"/>
-	<delete file="jni/angdroid.h"/>
+	<delete file="plugin/include/angdroid.h"/>
     </target>
 
     <target name="obfuscate" depends="angband-release">
@@ -87,7 +117,7 @@
        </proguard>
     </target>
     
-    <target name="angband-release" depends="angband-resources, angband-lib, loader-lib, release" />
-    <target name="angband-debug" depends="angband-resources, angband-lib, loader-lib, debug" />
+    <target name="angband-release" depends="angband-resources, plugin-libs, release" />
+    <target name="angband-debug"   depends="angband-resources, plugin-libs, debug" />
 
 </project>

@@ -44,10 +44,10 @@ public class TermView extends View implements Runnable {
 			MOD_NUM_KEYPAD = 0x4000;
 	// MIDDLE_DRAG = 0x204, RIGHT_DRAG = 0x205,
 
-	static final int ARROW_DOWN = 0x8A;
-	static final int ARROW_LEFT = 0x8B;
-	static final int ARROW_RIGHT = 0x8C;
-	static final int ARROW_UP = 0x8D;
+	static int ARROW_DOWN = 0x8A;
+	static int ARROW_LEFT = 0x8B;
+	static int ARROW_RIGHT = 0x8C;
+	static int ARROW_UP = 0x8D;
 
 	private boolean ctrl_mod = false;
 	private boolean ctrl_key_pressed;
@@ -356,6 +356,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void addToKeyBuffer(int key) {
+		Log.d("Angband", "addKeyToBuffer:"+key);
 		synchronized (keybuffer) {
 			keybuffer.offer(key);
 			if (wait) {
@@ -545,6 +546,19 @@ public class TermView extends View implements Runnable {
 
 			clearKeyBuffer();
 
+			if (AngbandActivity.getActivePluginName().compareTo("angband")==0) {
+				ARROW_DOWN = 0x8A;
+				ARROW_LEFT = 0x8B;
+				ARROW_RIGHT = 0x8C;
+				ARROW_UP = 0x8D;
+			}
+			else {
+				ARROW_DOWN = '2';
+				ARROW_LEFT = '4';
+				ARROW_RIGHT = '6';
+				ARROW_UP = '8';
+			}
+
 			thread = new Thread(this);
 			thread.start();
 		}
@@ -565,9 +579,11 @@ public class TermView extends View implements Runnable {
 	}
 
 	// Call native methods from library
-	native void startGame(String filesPath);
-	public void run() {
-		startGame(AngbandActivity.getAngbandFilesDirectory());
+	native void startGame(String pluginPath, String filesPath, String arguments);
+	public void run() {	    
+
+	    String pluginPath = AngbandActivity.getActivityFilesDirectory()+"/../lib/lib"+AngbandActivity.getActivePluginName()+".so";
+	    startGame(pluginPath, AngbandActivity.getAngbandFilesDirectory(), "");
 	}
 
 	public void onExitGame() {
