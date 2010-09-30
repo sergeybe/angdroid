@@ -38,3 +38,18 @@ diff -Nru --strip-trailing-cr angband-3.0.6/src/util.c angband-3.0.6-android/src
  
  	/* Secure creation of a temporary file */
  	fd = mkstemp(buf);
+--- angband-3.0.6/src/files.c	2010-09-29 20:30:20.481793682 -0700
++++ angband-3.0.6-android/src/files.c	2010-09-29 19:47:41.000000000 -0700
+@@ -4243,9 +4243,9 @@
+ 			/* Exit */
+ 			case ESCAPE:
+ 			{
+-				if (get_check("Do you want to quit? "))
+-					wants_to_quit = TRUE;
+-
++				// hack to allow KTRL('X') to exit the game here
++				int gckey = get_check_other("Do you want to quit?", KTRL('X'));
++				if (gckey != 0) wants_to_quit = TRUE;
+ 				break;
+ 			}
+ 
