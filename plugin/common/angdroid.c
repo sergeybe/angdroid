@@ -361,7 +361,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is optional, but can improve both the
 			 * efficiency (and attractiveness) of the program.
 			 */
-			LOGD("TERM_XTRA_SHAPE");
+			//LOGD("TERM_XTRA_SHAPE");
 			(*env)->CallVoidMethod(env, TermViewObj, TermView_setCursorVisible, v);
 			
 			return 0;
@@ -397,7 +397,7 @@ static errr Term_xtra_and(int n, int v)
 			 * that the "TERM_XTRA_FROSH" entry above takes care of any
 			 * necessary flushing issues.
 			 */
-			LOGD("TERM_XTRA_FRESH");
+			//LOGD("TERM_XTRA_FRESH");
 			(*env)->CallVoidMethod(env, TermViewObj, TermView_postInvalidate);
 			return 0;
 		}
@@ -529,7 +529,7 @@ static errr Term_curs_and(int x, int y)
 {
 	term_data *td = (term_data*)(Term->data);
 
-	LOGD("Term_curs_and");
+	//LOGD("Term_curs_and");
 
 	/* XXX XXX XXX */
 	(*env)->CallVoidMethod(env, TermViewObj, TermView_setCursorXY, x , y);
