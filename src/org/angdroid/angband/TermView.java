@@ -128,6 +128,7 @@ public class TermView extends View implements Runnable {
 	private Thread thread;
 	boolean game_thread_running = false;
 	boolean signal_game_exit = false;
+	boolean game_restart = false;
 
 	// Load native library
 	static {
@@ -145,7 +146,6 @@ public class TermView extends View implements Runnable {
 	}
 
 	protected void initTermView(Context context) {
-		Log.d("Angband", "initTermView");
 		fore = new Paint();
 		fore.setTextAlign(Paint.Align.LEFT);
 		fore.setColor(colors[1]);
@@ -214,9 +214,9 @@ public class TermView extends View implements Runnable {
 		//fore.setDither(false);
 		//fore.setSubpixelText(false);
 
-		Log.d("Angband", "onMeasure "+screen_width+","+screen_height
-			+","+char_height+","+char_width+","+font_text_size
-			+","+font_height_scrunch);
+		//Log.d("Angband", "onMeasure "+screen_width+","+screen_height
+		//	+","+char_height+","+char_width+","+font_text_size
+		//	+","+font_height_scrunch);
 	}
 
 	@Override
@@ -246,7 +246,7 @@ public class TermView extends View implements Runnable {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
-		Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
+		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_UP:
 			key = ARROW_UP;
@@ -365,7 +365,7 @@ public class TermView extends View implements Runnable {
 					keybuffer.offer(key);
 
 					if (wait) {
-						Log.d("Angband", "Wake up!!!");
+						//Log.d("Angband", "Wake up!!!");
 						keybuffer.notify();
 					}
 				}
@@ -378,11 +378,11 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void addToKeyBuffer(int key) {
-		Log.d("Angband", "addKeyToBuffer:"+key);
+		//Log.d("Angband", "addKeyToBuffer:"+key);
 		synchronized (keybuffer) {
 			keybuffer.offer(key);
 			if (wait) {
-				Log.d("Angband", "Wake up!!!");
+				//Log.d("Angband", "Wake up!!!");
 				keybuffer.notify();
 			}
 		}
@@ -417,16 +417,16 @@ public class TermView extends View implements Runnable {
 		if (v == 1) {
 			// Wait key press
 			try {
-				Log.d("Angband", "Wait keypress BEFORE");
+		        	//Log.d("Angband", "Wait keypress BEFORE");
 				synchronized (keybuffer) {
 					wait = true;
 					//keybuffer.clear(); //not necessary
 					keybuffer.wait();
 					wait = false;
 				}
-				Log.d("Angband", "Wait keypress AFTER");
+				//Log.d("Angband", "Wait keypress AFTER");
 			} catch (Exception e) {
-				Log.d("Angband", "The getch() wait exception" + e);
+				//Log.d("Angband", "The getch() wait exception" + e);
 			}
 		}
 
@@ -521,7 +521,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void setCursorXY(final int x, final int y) {
-		Log.d("Angband", "setCursor() x = " + x + ", y = " + y);
+		//Log.d("Angband", "setCursor() x = " + x + ", y = " + y);
 		synchronized (bitmap) {
 			this.cur_x = x;
 			this.cur_y = y;
@@ -565,7 +565,7 @@ public class TermView extends View implements Runnable {
 	public void startAngband() {
 		// sanity checks: thread must not already be running
 		// and we must have a valid canvas to draw upon.
-		Log.d("Angband","startAngband()");
+		//Log.d("Angband","startAngband()");
 		if (!game_thread_running && canvas != null) {
 			Log.d("Angband","startAngband().reallyStarting");
 			game_thread_running = true;
@@ -594,6 +594,8 @@ public class TermView extends View implements Runnable {
 
 	public void quitAngband() {
 		// signal keybuffer to send quit command to angband 
+		// (this is when the user chooses quit or the app is pausing)
+	   
 		signal_game_exit = true;
 		synchronized (keybuffer) {
 			keybuffer.notify();
@@ -611,13 +613,29 @@ public class TermView extends View implements Runnable {
 	native int isRoguelikeKeysEnabled();
 	public void run() {	    
 
-	    String pluginPath = AngbandActivity.getActivityFilesDirectory()+"/../lib/lib"+AngbandActivity.getActivePluginName()+".so";
+	    if (game_restart) {
+		game_restart = false;
+			try {
+				// pause for effect briefly if restarting after normal exit
+				Thread.sleep(400);
+	    		} catch (Exception ex) {}
+	    }
+
+	    String pluginPath = AngbandActivity.getActivityFilesDirectory()
+		+"/../lib/lib"+AngbandActivity.getActivePluginName()+".so";
 	    startGame(pluginPath, AngbandActivity.getAngbandFilesDirectory(), "");
 	}
 
 	public void onExitGame() {
+			
 		//this is called from native thread just before exiting
 		Log.d("Angband","onExitGame()");
 		game_thread_running = false;
+
+		// if game exited normally, restart!
+		if (!signal_game_exit) {
+		    game_restart = true;
+		    startAngband();
+		}
 	}
 }
