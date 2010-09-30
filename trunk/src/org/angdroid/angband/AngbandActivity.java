@@ -91,7 +91,7 @@ public class AngbandActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		Log.d("Angband", "onResume");
+		//Log.d("Angband", "onResume");
 		super.onResume();
 
 		if (pref.getBoolean(Preferences.KEY_FULLSCREEN, true)) {
@@ -108,7 +108,7 @@ public class AngbandActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		Log.d("Angband", "onPause");
+		//Log.d("Angband", "onPause");
 		super.onPause();
 		term.onPause();
 	}
@@ -234,7 +234,7 @@ public class AngbandActivity extends Activity {
 			}
 		}
 		// The directory is now empty so delete it
-		Log.d("Angband", "delete old file: "+dir.getAbsolutePath());
+		//Log.d("Angband", "delete old file: "+dir.getAbsolutePath());
 		return dir.delete();
 	}
 
