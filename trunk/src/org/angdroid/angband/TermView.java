@@ -536,21 +536,10 @@ public class TermView extends View implements Runnable {
 		}
 	}
 
-	public void setVibrate(boolean vibrate) {
-		this.vibrate = vibrate;
-	}
-	public boolean getVibrate() {
-		return vibrate;
-	}
-
-	public void setAlwaysRun(boolean alwaysRun) {
-		this.always_run = alwaysRun;
-	}
-	public boolean getAlwaysRun() {
-		return always_run;
-	}
-
 	public void onResume() {
+		always_run = Preferences.getAlwaysRun();
+		vibrate = Preferences.getVibrate();
+
 		Log.d("Angband","Termview.onResume()");
 		startAngband();
 	}
@@ -574,7 +563,7 @@ public class TermView extends View implements Runnable {
 
 			clearKeyBuffer();
 
-			if (AngbandActivity.getActivePluginName().compareTo("angband")==0) {
+			if (Preferences.getActivePluginName().compareTo("angband")==0) {
 				ARROW_DOWN = 0x8A;
 				ARROW_LEFT = 0x8B;
 				ARROW_RIGHT = 0x8C;
@@ -621,9 +610,9 @@ public class TermView extends View implements Runnable {
 	    		} catch (Exception ex) {}
 	    }
 
-	    String pluginPath = AngbandActivity.getActivityFilesDirectory()
-		+"/../lib/lib"+AngbandActivity.getActivePluginName()+".so";
-	    startGame(pluginPath, AngbandActivity.getAngbandFilesDirectory(), "");
+	    String pluginPath = Preferences.getActivityFilesDirectory()
+		+"/../lib/lib"+Preferences.getActivePluginName()+".so";
+	    startGame(pluginPath, Preferences.getAngbandFilesDirectory(), "");
 	}
 
 	public void onExitGame() {

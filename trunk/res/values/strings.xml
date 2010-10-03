@@ -2,11 +2,19 @@
 <resources>
     <string name="app_name">Angband</string>
     <string name="version">0.0.0.1</string>
+
     <string name="menu_preferences">Preferences</string>
+    <string name="menu_profiles">Profiles</string>
     <string name="menu_help">Help</string>
     <string name="menu_quit">Quit</string>
+
+    <string name="menu_profile_add">New Profile</string>
+
     <string name="angband_help">Angband Help</string>
     <string name="preferences">Preferences</string>
+    <string name="profiles">Profiles</string>
+    <string name="profileadd">New Profile</string>
+
     <string name="interface1">Interface</string>
     <string name="description">Angband is a dungeon-crawling roguelike RPG game.</string>
     <string name="preferences_vibrate_title">Vibrate</string>
@@ -17,6 +25,7 @@
     <string name="preferences_gameplugin_summary">Select Angband variant to play</string>
     <string name="preferences_alwaysrun_title">Always Run</string>
     <string name="preferences_alwaysrun_summary">Always run when using touch directional commands</string>
+
     <string-array name="gamePlugins">
       <item>Vanilla 3.1.2v2</item>
       <item>Vanilla 3.0.6 squelch+borg</item>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
 	<PreferenceCategory android:title="@string/interface1">
 		<CheckBoxPreference 
 			android:key="angband.vibrate"
@@ -24,5 +23,4 @@
 				android:entries="@array/gamePlugins"
 				android:entryValues="@array/gamePluginValues" />
 	</PreferenceCategory>
-
 </PreferenceScreen>
