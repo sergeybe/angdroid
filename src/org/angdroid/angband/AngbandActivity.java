@@ -43,19 +43,19 @@ import com.flurry.android.FlurryAgent;
 public class AngbandActivity extends Activity {
 
 	private TermView term;
-	private static String activityFilesPath;
-	private static SharedPreferences pref;
-	private static String[] gamePluginValues;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		activityFilesPath = getFilesDir().getAbsolutePath();
-		pref = getSharedPreferences(Preferences.NAME,MODE_PRIVATE);
-		gamePluginValues = getResources().getStringArray(R.array.gamePluginValues);
 
-		for(int i = 0; i < gamePluginValues.length; i++) {
-			extractAngbandResources(gamePluginValues[i]);
+	    Preferences.init ( 
+			getFilesDir(),
+			getResources(), 
+			getSharedPreferences(Preferences.NAME, MODE_PRIVATE)
+		);
+
+		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
+			extractAngbandResources(Preferences.getInstalledPlugins()[i]);
 		}
 
 		setContentView(R.layout.main);
@@ -78,10 +78,14 @@ public class AngbandActivity extends Activity {
 			startActivity(intent);
 			break;
 		case '2':
-			intent = new Intent(this, PreferencesActivity.class);
+			intent = new Intent(this, ProfilesActivity.class);
 			startActivity(intent);
 			break;
 		case '3':
+			intent = new Intent(this, PreferencesActivity.class);
+			startActivity(intent);
+			break;
+		case '4':
 			term.onPause();
 			finish();
 			break;
@@ -94,14 +98,11 @@ public class AngbandActivity extends Activity {
 		//Log.d("Angband", "onResume");
 		super.onResume();
 
-		if (pref.getBoolean(Preferences.KEY_FULLSCREEN, true)) {
+		if (Preferences.getFullScreen()) {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		} else {
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
-		
-		term.setVibrate(pref.getBoolean(Preferences.KEY_VIBRATE, false));
-		term.setAlwaysRun(pref.getBoolean(Preferences.KEY_ALWAYSRUN, true));
 		
 		term.onResume();
 	}
@@ -123,7 +124,7 @@ public class AngbandActivity extends Activity {
 	}
 
 	void extractAngbandResources(String pluginName) {
-		File f = new File(getAngbandFilesDirectory(pluginName));
+		File f = new File(Preferences.getAngbandFilesDirectory(pluginName));
 		f.mkdirs();
 		String abs_path = f.getAbsolutePath();
 
@@ -185,7 +186,7 @@ public class AngbandActivity extends Activity {
 			// restore does not work from 0.15, disable for now
 			if (false && oldsave.exists()) {
 				Log.v("Angband", "0.15 save files exists; copying");
-				File newsave = new File(getAngbandFilesDirectory() +
+				File newsave = new File(Preferences.getAngbandFilesDirectory() +
 							"/save/PLAYER");
 				FileReader in = new FileReader(oldsave);
 				FileWriter out = new FileWriter(newsave,false);
@@ -238,33 +239,6 @@ public class AngbandActivity extends Activity {
 		return dir.delete();
 	}
 
-	public static String getAngbandFilesDirectory(String pluginName) {
-		return 
-			Environment.getExternalStorageDirectory()
-			+ "/"
-			+ "Android/data/org.angdroid.angband/files/lib"
-			+ pluginName.replace("angband","");
-	}
-	public static String getAngbandFilesDirectory() {
-		return 
-			Environment.getExternalStorageDirectory()
-			+ "/"
-			+ "Android/data/org.angdroid.angband/files/lib"
-			+ getActivePluginName().replace("angband","");
-	}
-	public static String getActivityFilesDirectory() {
-		return activityFilesPath;
-	}
-	public static String getActivePluginName() {
-		String activePluginName;
-		String prefPluginName = pref.getString(Preferences.KEY_GAMEPLUGIN, "");
-		activePluginName = gamePluginValues[0];
-		for(int i = 0; i < gamePluginValues.length; i++) {
-			if (prefPluginName.compareTo(gamePluginValues[i])==0)
-				activePluginName = gamePluginValues[i];
-		}
-		return activePluginName;
-	}
 
 	public void onStart() {
 		super.onStart();
