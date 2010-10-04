@@ -584,6 +584,8 @@ public class TermView extends View implements Runnable {
 	public void quitAngband() {
 		// signal keybuffer to send quit command to angband 
 		// (this is when the user chooses quit or the app is pausing)
+
+		if (!game_thread_running) return;
 	   
 		signal_game_exit = true;
 		synchronized (keybuffer) {
