@@ -26,7 +26,8 @@ jstring pass_arguments;
 static JavaVM *jvm;
 static JNIEnv *env;
 static void* handle = NULL;
-pthread_mutex_t mu = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t muQuery = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t muGame = PTHREAD_MUTEX_INITIALIZER;
 
 void* run_angband(void* foo)
 {
@@ -40,7 +41,17 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	pthread_t game_thread;
 
 	// begin synchronize
-	pthread_mutex_lock (&mu);
+
+	int ct = 0;
+	while (pthread_mutex_trylock(&muGame)!=0) {
+		sleep(100);
+		if(ct++>5) {
+			LOGE("failed to acquire game thread lock, bailing");
+			return;
+		}
+	}
+
+	pthread_mutex_lock (&muQuery);
 
 	pass_env1 = env1;
 	pass_obj1 = obj1;
@@ -77,13 +88,13 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	pthread_create(&game_thread, NULL, run_angband, (void*) NULL);	
 
 	// end synchronize
-	pthread_mutex_unlock (&mu);
+	pthread_mutex_unlock (&muQuery);
 
 	LOGD("loader.waiting on game_thread");
 	pthread_join(game_thread, NULL); // wait for thread to exit
 
 	// begin synchronize
-	pthread_mutex_lock (&mu);
+	pthread_mutex_lock (&muQuery);
 
 	LOGD("loader.game_thread is finished");
 	dlclose(handle);           	 // unload angband lib
@@ -93,7 +104,8 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	isRoguelikeKeysEnabled = NULL;
 
 	// end synchronize
-	pthread_mutex_unlock (&mu);
+	pthread_mutex_unlock (&muQuery);
+	pthread_mutex_unlock (&muGame);
 
 	//LOGD("loader.detatch");
 	//(*jvm)->DetachCurrentThread(jvm);
@@ -104,7 +116,7 @@ JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled
 {
 	jint rl = 0;
 	// begin synchronize
-	pthread_mutex_lock (&mu);
+	pthread_mutex_lock (&muQuery);
 
 	if (handle) {
 		if (!isRoguelikeKeysEnabled)
@@ -122,7 +134,7 @@ JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled
 	}
 
 	// end synchronize
-	pthread_mutex_unlock (&mu);
+	pthread_mutex_unlock (&muQuery);
 
 	return rl;
 }
