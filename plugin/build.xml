@@ -2,9 +2,10 @@
 <project name="AngbandPlugin" default="plugin-lib">
 
     <target name="plugin-lib">
-        <exec executable="${ndk-location}/ndk-build" 
+        <exec executable="sh" 
 	      failonerror="true"
 	      dir="plugin/${plugin.name}">
+	    <arg value="${ndk-location}/ndk-build"/>
 	</exec>
 	<copy file="plugin/${plugin.name}/libs/armeabi/lib${plugin.name}.so" 
 	      tofile="libs/armeabi/lib${plugin.name}.so"
