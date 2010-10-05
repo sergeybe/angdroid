@@ -54,7 +54,7 @@ public class TermView extends View implements Runnable {
 	private boolean wait = false;
 	private int quit_key_seq = 0;
 
-	Queue<Integer> keybuffer = new LinkedList<Integer>();
+	private Queue<Integer> keybuffer = new LinkedList<Integer>();
 
 	// Default curses colors
 	final int colors[] = { /* */
@@ -125,8 +125,10 @@ public class TermView extends View implements Runnable {
 	private boolean always_run = true;
 	private boolean cursor_visible;
 
-	private Thread thread;
-	boolean game_thread_running = false;
+	private static boolean game_thread_running = false;
+	private static String game_thread_lock = "lock";
+
+	private Thread thread = null;
 	boolean signal_game_exit = false;
 	boolean game_restart = false;
 
@@ -234,10 +236,18 @@ public class TermView extends View implements Runnable {
 			Log.d("Angband", "onSizeChanged");
 		}
 		 
-		bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+		synchronized (game_thread_lock) {
+			if (game_thread_running) return;
 
-		canvas = new Canvas(bitmap);
-		//canvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.DITHER_FLAG|Paint.ANTI_ALIAS_FLAG|Paint.SUBPIXEL_TEXT_FLAG,0)); // this seems to have no effect, why?
+			bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+			canvas = new Canvas(bitmap);
+
+			/*
+			canvas.setDrawFilter(new PaintFlagsDrawFilter(
+				Paint.DITHER_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG,0
+			)); // this seems to have no effect, why?
+			*/
+		}
 
 		startAngband();
 	}
@@ -398,54 +408,70 @@ public class TermView extends View implements Runnable {
 
 		Integer key = null;
 
-		if (signal_game_exit) {
-			switch((quit_key_seq++)%4) {
+		//Log.d("Angband", "getch");
+		synchronized (keybuffer) {
+
+			if (signal_game_exit) {
+				//Log.d("Angband", "getch.exit game sequence");
+				switch((quit_key_seq++)%4) {
 				case 0: return 24; // Esc
 				case 1: return 0; 
 				case 2: return 96; // Ctrl-X (Quit)
 				case 3: return 0; 
+				}
 			}
-		}
 
-		//peek before wait -- fix issue #3 keybuffer loss
-		if (keybuffer.peek() != null) {
-			key = keybuffer.poll();
-			Log.w("Angband", "process key = " + key);
-			return key;
-		}		
+			//peek before wait -- fix issue #3 keybuffer loss
+			if (keybuffer.peek() != null) {
+				key = keybuffer.poll();
+				//Log.w("Angband", "process key = " + key);
+				return key;
+			}		
 
-		if (v == 1) {
-			// Wait key press
-			try {
+			if (v == 1) {
+				// Wait key press
+				try {
 		        	//Log.d("Angband", "Wait keypress BEFORE");
-				synchronized (keybuffer) {
 					wait = true;
 					//keybuffer.clear(); //not necessary
 					keybuffer.wait();
 					wait = false;
+					//Log.d("Angband", "Wait keypress AFTER");
+				} catch (Exception e) {
+					Log.d("Angband", "The getch() wait exception" + e);
 				}
-				//Log.d("Angband", "Wait keypress AFTER");
-			} catch (Exception e) {
-				//Log.d("Angband", "The getch() wait exception" + e);
 			}
+
+			// return key after wait, if there is one
+			if (keybuffer.peek() != null) {
+				key = keybuffer.poll();
+				//Log.w("Angband", "process key = " + key);
+				return key;
+			}		
 		}
 
 		return 0;
 	}
 
 	public void refresh() {
-		postInvalidate();
+		synchronized (game_thread_lock) {
+			postInvalidate();
+		}
 	}
 
 	public void clear() {
-		if (canvas != null) {
-			canvas.drawPaint(back);
+		synchronized (game_thread_lock) {
+			if (canvas != null) {
+				canvas.drawPaint(back);
+			}
 		}
 	}
 
 	public void noise() {
-		if (vibrate) {
-			vibrator.vibrate(50);
+		synchronized (game_thread_lock) {
+			if (vibrate) {
+				vibrator.vibrate(50);
+			}
 		}
 	}
 
@@ -474,7 +500,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void wipe(final int row, final int col, final int n) {
-		synchronized (bitmap) {
+		synchronized (game_thread_lock) {
 			float x = col * char_width;
 			float y = (row + 1) * char_height;
 			canvas.drawRect(
@@ -488,7 +514,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void move(final int col, final int row) {
-		synchronized (bitmap) {
+		synchronized (game_thread_lock) {
 			this.col = col;
 			this.row = row;
 		}
@@ -496,7 +522,7 @@ public class TermView extends View implements Runnable {
 
 	public void putchar(final char c) {
 		wipe(row, col, 1);
-		synchronized (bitmap) {
+		synchronized (game_thread_lock) {
 
 			float x = col * (char_width);
 			float y = (row + 1) * char_height;
@@ -522,17 +548,19 @@ public class TermView extends View implements Runnable {
 
 	public void setCursorXY(final int x, final int y) {
 		//Log.d("Angband", "setCursor() x = " + x + ", y = " + y);
-		synchronized (bitmap) {
+		synchronized (game_thread_lock) {
 			this.cur_x = x;
 			this.cur_y = y;
 		}
 	}
 
 	public void setCursorVisible(final int v) {
-		if (v == 1) {
-			cursor_visible = true;
-		} else if (v == 0) {
-			cursor_visible = false;
+		synchronized (game_thread_lock) {
+			if (v == 1) {
+				cursor_visible = true;
+			} else if (v == 0) {
+				cursor_visible = false;
+			}
 		}
 	}
 
@@ -552,42 +580,54 @@ public class TermView extends View implements Runnable {
 	}
 
 	public void startAngband() {
+		//Log.d("Angband","startAngband()");
+
 		// sanity checks: thread must not already be running
 		// and we must have a valid canvas to draw upon.
-		//Log.d("Angband","startAngband()");
-		if (!game_thread_running && canvas != null) {
-			Log.d("Angband","startAngband().reallyStarting");
+		synchronized(game_thread_lock) {
+			if (game_thread_running || canvas == null) return;
+
 			game_thread_running = true;
 			signal_game_exit = false;
 			quit_key_seq = 0;
-
-			clearKeyBuffer();
-
-			if (Preferences.getActivePluginName().compareTo("angband")==0) {
-				ARROW_DOWN = 0x8A;
-				ARROW_LEFT = 0x8B;
-				ARROW_RIGHT = 0x8C;
-				ARROW_UP = 0x8D;
-			}
-			else {
-				ARROW_DOWN = '2';
-				ARROW_LEFT = '4';
-				ARROW_RIGHT = '6';
-				ARROW_UP = '8';
-			}
-
-			thread = new Thread(this);
-			thread.start();
 		}
+
+		Log.d("Angband","startAngband().reallyStarting");
+
+		clearKeyBuffer();
+
+		if (Preferences.getActivePluginName().compareTo("angband")==0) {
+			ARROW_DOWN = 0x8A;
+			ARROW_LEFT = 0x8B;
+			ARROW_RIGHT = 0x8C;
+			ARROW_UP = 0x8D;
+		}
+		else {
+			ARROW_DOWN = '2';
+			ARROW_LEFT = '4';
+			ARROW_RIGHT = '6';
+			ARROW_UP = '8';
+		}
+
+		thread = new Thread(this);
+		thread.start();
 	}
 
 	public void quitAngband() {
 		// signal keybuffer to send quit command to angband 
 		// (this is when the user chooses quit or the app is pausing)
 
-		if (!game_thread_running) return;
-	   
+		Log.d("Angband","quitAngband()");
+
+		synchronized (game_thread_lock) {
+			if (!game_thread_running || thread == null) 
+				return;
+		}
+
 		signal_game_exit = true;
+
+		Log.d("Angband","waiting on thread.join()");
+
 		synchronized (keybuffer) {
 			keybuffer.notify();
 		}
@@ -597,6 +637,8 @@ public class TermView extends View implements Runnable {
 		} catch (Exception e) {
 			Log.d("Angband",e.toString());
 		}
+
+		Log.d("Angband","after waiting for thread.join()");
 	}
 
 	// Call native methods from library
@@ -604,29 +646,33 @@ public class TermView extends View implements Runnable {
 	native int isRoguelikeKeysEnabled();
 	public void run() {	    
 
-	    if (game_restart) {
-		game_restart = false;
-			try {
-				// pause for effect briefly if restarting after normal exit
-				Thread.sleep(400);
-	    		} catch (Exception ex) {}
-	    }
+		synchronized (game_thread_lock) {
+			if (game_restart)
+				game_restart = false;
+				try {
+					// if restarting, pause for effect (and to let the
+					// other game thread unlock its mutex!)
+					Thread.sleep(400);
+				} catch (Exception ex) {}
+		}
 
 	    String pluginPath = Preferences.getActivityFilesDirectory()
-		+"/../lib/lib"+Preferences.getActivePluginName()+".so";
+			+"/../lib/lib"+Preferences.getActivePluginName()+".so";
 	    startGame(pluginPath, Preferences.getAngbandFilesDirectory(), "");
 	}
 
+	//this is called from native thread just before exiting
 	public void onExitGame() {
+		boolean local_restart = false;
 			
-		//this is called from native thread just before exiting
-		Log.d("Angband","onExitGame()");
-		game_thread_running = false;
+		synchronized (game_thread_lock) {
+			Log.d("Angband","onExitGame()");
+			game_thread_running = false;
 
-		// if game exited normally, restart!
-		if (!signal_game_exit) {
-		    game_restart = true;
-		    startAngband();
+			// if game exited normally, restart!
+			local_restart = game_restart = !signal_game_exit;
 		}
+
+		if	(local_restart) startAngband();
 	}
 }
