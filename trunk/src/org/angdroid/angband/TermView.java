@@ -647,13 +647,14 @@ public class TermView extends View implements Runnable {
 	public void run() {	    
 
 		synchronized (game_thread_lock) {
-			if (game_restart)
+			if (game_restart) {
 				game_restart = false;
 				try {
 					// if restarting, pause for effect (and to let the
 					// other game thread unlock its mutex!)
 					Thread.sleep(400);
 				} catch (Exception ex) {}
+			}
 		}
 
 	    String pluginPath = Preferences.getActivityFilesDirectory()
