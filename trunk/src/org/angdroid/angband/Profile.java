@@ -1,5 +1,7 @@
 package org.angdroid.angband;
 
+import android.util.Log;
+
 public class Profile {
 
 	protected int id;
@@ -9,7 +11,10 @@ public class Profile {
 	protected static String dl = "~";
 
 	public Profile(int id, String name, String saveFile, boolean autoBorg) {
-		this.id = id;
+		if (id == 0) 
+			this.id = Preferences.getNextProfileId();
+		else
+			this.id = id;
 		this.name = name;
 		this.saveFile = saveFile;
 		this.autoBorg = autoBorg;
@@ -18,7 +23,7 @@ public class Profile {
 	public Profile() {}
 
 	public String toString() {
-		return name + " (" + id + ")";
+		return name + " (" + saveFile + ")";
 	}
 
 	public int getId() {

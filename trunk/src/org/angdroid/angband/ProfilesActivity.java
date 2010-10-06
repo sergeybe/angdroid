@@ -31,19 +31,11 @@ public class ProfilesActivity extends Activity{
 	protected static final int CONTEXTMENU_ADDITEM = 2;
 
 	protected ListView proList;
-	protected ArrayList<Profile> fakePros = new ArrayList<Profile>();
 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.profile);
-
-		/* Add some items to the list the listview will be showing. */
-		fakePros.add(new Profile(0,"Default", "PLAYER", false));
-		fakePros.add(new Profile(0,"Mark the Mage", "PLAYER1", false));
-		fakePros.add(new Profile(0,"Roger the Rogue", "PLAYER2", false));
-		fakePros.add(new Profile(0,"Bob the Warrior", "PLAYER3", false));
-		fakePros.add(new Profile(0,"Borg", "PLAYER4", true));
 
 		this.proList = (ListView) this.findViewById(R.id.list_profiles);
 		initListView();
@@ -53,7 +45,7 @@ public class ProfilesActivity extends Activity{
 		//	  proList.setAdapter(new IconicAdapter(this));
 		proList.setAdapter(new ArrayAdapter<Profile>(
 						   this,
-						   android.R.layout.simple_list_item_1, fakePros)
+						   android.R.layout.simple_list_item_1, Preferences.getProfiles())
 						   );
 	}
 
@@ -101,7 +93,7 @@ public class ProfilesActivity extends Activity{
 
 		switch (aItem.getItemId()) {
 		case CONTEXTMENU_DELETEITEM:
-			fakePros.remove(pro);
+			Preferences.getProfiles().remove(pro);
 			refreshProListItems();
 			return true; 
 		case CONTEXTMENU_EDITITEM:
@@ -121,7 +113,7 @@ public class ProfilesActivity extends Activity{
 		Activity context; 
  
 		IconicAdapter(Activity context) { 
-			super(context, R.layout.profile_row, fakePros); 
+			super(context, R.layout.profile_row, profiles); 
  
 			this.context=context; 
 		} 
@@ -131,7 +123,7 @@ public class ProfilesActivity extends Activity{
 			View row=inflater.inflate(R.layout.profile_row, null); 
 			TextView label=(TextView)row.findViewById(R.id.label); 
  
-			label.setText(fakePros.get(position).name); 
+			label.setText(profiles.get(position).name); 
  
 			if (position == 0) { 
 				ImageView icon=(ImageView)row.findViewById(R.id.icon); 

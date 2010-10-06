@@ -6,16 +6,20 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.content.res.Resources;
 import android.content.Context;
+import android.util.Log;
 
 final public class Preferences {
 
 	static final String NAME = "angband";
 	static final String KEY_PROFILES = "angband.profiles";
 	static final String KEY_ACTIVEPROFILE = "angband.activeprofile";
+	static final String KEY_PROFILEID = "angband.profileid";
 	static final String KEY_VIBRATE = "angband.vibrate";
 	static final String KEY_FULLSCREEN = "angband.fullscreen";
 	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
 	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
+
+	static final String DEFAULT_PROFILE = "0~Default~PLAYER~false";
 
 	private static String activityFilesPath;
 	private static SharedPreferences pref;
@@ -75,12 +79,13 @@ final public class Preferences {
 	}
 	public static ProfileList getProfiles() {
 		if (profiles == null) {
-			String s = pref.getString(Preferences.KEY_PROFILES, "Default~Player~false");
+			String s = pref.getString(Preferences.KEY_PROFILES, DEFAULT_PROFILE);
 			profiles = ProfileList.deserialize(s);
+			if (s.compareTo(DEFAULT_PROFILE)==0) saveProfiles();
 		}
 		return profiles;
 	}
-	public static void setProfiles() {
+	public static void saveProfiles() {
 		SharedPreferences.Editor ed = pref.edit();
 		ed.putString(Preferences.KEY_PROFILES, profiles.serialize());
 		ed.commit();
@@ -101,5 +106,12 @@ final public class Preferences {
 		ed.putInt(Preferences.KEY_ACTIVEPROFILE, ix);
 		ed.commit();
 	}
+	public static int getNextProfileId() {
+		int id = pref.getInt(Preferences.KEY_PROFILEID, 0)+1;
+		SharedPreferences.Editor ed = pref.edit();
+		ed.putInt(Preferences.KEY_PROFILEID, id);
+		ed.commit();
 
+		return id;
+	}
 }
