@@ -3,9 +3,11 @@ package org.angdroid.angband;
 import java.util.ArrayList;
 import java.lang.StringBuffer;
 
+import android.util.Log;
+
 public class ProfileList extends ArrayList<Profile> {
 
-	protected static String dl = "|";
+	protected static String dl = "\\|";
 
 	public ProfileList(){}
 
