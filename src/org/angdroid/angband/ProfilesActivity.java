@@ -23,6 +23,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemClickListener;
+
 
 public class ProfilesActivity extends Activity{
 
@@ -31,6 +33,7 @@ public class ProfilesActivity extends Activity{
 	protected static final int CONTEXTMENU_ADDITEM = 2;
 
 	protected ListView proList;
+	protected ProfileList profiles;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -38,33 +41,46 @@ public class ProfilesActivity extends Activity{
 		setContentView(R.layout.profile);
 
 		this.proList = (ListView) this.findViewById(R.id.list_profiles);
+		this.proList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		initListView();
 	}
 
 	private void refreshProListItems() {
-		//	  proList.setAdapter(new IconicAdapter(this));
-		proList.setAdapter(new ArrayAdapter<Profile>(
-						   this,
-						   android.R.layout.simple_list_item_1, Preferences.getProfiles())
-						   );
+		profiles = Preferences.getProfiles();
+
+		proList.setAdapter (
+			new ProfileAdapter(
+				this, 
+				profiles, 
+				profiles.indexOf(Preferences.getActiveProfile())
+			)
+		);
 	}
 
 	private void initListView() {
 
-		/* Loads the items to the ListView. */
 		refreshProListItems();
 
-		/* Add Context-Menu listener to the ListView. */
 		proList.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
 				@Override
 					public void onCreateContextMenu(ContextMenu menu, View v,
 													ContextMenuInfo menuInfo) {
 					menu.setHeaderTitle("ContextMenu");
 					menu.add(0, CONTEXTMENU_EDITITEM, 0, "Edit"); 
-					//menu.add(0, CONTEXTMENU_ADDITEM, 0, "New Profile"); 
 					menu.add(0, CONTEXTMENU_DELETEITEM, 0, "Delete"); 
 				}
 			});
+
+        proList.setOnItemClickListener(new OnItemClickListener() 
+        {
+            public void onItemClick(AdapterView parent, 
+            View v, int position, long id) 
+            {                
+				Profile pro = (Profile) proList.getAdapter().getItem(position);
+				Preferences.setActiveProfile(pro);
+				finish();
+            }
+        });
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -93,47 +109,55 @@ public class ProfilesActivity extends Activity{
 
 		switch (aItem.getItemId()) {
 		case CONTEXTMENU_DELETEITEM:
-			Preferences.getProfiles().remove(pro);
-			refreshProListItems();
+			if (profiles.size()>1) {
+				profiles.remove(pro);
+				Preferences.saveProfiles();
+				refreshProListItems();
+			}
+			else
+				Preferences.alert(this, "Not Allowed", "You cannot delete the last profile");
 			return true; 
 		case CONTEXTMENU_EDITITEM:
 			Intent intent = new Intent(this, ProfileAddActivity.class);
+			intent.putExtra("profile", pro.id);
 			startActivity(intent);
 			return true; 
-		//case CONTEXTMENU_ADDITEM:
-			//Intent intent = new Intent(this, ProfileAddActivity.class);
-			//startActivity(intent);
-			//return true; 
 		}
 		return false;
 	}
 
-	/* experimental list items with icons
-	public class IconicAdapter extends ArrayAdapter { 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		refreshProListItems();
+	}
+
+	public class ProfileAdapter extends ArrayAdapter<Profile> { 
 		Activity context; 
+		ProfileList profiles;
+		int activeIndex;
+
+		ProfileAdapter(Activity context, ProfileList profiles, int activeIndex) { 
+			super(context, R.layout.profilerow, profiles); 
  
-		IconicAdapter(Activity context) { 
-			super(context, R.layout.profile_row, profiles); 
- 
+			this.profiles = profiles;
+			this.activeIndex = activeIndex;
 			this.context=context; 
 		} 
- 
-		public View getView(int position, View convertView, ViewGroup parent) { 
-			LayoutInflater inflater = LayoutInflater.from(context);
-			View row=inflater.inflate(R.layout.profile_row, null); 
-			TextView label=(TextView)row.findViewById(R.id.label); 
- 
-			label.setText(profiles.get(position).name); 
- 
-			if (position == 0) { 
-				ImageView icon=(ImageView)row.findViewById(R.id.icon); 
- 
-				icon.setImageResource(R.drawable.menu_add); 
-			}	   
- 
-			return(row); 
-		} 
-	}
-	*/
 
+		public View getView(int position, View convertView, ViewGroup parent) { 
+
+			LayoutInflater inflater = LayoutInflater.from(context);
+            View row=inflater.inflate(R.layout.profilerow, parent, false); 
+
+            TextView label=(TextView)row.findViewById(R.id.label); 
+			label.setText(profiles.get(position).toString()); 
+
+			if (position == activeIndex) {
+				ImageView icon=(ImageView)row.findViewById(R.id.icon); 
+				icon.setImageResource(R.drawable.btn_radio_on); 
+			}
+			return row;
+		}    
+	}
 }

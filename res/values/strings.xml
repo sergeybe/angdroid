@@ -15,6 +15,9 @@
     <string name="profiles">Profiles</string>
     <string name="profileadd">New Profile</string>
 
+    <string name="profile_name_caption">Name or description of profile</string>
+    <string name="profile_savefile_caption">Filename for saved game</string>
+
     <string name="interface1">Interface</string>
     <string name="description">Angband is a dungeon-crawling roguelike RPG game.</string>
     <string name="preferences_vibrate_title">Vibrate</string>
