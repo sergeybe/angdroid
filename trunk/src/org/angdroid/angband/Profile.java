@@ -4,17 +4,14 @@ import android.util.Log;
 
 public class Profile {
 
-	protected int id;
-	protected String name;
-    protected String saveFile;
-	protected boolean autoBorg;
+	protected int id = 0;
+	protected String name = "";
+    protected String saveFile = "";
+	protected boolean autoBorg = false;
 	protected static String dl = "~";
 
 	public Profile(int id, String name, String saveFile, boolean autoBorg) {
-		if (id == 0) 
-			this.id = Preferences.getNextProfileId();
-		else
-			this.id = id;
+		this.id = id;
 		this.name = name;
 		this.saveFile = saveFile;
 		this.autoBorg = autoBorg;
@@ -23,7 +20,7 @@ public class Profile {
 	public Profile() {}
 
 	public String toString() {
-		return name + " (" + saveFile + ")";
+		return name;
 	}
 
 	public int getId() {
@@ -68,9 +65,5 @@ public class Profile {
 			       );
 		else
 			return new Profile();
-	}
-	
-	public boolean equals(Object o) {
-		return o instanceof Profile && ((Profile) o).id == 0;
 	}
 }

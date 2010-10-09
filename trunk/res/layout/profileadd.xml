@@ -24,7 +24,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 			android:id="@+id/txtCap1"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Name of Profile"
+			android:text="@string/profile_name_caption"
 			>
 			</TextView>
 
@@ -50,7 +50,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 			android:id="@+id/txtCap2"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Filename for Savefile"
+			android:text="@string/profile_savefile_caption"
 			>
 			</TextView>
 
@@ -59,11 +59,13 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:hint="SaveFile"
-			android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345789-_."
+			android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345789-"
 			android:textSize="18sp"
+			android:maxLength="20"
 			>
 			</EditText>		
 
+<!--
 			<CheckBox
 			android:id="@+id/chkAutoBorg"
 			android:layout_width="wrap_content"
@@ -71,7 +73,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 			android:text="Auto-Start Borg?"
 			>
 			</CheckBox>
-
+-->
 		</LinearLayout>
 
 		</ScrollView>
