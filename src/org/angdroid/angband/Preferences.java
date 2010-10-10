@@ -1,6 +1,7 @@
 package org.angdroid.angband;
 
 import java.io.File;
+import java.lang.reflect.Array;
 
 import android.os.Environment;
 import android.content.res.Resources;
@@ -20,11 +21,25 @@ final public class Preferences {
 	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
 	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
 
-	static final String DEFAULT_PROFILE = "0~Default~PLAYER~false";
+	public enum Plugin {
+		Angband(0), Angband306(1), ToME(2);
+
+		private int id;
+
+		private Plugin(int id) {
+			this.id = id;
+		}
+		public int getId() {
+			return id;
+		}
+	}
+
+	static final String DEFAULT_PROFILE = "0~Default~PLAYER~false~0";
 
 	private static String activityFilesPath;
 	private static SharedPreferences pref;
-	private static String[] gamePluginValues;
+	private static int[] gamePlugins;
+	private static String[] gamePluginNames;
 	private static ProfileList profiles;
 
 	Preferences() {}
@@ -32,7 +47,13 @@ final public class Preferences {
 	public static void init(File filesDir, Resources resources, SharedPreferences sharedPrefs) {
 		activityFilesPath = filesDir.getAbsolutePath();
 		pref = sharedPrefs;
-		gamePluginValues = resources.getStringArray(R.array.gamePluginValues);
+
+		String[] gamePluginsStr = resources.getStringArray(R.array.gamePlugins);
+		gamePlugins = (int[])Array.newInstance(int.class, gamePluginsStr.length);
+		for(int i = 0; i<gamePluginsStr.length; i++)
+			gamePlugins[i] = Integer.parseInt(gamePluginsStr[i]);
+		
+		gamePluginNames = resources.getStringArray(R.array.gamePluginNames);
 	}
 
 	public static boolean getFullScreen() {
@@ -47,16 +68,23 @@ final public class Preferences {
 		return pref.getBoolean(Preferences.KEY_VIBRATE, false);
 	}
 
-	public static String[] getInstalledPlugins() {
-		return gamePluginValues;
+	public static int[] getInstalledPlugins() {
+		return gamePlugins;
 	}
 
-	public static String getAngbandFilesDirectory(String pluginName) {
+	public static String getPluginName(int pluginId) {
+		if (pluginId > -1 && pluginId < gamePluginNames.length)
+			return gamePluginNames[pluginId];
+		else 
+			return gamePluginNames[0];
+	}
+
+	public static String getAngbandFilesDirectory(int pluginId) {
 		return 
 			Environment.getExternalStorageDirectory()
 			+ "/"
 			+ "Android/data/org.angdroid.angband/files/lib"
-			+ pluginName.replace("angband","");
+			+ getPluginName(pluginId).replace("angband","");
 	}
 
 	public static String getAngbandFilesDirectory() {
@@ -72,14 +100,15 @@ final public class Preferences {
 	}
 
 	public static String getActivePluginName() {
-		String activePluginName;
-		String prefPluginName = pref.getString(Preferences.KEY_GAMEPLUGIN, "");
-		activePluginName = gamePluginValues[0];
-		for(int i = 0; i < gamePluginValues.length; i++) {
-			if (prefPluginName.compareTo(gamePluginValues[i])==0)
-				activePluginName = gamePluginValues[i];
+		int activePlugin;
+		int prefPlugin = getActiveProfile().getPlugin();
+		activePlugin = gamePlugins[0];
+		for(int i = 0; i < gamePlugins.length; i++) {
+			if (prefPlugin == gamePlugins[i])
+				activePlugin = gamePlugins[i];
 		}
-		return activePluginName;
+
+		return getPluginName(activePlugin);
 	}
 
 	public static ProfileList getProfiles() {
@@ -144,7 +173,7 @@ final public class Preferences {
 	public static String generateSaveFilename() {
 		ProfileList pl = getProfiles();
 		String saveFile = null;
-		for(int i = 2; i<100; i++) {
+		for(int i = 2; i < 100; i++) {
 			saveFile = "PLAYER"+i;
 			if (pl.findBySaveFile(saveFile,0) == null
 				&& !saveFileExists(saveFile)) 

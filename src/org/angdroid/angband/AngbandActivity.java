@@ -110,7 +110,7 @@ public class AngbandActivity extends Activity {
 		} else {
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
-		
+
 		term.onResume();
 	}
 
@@ -130,18 +130,18 @@ public class AngbandActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	void extractAngbandResources(String pluginName) {
-		File f = new File(Preferences.getAngbandFilesDirectory(pluginName));
+	void extractAngbandResources(int plugin) {
+		File f = new File(Preferences.getAngbandFilesDirectory(plugin));
 		f.mkdirs();
 		String abs_path = f.getAbsolutePath();
 
 		InputStream is = null;
-		if (pluginName.compareTo("angband")==0)
+		if (plugin == Preferences.Plugin.Angband.getId())
 			is = getResources().openRawResource(R.raw.zipangband);
-		else if (pluginName.compareTo("angband306")==0)
+		else if (plugin == Preferences.Plugin.Angband306.getId())
 			is = getResources().openRawResource(R.raw.zipangband306);
 		/*
-		else if (pluginName.compareTo("tome")==0) {
+		else if (plugin == Preferences.Plugin.ToME.getId())
 			is = getResources().openRawResource(R.raw.ziptome);
 		}
 		*/

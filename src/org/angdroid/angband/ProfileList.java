@@ -7,12 +7,12 @@ import android.util.Log;
 
 public class ProfileList extends ArrayList<Profile> {
 
-	protected static String dl = "\\|";
+	protected static String dl = "|";
 
 	public ProfileList(){}
 
 	public static ProfileList deserialize(String value) {
-		String[] tk = value.split(dl);
+		String[] tk = value.split("\\"+dl);
 		ProfileList pl = new ProfileList();
 		for(int i=0; i < tk.length; i++)
 			pl.add(Profile.deserialize(tk[i]));
