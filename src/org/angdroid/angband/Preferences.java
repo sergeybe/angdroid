@@ -19,6 +19,7 @@ final public class Preferences {
 	static final String KEY_VIBRATE = "angband.vibrate";
 	static final String KEY_FULLSCREEN = "angband.fullscreen";
 	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
+	static final String KEY_ENABLETOUCH = "angband.enabletouch";
 	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
 
 	public enum Plugin {
@@ -60,12 +61,16 @@ final public class Preferences {
 		return pref.getBoolean(Preferences.KEY_FULLSCREEN, true);
 	}
 
-	public static boolean getAlwaysRun() {
-		return pref.getBoolean(Preferences.KEY_ALWAYSRUN, true);
-	}
-
 	public static boolean getVibrate() {
 		return pref.getBoolean(Preferences.KEY_VIBRATE, false);
+	}
+
+	public static boolean getEnableTouch() {
+		return pref.getBoolean(Preferences.KEY_ENABLETOUCH, true);
+	}
+
+	public static boolean getAlwaysRun() {
+		return pref.getBoolean(Preferences.KEY_ALWAYSRUN, true);
 	}
 
 	public static int[] getInstalledPlugins() {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-	<PreferenceCategory android:title="@string/interface1">
+	<PreferenceCategory android:title="@string/interface_category">
 		<CheckBoxPreference 
 			android:key="angband.vibrate"
 			android:defaultValue="false" 
@@ -13,10 +13,18 @@
 			android:title="@string/preferences_fullscreen_title"
 			android:summary="@string/preferences_fullscreen_summary" />
 		<CheckBoxPreference 
+			android:key="angband.enabletouch"
+			android:defaultValue="true" 
+			android:title="@string/preferences_enabletouch_title"
+			android:summary="@string/preferences_enabletouch_summary" />
+		<CheckBoxPreference 
 			android:key="angband.alwaysrun"
 			android:defaultValue="true" 
 			android:title="@string/preferences_alwaysrun_title"
-			android:summary="@string/preferences_alwaysrun_summary" />
+			android:summary="@string/preferences_alwaysrun_summary" 
+		    android:dependency="angband.enabletouch" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/game_category">
 		<org.angdroid.angband.PluginPreference android:title="@string/preferences_gameplugin_title"
 				android:key="angband.gameplugin"
 				android:summary="@string/preferences_gameplugin_summary"

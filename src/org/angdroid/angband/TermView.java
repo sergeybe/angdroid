@@ -360,6 +360,7 @@ public class TermView extends View implements Runnable {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		if (!Preferences.getEnableTouch()) return false;
 
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 

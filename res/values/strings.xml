@@ -18,7 +18,8 @@
     <string name="profile_name_caption">Name or description of profile</string>
     <string name="profile_savefile_caption">Filename for saved game</string>
 
-    <string name="interface1">Interface</string>
+    <string name="interface_category">Interface</string>
+    <string name="game_category">Game</string>
     <string name="description">Angband is a dungeon-crawling roguelike RPG game.</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Enable or disable vibration in game</string>
@@ -26,6 +27,8 @@
     <string name="preferences_fullscreen_summary">Enable or disable game in full screen</string>
     <string name="preferences_gameplugin_title">Selected Variant</string>
     <string name="preferences_gameplugin_summary">Select Angband variant to play</string>
+    <string name="preferences_enabletouch_title">Enable Touchscreen input</string>
+    <string name="preferences_enabletouch_summary">Turn on touchscreen input controls.</string>
     <string name="preferences_alwaysrun_title">Always Run</string>
     <string name="preferences_alwaysrun_summary">Always run when using touch directional commands</string>
 
