@@ -50,6 +50,8 @@ public class TermView extends View implements Runnable {
 	static int ARROW_UP = 0x8D;
 
 	private boolean ctrl_mod = false;
+	private boolean shift_mod = false;
+	private boolean alt_mod = false;
 	private boolean ctrl_key_pressed;
 	private boolean wait = false;
 	private int quit_key_seq = 0;
@@ -256,7 +258,7 @@ public class TermView extends View implements Runnable {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
-		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
+		Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_UP:
 			key = ARROW_UP;
@@ -288,10 +290,31 @@ public class TermView extends View implements Runnable {
 		case KeyEvent.KEYCODE_DEL:
 			key = '\b';
 			break;
+		case KeyEvent.KEYCODE_ALT_LEFT:
+		case KeyEvent.KEYCODE_ALT_RIGHT:
+		    	alt_mod = true;
+			key = -1;
+			break;
+		case KeyEvent.KEYCODE_SHIFT_LEFT:
+		case KeyEvent.KEYCODE_SHIFT_RIGHT:
+		    	shift_mod = true;
+			key = -1;
+			break;
 		}
+
 		if (key == 0) {
-			// key = event.getDisplayLabel();
-			key = event.getUnicodeChar();
+			int meta=0;
+			if(alt_mod) {
+				meta |= KeyEvent.META_ALT_ON;
+				meta |= KeyEvent.META_ALT_LEFT_ON;
+				alt_mod = false;
+			}
+			if(shift_mod) {
+				meta |= KeyEvent.META_SHIFT_ON;
+				meta |= KeyEvent.META_SHIFT_LEFT_ON;
+				shift_mod = false;
+			}
+			key = event.getUnicodeChar(meta);
 			if (key <= 127) {
 				if (key >= 'a' && key <= 'z' && ctrl_mod) {
 					key = key - 'a' + 1;
@@ -300,7 +323,7 @@ public class TermView extends View implements Runnable {
 			}
 		}
 
-		if (key == 0) {
+		if (key <= 0) {
 			return super.onKeyDown(keyCode, event);
 		}
 
