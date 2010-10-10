@@ -17,10 +17,10 @@
 			android:defaultValue="true" 
 			android:title="@string/preferences_alwaysrun_title"
 			android:summary="@string/preferences_alwaysrun_summary" />
-		<ListPreference android:title="@string/preferences_gameplugin_title"
+		<org.angdroid.angband.PluginPreference android:title="@string/preferences_gameplugin_title"
 				android:key="angband.gameplugin"
 				android:summary="@string/preferences_gameplugin_summary"
-				android:entries="@array/gamePlugins"
-				android:entryValues="@array/gamePluginValues" />
+				android:entries="@array/gamePluginDescriptions"
+				android:entryValues="@array/gamePlugins" />
 	</PreferenceCategory>
 </PreferenceScreen>

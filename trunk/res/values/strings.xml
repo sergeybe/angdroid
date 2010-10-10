@@ -29,14 +29,20 @@
     <string name="preferences_alwaysrun_title">Always Run</string>
     <string name="preferences_alwaysrun_summary">Always run when using touch directional commands</string>
 
-    <string-array name="gamePlugins">
+	<!-- todo move plugin manifest onto sdcard -->
+    <string-array name="gamePluginDescriptions">
       <item>Vanilla 3.1.2v2</item>
       <item>Vanilla 3.0.6 squelch+borg</item>
       <!-- <item>ToME 2.5.3</item> -->
     </string-array>
-    <string-array name="gamePluginValues">
+    <string-array name="gamePluginNames">
       <item>angband</item>
       <item>angband306</item>
       <!-- <item>tome</item> -->
+    </string-array>
+    <string-array name="gamePlugins">
+      <item>0</item>
+      <item>1</item>
+      <!-- <item>2</item> -->
     </string-array>
 </resources>
