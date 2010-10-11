@@ -274,6 +274,7 @@ public class TermView extends View implements Runnable {
 			break;
 		case KeyEvent.KEYCODE_DPAD_CENTER:
 		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
+			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
 			ctrl_mod = true;
 			ctrl_key_pressed = false;
 			return true;
@@ -292,11 +293,13 @@ public class TermView extends View implements Runnable {
 			break;
 		case KeyEvent.KEYCODE_ALT_LEFT:
 		case KeyEvent.KEYCODE_ALT_RIGHT:
+			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
 			alt_mod = true;
 			key = -1;
 			break;
 		case KeyEvent.KEYCODE_SHIFT_LEFT:
 		case KeyEvent.KEYCODE_SHIFT_RIGHT:
+			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
 			shift_mod = true;
 			key = -1;
 			break;
@@ -319,6 +322,7 @@ public class TermView extends View implements Runnable {
 				if (key >= 'a' && key <= 'z' && ctrl_mod) {
 					key = key - 'a' + 1;
 					ctrl_key_pressed = true;
+					ctrl_mod = false;
 				}
 			}
 		}
@@ -342,17 +346,12 @@ public class TermView extends View implements Runnable {
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-			ctrl_mod = false;
 
 			// I think the overloaded control key + menu feature is annoying
 			// todo: move to preference
 			if(!ctrl_key_pressed) {
 				addToKeyBuffer('\r');
 			}
-		}
-		// emoticon key on Samsung Epic 4G (todo move to Preference)
-		else if (keyCode == 97) {
-			ctrl_mod = false;
 		}
 		return super.onKeyUp(keyCode, event);
 	}
