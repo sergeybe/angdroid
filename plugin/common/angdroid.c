@@ -83,6 +83,7 @@
 #include <jni.h>
 #include <android/log.h>
 #include <pthread.h>
+#include <string.h>
 
 #define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "Angband", __VA_ARGS__)
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "Angband", __VA_ARGS__)
@@ -118,9 +119,9 @@ static jmethodID TermView_postInvalidate;
 static jmethodID TermView_setCursorXY;
 static jmethodID TermView_setCursorVisible;
 static jmethodID TermView_clearKeyBuffer;
-static jmethodID TermView_onExitGame;
 
 char android_files_path[1024];
+char android_savefile[50];
 
 /*
  * Extra data to associate with each "window"
@@ -345,7 +346,7 @@ static errr Term_xtra_and(int n, int v)
 			 *
 			 * This action is required.
 			 */
-			LOGD("TERM_XTRA_CLEAR");
+			//LOGD("TERM_XTRA_CLEAR");
 			(*env)->CallVoidMethod(env, TermViewObj, TermView_clear);
 			return 0;
 		}
@@ -495,7 +496,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is optional, but may be required by this file,
 			 * especially if special "macro sequences" must be supported.
 			 */
-			LOGD("TERM_XTRA_DELAY v=%d", v);
+			//LOGD("TERM_XTRA_DELAY v=%d", v);
 			
 			if (v > 0)
 				usleep((unsigned int)1000 * v);
@@ -756,10 +757,6 @@ static void hook_quit(cptr str)
 
 	LOGD("hook_quit()");
 
-	(*env)->CallVoidMethod(env, TermViewObj, TermView_onExitGame);
-
-	LOGD("DetatchCurrentThread (bye)");
-
 	(*jvm)->DetachCurrentThread(jvm);
 
 	pthread_exit(NULL);
@@ -879,7 +876,11 @@ static void init_stuff()
 	init_file_paths(android_files_path);
 #endif
 
-	process_player_name(TRUE);
+	char temp[1024];
+	strnfmt(temp, sizeof(temp), "%s", android_savefile);
+	path_build(savefile, sizeof(savefile), ANGBAND_DIR_SAVE, temp);
+
+	process_player_name(FALSE);
 
 #ifdef ANGDROID_ANGBAND_PLUGIN
 #ifdef USE_SOUND
@@ -956,7 +957,6 @@ void initGame ()
 	TermView_setCursorXY = (*env)->GetMethodID(env, TermViewClass, "setCursorXY", "(II)V");
 	TermView_setCursorVisible = (*env)->GetMethodID(env, TermViewClass, "setCursorVisible", "(I)V");
 	TermView_clearKeyBuffer = (*env)->GetMethodID(env, TermViewClass, "clearKeyBuffer", "()V");
-	TermView_onExitGame = (*env)->GetMethodID(env, TermViewClass, "onExitGame", "()V");
 
 #ifdef ANGDROID_ANGBAND_PLUGIN
 	/* Set up the command hook */
@@ -970,20 +970,46 @@ void initGame ()
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
-JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled
-	(JNIEnv *env1, jobject obj1)
+JNIEXPORT jstring JNICALL angdroid_gameQueryString
+	(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
-	jint rl = 0;
-#ifdef ANGDROID_ANGBAND_PLUGIN
-	if (op_ptr && OPT(rogue_like_commands)) rl=1;
-#else
-	if (rogue_like_commands) rl=1;
-#endif
-	return rl;
+	return (jstring)0; // null indicates error
 }
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
-	(JNIEnv *env1, jobject obj1, jstring pluginPath, jstring libPath, jstring arguments)
+JNIEXPORT jint JNICALL angdroid_gameQueryInt
+	(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
+{
+	jint result = -1; // -1 indicates error
+
+	// process argc/argv 
+	jstring argv0 = NULL;
+	int i = 0;
+
+	argv0 = (*env1)->GetObjectArrayElement(env1, argv, i);
+	const char *copy_argv0 = (*env1)->GetStringUTFChars(env1, argv0, 0);
+
+	if (strcmp(copy_argv0,"pluginVersion")==0) {
+		result = 1;
+	}
+	if (strcmp(copy_argv0,"isRogueLikeEnabled")==0) {
+		result = 0;
+#ifdef ANGDROID_ANGBAND_PLUGIN
+		if (op_ptr && OPT(rogue_like_commands)) result=1;
+#else
+		if (rogue_like_commands) result=1;
+#endif
+	}
+	else {
+		result = -1; //unknown command
+	}
+
+	(*env1)->ReleaseStringUTFChars(env1, argv0, copy_argv0);
+
+	return result;
+}
+
+JNIEXPORT void JNICALL angdroid_gameStart
+(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	env = env1;
 
@@ -996,9 +1022,28 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 
 	(*jvm)->AttachCurrentThread(jvm, &env, NULL);
 
-	const char *copy_path = (*env)->GetStringUTFChars(env1, libPath, 0);
-	my_strcpy(android_files_path, copy_path, strlen(copy_path)+1);
-	(*env)->ReleaseStringUTFChars(env1, libPath, copy_path);
+	// process argc/argv 
+	jstring argv0 = NULL;
+	int i;
+	for(i = 0; i < argc; i++) {
+		argv0 = (*env1)->GetObjectArrayElement(env1, argv, i);
+		const char *copy_argv0 = (*env1)->GetStringUTFChars(env1, argv0, 0);
+
+		LOGD("loader argv%d = %s",i,copy_argv0);
+
+		switch(i){
+		case 0: //files path
+			my_strcpy(android_files_path, copy_argv0, strlen(copy_argv0)+1);
+			break;
+		case 1: //savefile
+			my_strcpy(android_savefile, copy_argv0, strlen(copy_argv0)+1);
+			break;
+		default:
+			break;
+		}
+
+		(*env1)->ReleaseStringUTFChars(env1, argv0, copy_argv0);
+	}
 
 	/* Save objects */
 	TermViewObj = obj1;
@@ -1023,7 +1068,6 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	LOGD("cleanup_angband()");
 	cleanup_angband();
 
-	LOGD("quit()");
 	quit("exit normally");
 }
 

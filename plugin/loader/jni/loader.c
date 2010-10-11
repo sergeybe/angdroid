@@ -15,30 +15,36 @@
 /* FIXME __android_log_write or __android_log_print ??? */
 #define LOG(msg) (__android_log_write(ANDROID_LOG_DEBUG, "Angband", (msg)));
 
-void( * startGame ) (JNIEnv*, jobject, jstring, jstring, jstring) = NULL; 
-jint( * isRoguelikeKeysEnabled ) (JNIEnv*, jobject) = NULL;
+void( * angdroid_gameStart ) (JNIEnv*, jobject, jint, jobjectArray) = NULL; 
+jint( * angdroid_gameQueryInt ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
+jstring( * angdroid_gameQueryString ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
+
 JNIEnv* pass_env1; 
 jobject pass_obj1;
-jstring pass_pluginPath;
-jstring pass_libPath;
-jstring pass_arguments;
+jint    pass_argc;
+jobject pass_argv;
 
 static JavaVM *jvm;
-static JNIEnv *env;
 static void* handle = NULL;
 pthread_mutex_t muQuery = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t muGame = PTHREAD_MUTEX_INITIALIZER;
 
+static jclass TermViewClass;
+static jobject TermViewObj;
+static jmethodID TermView_onExitGame;
+
 void* run_angband(void* foo)
 {
-	startGame(pass_env1, pass_obj1, pass_pluginPath, pass_libPath, pass_arguments);   
+	angdroid_gameStart(pass_env1, pass_obj1, pass_argc, pass_argv);   
 	return foo;
 }
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
-	(JNIEnv *env1, jobject obj1, jstring pluginPath, jstring libPath, jstring arguments)
+JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_gameStart
+(JNIEnv *env1, jobject obj1, jstring pluginPath, jint argc, jobjectArray argv)
 {
 	pthread_t game_thread;
+
+	LOGD("loader.startGame.syncwait");
 
 	// begin synchronize
 
@@ -53,19 +59,17 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 
 	pthread_mutex_lock (&muQuery);
 
+	LOGD("loader.startGame.initializing");
+
 	pass_env1 = env1;
 	pass_obj1 = obj1;
-	pass_pluginPath = pluginPath;
-	pass_libPath = libPath;
-	pass_arguments = arguments;
-	LOGD("in the loader");
+	pass_argc = argc;
+	pass_argv = argv;
 
-	/*
-	if ((*env1)->GetJavaVM(env1, &jvm) < 0){
-		LOGE("Error: Can't get JavaVM!");
-	}
-	(*jvm)->AttachCurrentThread(jvm, &env1, NULL);
-	*/
+	/* Init exit game callback */
+	TermViewObj = obj1;
+	TermViewClass = (*env1)->GetObjectClass(env1, TermViewObj);
+	TermView_onExitGame = (*env1)->GetMethodID(env1, TermViewClass, "onExitGame", "()V");
 
 	// load game plugin lib
 	const char *copy_pluginPath = (*env1)->GetStringUTFChars(env1, pluginPath, 0);
@@ -77,9 +81,9 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 	(*env1)->ReleaseStringUTFChars(env1, pluginPath, copy_pluginPath);
 
 	// find entry point
-	startGame = dlsym(handle, "Java_org_angdroid_angband_TermView_startGame");   
-	if (!startGame) {
-		LOGE("dlsym failed on Java_org_angdroid_angband_TermView_startGame");
+	angdroid_gameStart = dlsym(handle, "angdroid_gameStart");   
+	if (!angdroid_gameStart) {
+		LOGE("dlsym failed on gameStart");
 		return;
 	}	
 
@@ -101,40 +105,47 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_startGame
 
 	// clear pointers
 	handle = NULL;
-	isRoguelikeKeysEnabled = NULL;
+	angdroid_gameQueryInt = NULL;
+	angdroid_gameQueryString = NULL;
+
+	// signal game has exited
+	(*env1)->CallVoidMethod(env1, TermViewObj, TermView_onExitGame);
 
 	// end synchronize
 	pthread_mutex_unlock (&muQuery);
 	pthread_mutex_unlock (&muGame);
-
-	//LOGD("loader.detatch");
-	//(*jvm)->DetachCurrentThread(jvm);
 }
 
-JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled
-	(JNIEnv *env1, jobject obj1)
+JNIEXPORT jstring JNICALL Java_org_angdroid_angband_TermView_gameQueryString
+  (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
-	jint rl = 0;
+	return (jstring)0; // null indicates error
+}
+
+JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_gameQueryInt
+(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
+{
+	jint result = -1; // -1 indicates error
+
 	// begin synchronize
 	pthread_mutex_lock (&muQuery);
 
 	if (handle) {
-		if (!isRoguelikeKeysEnabled)
+		if (!angdroid_gameQueryInt)
 		  	// find entry point
-		  	isRoguelikeKeysEnabled = dlsym(handle, "Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled");   
+		  	angdroid_gameQueryInt = dlsym(handle, "angdroid_gameQueryInt");   
 
-		if (isRoguelikeKeysEnabled)
-			rl = isRoguelikeKeysEnabled(env1, obj1);
+		if (angdroid_gameQueryInt)
+			result = angdroid_gameQueryInt(env1, obj1, argc, argv);
 		else
-			LOGE("dlsym failed on Java_org_angdroid_angband_TermView_isRoguelikeKeysEnabled");
+			LOGE("dlsym failed on angdroid_gameQueryInt");
 	}
 	else {
-		LOGE("dlopen failed -- isRoguelikeKeysEnabled");
-		rl =  0;
+		LOGE("dlopen failed -- angdroid_gameQueryInt");
 	}
 
 	// end synchronize
 	pthread_mutex_unlock (&muQuery);
 
-	return rl;
+	return result;
 }

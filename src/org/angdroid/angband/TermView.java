@@ -276,7 +276,7 @@ public class TermView extends View implements Runnable {
 		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
 			ctrl_mod = true;
 			ctrl_key_pressed = false;
-				return true;
+			return true;
 		case KeyEvent.KEYCODE_BACK:
 			key = '`'; // escape key on back button
 			break;
@@ -292,12 +292,12 @@ public class TermView extends View implements Runnable {
 			break;
 		case KeyEvent.KEYCODE_ALT_LEFT:
 		case KeyEvent.KEYCODE_ALT_RIGHT:
-		    	alt_mod = true;
+			alt_mod = true;
 			key = -1;
 			break;
 		case KeyEvent.KEYCODE_SHIFT_LEFT:
 		case KeyEvent.KEYCODE_SHIFT_RIGHT:
-		    	shift_mod = true;
+			shift_mod = true;
 			key = -1;
 			break;
 		}
@@ -370,8 +370,8 @@ public class TermView extends View implements Runnable {
 			int r, c;
 			c = (x * 3) / getWidth();
 			r = (y * 3) / getHeight();
-
-			boolean rogueLike = (isRoguelikeKeysEnabled()==1);
+			
+			boolean rogueLike = (gameQueryInt(1,new String[]{"isRogueLikeEnabled"})==1);
 			int key = (2 - r) * 3 + c + '1';
 
 			if (rogueLike) {
@@ -666,8 +666,10 @@ public class TermView extends View implements Runnable {
 	}
 
 	// Call native methods from library
-	native void startGame(String pluginPath, String filesPath, String arguments);
-	native int isRoguelikeKeysEnabled();
+	native void gameStart(String pluginPath, int argc, String[] argv);
+	native int gameQueryInt(int argc, String[] argv);
+	native String gameQueryString(int argc, String[] argv);
+
 	public void run() {	    
 
 		synchronized (game_thread_lock) {
@@ -683,7 +685,15 @@ public class TermView extends View implements Runnable {
 
 	    String pluginPath = Preferences.getActivityFilesDirectory()
 			+"/../lib/lib"+Preferences.getActivePluginName()+".so";
-	    startGame(pluginPath, Preferences.getAngbandFilesDirectory(), "");
+		Log.d("Angband","gameStart");
+	    gameStart(
+			pluginPath, 
+			2, 
+			new String[]{
+				Preferences.getAngbandFilesDirectory(),
+				Preferences.getActiveProfile().getSaveFile()
+			}
+	    );
 	}
 
 	//this is called from native thread just before exiting
