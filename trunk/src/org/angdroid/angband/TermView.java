@@ -52,7 +52,13 @@ public class TermView extends View implements Runnable {
 	private boolean ctrl_mod = false;
 	private boolean shift_mod = false;
 	private boolean alt_mod = false;
-	private boolean ctrl_key_pressed;
+	private boolean shift_down = false;
+	private boolean alt_down = false;
+	private boolean ctrl_down = false;
+	private boolean ctrl_key_pressed = false;
+	private boolean shift_key_pressed = false;
+	private boolean alt_key_pressed = false;
+
 	private boolean wait = false;
 	private int quit_key_seq = 0;
 
@@ -258,7 +264,7 @@ public class TermView extends View implements Runnable {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
-		Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
+		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_UP:
 			key = ARROW_UP;
@@ -276,6 +282,7 @@ public class TermView extends View implements Runnable {
 		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
 			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
 			ctrl_mod = true;
+			ctrl_down = true;
 			ctrl_key_pressed = false;
 			return true;
 		case KeyEvent.KEYCODE_BACK:
@@ -295,12 +302,16 @@ public class TermView extends View implements Runnable {
 		case KeyEvent.KEYCODE_ALT_RIGHT:
 			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
 			alt_mod = true;
+			alt_down = true;
+			alt_key_pressed = false;
 			key = -1;
 			break;
 		case KeyEvent.KEYCODE_SHIFT_LEFT:
 		case KeyEvent.KEYCODE_SHIFT_RIGHT:
 			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
 			shift_mod = true;
+			shift_down = true;
+			shift_key_pressed = false;
 			key = -1;
 			break;
 		}
@@ -310,25 +321,31 @@ public class TermView extends View implements Runnable {
 			if(alt_mod) {
 				meta |= KeyEvent.META_ALT_ON;
 				meta |= KeyEvent.META_ALT_LEFT_ON;
-				alt_mod = false;
+				alt_mod = alt_down; // if held down, mod is still active
 			}
 			if(shift_mod) {
 				meta |= KeyEvent.META_SHIFT_ON;
 				meta |= KeyEvent.META_SHIFT_LEFT_ON;
-				shift_mod = false;
+				shift_mod = shift_down; // if held down, mod is still active
 			}
 			key = event.getUnicodeChar(meta);
 			if (key <= 127) {
-				if (key >= 'a' && key <= 'z' && ctrl_mod) {
+				if (key >= 'a' && key <= 'z') {
+				    if (ctrl_mod) {
 					key = key - 'a' + 1;
-					ctrl_key_pressed = true;
-					ctrl_mod = false;
+				        ctrl_mod = ctrl_down; // if held down, mod is still active
+				    }
 				}
 			}
 		}
 
 		if (key <= 0) {
 			return super.onKeyDown(keyCode, event);
+		}
+		else {
+			alt_key_pressed = alt_down;
+			ctrl_key_pressed = ctrl_down;
+			shift_key_pressed = shift_down;
 		}
 
 		if (event.isShiftPressed()) {
@@ -345,13 +362,32 @@ public class TermView extends View implements Runnable {
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+		//Log.d("Angband", "onKeyUp("+keyCode+","+event+")");
+		switch (keyCode) {
+		case KeyEvent.KEYCODE_DPAD_CENTER:
+			ctrl_down = false;
+			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
 
 			// I think the overloaded control key + menu feature is annoying
 			// todo: move to preference
 			if(!ctrl_key_pressed) {
 				addToKeyBuffer('\r');
 			}
+			break;
+		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
+		    	ctrl_down = false;
+			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
+			break;
+		case KeyEvent.KEYCODE_ALT_LEFT:
+		case KeyEvent.KEYCODE_ALT_RIGHT:
+			alt_down = false;
+			alt_mod = !alt_key_pressed; // turn off mod only if used at least once
+			break;
+		case KeyEvent.KEYCODE_SHIFT_LEFT:
+		case KeyEvent.KEYCODE_SHIFT_RIGHT:
+			shift_down = false;
+			shift_mod = !shift_key_pressed; // turn off mod only if used at least once
+			break;
 		}
 		return super.onKeyUp(keyCode, event);
 	}
