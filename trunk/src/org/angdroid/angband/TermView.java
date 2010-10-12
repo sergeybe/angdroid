@@ -281,9 +281,9 @@ public class TermView extends View implements Runnable {
 		case KeyEvent.KEYCODE_DPAD_CENTER:
 		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
 			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			ctrl_mod = true;
+			ctrl_mod = !ctrl_mod;
+			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
 			ctrl_down = true;
-			ctrl_key_pressed = false;
 			return true;
 		case KeyEvent.KEYCODE_BACK:
 			key = '`'; // escape key on back button
@@ -301,17 +301,17 @@ public class TermView extends View implements Runnable {
 		case KeyEvent.KEYCODE_ALT_LEFT:
 		case KeyEvent.KEYCODE_ALT_RIGHT:
 			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			alt_mod = true;
+			alt_mod = !alt_mod;
+			alt_key_pressed = !alt_mod; // double tap, turn off mod
 			alt_down = true;
-			alt_key_pressed = false;
 			key = -1;
 			break;
 		case KeyEvent.KEYCODE_SHIFT_LEFT:
 		case KeyEvent.KEYCODE_SHIFT_RIGHT:
 			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			shift_mod = true;
+			shift_mod = !shift_mod;
+			shift_key_pressed = !shift_mod; // double tap, turn off mod
 			shift_down = true;
-			shift_key_pressed = false;
 			key = -1;
 			break;
 		}
@@ -375,7 +375,7 @@ public class TermView extends View implements Runnable {
 			}
 			break;
 		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
-		    	ctrl_down = false;
+			ctrl_down = false;
 			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
 			break;
 		case KeyEvent.KEYCODE_ALT_LEFT:
@@ -646,6 +646,22 @@ public class TermView extends View implements Runnable {
 		synchronized(game_thread_lock) {
 			if (game_thread_running || canvas == null) return;
 
+			if (!game_restart) {
+
+				// check plugin version before starting
+			
+				String pluginPath = Preferences.getActivityFilesDirectory()
+					+"/../lib/lib"+Preferences.getActivePluginName()+".so";
+				int version = gamePluginVersion(pluginPath);
+
+				if (version == -1 || version > 1) {
+					// todo notify user here to reinstall plugin (-1 == missing)
+					// todo notify user here to upgrade (version > 1)
+					// set active plugin back to default
+					return;
+				}
+			}
+
 			game_thread_running = true;
 			signal_game_exit = false;
 			quit_key_seq = 0;
@@ -701,6 +717,7 @@ public class TermView extends View implements Runnable {
 	}
 
 	// Call native methods from library
+	native int gamePluginVersion(String pluginPath);
 	native void gameStart(String pluginPath, int argc, String[] argv);
 	native int gameQueryInt(int argc, String[] argv);
 	native String gameQueryString(int argc, String[] argv);
@@ -716,11 +733,15 @@ public class TermView extends View implements Runnable {
 					Thread.sleep(400);
 				} catch (Exception ex) {}
 			}
+			else {
+			}
 		}
+
+
+		Log.d("Angband","gameStart");
 
 	    String pluginPath = Preferences.getActivityFilesDirectory()
 			+"/../lib/lib"+Preferences.getActivePluginName()+".so";
-		Log.d("Angband","gameStart");
 	    gameStart(
 			pluginPath, 
 			2, 
