@@ -119,9 +119,14 @@ final public class Preferences {
 	public static ProfileList getProfiles() {
 		if (profiles == null) {
 			//Log.d("Angband", "loading profiles");
-			String s = pref.getString(Preferences.KEY_PROFILES, DEFAULT_PROFILE);
-			profiles = ProfileList.deserialize(s);
-			if (s.compareTo(DEFAULT_PROFILE)==0) saveProfiles();
+			String s = pref.getString(Preferences.KEY_PROFILES, "");
+			if (s.length() == 0) {
+				profiles = ProfileList.deserialize(DEFAULT_PROFILE);
+				saveProfiles();
+			}
+			else {
+				profiles = ProfileList.deserialize(s);
+			}
 		}
 		return profiles;
 	}
