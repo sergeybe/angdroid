@@ -646,22 +646,6 @@ public class TermView extends View implements Runnable {
 		synchronized(game_thread_lock) {
 			if (game_thread_running || canvas == null) return;
 
-			if (!game_restart) {
-
-				// check plugin version before starting
-			
-				String pluginPath = Preferences.getActivityFilesDirectory()
-					+"/../lib/lib"+Preferences.getActivePluginName()+".so";
-				int version = gamePluginVersion(pluginPath);
-
-				if (version == -1 || version > 1) {
-					// todo notify user here to reinstall plugin (-1 == missing)
-					// todo notify user here to upgrade (version > 1)
-					// set active plugin back to default
-					return;
-				}
-			}
-
 			game_thread_running = true;
 			signal_game_exit = false;
 			quit_key_seq = 0;
@@ -717,7 +701,6 @@ public class TermView extends View implements Runnable {
 	}
 
 	// Call native methods from library
-	native int gamePluginVersion(String pluginPath);
 	native void gameStart(String pluginPath, int argc, String[] argv);
 	native int gameQueryInt(int argc, String[] argv);
 	native String gameQueryString(int argc, String[] argv);

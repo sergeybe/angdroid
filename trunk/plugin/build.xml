@@ -48,17 +48,10 @@
 	    <fileset dir="plugin/${plugin.name}/patch/" 
 		      includes="*.patch"/>
 	</apply>
-<!--
-        <exec executable="patch" failonerror="true">
-	    <arg value="-dplugin/angband306/extsrc/"/>
-	    <arg value="-i../patch/angband-3.0.6-android.patch"/>
-	    <arg value="-p2"/>
-	</exec>
-        <exec executable="patch" failonerror="true">
-	    <arg value="-dplugin/angband306/extsrc/"/>
-	    <arg value="-i../patch/angband-3.0.6-squelch.patch"/>
-	</exec>
--->
+	<!-- for angband306 only, copy over the borgsave -->
+	<copy file="plugin/${plugin.name}/patch/BORGSAVE" 
+	      tofile="plugin/${plugin.name}/extsrc/lib/save/BORGSAVE" 
+	      overwrite="true"
+		  failonerror="false"/>
     </target>
-
 </project>
