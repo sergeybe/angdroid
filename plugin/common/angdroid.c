@@ -976,12 +976,6 @@ JNIEXPORT jstring JNICALL angdroid_gameQueryString
 	return (jstring)0; // null indicates error
 }
 
-JNIEXPORT jint JNICALL angdroid_gamePluginVersion
-	(JNIEnv *env1, jobject obj1)
-{
-	return (jint)1;
-}
-
 JNIEXPORT jint JNICALL angdroid_gameQueryInt
 	(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {

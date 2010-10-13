@@ -18,7 +18,6 @@
 void( * angdroid_gameStart ) (JNIEnv*, jobject, jint, jobjectArray) = NULL; 
 jint( * angdroid_gameQueryInt ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
 jstring( * angdroid_gameQueryString ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
-jint( * angdroid_gamePluginVersion ) (JNIEnv*, jobject) = NULL; 
 
 JNIEnv* pass_env1; 
 jobject pass_obj1;
@@ -38,50 +37,6 @@ void* run_angband(void* foo)
 {
 	angdroid_gameStart(pass_env1, pass_obj1, pass_argc, pass_argv);   
 	return foo;
-}
-
-JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_gamePluginVersion
-(JNIEnv *env1, jobject obj1, jstring pluginPath)
-{
-	jint result = -1; //error
-
-	LOGD("loader.gamePluginVersion");
-
-	// begin synchronize
-	pthread_mutex_lock (&muGame);
-	pthread_mutex_lock (&muQuery);
-
-	LOGD("loader.startGame.initializing");
-
-	// load game plugin lib
-	const char *copy_pluginPath = (*env1)->GetStringUTFChars(env1, pluginPath, 0);
-	handle = dlopen(copy_pluginPath,RTLD_LOCAL | RTLD_LAZY);  
-	if (!handle) {
-		LOGE("dlopen failed on %s", copy_pluginPath);
-		return result;
-	}	
-	(*env1)->ReleaseStringUTFChars(env1, pluginPath, copy_pluginPath);
-
-	// find entry point
-    angdroid_gamePluginVersion = dlsym(handle, "angdroid_gamePluginVersion");   
-	if (!angdroid_gamePluginVersion) {
-		LOGE("dlsym failed on angdroid_gamePluginVersion");
-		return result;
-	}	
-
-	result = angdroid_gamePluginVersion(env1, obj1);
-
-	dlclose(handle);           	 // unload angband lib
-
-	// clear pointers
-	handle = NULL;
-	angdroid_gamePluginVersion = NULL;
-
-	// end synchronize
-	pthread_mutex_unlock (&muQuery);
-	pthread_mutex_unlock (&muGame);
-
-	return result;
 }
 
 JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_gameStart

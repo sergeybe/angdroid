@@ -14,13 +14,17 @@ import android.util.Log;
 final public class Preferences {
 
 	static final String NAME = "angband";
-	static final String KEY_PROFILES = "angband.profiles";
-	static final String KEY_ACTIVEPROFILE = "angband.activeprofile";
+
 	static final String KEY_VIBRATE = "angband.vibrate";
 	static final String KEY_FULLSCREEN = "angband.fullscreen";
-	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
 	static final String KEY_ENABLETOUCH = "angband.enabletouch";
+
+	static final String KEY_PROFILES = "angband.profiles";
+	static final String KEY_ACTIVEPROFILE = "angband.activeprofile";
+	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
 	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
+	static final String KEY_SKIPWELCOME = "angband.skipwelcome";
+	static final String KEY_AUTOSTARTBORG = "angband.autostartborg";
 
 	public enum Plugin {
 		Angband(0), Angband306(1), ToME(2);
@@ -35,7 +39,7 @@ final public class Preferences {
 		}
 	}
 
-	static final String DEFAULT_PROFILE = "0~Default~PLAYER~false~0";
+	static final String DEFAULT_PROFILE = "0~Default~PLAYER~0~0|0~Borg~BORGSAVE~1~1";
 
 	private static String activityFilesPath;
 	private static SharedPreferences pref;
@@ -123,6 +127,13 @@ final public class Preferences {
 			if (s.length() == 0) {
 				profiles = ProfileList.deserialize(DEFAULT_PROFILE);
 				saveProfiles();
+
+				// for some reason ProfileListPreference needs a persisted value to display
+				// the very first time.
+				// ...there is probably an override to get around this in ListPreference.
+				SharedPreferences.Editor ed = pref.edit();
+				ed.putString(Preferences.KEY_GAMEPLUGIN, String.valueOf(getActiveProfile().getPlugin()));
+				ed.commit();			
 			}
 			else {
 				profiles = ProfileList.deserialize(s);

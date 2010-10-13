@@ -25,10 +25,21 @@
 		    android:dependency="angband.enabletouch" />
 	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/game_category">
-		<org.angdroid.angband.PluginPreference android:title="@string/preferences_gameplugin_title"
+		<org.angdroid.angband.ProfileListPreference 
+				android:title="@string/preferences_gameplugin_title"
 				android:key="angband.gameplugin"
 				android:summary="@string/preferences_gameplugin_summary"
 				android:entries="@array/gamePluginDescriptions"
 				android:entryValues="@array/gamePlugins" />
+		<org.angdroid.angband.ProfileCheckBoxPreference 
+				android:title="@string/preferences_skipwelcome_title"
+				android:key="angband.skipwelcome"
+				android:defaultValue="false" 
+				android:summary="@string/preferences_skipwelcome_summary" />
+		<org.angdroid.angband.ProfileCheckBoxPreference 
+				android:title="@string/preferences_autostartborg_title"
+				android:key="angband.autostartborg"
+				android:defaultValue="false" 
+				android:summary="@string/preferences_autostartborg_summary" />
 	</PreferenceCategory>
 </PreferenceScreen>

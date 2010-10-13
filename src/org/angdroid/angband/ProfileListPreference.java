@@ -6,13 +6,13 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 
-public class PluginPreference extends ListPreference 
+public class ProfileListPreference extends ListPreference 
 {
-	public PluginPreference(Context context, AttributeSet attrs) {
+	public ProfileListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public PluginPreference(Context context) {
+    public ProfileListPreference(Context context) {
         super(context);
     }
 
@@ -26,6 +26,13 @@ public class PluginPreference extends ListPreference
 		else
 			return false;
 	}
+
+	/* doesn't seem to help initial display problem
+	@Override
+    protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {		
+        setValue(getPersistedString("0"));
+    }
+	*/
 
     @Override
     protected String getPersistedString(String defaultReturnValue) {
