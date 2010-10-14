@@ -77,6 +77,14 @@ final public class Preferences {
 		return pref.getBoolean(Preferences.KEY_ALWAYSRUN, true);
 	}
 
+	public static boolean getSkipWelcome() {
+		return getActiveProfile().getSkipWelcome();
+	}
+
+	public static boolean getAutoStartBorg() {
+		return getActiveProfile().getAutoStartBorg();
+	}
+
 	public static int[] getInstalledPlugins() {
 		return gamePlugins;
 	}

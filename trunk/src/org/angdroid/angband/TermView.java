@@ -655,7 +655,8 @@ public class TermView extends View implements Runnable {
 
 		clearKeyBuffer();
 
-		if (Preferences.getActivePluginName().compareTo("angband")==0) {
+		if (Preferences.getActiveProfile().getPlugin()
+			== Preferences.Plugin.Angband.getId()) {
 			ARROW_DOWN = 0x8A;
 			ARROW_LEFT = 0x8B;
 			ARROW_RIGHT = 0x8C;
@@ -666,6 +667,17 @@ public class TermView extends View implements Runnable {
 			ARROW_LEFT = '4';
 			ARROW_RIGHT = '6';
 			ARROW_UP = '8';
+		}
+
+		if (Preferences.getActiveProfile().getPlugin()
+			== Preferences.Plugin.Angband306.getId()
+			&& Preferences.getAutoStartBorg()) {
+			addToKeyBuffer(32); //space
+			addToKeyBuffer(26); //ctrl-v
+			addToKeyBuffer(122); //v
+		}
+		else if (Preferences.getSkipWelcome()) {
+			addToKeyBuffer(32); //space
 		}
 
 		thread = new Thread(this);
