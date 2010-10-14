@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="AngbandPlugin" default="plugin-lib">
 
+    <condition property="is.exist.jni.header">
+        <available file="angdroid.h" type="file" filepath="plugin/include"/>
+    </condition>
+    <target name="angband-javah" unless="is.exist.jni.header">
+        <javah outputFile="plugin/include/angdroid.h"
+            classpath="${out-classes-location}"
+            bootclasspath="${android-jar}"
+            verbose="true">
+            <class name="org.angdroid.angband.TermView" />
+            <class name="org.angdroid.angband.AngbandActivity" />
+        </javah>
+    </target>
+
     <target name="plugin-lib">
         <exec executable="sh" 
 	      failonerror="true"
@@ -16,7 +29,8 @@
             <available file="zip${plugin.name}" type="file" filepath="${resource-folder}/raw/"/>
     </condition>
 
-    <target name="plugin-resources" unless="is.created.zip.resource">
+    <target name="plugin-resources">
+        <delete file="${resource-folder}/raw/zip${plugin.name}"/>
         <zip destfile="${resource-folder}/raw/zip${plugin.name}" basedir="plugin/${plugin.name}/extsrc/lib"
             excludes="**/Makefile **/Makefile.am **/Makefile.in **/delete.me **/*.glade **/*.bmp **/*.png **/*.wav xtra/font/*.* xtra/sound/*.* xtra/help/*.* xtra/graf/*.*" />
     </target>
