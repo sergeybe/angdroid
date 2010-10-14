@@ -23,8 +23,8 @@
        </proguard>
     </target>
     
-    <target name="angband-release" depends="plugin-resources, plugin-libs, release" />
-    <target name="angband-debug"   depends="plugin-resources, plugin-libs, debug" />
+    <target name="angband-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
+    <target name="angband-debug"   depends="plugin-resources, angband-javah, plugin-libs, debug" />
 
 <!--
     ************************************************************************
@@ -48,19 +48,10 @@
 -->
     </target>
 
-    <condition property="is.exist.jni.header">
-        <available file="angdroid.h" type="file" filepath="plugin/include"/>
-    </condition>
-
-    <target name="angband-javah" depends="compile" unless="is.exist.jni.header">
-        <javah outputFile="plugin/include/angdroid.h"
-            classpath="${out-classes-location}"
-            bootclasspath="${android-jar}"
-            verbose="true">
-            <class name="org.angdroid.angband.TermView" />
-            <class name="org.angdroid.angband.AngbandActivity" />
-        </javah>
-    </target>
+    <target name="angband-javah" depends="compile">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
+	</ant>
+	</target>
 
     <target name="plugin-libs" depends="angband-javah">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
@@ -120,7 +111,7 @@
         <delete dir="bin"/>
         <delete dir="gen"/>
         <delete dir="libs/armeabi"/>
-	<delete file="plugin/include/angdroid.h"/>
+		<delete file="plugin/include/angdroid.h"/>
     </target>
 
 
