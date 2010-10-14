@@ -46,10 +46,11 @@ final public class Preferences {
 	private static int[] gamePlugins;
 	private static String[] gamePluginNames;
 	private static ProfileList profiles;
+	private static String version;
 
 	Preferences() {}
 
-	public static void init(File filesDir, Resources resources, SharedPreferences sharedPrefs) {
+	public static void init(File filesDir, Resources resources, SharedPreferences sharedPrefs, String pversion) {
 		activityFilesPath = filesDir.getAbsolutePath();
 		pref = sharedPrefs;
 
@@ -59,6 +60,11 @@ final public class Preferences {
 			gamePlugins[i] = Integer.parseInt(gamePluginsStr[i]);
 		
 		gamePluginNames = resources.getStringArray(R.array.gamePluginNames);
+		version = pversion;
+	}
+
+	public static String getVersion() {
+		return version;
 	}
 
 	public static boolean getFullScreen() {

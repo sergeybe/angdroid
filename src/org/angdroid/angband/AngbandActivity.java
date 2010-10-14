@@ -37,6 +37,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.os.Environment;
+import android.content.pm.ComponentInfo;
+import android.content.pm.PackageInfo;
+import android.content.ComponentName;
 
 import com.flurry.android.FlurryAgent;
 
@@ -48,10 +51,18 @@ public class AngbandActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		String version = "unknown";
+		try {
+			ComponentName comp = new ComponentName(this, AngbandActivity.class);
+			PackageInfo pinfo = this.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
+			version = pinfo.versionName;
+		} catch (Exception e) {}
+
 	    Preferences.init ( 
 			getFilesDir(),
 			getResources(), 
-			getSharedPreferences(Preferences.NAME, MODE_PRIVATE)
+			getSharedPreferences(Preferences.NAME, MODE_PRIVATE),
+			version
 		);
 
 		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
@@ -131,24 +142,32 @@ public class AngbandActivity extends Activity {
 	}
 
 	void extractAngbandResources(int plugin) {
-		File f = new File(Preferences.getAngbandFilesDirectory(plugin));
-		f.mkdirs();
-		String abs_path = f.getAbsolutePath();
 
-		InputStream is = null;
-		if (plugin == Preferences.Plugin.Angband.getId())
-			is = getResources().openRawResource(R.raw.zipangband);
-		else if (plugin == Preferences.Plugin.Angband306.getId())
-			is = getResources().openRawResource(R.raw.zipangband306);
-		/*
-		else if (plugin == Preferences.Plugin.ToME.getId())
-			is = getResources().openRawResource(R.raw.ziptome);
-		}
-		*/
-		ZipInputStream zis = new ZipInputStream(is);
-		ZipEntry ze;
-		boolean filesExist = false;
 		try {
+			File f = new File(Preferences.getAngbandFilesDirectory(plugin));
+			f.mkdirs();
+			String abs_path = f.getAbsolutePath();
+
+			File cookie = new File(abs_path + "/installed-" + Preferences.getVersion()); 
+			// drop a cookie to indicate we've extracted the files
+			if (!cookie.createNewFile()) {
+				return; 
+			}
+
+			InputStream is = null;
+			if (plugin == Preferences.Plugin.Angband.getId())
+				is = getResources().openRawResource(R.raw.zipangband);
+			else if (plugin == Preferences.Plugin.Angband306.getId())
+				is = getResources().openRawResource(R.raw.zipangband306);
+			/*
+			  else if (plugin == Preferences.Plugin.ToME.getId())
+			  is = getResources().openRawResource(R.raw.ziptome);
+			  }
+			*/
+
+			ZipInputStream zis = new ZipInputStream(is);
+			ZipEntry ze;
+
 			while ((ze = zis.getNextEntry()) != null) {
 				String ze_name = ze.getName();
 				Log.v("Angband", "extracting " + ze_name);
@@ -163,13 +182,6 @@ public class AngbandActivity extends Activity {
 
 				byte contents[] = new byte[(int) ze.getSize()];
 
-				if (!myfile.createNewFile()) {
-					Log.v("Angband",
-							"file exists. not extracting any more files.");
-					filesExist = true;
-					break;
-				}
-
 				FileOutputStream fos = new FileOutputStream(myfile);
 				int remaining = (int) ze.getSize();
 
@@ -183,49 +195,6 @@ public class AngbandActivity extends Activity {
 				zis.closeEntry();
 			}
 			zis.close();
-
-			if (filesExist) return; // bail out, we're aleady installed
-
-			// copy version 0.15 save file to sdcard
-			File oldsave = new File(getFilesDir().getAbsolutePath() +
-						"/lib/save/PLAYER");
-			//Log.v("Angband","old save path = " + oldsave.getAbsolutePath());
-			// restore does not work from 0.15, disable for now
-			if (false && oldsave.exists()) {
-				Log.v("Angband", "0.15 save files exists; copying");
-				File newsave = new File(Preferences.getAngbandFilesDirectory() +
-							"/save/PLAYER");
-				FileReader in = new FileReader(oldsave);
-				FileWriter out = new FileWriter(newsave,false);
-				int c;
-
-				while ((c = in.read()) != -1)
-					out.write(c);
-
-				in.close();
-				out.close();
-				oldsave.delete();
-			}
-
-			// delete unused old files 
-			String oldf = getFilesDir().getAbsolutePath() + "/lib";
-			deleteDir(new File(oldf + "/apex"));
-			//deleteDir(new File(oldf + "/bone")); // bones are user data
-			deleteDir(new File(oldf + "/bone/.keep"));
-			deleteDir(new File(oldf + "/bone/delete.me"));
-			deleteDir(new File(oldf + "/data"));
-			deleteDir(new File(oldf + "/edit"));
-			deleteDir(new File(oldf + "/file"));
-			deleteDir(new File(oldf + "/help"));
-			deleteDir(new File(oldf + "/info"));
-			deleteDir(new File(oldf + "/pref"));
-			//deleteDir(oldf + "/save"); // leave save for downgrade
-			deleteDir(new File(oldf + "/save/delete.me"));
-			//deleteDir(new File(oldf + "/user")); // user prefs here
-			deleteDir(new File(oldf + "/user/delete.me"));
-			deleteDir(new File(oldf + "/xtra"));
-			deleteDir(new File(oldf + "/readme.txt"));
-
 		} catch (Exception e) {
 			Log.v("Angband", "error extracting files: " + e);
 		}
