@@ -1,0 +1,12 @@
+diff -Nru --strip-trailing-cr npp-0.5.1.beta2/src/h-basic.h npp-0.5.1.beta2-android/src/h-basic.h
+--- npp-0.5.1.beta2/src/h-basic.h	2009-11-16 03:13:14.000000000 -0800
++++ npp-0.5.1.beta2-android/src/h-basic.h	2010-10-15 22:46:59.000000000 -0700
+@@ -75,7 +75,7 @@
+  * Basically, SET_UID should *only* be set for "Unix" machines.
+  */
+ #if !defined(MACH_O_CARBON) && !defined(WINDOWS) && \
+-    !defined(RISCOS) && !defined(GAMEBOY) && !defined(NDS)
++    !defined(RISCOS) && !defined(GAMEBOY) && !defined(NDS) && !defined(USE_AND)
+ # define SET_UID
+ 
+ /* Without autoconf, turn on some things */
