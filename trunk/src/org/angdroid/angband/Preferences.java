@@ -27,7 +27,7 @@ final public class Preferences {
 	static final String KEY_AUTOSTARTBORG = "angband.autostartborg";
 
 	public enum Plugin {
-		Angband(0), Angband306(1), ToME(2);
+		Angband(0), Angband306(1), ToME(2), Sangband(3), NPP(4);
 
 		private int id;
 
