@@ -38,20 +38,27 @@
     <string name="preferences_autostartborg_title">Auto-start borg</string>
     <string name="preferences_autostartborg_summary">Automatically starts your borg (Vanilla 3.0.6 only)</string>
 
-	<!-- todo move plugin manifest onto sdcard -->
     <string-array name="gamePluginDescriptions">
       <item>Vanilla 3.1.2v2</item>
       <item>Vanilla 3.0.6 squelch+borg</item>
-      <!-- <item>ToME 2.5.3</item> -->
+      <item>ToME 2.5.3</item>
+      <item>Sangband 1.0.0 lf3</item>
+      <item>NPPAngband 0.5.1 beta2</item>
     </string-array>
     <string-array name="gamePluginNames">
       <item>angband</item>
       <item>angband306</item>
-      <!-- <item>tome</item> -->
+      <item>tome</item>
+      <item>sangband</item>
+      <item>npp</item>
     </string-array>
     <string-array name="gamePlugins">
       <item>0</item>
       <item>1</item>
-      <!-- <item>2</item> -->
+<!--
+      <item>2</item>
+      <item>3</item>
+      <item>4</item>
+-->
     </string-array>
 </resources>
