@@ -1,0 +1,12 @@
+diff -Nru --strip-trailing-cr sangband-100.lf3/src/h-config.h sangband-100.lf3-android/src/h-config.h
+--- sangband-100.lf3/src/h-config.h	2007-08-03 16:48:58.000000000 -0700
++++ sangband-100.lf3-android/src/h-config.h	2010-10-16 06:59:23.000000000 -0700
+@@ -101,7 +101,7 @@
+  * or for the "Atari" platform which is Unix-like, apparently.
+  */
+ #if !defined(MACINTOSH) && !defined(WINDOWS) && \
+-    !defined(MSDOS) && !defined(RISCOS)
++    !defined(MSDOS) && !defined(RISCOS) && !defined(USE_AND)
+ # define SET_UID
+ #endif
+ 
