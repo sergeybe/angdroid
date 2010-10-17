@@ -3,5 +3,14 @@ build.properties
 .project
 bin
 jni/angdroid.h
-res/raw/zip
+res/raw/zipangband
+res/raw/zipangband306
+res/raw/ziptome
+res/raw/zipsangband
+res/raw/zipnpp
 gen
+plugin/angband/extsrc
+plugin/angband306/extsrc
+plugin/tome/extsrc
+plugin/sangband/extsrc
+plugin/npp/extsrc

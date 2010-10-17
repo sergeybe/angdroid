@@ -78,7 +78,9 @@
 
 #ifdef USE_AND
 
+#ifndef ANGDROID_TOME_PLUGIN
 #include "main.h"
+#endif
 #include "angdroid.h"
 #include <jni.h>
 #include <android/log.h>
@@ -139,9 +141,9 @@ struct term_data
 	/* Other fields if needed XXX XXX XXX */
 };
 
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 #include "textui.h" 
-static game_command cmd = { CMD_NULL, 0 };
+//static game_command cmd = { CMD_NULL, 0 };
 #endif
 
 static bool new_game = FALSE;
@@ -180,6 +182,66 @@ static local_color_data_type color_data[MAX_COLORS];
 /*
 static errr CheckEvents(int wait);
 */
+
+#ifdef ANGDROID_TOME_PLUGIN
+/*
+ * The my_strcpy() function copies up to 'bufsize'-1 characters from 'src'
+ * to 'buf' and NUL-terminates the result.  The 'buf' and 'src' strings may
+ * not overlap.
+ *
+ * my_strcpy() returns strlen(src).  This makes checking for truncation
+ * easy.  Example: if (my_strcpy(buf, src, sizeof(buf)) >= sizeof(buf)) ...;
+ *
+ * This function should be equivalent to the strlcpy() function in BSD.
+ */
+size_t my_strcpy(char *buf, const char *src, size_t bufsize)
+{
+	size_t len = strlen(src);
+	size_t ret = len;
+
+	/* Paranoia */
+	if (bufsize == 0) return ret;
+
+	/* Truncate */
+	if (len >= bufsize) len = bufsize - 1;
+
+	/* Copy the string and terminate it */
+	(void)memcpy(buf, src, len);
+	buf[len] = '\0';
+
+	/* Return strlen(src) */
+	return ret;
+}
+
+
+/*
+ * The my_strcat() tries to append a string to an existing NUL-terminated string.
+ * It never writes more characters into the buffer than indicated by 'bufsize' and
+ * NUL-terminates the buffer.  The 'buf' and 'src' strings may not overlap.
+ *
+ * my_strcat() returns strlen(buf) + strlen(src).  This makes checking for
+ * truncation easy.  Example:
+ * if (my_strcat(buf, src, sizeof(buf)) >= sizeof(buf)) ...;
+ *
+ * This function should be equivalent to the strlcat() function in BSD.
+ */
+size_t my_strcat(char *buf, const char *src, size_t bufsize)
+{
+	size_t dlen = strlen(buf);
+
+	/* Is there room left in the buffer? */
+	if (dlen < bufsize - 1)
+	{
+		/* Append as much as possible  */
+		return (dlen + my_strcpy(buf + dlen, src, bufsize - dlen));
+	}
+	else
+	{
+		/* Return without appending */
+		return (dlen + strlen(src));
+	}
+}
+#endif /* ANGDROID_TOME_PLUGIN */
 
 
 /*** Function hooks needed by "Term" ***/
@@ -727,8 +789,9 @@ static void term_data_link(int i)
 	t->curs_hook = Term_curs_and;
 	t->wipe_hook = Term_wipe_and;
 	t->text_hook = Term_text_and;
+#ifndef ANGDROID_TOME_PLUGIN
 	t->pict_hook = Term_pict_and;
-
+#endif
 	/* Remember where we came from */
 	t->data = td;
 
@@ -864,7 +927,7 @@ static void init_stuff()
 	LOGD(android_files_path);
 
 	/* Prepare the filepaths */
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	init_file_paths(android_files_path, android_files_path, android_files_path);
 	if (!file_exists(android_files_path))
 	{
@@ -882,7 +945,7 @@ static void init_stuff()
 
 	process_player_name(FALSE);
 
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 #ifdef USE_SOUND
 
 	/* Set up sound hook */
@@ -892,7 +955,7 @@ static void init_stuff()
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 static errr get_init_cmd()
 {
 	/* Wait for response */
@@ -918,6 +981,12 @@ static errr and_get_cmd(cmd_context context, bool wait)
 }
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 
+bool private_check_user_directory(cptr dirpath)
+{
+	// todo: used in ToME figure out if we need it in android
+	LOGD("private_check_user_directory %s",dirpath);
+	return TRUE;
+}
 
 #ifdef ANDROID
 void initGame ()
@@ -958,7 +1027,7 @@ void initGame ()
 	TermView_setCursorVisible = (*env)->GetMethodID(env, TermViewClass, "setCursorVisible", "(I)V");
 	TermView_clearKeyBuffer = (*env)->GetMethodID(env, TermViewClass, "clearKeyBuffer", "()V");
 
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	/* Set up the command hook */
 	cmd_get_hook = and_get_cmd;
 
@@ -993,7 +1062,7 @@ JNIEXPORT jint JNICALL angdroid_gameQueryInt
 	}
 	if (strcmp(copy_argv0,"isRogueLikeEnabled")==0) {
 		result = 0;
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined (ANGDROID_ANGBAND_PLUGIN) 
 		if (op_ptr && OPT(rogue_like_commands)) result=1;
 #else
 		if (rogue_like_commands) result=1;
@@ -1055,18 +1124,25 @@ JNIEXPORT void JNICALL angdroid_gameStart
 
 	/* Start main loop of game */
 	LOGD("play_game()");
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	play_game();
+#else
+#ifdef ANGDROID_SANGBAND_PLUGIN
+	/* Wait for response */
+	pause_line(Term->rows - 1);
+	play_game(FALSE);
 #else
 	/* Wait for response */
 	pause_line(Term->hgt - 1);
-
 	play_game(FALSE);
+#endif /* ANGDROID_SANGBAND_PLUGIN */
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 
+#ifndef ANGDROID_TOME_PLUGIN
 	/* Free resources */
 	LOGD("cleanup_angband()");
 	cleanup_angband();
+#endif
 
 	quit("exit normally");
 }
