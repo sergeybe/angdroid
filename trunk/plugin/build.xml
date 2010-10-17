@@ -51,9 +51,9 @@
 	    <arg value="-c"/>
 	    <arg value="${src.url.base}/${src.url.file}"/>
 	</exec>        
-        <exec executable="tar" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
-	    <arg value="--strip-components=1"/>
-	    <arg value="-xzf"/>
+        <exec executable="${extract.command}" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
+	    <arg value="${extract.arg1}"/>
+	    <arg value="${extract.arg2}"/>
 	    <arg value="${src.url.file}"/>
 	</exec>        
 	<apply executable="patch" dir="${basedir}/plugin/${plugin.name}/extsrc/" failonerror="true">
