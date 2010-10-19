@@ -68,7 +68,7 @@ Dr. Andrew White
 ===========================
 
 by Robert Ruehlmann < rr9@angband.org >
-   Andrew White     < apwhite@itctel.com >
+   Andrew White     < drandrewwhitedc@gmail.com >
    
 Version 1.2 (23 August 2002)
 
