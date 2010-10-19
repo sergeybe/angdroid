@@ -41,31 +41,45 @@
         <delete file="${resource-folder}/raw/zip${plugin.name}"/>
     </target>
 
-    <target name="get-patch-plugin-src">
-         <delete>
-	     <fileset dir="plugin/${plugin.name}/extsrc/" 
-		      includes="**/*"
-		      excludes="${src.url.file}"/>
-	 </delete>
-        <exec executable="wget" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
+	<target name="get-patch-plugin-src" depends="get-src, patch-updates, copy-updates">
+	</target>
+
+    <target name="get-src">
+      <delete>
+	    <fileset dir="plugin/${plugin.name}/extsrc/" 
+				 includes="**/*"
+				 excludes="${src.url.file}"/>
+	  </delete>
+      <exec executable="wget" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
 	    <arg value="-c"/>
 	    <arg value="${src.url.base}/${src.url.file}"/>
-	</exec>        
-        <exec executable="${extract.command}" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
+	  </exec>        
+      <exec executable="${extract.command}" dir="plugin/${plugin.name}/extsrc/" failonerror="true">
 	    <arg value="${extract.arg1}"/>
 	    <arg value="${extract.arg2}"/>
 	    <arg value="${src.url.file}"/>
-	</exec>        
-	<apply executable="patch" dir="${basedir}/plugin/${plugin.name}/extsrc/" failonerror="true">
+	  </exec>        
+	</target>
+
+    <target name="patch-updates">
+	  <apply executable="patch" dir="${basedir}/plugin/${plugin.name}/extsrc/" failonerror="true">
 	    <arg value="-p1"/>
 	    <arg value="-i"/>
 	    <fileset dir="plugin/${plugin.name}/patch/" 
-		      includes="*.patch"/>
-	</apply>
-	<!-- for angband306 only, copy over the borgsave -->
-	<copy file="plugin/${plugin.name}/patch/BORGSAVE" 
-	      tofile="plugin/${plugin.name}/extsrc/lib/save/BORGSAVE" 
-	      overwrite="true"
-		  failonerror="false"/>
+				 includes="*.patch"/>
+	  </apply>
+    </target>
+
+	<condition property="is.exist.copy">
+	  <available file="plugin/${plugin.name}/patch/copy" type="dir" />
+	</condition>
+
+    <target name="copy-updates" if="is.exist.copy">
+      <echo>in copy-updates</echo>
+	  <copy todir="plugin/${plugin.name}/extsrc">
+		<fileset dir="plugin/${plugin.name}/patch/copy">
+		  <include name="**/*"/>
+		</fileset>
+	  </copy>
     </target>
 </project>
