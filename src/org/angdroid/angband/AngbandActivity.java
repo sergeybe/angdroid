@@ -159,12 +159,14 @@ public class AngbandActivity extends Activity {
 				is = getResources().openRawResource(R.raw.zipangband);
 			else if (plugin == Preferences.Plugin.Angband306.getId())
 				is = getResources().openRawResource(R.raw.zipangband306);
+			/*
 			else if (plugin == Preferences.Plugin.ToME.getId())
 				is = getResources().openRawResource(R.raw.ziptome);
 			else if (plugin == Preferences.Plugin.Sangband.getId())
 				is = getResources().openRawResource(R.raw.zipsangband);
 			else if (plugin == Preferences.Plugin.NPP.getId())
 				is = getResources().openRawResource(R.raw.zipnpp);
+			*/
 
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry ze;

@@ -24,7 +24,7 @@
     </target>
     
     <target name="angband-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
-    <target name="angband-debug"   depends="plugin-resources, angband-javah, plugin-libs, debug" />
+    <target name="angband-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
 
 <!--
     ************************************************************************
@@ -82,23 +82,33 @@
 -->
     </target>
 
-    <target name="plugin-src">
+    <condition property="is.exist.libs">
+	  	<and>
+        	<available file="plugin/angband/extsrc/lib" type="dir" />
+			<available file="plugin/angband306/extsrc/lib" type="dir" />	  
+		</and>
+    </condition>
+	<target name="check-plugin-src" unless="is.exist.libs">
+		<antcall target="plugin-src">
+		</antcall>
+	</target>
 
+    <target name="plugin-src">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="angband306"/>
 	    <property name="src.url.base" value="http://rephial.org/downloads/3.0"/>
 	    <property name="src.url.file" value="angband-3.0.6-src.tar.gz"/>
 		<property name="extract.command" value="tar" />
-		<property name="extract.arg1" value="-xzf" />
-		<property name="extract.arg2" value="- -strip-components=1" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="angband"/>
 	    <property name="src.url.base" value="http://rephial.org/downloads/3.1"/>
 	    <property name="src.url.file" value="angband-3.1.2v2-src.tar.gz"/>
 		<property name="extract.command" value="tar" />
-		<property name="extract.arg1" value="-xzf" />
-		<property name="extract.arg2" value="- -strip-components=1" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
 	</ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
