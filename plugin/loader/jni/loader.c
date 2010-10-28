@@ -16,6 +16,7 @@
 #define LOG(msg) (__android_log_write(ANDROID_LOG_DEBUG, "Angband", (msg)));
 
 void( * angdroid_gameStart ) (JNIEnv*, jobject, jint, jobjectArray) = NULL; 
+jint( * angdroid_gameQueryRedraw ) (JNIEnv*, jobject, jint, jint, jint, jint) = NULL;
 jint( * angdroid_gameQueryInt ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
 jstring( * angdroid_gameQueryString ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
 
@@ -121,6 +122,38 @@ JNIEXPORT jstring JNICALL Java_org_angdroid_angband_TermView_gameQueryString
 {
 	return (jstring)0; // null indicates error
 }
+
+JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_gameQueryRedraw
+(JNIEnv *env1, jobject obj1, jint x1, jint y1, jint x2, jint y2)
+{
+	jint result = -1; // -1 indicates error
+
+	// begin synchronize
+	pthread_mutex_lock (&muQuery);
+
+	LOGD("loader.angdroid_gameQueryRedraw %d %d %d %d", x1, y1, x2, y2);
+
+	if (handle) {
+		if (!angdroid_gameQueryRedraw)
+		  	// find entry point
+		  	angdroid_gameQueryRedraw = dlsym(handle, "angdroid_gameQueryRedraw");   
+
+		if (angdroid_gameQueryRedraw)
+			result = angdroid_gameQueryRedraw(env1, obj1, x1, y1, x2, y2);
+		else
+			LOGE("dlsym failed on angdroid_gameQueryRedraw");
+	}
+	else {
+		LOGE("dlopen failed -- angdroid_gameQueryRedraw");
+	}
+
+	// end synchronize
+	pthread_mutex_unlock (&muQuery);
+
+	return result;
+}
+
+
 
 JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_gameQueryInt
 (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)

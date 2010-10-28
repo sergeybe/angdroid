@@ -35,16 +35,22 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Window;
 import android.view.WindowManager;
+import android.view.ViewGroup.LayoutParams;
 import android.os.Environment;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfo;
 import android.content.ComponentName;
+import android.content.res.Configuration;
+import android.widget.LinearLayout;
+import android.content.pm.ActivityInfo;
 
 import com.flurry.android.FlurryAgent;
 
 public class AngbandActivity extends Activity {
 
+	private LinearLayout screenLayout = null; 
 	private static TermView term = null;
 
 	@Override
@@ -69,15 +75,32 @@ public class AngbandActivity extends Activity {
 			extractAngbandResources(Preferences.getInstalledPlugins()[i]);
 		}
 
-		setContentView(R.layout.main);
+/* TODO: fix title bar problem on portrait (vkeyboard) startup
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-		// it seems that the activity is restarted sometimes
-		// without a pause notification.  I can reproduce it when
-		// I answer a phone call, hang up, then press back key.
-		// In this case, make sure we get out of the old session!
-		if (term != null) term.onPause();
+		if (Preferences.getFullScreen()) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+		}
+		else {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+*/
+	}
 
-		term = (TermView) findViewById(R.id.term);
+	public void onStart() {
+		super.onStart();
+
+		startFlurry();
+
+		rebuildViews();
+	}
+
+	public void onStop() {
+		super.onStop();
+
+		stopFlurry();
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -109,6 +132,67 @@ public class AngbandActivity extends Activity {
 			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
+	}
+
+	/* TODO: move native code handling out of TermView, then rebuildViews 
+		on the fly, and re-link new TermView to native code.
+
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+
+		Configuration config = this.getResources().getConfiguration();		
+		if(config.orientation == Configuration.ORIENTATION_PORTRAIT)
+			Log.d("Angband","onConfigurationChanged: Portrait");
+		else
+			Log.d("Angband","onConfigurationChanged: Landscape");
+	}
+	*/
+
+	protected void rebuildViews() {
+		Log.d("Angband", "rebuildViews");
+
+		boolean kb = Preferences.getEnableVirtualKeyboard();
+
+		if (kb) 
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		else
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+ 		if (screenLayout != null) screenLayout.removeAllViews();
+		screenLayout = new LinearLayout(this);
+
+		// HACK 
+		// it seems that the activity is restarted sometimes
+		// without a pause notification.  I can reproduce it when
+		// I answer a phone call, hang up, then press back key.
+		// In this case, make sure we get out of the old session!
+		if (term != null) {
+			Log.d("Angband", "rebuildViews.stop old session");
+			term.onPause();  // this waits until game exists
+		}
+
+		term = new TermView(this);
+		term.setLayoutParams(
+			new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
+										  LayoutParams.WRAP_CONTENT, 
+										  1.0f)
+		);
+
+		screenLayout.setOrientation(LinearLayout.VERTICAL);
+		screenLayout.addView(term);
+
+		if (kb) {
+			AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this.term);
+			virtualKeyboard.virtualKeyboardView.setLayoutParams(
+				new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
+											  LayoutParams.WRAP_CONTENT, 
+											  0)
+			);
+			screenLayout.addView(virtualKeyboard.virtualKeyboardView);
+		}
+
+		setContentView(screenLayout);
 	}
 
 	@Override
@@ -219,20 +303,16 @@ public class AngbandActivity extends Activity {
 	}
 
 
-	public void onStart() {
-		super.onStart();
+	private void startFlurry() {
 		// test key
 		FlurryAgent.onStartSession(this, "382WWKEB1V2HZN1UJYBP");
 
 		// release key
 		//FlurryAgent.onStartSession(this, "GFZUMCZCJ2J9WNYI8XAV");
-
-		// your code
 	}
 
-	public void onStop() {
-		super.onStop();
+	private void stopFlurry() {
 		FlurryAgent.onEndSession(this);
-		// your code
 	}
+
 }

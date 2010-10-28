@@ -28,14 +28,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Typeface;
+import android.graphics.Rect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
 
-public class TermView extends View implements Runnable {
+public class TermView extends View implements Runnable, OnGestureListener {
 
 	static final int LEFT_BUTTON = 0x0200, MIDDLE_BUTTON = 0x201,
 			RIGHT_BUTTON = 0x202, LEFT_DRAG = 0x203, LEFT_RELEASE = 0x206,
@@ -114,19 +117,18 @@ public class TermView extends View implements Runnable {
 
 	int row = 0;
 	int col = 0;
-	int width = 80;
-	int height = 24;
+	int rows = 24;
+	int cols = 80;
 
 	int cur_x = 0;
 	int cur_y = 0;
 
-	private int screen_height = 320;
-	private int screen_width = 480;
-	private int char_height = 12;
-	private int char_width = 6;
-	private int font_text_size = 12;
-	private int font_width_scrunch = 0;
-	private int font_height_scrunch = 0;
+	public int view_width = 0;
+	public int view_height = 0;
+
+	private int char_height = 0;
+	private int char_width = 0;
+	private int font_text_size = 0;
 
 	private Vibrator vibrator;
 	private boolean vibrate;
@@ -139,6 +141,7 @@ public class TermView extends View implements Runnable {
 	private Thread thread = null;
 	boolean signal_game_exit = false;
 	boolean game_restart = false;
+	private GestureDetector gesture;
 
 	// Load native library
 	static {
@@ -172,82 +175,229 @@ public class TermView extends View implements Runnable {
 				.getSystemService(Context.VIBRATOR_SERVICE);
 
 		setFocusableInTouchMode(true);
+		gesture = new GestureDetector(context, this);
 	}
 
 	protected void onDraw(Canvas canvas) {
 		if (bitmap != null) {
 			canvas.drawBitmap(bitmap, 0, 0, null);
-		}
-		int x = cur_x * (char_width) + font_width_scrunch;
-		int y = (cur_y + 1) * char_height;
 
-		// due to font "scrunch", cursor is sometimes a bit too big
-		int cl = Math.max(x-1,0);
-		int cr = Math.min(x+char_width-1,screen_width-1);
-		int ct = Math.max(y-char_height+2,0);
-		int cb = Math.min(y+2,screen_height-1);
+			int x = cur_x * (char_width);
+			int y = (cur_y + 1) * char_height;
 
-		if (cursor_visible) {
-			canvas.drawRect(cl, ct, cr, cb, cursor);
+			// due to font "scrunch", cursor is sometimes a bit too big
+			int cl = Math.max(x-1,0);
+			int cr = Math.min(x+char_width-1,view_width-1);
+			int ct = Math.max(y-char_height+2,0);
+			int cb = Math.min(y+2,view_height-1);
+
+			if (cursor_visible) {
+				canvas.drawRect(cl, ct, cr, cb, cursor);
+			}
 		}
 	}
 
+	public void computeViewSize()
+	{
+		view_width = cols*char_width;
+		view_height = rows*char_height;
+	}
+
+
+	private void autoSizeFont(int maxHeight) {
+		if (maxHeight<=320) {
+			tf = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
+		}
+		else {
+			tf = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+		}
+		fore.setTypeface(tf);
+
+		// HACK -- keep 480x320 fullscreen as-is
+		if (maxHeight==320) {
+			font_text_size = 12;
+			char_height = 12;
+			char_width = 6;
+		}
+		else {
+			font_text_size = 6;
+			do {
+				font_text_size += 1;
+				fore.setTextSize(font_text_size);		
+
+				char_height = (int)Math.ceil(fore.getFontSpacing()); 
+
+				// HACK -- scrunch spacing 8%
+				if (font_text_size >= 16) 
+					char_height-=(int)((float)char_height*0.08);
+
+			} while (char_height*rows < maxHeight);
+		
+			font_text_size -= 1;
+			fore.setTextSize(font_text_size);		
+
+			char_height = (int)Math.ceil(fore.getFontSpacing()); 
+
+			// HACK -- scrunch spacing 8%
+			if (font_text_size >= 16) 
+				char_height-=(int)((float)char_height*0.08);
+
+			char_width = (int)fore.measureText("X", 0, 1);	
+		}
+
+		fore.setTextSize(font_text_size);		
+		fore.setTextAlign(Paint.Align.LEFT);
+	}
+
 	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		screen_width = getMeasuredWidth();
-		screen_height = getMeasuredHeight();
-		setMeasuredDimension(screen_width,screen_height);
+	protected void onMeasure(int widthmeasurespec, int heightmeasurespec)
+	{
+		int height = MeasureSpec.getSize(heightmeasurespec);
+		int width = MeasureSpec.getSize(widthmeasurespec);
 
-		char_height = screen_height/height;
-		char_width = screen_width/width;
+		autoSizeFont(height);
 
-		if (tf == null) {
-			if (char_width <= 6) {
-				char_height -= 1;
-				font_height_scrunch = 0;
-				font_width_scrunch = 0;
-				tf = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
-			}
-			else {
-				font_height_scrunch = char_height/10;
-				font_width_scrunch = char_width/10;
-				tf = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+		computeViewSize();
+
+		// int minheight = getSuggestedMinimumHeight();
+		// int minwidth = getSuggestedMinimumWidth();
+
+		// int width=0, height=0;
+
+		/*
+		if (width < minwidth)
+		{
+			width = minwidth;
+		}
+		if (height < minheight)
+		{
+			height = minheight;
+		}
+
+		int modex = MeasureSpec.getMode(widthmeasurespec);
+		int modey = MeasureSpec.getMode(heightmeasurespec);
+		if(modex == MeasureSpec.AT_MOST)
+		{
+			width = Math.min(MeasureSpec.getSize(widthmeasurespec), width);
+		}
+		else if(modex == MeasureSpec.EXACTLY)
+		{
+		width = MeasureSpec.getSize(widthmeasurespec);
+		}
+		if(modey == MeasureSpec.AT_MOST)
+		{
+			height = Math.min(MeasureSpec.getSize(heightmeasurespec), height);
+		}
+		else if(modey == MeasureSpec.EXACTLY)
+		{
+		height = MeasureSpec.getSize(heightmeasurespec);
+		}
+		*/
+
+		setMeasuredDimension(width, height);
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent me)
+	{
+		return gesture.onTouchEvent(me);
+	}
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) 
+	{
+		int newscrollx = this.getScrollX() + (int)distanceX;
+		int newscrolly = this.getScrollY() + (int)distanceY;
+	
+		if(newscrollx < 0) 
+			newscrollx = 0;
+		//if(newscrolly < 0) 
+			newscrolly = 0;
+		if(newscrollx >= view_width - getWidth())
+			newscrollx = view_width - getWidth() + 1;
+		// if(newscrolly >= view_height - getHeight())
+		// 	newscrolly = view_height - getHeight() + 1;
+
+		scrollTo(newscrollx, newscrolly);
+
+		return true;
+	}
+	public boolean onDown(MotionEvent e)
+	{
+		return true;
+	}
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
+	{
+		return true;
+	}
+	public void onLongPress(MotionEvent e)
+	{
+	}
+	public void onShowPress(MotionEvent e)
+	{
+	}
+	public boolean onSingleTapUp(MotionEvent event)
+	{
+		if (!Preferences.getEnableTouch()) return false;
+
+		int x = (int) event.getX();
+		int y = (int) event.getY();
+
+		int r, c;
+		c = (x * 3) / getWidth();
+		r = (y * 3) / getHeight();
+			
+		boolean rogueLike = (gameQueryInt(1,new String[]{"rl"})==1);
+		int key = (2 - r) * 3 + c + '1';
+
+		if (rogueLike) {
+			switch(key) {
+			case '1': key = 'b'; break;
+			case '2': key = 'j'; break;
+			case '3': key = 'n'; break;
+			case '4': key = 'h'; break;
+			case '5': key = ' '; break;
+			case '6': key = 'l'; break;
+			case '7': key = 'y'; break;
+			case '8': key = 'k'; break;
+			case '9': key = 'u'; break;
 			}
 		}
 
-		font_text_size = char_height-font_height_scrunch;
-		fore.setTypeface(tf);
+		if (always_run && wait) {
+			synchronized (keybuffer) {
+				if (rogueLike) {
+					key = Character.toUpperCase(key);
+				}
+				else {
+					keybuffer.offer(46); // '.' command
+				}
+				keybuffer.offer(key);
 
-		fore.setTextSize(font_text_size);
-		//fore.setAntiAlias(false);  // these don't seem to have any effect, why?
-		//fore.setDither(false);
-		//fore.setSubpixelText(false);
-
-		//Log.d("Angband", "onMeasure "+screen_width+","+screen_height
-		//	+","+char_height+","+char_width+","+font_text_size
-		//	+","+font_height_scrunch);
+				if (wait) {
+					//Log.d("Angband", "Wake up!!!");
+					keybuffer.notify();
+				}
+			}
+		} else {
+			addToKeyBuffer(key);
+		}
+		return true;
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 
-		// fix for blank splash/title screen at startup:
-		// for some reason we occasionally get a portrait orientation
-		// size change which creates a new canvas by mistake.
-		if (h > w) {
-			Log.d("Angband", "onSizeChanged.rejected");
-			return; // ignore portrait until we actually implement it!
-		}
-		else {
-			Log.d("Angband", "onSizeChanged");
-		}
+		Log.d("Angband", "onSizeChanged");
 		 
 		synchronized (game_thread_lock) {
-			if (game_thread_running) return;
+			if (game_thread_running) {
+				Log.d("Angband", "onSizeChanged.game already running");
+				return;
+			}
 
-			bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+			computeViewSize();
+			Log.d("Angband","createBitmap "+view_width+","+view_height);
+			bitmap = Bitmap.createBitmap(view_width, view_height, Bitmap.Config.RGB_565);
 			canvas = new Canvas(bitmap);
 
 			/*
@@ -392,60 +542,6 @@ public class TermView extends View implements Runnable {
 		return super.onKeyUp(keyCode, event);
 	}
 
-
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		if (!Preferences.getEnableTouch()) return false;
-
-		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-			int x = (int) event.getX();
-			int y = (int) event.getY();
-
-			int r, c;
-			c = (x * 3) / getWidth();
-			r = (y * 3) / getHeight();
-			
-			boolean rogueLike = (gameQueryInt(1,new String[]{"isRogueLikeEnabled"})==1);
-			int key = (2 - r) * 3 + c + '1';
-
-			if (rogueLike) {
-				switch(key) {
-				case '1': key = 'b'; break;
-				case '2': key = 'j'; break;
-				case '3': key = 'n'; break;
-				case '4': key = 'h'; break;
-				case '5': key = ' '; break;
-				case '6': key = 'l'; break;
-				case '7': key = 'y'; break;
-				case '8': key = 'k'; break;
-				case '9': key = 'u'; break;
-				}
-			}
-
-			if (always_run && wait) {
-				synchronized (keybuffer) {
-					if (rogueLike) {
-						key = Character.toUpperCase(key);
-					}
-					else {
-						keybuffer.offer(46); // '.' command
-					}
-					keybuffer.offer(key);
-
-					if (wait) {
-						//Log.d("Angband", "Wake up!!!");
-						keybuffer.notify();
-					}
-				}
-			} else {
-				addToKeyBuffer(key);
-			}
-			return true;
-		}
-		return false;
-	}
-
 	public void addToKeyBuffer(int key) {
 		//Log.d("Angband", "addKeyToBuffer:"+key);
 		synchronized (keybuffer) {
@@ -561,12 +657,12 @@ public class TermView extends View implements Runnable {
 	public void wipe(final int row, final int col, final int n) {
 		synchronized (game_thread_lock) {
 			float x = col * char_width;
-			float y = (row + 1) * char_height;
+			float y = row * char_height;
 			canvas.drawRect(
 				x, 
-				y - char_height + 2, 
-				x + (char_width) * n + font_width_scrunch, 
-				y + 2,
+				y, 
+				x + (char_width) * n , 
+				y + char_height,
 				back
 			);
 		}
@@ -583,14 +679,15 @@ public class TermView extends View implements Runnable {
 		wipe(row, col, 1);
 		synchronized (game_thread_lock) {
 
-			float x = col * (char_width);
+			float x = col * char_width;
 			float y = (row + 1) * char_height;
+		  
 			String str = c + "";
 
 			canvas.drawText (
 				str,
 				x, 
-				y-font_height_scrunch, 
+				y - fore.descent(), 
 				fore
 			);
 
@@ -644,7 +741,19 @@ public class TermView extends View implements Runnable {
 		// sanity checks: thread must not already be running
 		// and we must have a valid canvas to draw upon.
 		synchronized(game_thread_lock) {
-			if (game_thread_running || canvas == null) return;
+			if (game_thread_running) {
+				Log.d("Angband","startAngband.game already running");
+				if (canvas == null) {
+					Log.d("Angband","no canvas");
+					return;
+				}
+				onDraw(canvas);
+				return;
+			}
+			if (canvas == null) {
+				Log.d("Angband","no canvas");
+				return;
+			}
 
 			game_thread_running = true;
 			signal_game_exit = false;
@@ -714,6 +823,7 @@ public class TermView extends View implements Runnable {
 
 	// Call native methods from library
 	native void gameStart(String pluginPath, int argc, String[] argv);
+	native int gameQueryRedraw(int x1, int y1, int x2, int y2);
 	native int gameQueryInt(int argc, String[] argv);
 	native String gameQueryString(int argc, String[] argv);
 

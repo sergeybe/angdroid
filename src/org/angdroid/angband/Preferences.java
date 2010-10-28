@@ -17,14 +17,17 @@ final public class Preferences {
 
 	static final String KEY_VIBRATE = "angband.vibrate";
 	static final String KEY_FULLSCREEN = "angband.fullscreen";
+
 	static final String KEY_ENABLETOUCH = "angband.enabletouch";
+	static final String KEY_ENABLEVKEY = "angband.enablevkey";
+	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
+
+	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
+	static final String KEY_SKIPWELCOME = "angband.skipwelcome";
+	static final String KEY_AUTOSTARTBORG = "angband.autostartborg";
 
 	static final String KEY_PROFILES = "angband.profiles";
 	static final String KEY_ACTIVEPROFILE = "angband.activeprofile";
-	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
-	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
-	static final String KEY_SKIPWELCOME = "angband.skipwelcome";
-	static final String KEY_AUTOSTARTBORG = "angband.autostartborg";
 
 	public enum Plugin {
 		Angband(0), Angband306(1), ToME(2), Sangband(3), NPP(4);
@@ -73,6 +76,10 @@ final public class Preferences {
 
 	public static boolean getVibrate() {
 		return pref.getBoolean(Preferences.KEY_VIBRATE, false);
+	}
+
+	public static boolean getEnableVirtualKeyboard() {
+		return pref.getBoolean(Preferences.KEY_ENABLEVKEY, false);
 	}
 
 	public static boolean getEnableTouch() {

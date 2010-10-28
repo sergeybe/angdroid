@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Angband" default="angband-debug">
 
-    <!-- Please don't edit this file. Edit build.properties instead of -->
+    <!-- Please don't edit this file. Edit build.properties instead -->
 
     <!--
     <property environment="env"/>

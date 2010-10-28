@@ -18,8 +18,10 @@
     <string name="profile_name_caption">Name or description of profile</string>
     <string name="profile_savefile_caption">Filename for saved game</string>
 
-    <string name="interface_category">Interface</string>
+    <string name="display_category">Display</string>
+    <string name="control_category">Control</string>
     <string name="game_category">Game</string>
+
     <string name="description">Angband is a dungeon-crawling roguelike RPG game.</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Enable or disable vibration in game</string>
@@ -27,8 +29,10 @@
     <string name="preferences_fullscreen_summary">Enable or disable game in full screen</string>
     <string name="preferences_gameplugin_title">Selected variant</string>
     <string name="preferences_gameplugin_summary">Select Angband variant to play</string>
-    <string name="preferences_enabletouch_title">Enable touchscreen input</string>
-    <string name="preferences_enabletouch_summary">Turn on touchscreen input controls.</string>
+    <string name="preferences_enablevkey_title">Enable virtual keyboard</string>
+    <string name="preferences_enablevkey_summary">Display virtual keyboard (forces portrait orientation)</string>
+    <string name="preferences_enabletouch_title">Enable touch directionals</string>
+    <string name="preferences_enabletouch_summary">Turn on touchscreen directional controls.</string>
     <string name="preferences_alwaysrun_title">Always run</string>
     <string name="preferences_alwaysrun_summary">Always run when using touch directional commands</string>
 
@@ -41,9 +45,11 @@
     <string-array name="gamePluginDescriptions">
       <item>Vanilla 3.1.2v2</item>
       <item>Vanilla 3.0.6 squelch+borg</item>
+<!--
       <item>ToME 2.5.3</item>
       <item>Sangband 1.0.0 lf3</item>
       <item>NPPAngband 0.5.1 beta2</item>
+-->
     </string-array>
     <string-array name="gamePluginNames">
       <item>angband</item>

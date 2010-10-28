@@ -1039,6 +1039,15 @@ void initGame ()
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
+JNIEXPORT jint JNICALL angdroid_gameQueryRedraw
+(JNIEnv *env1, jobject obj1, jint x1, jint y1, jint x2, jint y2)
+{
+	LOGD("angdroid.angdroid_gameQueryRedraw %d %d %d %d", x1, y1, x2, y2);
+
+	//return (jint)Term_redraw_section(x1, y1, x2, y2);
+	return 0;
+}
+
 JNIEXPORT jstring JNICALL angdroid_gameQueryString
 	(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
@@ -1057,10 +1066,13 @@ JNIEXPORT jint JNICALL angdroid_gameQueryInt
 	argv0 = (*env1)->GetObjectArrayElement(env1, argv, i);
 	const char *copy_argv0 = (*env1)->GetStringUTFChars(env1, argv0, 0);
 
-	if (strcmp(copy_argv0,"pluginVersion")==0) {
+	if (strcmp(copy_argv0,"pv")==0) {
 		result = 1;
 	}
-	if (strcmp(copy_argv0,"isRogueLikeEnabled")==0) {
+	else if (strcmp(copy_argv0,"px")==0) {
+		result = p_ptr->px;
+	}
+	else if (strcmp(copy_argv0,"rl")==0) {
 		result = 0;
 #if defined (ANGDROID_ANGBAND_PLUGIN) 
 		if (op_ptr && OPT(rogue_like_commands)) result=1;
