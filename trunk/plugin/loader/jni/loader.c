@@ -30,9 +30,9 @@ static void* handle = NULL;
 pthread_mutex_t muQuery = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t muGame = PTHREAD_MUTEX_INITIALIZER;
 
-static jclass TermViewClass;
-static jobject TermViewObj;
-static jmethodID TermView_onExitGame;
+static jclass NativeWrapperClass;
+static jobject NativeWrapperObj;
+static jmethodID NativeWrapper_onExitGame;
 
 void* run_angband(void* foo)
 {
@@ -40,7 +40,7 @@ void* run_angband(void* foo)
 	return foo;
 }
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_gameStart
+JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
 (JNIEnv *env1, jobject obj1, jstring pluginPath, jint argc, jobjectArray argv)
 {
 	pthread_t game_thread;
@@ -68,9 +68,9 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_gameStart
 	pass_argv = argv;
 
 	/* Init exit game callback */
-	TermViewObj = obj1;
-	TermViewClass = (*env1)->GetObjectClass(env1, TermViewObj);
-	TermView_onExitGame = (*env1)->GetMethodID(env1, TermViewClass, "onExitGame", "()V");
+	NativeWrapperObj = obj1;
+	NativeWrapperClass = (*env1)->GetObjectClass(env1, NativeWrapperObj);
+	NativeWrapper_onExitGame = (*env1)->GetMethodID(env1, NativeWrapperClass, "onExitGame", "()V");
 
 	// load game plugin lib
 	const char *copy_pluginPath = (*env1)->GetStringUTFChars(env1, pluginPath, 0);
@@ -110,20 +110,20 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_TermView_gameStart
 	angdroid_gameQueryString = NULL;
 
 	// signal game has exited
-	(*env1)->CallVoidMethod(env1, TermViewObj, TermView_onExitGame);
+	(*env1)->CallVoidMethod(env1, NativeWrapperObj, NativeWrapper_onExitGame);
 
 	// end synchronize
 	pthread_mutex_unlock (&muQuery);
 	pthread_mutex_unlock (&muGame);
 }
 
-JNIEXPORT jstring JNICALL Java_org_angdroid_angband_TermView_gameQueryString
+JNIEXPORT jstring JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryString
   (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	return (jstring)0; // null indicates error
 }
 
-JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_gameQueryRedraw
+JNIEXPORT jint JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryRedraw
 (JNIEnv *env1, jobject obj1, jint x1, jint y1, jint x2, jint y2)
 {
 	jint result = -1; // -1 indicates error
@@ -154,8 +154,7 @@ JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_gameQueryRedraw
 }
 
 
-
-JNIEXPORT jint JNICALL Java_org_angdroid_angband_TermView_gameQueryInt
+JNIEXPORT jint JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryInt
 (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	jint result = -1; // -1 indicates error

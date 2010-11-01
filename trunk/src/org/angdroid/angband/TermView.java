@@ -18,9 +18,6 @@
 
 package org.angdroid.angband;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -38,7 +35,7 @@ import android.view.View;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 
-public class TermView extends View implements Runnable, OnGestureListener {
+public class TermView extends View implements OnGestureListener {
 
 	static final int LEFT_BUTTON = 0x0200, MIDDLE_BUTTON = 0x201,
 			RIGHT_BUTTON = 0x202, LEFT_DRAG = 0x203, LEFT_RELEASE = 0x206,
@@ -62,10 +59,6 @@ public class TermView extends View implements Runnable, OnGestureListener {
 	private boolean shift_key_pressed = false;
 	private boolean alt_key_pressed = false;
 
-	private boolean wait = false;
-	private int quit_key_seq = 0;
-
-	private Queue<Integer> keybuffer = new LinkedList<Integer>();
 
 	// Default curses colors
 	final int colors[] = { /* */
@@ -120,9 +113,6 @@ public class TermView extends View implements Runnable, OnGestureListener {
 	int rows = 24;
 	int cols = 80;
 
-	int cur_x = 0;
-	int cur_y = 0;
-
 	public int view_width = 0;
 	public int view_height = 0;
 
@@ -132,21 +122,11 @@ public class TermView extends View implements Runnable, OnGestureListener {
 
 	private Vibrator vibrator;
 	private boolean vibrate;
-	private boolean always_run = true;
-	private boolean cursor_visible;
 
-	private static boolean game_thread_running = false;
-	private static String game_thread_lock = "lock";
-
-	private Thread thread = null;
-	boolean signal_game_exit = false;
-	boolean game_restart = false;
 	private GestureDetector gesture;
 
-	// Load native library
-	static {
-		System.loadLibrary("loader");
-	}
+	private boolean pausing = false;
+	private boolean resuming = false;
 
 	public TermView(Context context) {
 		super(context);
@@ -182,16 +162,16 @@ public class TermView extends View implements Runnable, OnGestureListener {
 		if (bitmap != null) {
 			canvas.drawBitmap(bitmap, 0, 0, null);
 
-			int x = cur_x * (char_width);
-			int y = (cur_y + 1) * char_height;
+			int x = AngbandActivity.xb.cur_x * (char_width);
+			int y = (AngbandActivity.xb.cur_y + 1) * char_height;
 
 			// due to font "scrunch", cursor is sometimes a bit too big
-			int cl = Math.max(x-1,0);
-			int cr = Math.min(x+char_width-1,view_width-1);
-			int ct = Math.max(y-char_height+2,0);
-			int cb = Math.min(y+2,view_height-1);
+			int cl = Math.max(x,0);
+			int cr = Math.min(x+char_width,view_width-1);
+			int ct = Math.max(y-char_height,0);
+			int cb = Math.min(y,view_height-1);
 
-			if (cursor_visible) {
+			if (AngbandActivity.xb.cursor_visible) {
 				canvas.drawRect(cl, ct, cr, cb, cursor);
 			}
 		}
@@ -252,12 +232,15 @@ public class TermView extends View implements Runnable, OnGestureListener {
 	@Override
 	protected void onMeasure(int widthmeasurespec, int heightmeasurespec)
 	{
+		Log.d("Angband", "onMeasure");
+
 		int height = MeasureSpec.getSize(heightmeasurespec);
 		int width = MeasureSpec.getSize(widthmeasurespec);
 
 		autoSizeFont(height);
 
 		computeViewSize();
+		Log.d("Angband","onMeasure "+view_width+","+view_height);
 
 		// int minheight = getSuggestedMinimumHeight();
 		// int minwidth = getSuggestedMinimumWidth();
@@ -344,70 +327,63 @@ public class TermView extends View implements Runnable, OnGestureListener {
 		int r, c;
 		c = (x * 3) / getWidth();
 		r = (y * 3) / getHeight();
-			
-		boolean rogueLike = (gameQueryInt(1,new String[]{"rl"})==1);
+
 		int key = (2 - r) * 3 + c + '1';
 
-		if (rogueLike) {
-			switch(key) {
-			case '1': key = 'b'; break;
-			case '2': key = 'j'; break;
-			case '3': key = 'n'; break;
-			case '4': key = 'h'; break;
-			case '5': key = ' '; break;
-			case '6': key = 'l'; break;
-			case '7': key = 'y'; break;
-			case '8': key = 'k'; break;
-			case '9': key = 'u'; break;
-			}
-		}
-
-		if (always_run && wait) {
-			synchronized (keybuffer) {
-				if (rogueLike) {
-					key = Character.toUpperCase(key);
-				}
-				else {
-					keybuffer.offer(46); // '.' command
-				}
-				keybuffer.offer(key);
-
-				if (wait) {
-					//Log.d("Angband", "Wake up!!!");
-					keybuffer.notify();
-				}
-			}
-		} else {
-			addToKeyBuffer(key);
-		}
+		AngbandActivity.xb.addDirectionToKeyBuffer(key);
+			
 		return true;
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-
 		Log.d("Angband", "onSizeChanged");
-		 
-		synchronized (game_thread_lock) {
-			if (game_thread_running) {
-				Log.d("Angband", "onSizeChanged.game already running");
-				return;
-			}
 
-			computeViewSize();
-			Log.d("Angband","createBitmap "+view_width+","+view_height);
-			bitmap = Bitmap.createBitmap(view_width, view_height, Bitmap.Config.RGB_565);
-			canvas = new Canvas(bitmap);
+		if (pausing) {
+			pausing = false;
+		}
+		else if (resuming) {
+			resuming = false;
+			AngbandActivity.xb.startBand();
+		}
+  	}
 
-			/*
-			canvas.setDrawFilter(new PaintFlagsDrawFilter(
-				Paint.DITHER_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG,0
-			)); // this seems to have no effect, why?
-			*/
+	/* Xband interface */
+	public boolean onXbandStarting() {
+
+		computeViewSize();
+
+		// sanity 
+		if (view_width == 0 || view_height == 0) return false;
+
+		Log.d("Angband","createBitmap "+view_width+","+view_height);
+		bitmap = Bitmap.createBitmap(view_width, view_height, Bitmap.Config.RGB_565);
+		canvas = new Canvas(bitmap);		
+		/*
+		  canvas.setDrawFilter(new PaintFlagsDrawFilter(
+		  Paint.DITHER_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG,0
+		  )); // this seems to have no effect, why?
+		*/		
+
+		if (Preferences.getActiveProfile().getPlugin()
+			== Preferences.Plugin.Angband.getId()) {
+			ARROW_DOWN = 0x8A;
+			ARROW_LEFT = 0x8B;
+			ARROW_RIGHT = 0x8C;
+			ARROW_UP = 0x8D;
+		}
+		else {
+			ARROW_DOWN = '2';
+			ARROW_LEFT = '4';
+			ARROW_RIGHT = '6';
+			ARROW_UP = '8';
 		}
 
-		startAngband();
+		return true;
+	}
+
+	public void onXbandStopping() {
 	}
 
 	@Override
@@ -505,7 +481,7 @@ public class TermView extends View implements Runnable, OnGestureListener {
 			key |= MOD_CTRL;
 		}
 
-		addToKeyBuffer(key);
+		AngbandActivity.xb.addToKeyBuffer(key);
 
 		return super.onKeyDown(keyCode, event);
 	}
@@ -521,7 +497,7 @@ public class TermView extends View implements Runnable, OnGestureListener {
 			// I think the overloaded control key + menu feature is annoying
 			// todo: move to preference
 			if(!ctrl_key_pressed) {
-				addToKeyBuffer('\r');
+				AngbandActivity.xb.addToKeyBuffer('\r');
 			}
 			break;
 		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
@@ -542,91 +518,19 @@ public class TermView extends View implements Runnable, OnGestureListener {
 		return super.onKeyUp(keyCode, event);
 	}
 
-	public void addToKeyBuffer(int key) {
-		//Log.d("Angband", "addKeyToBuffer:"+key);
-		synchronized (keybuffer) {
-			keybuffer.offer(key);
-			if (wait) {
-				//Log.d("Angband", "Wake up!!!");
-				keybuffer.notify();
-			}
-		}
-	}
-
-	public void clearKeyBuffer() {
-		synchronized (keybuffer) {
-			keybuffer.clear();
-		}
-	}
-
-	int getch(final int v) {
-
-		Integer key = null;
-
-		//Log.d("Angband", "getch");
-		synchronized (keybuffer) {
-
-			if (signal_game_exit) {
-				//Log.d("Angband", "getch.exit game sequence");
-				switch((quit_key_seq++)%4) {
-				case 0: return 24; // Esc
-				case 1: return 0; 
-				case 2: return 96; // Ctrl-X (Quit)
-				case 3: return 0; 
-				}
-			}
-
-			//peek before wait -- fix issue #3 keybuffer loss
-			if (keybuffer.peek() != null) {
-				key = keybuffer.poll();
-				//Log.w("Angband", "process key = " + key);
-				return key;
-			}		
-
-			if (v == 1) {
-				// Wait key press
-				try {
-		        	//Log.d("Angband", "Wait keypress BEFORE");
-					wait = true;
-					//keybuffer.clear(); //not necessary
-					keybuffer.wait();
-					wait = false;
-					//Log.d("Angband", "Wait keypress AFTER");
-				} catch (Exception e) {
-					Log.d("Angband", "The getch() wait exception" + e);
-				}
-			}
-
-			// return key after wait, if there is one
-			if (keybuffer.peek() != null) {
-				key = keybuffer.poll();
-				//Log.w("Angband", "process key = " + key);
-				return key;
-			}		
-		}
-
-		return 0;
-	}
-
 	public void refresh() {
-		synchronized (game_thread_lock) {
-			postInvalidate();
-		}
+		postInvalidate();
 	}
 
 	public void clear() {
-		synchronized (game_thread_lock) {
-			if (canvas != null) {
-				canvas.drawPaint(back);
-			}
+		if (canvas != null) {
+			canvas.drawPaint(back);
 		}
 	}
 
 	public void noise() {
-		synchronized (game_thread_lock) {
-			if (vibrate) {
-				vibrator.vibrate(50);
-			}
+		if (vibrate) {
+			vibrator.vibrate(50);
 		}
 	}
 
@@ -645,9 +549,15 @@ public class TermView extends View implements Runnable, OnGestureListener {
 
 		fore.setColor(colors[a]);
 
+		byte c;
 		for (int i = 0; i < n; i++) {
-			if (cp[i] > 19 && cp[i] < 128) {
-				putchar((char) cp[i]);
+			c = cp[i];
+			if (c > 19 && c < 128) {
+				wipe(row, col, 1);
+
+				AngbandActivity.xb.cachePoint(col, row, c, a);
+		
+				putchar((char)c);
 			}
 		}
 
@@ -655,220 +565,89 @@ public class TermView extends View implements Runnable, OnGestureListener {
 	}
 
 	public void wipe(final int row, final int col, final int n) {
-		synchronized (game_thread_lock) {
-			float x = col * char_width;
-			float y = row * char_height;
-			canvas.drawRect(
-				x, 
-				y, 
-				x + (char_width) * n , 
-				y + char_height,
-				back
-			);
-		}
+		float x = col * char_width;
+		float y = row * char_height;
+
+		if (canvas == null ) return;
+
+		canvas.drawRect(
+						x, 
+						y, 
+						x + char_width * n, 
+						y + char_height,
+						back
+						);
 	}
 
 	public void move(final int col, final int row) {
-		synchronized (game_thread_lock) {
-			this.col = col;
-			this.row = row;
-		}
+		this.col = col;
+		this.row = row;
 	}
 
-	public void putchar(final char c) {
-		wipe(row, col, 1);
-		synchronized (game_thread_lock) {
+	private void putchar(final char c) {
 
-			float x = col * char_width;
-			float y = (row + 1) * char_height;
+		float x = col * char_width;
+		float y = (row + 1) * char_height;
 		  
-			String str = c + "";
+		String str = c + "";
 
-			canvas.drawText (
-				str,
-				x, 
-				y - fore.descent(), 
-				fore
-			);
+		if (canvas == null ) return;
 
-			col++;
-			if (col >= 80) {
-				row++;
-				col = 0;
-			}
-			if (row >= 24) {
-				row = 23;
-			}
+		canvas.drawText (
+						 str,
+						 x, 
+						 y - fore.descent(), 
+						 fore
+						 );
+
+		col++;
+		if (col >= 80) {
+			row++;
+			col = 0;
+		}
+		if (row >= 24) {
+			row = 23;
 		}
 	}
 
-	public void setCursorXY(final int x, final int y) {
-		//Log.d("Angband", "setCursor() x = " + x + ", y = " + y);
-		synchronized (game_thread_lock) {
-			this.cur_x = x;
-			this.cur_y = y;
-		}
-	}
+	public void redraw(char[][] charmap, byte[][] colormap) {
+		Log.d("Angband","Termview.redraw()");
+		int row_save = row;
+		int col_save = col;
 
-	public void setCursorVisible(final int v) {
-		synchronized (game_thread_lock) {
-			if (v == 1) {
-				cursor_visible = true;
-			} else if (v == 0) {
-				cursor_visible = false;
-			}
+		if (canvas != null) {
+			Log.d("Angband","Termview.really redrawing");
+			
+			canvas.drawPaint(back);
+			for(int r = 0; r < rows; r++) {
+				for(int c=0; c < cols; c++) {
+					fore.setColor(colors[colormap[c][r]]);
+					move(c, r);
+
+					char ch = charmap[c][r]; 
+					if(ch != '\0') putchar(ch);
+				}
+			}		
+
+			row = row_save;
+			col = col_save;
+			refresh();
 		}
 	}
 
 	public void onResume() {
-		always_run = Preferences.getAlwaysRun();
 		vibrate = Preferences.getVibrate();
-
+		pausing = false;
+		resuming = true;
 		Log.d("Angband","Termview.onResume()");
-		startAngband();
 	}
 
 	public void onPause() {
 		Log.d("Angband","Termview.onPause()");
 		// this is the only guaranteed safe place to save state 
 		// according to SDK docs
-		quitAngband();
-	}
-
-	public void startAngband() {
-		//Log.d("Angband","startAngband()");
-
-		// sanity checks: thread must not already be running
-		// and we must have a valid canvas to draw upon.
-		synchronized(game_thread_lock) {
-			if (game_thread_running) {
-				Log.d("Angband","startAngband.game already running");
-				if (canvas == null) {
-					Log.d("Angband","no canvas");
-					return;
-				}
-				onDraw(canvas);
-				return;
-			}
-			if (canvas == null) {
-				Log.d("Angband","no canvas");
-				return;
-			}
-
-			game_thread_running = true;
-			signal_game_exit = false;
-			quit_key_seq = 0;
-		}
-
-		Log.d("Angband","startAngband().reallyStarting");
-
-		clearKeyBuffer();
-
-		if (Preferences.getActiveProfile().getPlugin()
-			== Preferences.Plugin.Angband.getId()) {
-			ARROW_DOWN = 0x8A;
-			ARROW_LEFT = 0x8B;
-			ARROW_RIGHT = 0x8C;
-			ARROW_UP = 0x8D;
-		}
-		else {
-			ARROW_DOWN = '2';
-			ARROW_LEFT = '4';
-			ARROW_RIGHT = '6';
-			ARROW_UP = '8';
-		}
-
-		if (Preferences.getActiveProfile().getPlugin()
-			== Preferences.Plugin.Angband306.getId()
-			&& Preferences.getAutoStartBorg()) {
-			addToKeyBuffer(32); //space
-			addToKeyBuffer(26); //ctrl-v
-			addToKeyBuffer(122); //v
-		}
-		else if (Preferences.getSkipWelcome()) {
-			addToKeyBuffer(32); //space
-		}
-
-		thread = new Thread(this);
-		thread.start();
-	}
-
-	public void quitAngband() {
-		// signal keybuffer to send quit command to angband 
-		// (this is when the user chooses quit or the app is pausing)
-
-		Log.d("Angband","quitAngband()");
-
-		synchronized (game_thread_lock) {
-			if (!game_thread_running || thread == null) 
-				return;
-		}
-
-		signal_game_exit = true;
-
-		Log.d("Angband","waiting on thread.join()");
-
-		synchronized (keybuffer) {
-			keybuffer.notify();
-		}
-
-		try {
-			thread.join();
-		} catch (Exception e) {
-			Log.d("Angband",e.toString());
-		}
-
-		Log.d("Angband","after waiting for thread.join()");
-	}
-
-	// Call native methods from library
-	native void gameStart(String pluginPath, int argc, String[] argv);
-	native int gameQueryRedraw(int x1, int y1, int x2, int y2);
-	native int gameQueryInt(int argc, String[] argv);
-	native String gameQueryString(int argc, String[] argv);
-
-	public void run() {	    
-
-		synchronized (game_thread_lock) {
-			if (game_restart) {
-				game_restart = false;
-				try {
-					// if restarting, pause for effect (and to let the
-					// other game thread unlock its mutex!)
-					Thread.sleep(400);
-				} catch (Exception ex) {}
-			}
-			else {
-			}
-		}
-
-
-		Log.d("Angband","gameStart");
-
-	    String pluginPath = Preferences.getActivityFilesDirectory()
-			+"/../lib/lib"+Preferences.getActivePluginName()+".so";
-	    gameStart(
-			pluginPath, 
-			2, 
-			new String[]{
-				Preferences.getAngbandFilesDirectory(),
-				Preferences.getActiveProfile().getSaveFile()
-			}
-	    );
-	}
-
-	//this is called from native thread just before exiting
-	public void onExitGame() {
-		boolean local_restart = false;
-			
-		synchronized (game_thread_lock) {
-			Log.d("Angband","onExitGame()");
-			game_thread_running = false;
-
-			// if game exited normally, restart!
-			local_restart = game_restart = !signal_game_exit;
-		}
-
-		if	(local_restart) startAngband();
+		pausing = true;
+		resuming = false;
+		AngbandActivity.xb.saveBand();
 	}
 }

@@ -50,8 +50,10 @@ import com.flurry.android.FlurryAgent;
 
 public class AngbandActivity extends Activity {
 
+	public static NativeWrapper xb = null;
+
 	private LinearLayout screenLayout = null; 
-	private static TermView term = null;
+	private TermView term = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,6 +75,10 @@ public class AngbandActivity extends Activity {
 
 		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
 			extractAngbandResources(Preferences.getInstalledPlugins()[i]);
+		}
+
+		if (xb == null) {
+			xb = new NativeWrapper();
 		}
 
 /* TODO: fix title bar problem on portrait (vkeyboard) startup
@@ -127,11 +133,16 @@ public class AngbandActivity extends Activity {
 			startActivity(intent);
 			break;
 		case '4':
-			term.onPause();
 			finish();
 			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
+	}
+
+	@Override
+	public void finish() {
+		xb.stopBand();
+		super.finish();
 	}
 
 	/* TODO: move native code handling out of TermView, then rebuildViews 
@@ -162,16 +173,6 @@ public class AngbandActivity extends Activity {
  		if (screenLayout != null) screenLayout.removeAllViews();
 		screenLayout = new LinearLayout(this);
 
-		// HACK 
-		// it seems that the activity is restarted sometimes
-		// without a pause notification.  I can reproduce it when
-		// I answer a phone call, hang up, then press back key.
-		// In this case, make sure we get out of the old session!
-		if (term != null) {
-			Log.d("Angband", "rebuildViews.stop old session");
-			term.onPause();  // this waits until game exists
-		}
-
 		term = new TermView(this);
 		term.setLayoutParams(
 			new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
@@ -193,6 +194,8 @@ public class AngbandActivity extends Activity {
 		}
 
 		setContentView(screenLayout);
+
+		xb.linkTermView(term);
 	}
 
 	@Override

@@ -96,7 +96,7 @@ public class AngbandKeyboard implements OnKeyboardActionListener
 		}
 		if(c != 0)
 		{
-			term.addToKeyBuffer(c);
+			AngbandActivity.xb.addToKeyBuffer(c);
 		}
 	}
 	

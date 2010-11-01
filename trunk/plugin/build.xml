@@ -9,8 +9,7 @@
             classpath="${out-classes-location}"
             bootclasspath="${android-jar}"
             verbose="true">
-            <class name="org.angdroid.angband.TermView" />
-            <class name="org.angdroid.angband.AngbandActivity" />
+            <class name="org.angdroid.angband.NativeWrapper" />
         </javah>
     </target>
 
@@ -36,8 +35,12 @@
     </target>
 
     <target name="clean">
-        <delete dir="plugin/${plugin.name}/libs"/>
-        <delete dir="plugin/${plugin.name}/obj"/>
+		<delete includeemptydirs="true">
+		  <fileset dir="plugin/${plugin.name}/libs" includes="**/*"/>
+		</delete>
+		<delete includeemptydirs="true">
+		  <fileset dir="plugin/${plugin.name}/obj" includes="**/*"/>
+		</delete>
         <delete file="${resource-folder}/raw/zip${plugin.name}"/>
     </target>
 
