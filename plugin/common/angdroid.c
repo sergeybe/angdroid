@@ -81,6 +81,10 @@
 #ifndef ANGDROID_TOME_PLUGIN
 #include "main.h"
 #endif
+#ifdef ANGDROID_ANGBAND306_PLUGIN
+#include "borg1.h"
+#endif
+
 #include "angdroid.h"
 #include <jni.h>
 #include <android/log.h>
@@ -105,25 +109,26 @@ static JavaVM *jvm;
 static JNIEnv *env;
 
 /* Classes */
-static jclass TermViewClass;
+static jclass NativeWrapperClass;
 
 /* Objects */
-static jobject TermViewObj;
+static jobject NativeWrapperObj;
 
 /* Methods of TermView */
-static jmethodID TermView_text;
-static jmethodID TermView_wipe;
-static jmethodID TermView_clear;
-static jmethodID TermView_noise;
-static jmethodID TermView_refresh;
-static jmethodID TermView_getch;
-static jmethodID TermView_postInvalidate;
-static jmethodID TermView_setCursorXY;
-static jmethodID TermView_setCursorVisible;
-static jmethodID TermView_clearKeyBuffer;
+static jmethodID NativeWrapper_text;
+static jmethodID NativeWrapper_wipe;
+static jmethodID NativeWrapper_clear;
+static jmethodID NativeWrapper_noise;
+static jmethodID NativeWrapper_refresh;
+static jmethodID NativeWrapper_getch;
+static jmethodID NativeWrapper_postInvalidate;
+static jmethodID NativeWrapper_setCursorXY;
+static jmethodID NativeWrapper_setCursorVisible;
+static jmethodID NativeWrapper_clearKeyBuffer;
 
-char android_files_path[1024];
-char android_savefile[50];
+static char android_files_path[1024];
+static char android_savefile[50];
+static int turn_save = 0;
 
 /*
  * Extra data to associate with each "window"
@@ -353,30 +358,32 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is required.
 			 */
 			
-			key = (*env)->CallIntMethod(env, TermViewObj, TermView_getch, v);
-			/* old exit technique
-			if (key == -1)
-			{
-				save_game();
-				
-				if ((*jvm)->DetachCurrentThread(jvm) < 0)
-				{
-					LOGE("Can't deattach current thread!");
+			key = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_getch, v);
+			if (key == -1) {
+				LOGD("TERM_XTRA_EVENT.saving game");
+				if (turn_save != turn) {
+#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
+					save_game();
+#else
+					if (!borg_active) do_cmd_save_game();
+#endif
+					turn_save = turn;
+					LOGD("TERM_XTRA_EVENT.saved game success");
 				}
-				quit("Quit from game thread");
-				return 0;
+				else {
+					LOGD("TERM_XTRA_EVENT.save skipped");
+				}
 			}
-			*/
-			
-			if (v == 0)
-			{
+			else if (v == 0) {
 				while (key != 0)
 				{
 					Term_keypress(key);
-					key = (*env)->CallIntMethod(env, TermViewObj, TermView_getch, v);
+					key = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_getch, v);
 				}
 			}
-			else Term_keypress(key);
+			else {
+				Term_keypress(key);
+			}
 			
 			return 0;
 		}
@@ -393,7 +400,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is required, but may not be "essential".
 			 */
 			LOGD("TERM_XTRA_FLUSH");
-			(*env)->CallVoidMethod(env, TermViewObj, TermView_clearKeyBuffer);
+			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_clearKeyBuffer);
 
 			return 0;
 		}
@@ -409,7 +416,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is required.
 			 */
 			//LOGD("TERM_XTRA_CLEAR");
-			(*env)->CallVoidMethod(env, TermViewObj, TermView_clear);
+			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_clear);
 			return 0;
 		}
 
@@ -425,7 +432,7 @@ static errr Term_xtra_and(int n, int v)
 			 * efficiency (and attractiveness) of the program.
 			 */
 			//LOGD("TERM_XTRA_SHAPE");
-			(*env)->CallVoidMethod(env, TermViewObj, TermView_setCursorVisible, v);
+			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_setCursorVisible, v);
 			
 			return 0;
 		}
@@ -461,7 +468,7 @@ static errr Term_xtra_and(int n, int v)
 			 * necessary flushing issues.
 			 */
 			//LOGD("TERM_XTRA_FRESH");
-			(*env)->CallVoidMethod(env, TermViewObj, TermView_postInvalidate);
+			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_postInvalidate);
 			return 0;
 		}
 
@@ -475,7 +482,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is optional, but convenient.
 			 */
 			LOGD("TERM_XTRA_NOISE");
-			(*env)->CallVoidMethod(env, TermViewObj, TermView_noise);
+			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_noise);
 			return 0;
 		}
 
@@ -595,7 +602,7 @@ static errr Term_curs_and(int x, int y)
 	//LOGD("Term_curs_and");
 
 	/* XXX XXX XXX */
-	(*env)->CallVoidMethod(env, TermViewObj, TermView_setCursorXY, x , y);
+	(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_setCursorXY, x , y);
 
 	/* Success */
 	return 0;
@@ -616,7 +623,7 @@ static errr Term_wipe_and(int x, int y, int n)
 	LOGD("Term_wipe_and");
 
 	/* XXX XXX XXX */
-	(*env)->CallVoidMethod(env, TermViewObj, TermView_wipe, x , y , n);
+	(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_wipe, x , y , n);
 
 	/* Success */
 	return 0;
@@ -670,7 +677,7 @@ static errr Term_text_and(int x, int y, int n, byte a, const char *cp)
 
 	(*env)->SetByteArrayRegion(env, array, 0, n, cp);
 
-	ret = (*env)->CallIntMethod(env, TermViewObj, TermView_text, x, y, n, a, array);
+	ret = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_text, x, y, n, a, array);
 
 	(*env)->DeleteLocalRef(env, array);
 
@@ -1015,17 +1022,17 @@ void initGame ()
 	init_stuff();
 
 
-	/* TermView Methods */
-	TermView_text = (*env)->GetMethodID(env, TermViewClass, "text", "(IIIB[B)I");
-	TermView_wipe = (*env)->GetMethodID(env, TermViewClass, "wipe", "(III)V");
-	TermView_clear = (*env)->GetMethodID(env, TermViewClass, "clear", "()V");
-	TermView_noise = (*env)->GetMethodID(env, TermViewClass, "noise", "()V");
-	TermView_refresh = (*env)->GetMethodID(env, TermViewClass, "refresh", "()V");
-	TermView_getch = (*env)->GetMethodID(env, TermViewClass, "getch", "(I)I");
-	TermView_postInvalidate = (*env)->GetMethodID(env, TermViewClass, "postInvalidate", "()V");
-	TermView_setCursorXY = (*env)->GetMethodID(env, TermViewClass, "setCursorXY", "(II)V");
-	TermView_setCursorVisible = (*env)->GetMethodID(env, TermViewClass, "setCursorVisible", "(I)V");
-	TermView_clearKeyBuffer = (*env)->GetMethodID(env, TermViewClass, "clearKeyBuffer", "()V");
+	/* NativeWrapper Methods */
+	NativeWrapper_text = (*env)->GetMethodID(env, NativeWrapperClass, "text", "(IIIB[B)I");
+	NativeWrapper_wipe = (*env)->GetMethodID(env, NativeWrapperClass, "wipe", "(III)V");
+	NativeWrapper_clear = (*env)->GetMethodID(env, NativeWrapperClass, "clear", "()V");
+	NativeWrapper_noise = (*env)->GetMethodID(env, NativeWrapperClass, "noise", "()V");
+	NativeWrapper_refresh = (*env)->GetMethodID(env, NativeWrapperClass, "refresh", "()V");
+	NativeWrapper_getch = (*env)->GetMethodID(env, NativeWrapperClass, "getch", "(I)I");
+	NativeWrapper_postInvalidate = (*env)->GetMethodID(env, NativeWrapperClass, "postInvalidate", "()V");
+	NativeWrapper_setCursorXY = (*env)->GetMethodID(env, NativeWrapperClass, "setCursorXY", "(II)V");
+	NativeWrapper_setCursorVisible = (*env)->GetMethodID(env, NativeWrapperClass, "setCursorVisible", "(I)V");
+	NativeWrapper_clearKeyBuffer = (*env)->GetMethodID(env, NativeWrapperClass, "clearKeyBuffer", "()V");
 
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	/* Set up the command hook */
@@ -1127,10 +1134,10 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	}
 
 	/* Save objects */
-	TermViewObj = obj1;
+	NativeWrapperObj = obj1;
 
-	/* Get TermView class */
-	TermViewClass = (*env)->GetObjectClass(env, TermViewObj);
+	/* Get NativeWrapper class */
+	NativeWrapperClass = (*env)->GetObjectClass(env, NativeWrapperObj);
 
 	initGame();
 

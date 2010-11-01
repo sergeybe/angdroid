@@ -167,9 +167,15 @@
     </target>
 
     <target name="clean" depends="clean-plugins">
-        <delete dir="bin"/>
-        <delete dir="gen"/>
-        <delete dir="libs/armeabi"/>
+		<delete includeemptydirs="true">
+		  <fileset dir="bin" includes="**/*"/>
+		</delete>
+		<delete includeemptydirs="true">
+		  <fileset dir="gen" includes="**/*"/>
+		</delete>
+		<delete includeemptydirs="true">
+		  <fileset dir="libs/armeabi" includes="**/*"/>
+		</delete>
 		<delete file="plugin/include/angdroid.h"/>
     </target>
 
