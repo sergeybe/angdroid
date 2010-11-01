@@ -155,6 +155,7 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="angband306"/>
 	</ant>
+<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="tome"/>
 	</ant>
@@ -164,6 +165,7 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="npp"/>
 	</ant>
+-->
     </target>
 
     <target name="clean" depends="clean-plugins">
