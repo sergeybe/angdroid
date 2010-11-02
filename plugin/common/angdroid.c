@@ -361,7 +361,10 @@ static errr Term_xtra_and(int n, int v)
 			key = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_getch, v);
 			if (key == -1) {
 				LOGD("TERM_XTRA_EVENT.saving game");
-				if (turn_save != turn) {
+				if (turn_save != turn 
+					&& turn > 1 
+					&& p_ptr != NULL 
+					&& !p_ptr->is_dead) {
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 					save_game();
 #else
