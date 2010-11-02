@@ -227,8 +227,10 @@ public class NativeWrapper implements Runnable {
 			}
 			else {
 				Log.d("Angband","redraw.game initialized - redrawing");
-				term.onXbandStarting();
-				term.redraw(charBuffer, colorBuffer);
+				synchronized (display_lock) {
+					term.onXbandStarting();
+					term.redraw(charBuffer, colorBuffer);
+				}
 			}			
 			return; // done.
 		}
@@ -240,7 +242,9 @@ public class NativeWrapper implements Runnable {
 
 			/* game is not running, so start it up */
 
-			term.onXbandStarting();
+			synchronized (display_lock) {
+				term.onXbandStarting();
+			}
 
 			clearKeyBuffer();
 			if (Preferences.getActiveProfile().getPlugin()
