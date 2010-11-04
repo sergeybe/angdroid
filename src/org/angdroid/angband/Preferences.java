@@ -17,7 +17,9 @@ final public class Preferences {
 
 	static final String KEY_VIBRATE = "angband.vibrate";
 	static final String KEY_FULLSCREEN = "angband.fullscreen";
+	static final String KEY_ORIENTATION = "angband.orientation";
 
+	static final String KEY_ENABLEVOLKEYFONTSIZE = "angband.enablevolkeyfontsize";
 	static final String KEY_ENABLETOUCH = "angband.enabletouch";
 	static final String KEY_ENABLEVKEY = "angband.enablevkey";
 	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
@@ -50,6 +52,7 @@ final public class Preferences {
 	private static String[] gamePluginNames;
 	private static ProfileList profiles;
 	private static String version;
+	private static int fontSize = 17;
 
 	Preferences() {}
 
@@ -74,8 +77,23 @@ final public class Preferences {
 		return pref.getBoolean(Preferences.KEY_FULLSCREEN, true);
 	}
 
+	public static int getOrientation() {
+		return Integer.parseInt(pref.getString(Preferences.KEY_ORIENTATION, "2"));
+	}
+
+	public static int getDefaultFontSize() {
+		return fontSize;
+	}
+	public static int setDefaultFontSize(int value) {
+		return fontSize = value;
+	}
+
 	public static boolean getVibrate() {
 		return pref.getBoolean(Preferences.KEY_VIBRATE, false);
+	}
+
+	public static boolean getVolumeKeyFontSizing() {
+		return pref.getBoolean(Preferences.KEY_ENABLEVOLKEYFONTSIZE, true);
 	}
 
 	public static boolean getEnableVirtualKeyboard() {

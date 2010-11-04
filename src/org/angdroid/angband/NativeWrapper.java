@@ -227,10 +227,7 @@ public class NativeWrapper implements Runnable {
 			}
 			else {
 				Log.d("Angband","redraw.game initialized - redrawing");
-				synchronized (display_lock) {
-					term.onXbandStarting();
-					term.redraw(charBuffer, colorBuffer);
-				}
+				redraw();
 			}			
 			return; // done.
 		}
@@ -312,6 +309,13 @@ public class NativeWrapper implements Runnable {
 		}
 
 		signalGameExit();
+	}
+
+	public void redraw() {
+		synchronized (display_lock) {
+			term.onXbandStarting();
+			term.redraw(charBuffer, colorBuffer);
+		}
 	}
 
 	private void signalGameExit() {
