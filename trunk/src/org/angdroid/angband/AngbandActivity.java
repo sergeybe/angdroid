@@ -32,11 +32,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup.LayoutParams;
 import android.os.Environment;
 import android.content.pm.ComponentInfo;
@@ -54,6 +60,11 @@ public class AngbandActivity extends Activity {
 
 	private LinearLayout screenLayout = null; 
 	private TermView term = null;
+	private boolean kbVisible = false;
+
+	protected static final int CONTEXTMENU_FITWIDTH_ITEM = 0;
+	protected static final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
+	protected static final int CONTEXTMENU_VKEY_ITEM = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -163,12 +174,26 @@ public class AngbandActivity extends Activity {
 	protected void rebuildViews() {
 		Log.d("Angband", "rebuildViews");
 
-		boolean kb = Preferences.getEnableVirtualKeyboard();
+	    kbVisible = Preferences.getEnableVirtualKeyboard();
+		rebuildViews(kbVisible);
+	}
 
-		if (kb) 
+
+	protected void rebuildViews(boolean kb) {
+		Log.d("Angband", "rebuildViews");
+
+	    int orient = Preferences.getOrientation();
+		switch (orient) {
+		case 0: // sensor
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			break;
+		case 1: // portrait
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		else
+			break;
+		case 2: // landscape
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			break;
+		}
 
  		if (screenLayout != null) screenLayout.removeAllViews();
 		screenLayout = new LinearLayout(this);
@@ -179,6 +204,8 @@ public class AngbandActivity extends Activity {
 										  LayoutParams.WRAP_CONTENT, 
 										  1.0f)
 		);
+
+		registerForContextMenu(term);
 
 		screenLayout.setOrientation(LinearLayout.VERTICAL);
 		screenLayout.addView(term);
@@ -196,6 +223,44 @@ public class AngbandActivity extends Activity {
 		setContentView(screenLayout);
 
 		xb.linkTermView(term);
+	}
+
+	@Override
+	public void openContextMenu(View view) {
+		Log.d("Angband", "openContextMenu");		
+		super.openContextMenu(view);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+									ContextMenuInfo menuInfo) {
+		Log.d("Angband", "onCreateContextMenu");
+		menu.setHeaderTitle("Quick Settings");
+		menu.add(0, CONTEXTMENU_FITWIDTH_ITEM, 0, "Fit Width"); 
+		menu.add(0, CONTEXTMENU_FITHEIGHT_ITEM, 0, "Fit Height"); 
+		menu.add(0, CONTEXTMENU_VKEY_ITEM, 0, "Toggle Keyboard"); 
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem aItem) {
+		Log.d("Angband", "onContextItemSelected");		
+		switch (aItem.getItemId()) {
+		case CONTEXTMENU_FITWIDTH_ITEM:
+			term.autoSizeFontByWidth(0);
+			xb.redraw();
+			return true; 
+		case CONTEXTMENU_FITHEIGHT_ITEM:
+			term.autoSizeFontByHeight(0);
+			xb.redraw();
+			return true; 
+		case CONTEXTMENU_VKEY_ITEM:
+			kbVisible = !kbVisible;
+			rebuildViews(kbVisible);
+			term.onResume();
+			//xb.redraw();
+			return true; 
+		}
+		return false;
 	}
 
 	@Override

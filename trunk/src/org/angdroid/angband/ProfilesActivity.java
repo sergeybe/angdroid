@@ -65,7 +65,7 @@ public class ProfilesActivity extends Activity{
 				@Override
 					public void onCreateContextMenu(ContextMenu menu, View v,
 													ContextMenuInfo menuInfo) {
-					menu.setHeaderTitle("ContextMenu");
+					menu.setHeaderTitle("Profile");
 					menu.add(0, CONTEXTMENU_EDITITEM, 0, "Edit"); 
 					menu.add(0, CONTEXTMENU_DELETEITEM, 0, "Delete"); 
 				}

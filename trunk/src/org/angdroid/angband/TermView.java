@@ -33,6 +33,11 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.GestureDetector.OnGestureListener;
 
 public class TermView extends View implements OnGestureListener {
@@ -49,6 +54,7 @@ public class TermView extends View implements OnGestureListener {
 	static int ARROW_RIGHT = 0x8C;
 	static int ARROW_UP = 0x8D;
 
+
 	private boolean ctrl_mod = false;
 	private boolean shift_mod = false;
 	private boolean alt_mod = false;
@@ -56,6 +62,7 @@ public class TermView extends View implements OnGestureListener {
 	private boolean alt_down = false;
 	private boolean ctrl_down = false;
 	private boolean ctrl_key_pressed = false;
+	private boolean ctrl_key_overload = false;
 	private boolean shift_key_pressed = false;
 	private boolean alt_key_pressed = false;
 
@@ -101,7 +108,8 @@ public class TermView extends View implements OnGestureListener {
 	0xFF0010FF /* TERM_DEEP_L_BLUE */
 	};
 
-	Typeface tf;
+	Typeface tfStd;
+	Typeface tfTiny;
 	Bitmap bitmap;
 	Canvas canvas;
 	Paint fore;
@@ -113,8 +121,8 @@ public class TermView extends View implements OnGestureListener {
 	int rows = 24;
 	int cols = 80;
 
-	public int view_width = 0;
-	public int view_height = 0;
+	public int canvas_width = 0;
+	public int canvas_height = 0;
 
 	private int char_height = 0;
 	private int char_width = 0;
@@ -127,15 +135,18 @@ public class TermView extends View implements OnGestureListener {
 
 	private boolean pausing = false;
 	private boolean resuming = false;
+	private AngbandActivity aa = null;
 
 	public TermView(Context context) {
 		super(context);
 		initTermView(context);
+		aa = (AngbandActivity)context;
 	}
 
 	public TermView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initTermView(context);
+		aa = (AngbandActivity)context;
 	}
 
 	protected void initTermView(Context context) {
@@ -167,9 +178,9 @@ public class TermView extends View implements OnGestureListener {
 
 			// due to font "scrunch", cursor is sometimes a bit too big
 			int cl = Math.max(x,0);
-			int cr = Math.min(x+char_width,view_width-1);
+			int cr = Math.min(x+char_width,canvas_width-1);
 			int ct = Math.max(y-char_height,0);
-			int cb = Math.min(y,view_height-1);
+			int cb = Math.min(y,canvas_height-1);
 
 			if (AngbandActivity.xb.cursor_visible) {
 				canvas.drawRect(cl, ct, cr, cb, cursor);
@@ -177,21 +188,22 @@ public class TermView extends View implements OnGestureListener {
 		}
 	}
 
-	public void computeViewSize()
+	public void computeCanvasSize()
 	{
-		view_width = cols*char_width;
-		view_height = rows*char_height;
+		canvas_width = cols*char_width;
+	    canvas_height = rows*char_height;
 	}
 
-
-	private void autoSizeFont(int maxHeight) {
+	public void autoSizeFontByHeight(int maxHeight) {
+		if (maxHeight == 0) maxHeight = getMeasuredHeight();
 		if (maxHeight<=320) {
-			tf = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
+			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
+			fore.setTypeface(tfTiny);
 		}
 		else {
-			tf = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+			tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+			fore.setTypeface(tfStd);
 		}
-		fore.setTypeface(tf);
 
 		// HACK -- keep 480x320 fullscreen as-is
 		if (maxHeight==320) {
@@ -226,7 +238,86 @@ public class TermView extends View implements OnGestureListener {
 		}
 
 		fore.setTextSize(font_text_size);		
-		fore.setTextAlign(Paint.Align.LEFT);
+		Preferences.setDefaultFontSize(font_text_size);
+
+		Log.d("Angband","autoSizeFontHeight "+font_text_size);
+	}
+
+	public void autoSizeFontByWidth(int maxWidth) {
+		if (maxWidth == 0) maxWidth = getMeasuredWidth();
+		if (maxWidth<=480) {
+			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
+			fore.setTypeface(tfTiny);
+		}
+		else {
+			tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+			fore.setTypeface(tfStd);
+		}
+
+		// HACK -- keep 480x320 fullscreen as-is
+		if (maxWidth==480) {
+			font_text_size = 12;
+			char_height = 12;
+			char_width = 6;
+		}
+		else {
+			font_text_size = 6;
+			do {
+				font_text_size += 1;
+				fore.setTextSize(font_text_size);		
+
+				char_width = (int)fore.measureText("X", 0, 1);	
+			} while (char_width*cols < maxWidth);
+
+			font_text_size -= 1;
+			fore.setTextSize(font_text_size);		
+
+			char_height = (int)Math.ceil(fore.getFontSpacing()); 
+
+			// HACK -- scrunch spacing 8%
+			if (font_text_size >= 16) 
+				char_height-=(int)((float)char_height*0.08);
+
+			char_width = (int)fore.measureText("X", 0, 1);	
+		}
+
+		fore.setTextSize(font_text_size);		
+		Preferences.setDefaultFontSize(font_text_size);
+
+		Log.d("Angband","autoSizeFontWidth "+font_text_size+","+maxWidth);
+	}
+
+
+	private void setFontSize(int size) {
+		if (size>12) {
+			if (tfStd == null) {
+				tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+			}
+			fore.setTypeface(tfStd);
+		}
+		else {	
+			if (tfTiny == null) {
+				tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf"); 
+			}
+			fore.setTypeface(tfTiny);
+		}
+
+		if (size < 6) size = 6;
+		else if (size > 48) size = 48;
+
+		font_text_size = size;
+
+		fore.setTextSize(font_text_size);		
+		Preferences.setDefaultFontSize(font_text_size);
+ 
+		char_height = (int)Math.ceil(fore.getFontSpacing()); 
+		
+		// HACK -- scrunch spacing 8%
+		if (font_text_size >= 16) 
+			char_height-=(int)((float)char_height*0.08);
+
+		char_width = (int)fore.measureText("X", 0, 1);	
+		Log.d("Angband","setSizeFont "+font_text_size);
 	}
 
 	@Override
@@ -237,17 +328,17 @@ public class TermView extends View implements OnGestureListener {
 		int height = MeasureSpec.getSize(heightmeasurespec);
 		int width = MeasureSpec.getSize(widthmeasurespec);
 
-		autoSizeFont(height);
+		setFontSize(Preferences.getDefaultFontSize());  // todo: move to prefs
 
-		computeViewSize();
-		Log.d("Angband","onMeasure "+view_width+","+view_height);
+		fore.setTextAlign(Paint.Align.LEFT);
 
-		// int minheight = getSuggestedMinimumHeight();
-		// int minwidth = getSuggestedMinimumWidth();
+
+		int minheight = getSuggestedMinimumHeight();
+		int minwidth = getSuggestedMinimumWidth();
 
 		// int width=0, height=0;
-
 		/*
+
 		if (width < minwidth)
 		{
 			width = minwidth;
@@ -265,7 +356,7 @@ public class TermView extends View implements OnGestureListener {
 		}
 		else if(modex == MeasureSpec.EXACTLY)
 		{
-		width = MeasureSpec.getSize(widthmeasurespec);
+			width = MeasureSpec.getSize(widthmeasurespec);
 		}
 		if(modey == MeasureSpec.AT_MOST)
 		{
@@ -273,9 +364,10 @@ public class TermView extends View implements OnGestureListener {
 		}
 		else if(modey == MeasureSpec.EXACTLY)
 		{
-		height = MeasureSpec.getSize(heightmeasurespec);
+			height = MeasureSpec.getSize(heightmeasurespec);
 		}
 		*/
+		Log.d("Angband","onMeasure "+canvas_width+","+canvas_height+";"+width+","+height);
 
 		setMeasuredDimension(width, height);
 	}
@@ -286,18 +378,21 @@ public class TermView extends View implements OnGestureListener {
 		return gesture.onTouchEvent(me);
 	}
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) 
-	{
+	{	   
 		int newscrollx = this.getScrollX() + (int)distanceX;
 		int newscrolly = this.getScrollY() + (int)distanceY;
 	
 		if(newscrollx < 0) 
 			newscrollx = 0;
-		//if(newscrolly < 0) 
+		if(newscrolly < 0) 
 			newscrolly = 0;
-		if(newscrollx >= view_width - getWidth())
-			newscrollx = view_width - getWidth() + 1;
-		// if(newscrolly >= view_height - getHeight())
-		// 	newscrolly = view_height - getHeight() + 1;
+		if(newscrollx >= canvas_width - getWidth())
+			newscrollx = canvas_width - getWidth() + 1;
+		if(newscrolly >= canvas_height - getHeight())
+		 	newscrolly = canvas_height - getHeight() + 1;
+
+		if (canvas_width <= getWidth()) newscrollx = 0; //this.getScrollX();
+		if (canvas_height <= getHeight()) newscrolly = 0; //this.getScrollY();		
 
 		scrollTo(newscrollx, newscrolly);
 
@@ -313,6 +408,9 @@ public class TermView extends View implements OnGestureListener {
 	}
 	public void onLongPress(MotionEvent e)
 	{
+		Log.d("Angband", "onLongPress");		
+		aa.openContextMenu(this);
+		
 	}
 	public void onShowPress(MotionEvent e)
 	{
@@ -352,13 +450,13 @@ public class TermView extends View implements OnGestureListener {
 	/* Xband interface */
 	public boolean onXbandStarting() {
 
-		computeViewSize();
+		computeCanvasSize();
 
 		// sanity 
-		if (view_width == 0 || view_height == 0) return false;
+		if (canvas_width == 0 || canvas_height == 0) return false;
 
-		Log.d("Angband","createBitmap "+view_width+","+view_height);
-		bitmap = Bitmap.createBitmap(view_width, view_height, Bitmap.Config.RGB_565);
+		Log.d("Angband","createBitmap "+canvas_width+","+canvas_height);
+		bitmap = Bitmap.createBitmap(canvas_width, canvas_height, Bitmap.Config.RGB_565);
 		canvas = new Canvas(bitmap);		
 		/*
 		  canvas.setDrawFilter(new PaintFlagsDrawFilter(
@@ -390,7 +488,7 @@ public class TermView extends View implements OnGestureListener {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
-		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
+		Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_UP:
 			key = ARROW_UP;
@@ -410,7 +508,11 @@ public class TermView extends View implements OnGestureListener {
 			ctrl_mod = !ctrl_mod;
 			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
 			ctrl_down = true;
-			return true;
+			if (ctrl_key_overload) {
+				key = '\r';
+			}
+			if (key == 0) return true;
+			break;
 		case KeyEvent.KEYCODE_BACK:
 			key = '`'; // escape key on back button
 			break;
@@ -440,6 +542,24 @@ public class TermView extends View implements OnGestureListener {
 			shift_down = true;
 			key = -1;
 			break;
+
+		/* todo: move this font-size mapping to prefs */
+		case KeyEvent.KEYCODE_VOLUME_UP:
+			if (Preferences.getVolumeKeyFontSizing()) {
+				setFontSize(font_text_size+1);
+				//computeCanvasSize();
+				AngbandActivity.xb.redraw();
+			}
+			return true;
+			//break;
+		case KeyEvent.KEYCODE_VOLUME_DOWN:
+			if (Preferences.getVolumeKeyFontSizing()) {
+				setFontSize(font_text_size-1);
+				//computeCanvasSize();
+				AngbandActivity.xb.redraw();
+			}
+			return true;
+			//break;
 		}
 
 		if (key == 0) {
@@ -465,6 +585,8 @@ public class TermView extends View implements OnGestureListener {
 			}
 		}
 
+		ctrl_key_overload = false;
+
 		if (key <= 0) {
 			return super.onKeyDown(keyCode, event);
 		}
@@ -483,7 +605,8 @@ public class TermView extends View implements OnGestureListener {
 
 		AngbandActivity.xb.addToKeyBuffer(key);
 
-		return super.onKeyDown(keyCode, event);
+		return true;
+		//return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -491,23 +614,10 @@ public class TermView extends View implements OnGestureListener {
 		//Log.d("Angband", "onKeyUp("+keyCode+","+event+")");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_CENTER:
-			ctrl_down = false;
-			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
-
-			// I think the overloaded control key + menu feature is annoying
-			// todo: move to preference
-			if(!ctrl_key_pressed) {
-				AngbandActivity.xb.addToKeyBuffer('\r');
-			}
-			break;
 		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
 			ctrl_down = false;
 			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
-			break;
-		case KeyEvent.KEYCODE_ALT_LEFT:
-		case KeyEvent.KEYCODE_ALT_RIGHT:
-			alt_down = false;
-			alt_mod = !alt_key_pressed; // turn off mod only if used at least once
+			ctrl_key_overload = ctrl_mod;
 			break;
 		case KeyEvent.KEYCODE_SHIFT_LEFT:
 		case KeyEvent.KEYCODE_SHIFT_RIGHT:
@@ -520,6 +630,7 @@ public class TermView extends View implements OnGestureListener {
 
 	public void refresh() {
 		postInvalidate();
+		onScroll(null,null,0,0);  // sanitize scroll position
 	}
 
 	public void clear() {
