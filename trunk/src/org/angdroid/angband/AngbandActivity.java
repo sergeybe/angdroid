@@ -288,7 +288,10 @@ public class AngbandActivity extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// Dirty hack for BACK key
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			return true;
+			// for some reason after toggling keyboard via context menu,
+			// term does not receive the BACK onKeyDown anymore.  This
+			// patches up that problem
+			return term.onKeyDown(keyCode,event);
 		}
 		return super.onKeyDown(keyCode, event);
 	}
