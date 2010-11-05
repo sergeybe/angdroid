@@ -257,8 +257,6 @@ public class AngbandActivity extends Activity {
 		case CONTEXTMENU_VKEY_ITEM:
 			kbVisible = !kbVisible;
 			rebuildViews(kbVisible);
-			term.onResume();
-			//xb.redraw();
 			return true; 
 		}
 		return false;
