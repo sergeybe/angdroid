@@ -196,97 +196,63 @@ public class TermView extends View implements OnGestureListener {
 
 	public void autoSizeFontByHeight(int maxHeight) {
 		if (maxHeight == 0) maxHeight = getMeasuredHeight();
-		if (maxHeight<=320) {
-			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
-			fore.setTypeface(tfTiny);
-		}
-		else {
-			tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
-			fore.setTypeface(tfStd);
-		}
+		setFontFace(0, maxHeight);
 
 		// HACK -- keep 480x320 fullscreen as-is
 		if (maxHeight==320) {
-			font_text_size = 12;
-			char_height = 12;
-			char_width = 6;
+			setFontSizeLegacy();
 		}
 		else {
 			font_text_size = 6;
 			do {
 				font_text_size += 1;
-				fore.setTextSize(font_text_size);		
-
-				char_height = (int)Math.ceil(fore.getFontSpacing()); 
-
-				// HACK -- scrunch spacing 8%
-				if (font_text_size >= 16) 
-					char_height-=(int)((float)char_height*0.08);
-
-			} while (char_height*rows < maxHeight);
+				setFontSize(font_text_size);
+			} while (char_height*rows <= maxHeight);
 		
 			font_text_size -= 1;
-			fore.setTextSize(font_text_size);		
-
-			char_height = (int)Math.ceil(fore.getFontSpacing()); 
-
-			// HACK -- scrunch spacing 8%
-			if (font_text_size >= 16) 
-				char_height-=(int)((float)char_height*0.08);
-
-			char_width = (int)fore.measureText("X", 0, 1);	
+			setFontSize(font_text_size);
 		}
-
-		fore.setTextSize(font_text_size);		
-		Preferences.setDefaultFontSize(font_text_size);
-
 		Log.d("Angband","autoSizeFontHeight "+font_text_size);
 	}
 
 	public void autoSizeFontByWidth(int maxWidth) {
 		if (maxWidth == 0) maxWidth = getMeasuredWidth();
-		if (maxWidth<=480) {
+		setFontFace(maxWidth, 0);
+
+		// HACK -- keep 480x320 fullscreen as-is
+		if (maxWidth==480) {
+			setFontSizeLegacy();
+		}
+		else {
+			font_text_size = 6;
+			do {
+				font_text_size += 1;
+				setFontSize(font_text_size);		
+			} while (char_width*cols <= maxWidth);
+
+			font_text_size -= 1;
+			setFontSize(font_text_size);
+		}
+		Log.d("Angband","autoSizeFontWidth "+font_text_size+","+maxWidth);
+	}
+
+	private void setFontSizeLegacy() {
+		font_text_size = 12;
+		char_height = 12;
+		char_width = 6;
+		setFontSize(font_text_size);
+	}
+
+	private void setFontFace(int maxWidth, int maxHeight) {
+		if ( (maxWidth >0 && maxWidth<=480) || (maxHeight>0 && maxHeight<=320) ) {
 			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
 			fore.setTypeface(tfTiny);
 		}
 		else {
 			tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
 			fore.setTypeface(tfStd);
-		}
-
-		// HACK -- keep 480x320 fullscreen as-is
-		if (maxWidth==480) {
-			font_text_size = 12;
-			char_height = 12;
-			char_width = 6;
-		}
-		else {
-			font_text_size = 6;
-			do {
-				font_text_size += 1;
-				fore.setTextSize(font_text_size);		
-
-				char_width = (int)fore.measureText("X", 0, 1);	
-			} while (char_width*cols < maxWidth);
-
-			font_text_size -= 1;
-			fore.setTextSize(font_text_size);		
-
-			char_height = (int)Math.ceil(fore.getFontSpacing()); 
-
-			// HACK -- scrunch spacing 8%
-			if (font_text_size >= 16) 
-				char_height-=(int)((float)char_height*0.08);
-
-			char_width = (int)fore.measureText("X", 0, 1);	
-		}
-
-		fore.setTextSize(font_text_size);		
-		Preferences.setDefaultFontSize(font_text_size);
-
-		Log.d("Angband","autoSizeFontWidth "+font_text_size+","+maxWidth);
+		}		
 	}
-
 
 	private void setFontSize(int size) {
 		if (size>12) {
@@ -311,11 +277,6 @@ public class TermView extends View implements OnGestureListener {
 		Preferences.setDefaultFontSize(font_text_size);
  
 		char_height = (int)Math.ceil(fore.getFontSpacing()); 
-		
-		// HACK -- scrunch spacing 8%
-		if (font_text_size >= 16) 
-			char_height-=(int)((float)char_height*0.08);
-
 		char_width = (int)fore.measureText("X", 0, 1);	
 		Log.d("Angband","setSizeFont "+font_text_size);
 	}
