@@ -508,10 +508,8 @@ public class TermView extends View implements OnGestureListener {
 			ctrl_mod = !ctrl_mod;
 			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
 			ctrl_down = true;
-			if (ctrl_key_overload) {
-				key = '\r';
-			}
-			if (key == 0) return true;
+			if (ctrl_key_overload) key = '\r';
+			else return true;
 			break;
 		case KeyEvent.KEYCODE_BACK:
 			key = '`'; // escape key on back button
@@ -604,9 +602,12 @@ public class TermView extends View implements OnGestureListener {
 		}
 
 		AngbandActivity.xb.addToKeyBuffer(key);
-
-		return true;
-		//return super.onKeyDown(keyCode, event);
+		return true; 
+		// two \r's in a row force pop up context menu
+		// there may be other Android behaviors like this,
+		// and I think its best to stop them here if we've 
+		// already handled the key.
+		// return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -623,6 +624,11 @@ public class TermView extends View implements OnGestureListener {
 		case KeyEvent.KEYCODE_SHIFT_RIGHT:
 			shift_down = false;
 			shift_mod = !shift_key_pressed; // turn off mod only if used at least once
+			break;
+		case KeyEvent.KEYCODE_ALT_LEFT:		
+		case KeyEvent.KEYCODE_ALT_RIGHT:		
+			alt_down = false;		
+			alt_mod = !alt_key_pressed; // turn off mod only if used at least once		
 			break;
 		}
 		return super.onKeyUp(keyCode, event);
