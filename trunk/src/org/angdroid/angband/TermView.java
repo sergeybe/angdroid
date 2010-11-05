@@ -65,7 +65,7 @@ public class TermView extends View implements OnGestureListener {
 	private boolean ctrl_key_overload = false;
 	private boolean shift_key_pressed = false;
 	private boolean alt_key_pressed = false;
-
+	private boolean new_instance = true;
 
 	// Default curses colors
 	final int colors[] = { /* */
@@ -402,8 +402,9 @@ public class TermView extends View implements OnGestureListener {
 		if (pausing) {
 			pausing = false;
 		}
-		else if (resuming) {
+		else if (resuming || new_instance) {
 			resuming = false;
+			new_instance = false;
 			AngbandActivity.xb.startBand();
 		}
   	}
