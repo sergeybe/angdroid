@@ -207,6 +207,11 @@ public class AngbandActivity extends Activity {
 		menu.add(0, CONTEXTMENU_VKEY_ITEM, 0, "Toggle Keyboard"); 
 	}
 
+	public boolean isPortraitOrientation() {
+		Configuration config = this.getResources().getConfiguration();		
+		return (config.orientation == Configuration.ORIENTATION_PORTRAIT);
+	}
+
 	@Override
 	public boolean onContextItemSelected(MenuItem aItem) {
 		Log.d("Angband", "onContextItemSelected");		
@@ -220,8 +225,7 @@ public class AngbandActivity extends Activity {
 			xb.redraw();
 			return true; 
 		case CONTEXTMENU_VKEY_ITEM:
-			Configuration config = this.getResources().getConfiguration();		
-			if(config.orientation == Configuration.ORIENTATION_PORTRAIT)		
+			if(isPortraitOrientation())
 				Preferences.setPortraitKeyboard(!Preferences.getPortraitKeyboard());
 			else		
 				Preferences.setLandscapeKeyboard(!Preferences.getLandscapeKeyboard());

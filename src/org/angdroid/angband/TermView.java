@@ -132,9 +132,6 @@ public class TermView extends View implements OnGestureListener {
 	private boolean vibrate;
 
 	private GestureDetector gesture;
-
-	private boolean pausing = false;
-	private boolean resuming = false;
 	private AngbandActivity aa = null;
 
 	public TermView(Context context) {
@@ -206,7 +203,7 @@ public class TermView extends View implements OnGestureListener {
 			font_text_size = 6;
 			do {
 				font_text_size += 1;
-				setFontSize(font_text_size);
+				setFontSize(font_text_size, false);
 			} while (char_height*rows <= maxHeight);
 		
 			font_text_size -= 1;
@@ -227,7 +224,7 @@ public class TermView extends View implements OnGestureListener {
 			font_text_size = 6;
 			do {
 				font_text_size += 1;
-				setFontSize(font_text_size);		
+				setFontSize(font_text_size, false);		
 			} while (char_width*cols <= maxWidth);
 
 			font_text_size -= 1;
@@ -255,6 +252,9 @@ public class TermView extends View implements OnGestureListener {
 	}
 
 	private void setFontSize(int size) {
+		setFontSize(size,true);
+	}
+	private void setFontSize(int size, boolean persist) {
 		if (size>12) {
 			if (tfStd == null) {
 				tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
@@ -274,7 +274,13 @@ public class TermView extends View implements OnGestureListener {
 		font_text_size = size;
 
 		fore.setTextSize(font_text_size);		
-		Preferences.setDefaultFontSize(font_text_size);
+		
+		if (persist) {
+			if(aa.isPortraitOrientation())
+				Preferences.setPortraitFontSize(font_text_size);
+			else
+				Preferences.setLandscapeFontSize(font_text_size);			
+		}
  
 		char_height = (int)Math.ceil(fore.getFontSpacing()); 
 		char_width = (int)fore.measureText("X", 0, 1);	
@@ -284,53 +290,27 @@ public class TermView extends View implements OnGestureListener {
 	@Override
 	protected void onMeasure(int widthmeasurespec, int heightmeasurespec)
 	{
-		Log.d("Angband", "onMeasure");
-
 		int height = MeasureSpec.getSize(heightmeasurespec);
 		int width = MeasureSpec.getSize(widthmeasurespec);
 
-		setFontSize(Preferences.getDefaultFontSize());  // todo: move to prefs
+		int fs = 0;
+		if(aa.isPortraitOrientation())
+			fs = Preferences.getPortraitFontSize();
+		else
+			fs = Preferences.getLandscapeFontSize();
+
+		if(fs == 0) 
+			autoSizeFontByWidth(width);
+		else
+			setFontSize(fs, false);  
 
 		fore.setTextAlign(Paint.Align.LEFT);
-
 
 		int minheight = getSuggestedMinimumHeight();
 		int minwidth = getSuggestedMinimumWidth();
 
-		// int width=0, height=0;
-		/*
-
-		if (width < minwidth)
-		{
-			width = minwidth;
-		}
-		if (height < minheight)
-		{
-			height = minheight;
-		}
-
-		int modex = MeasureSpec.getMode(widthmeasurespec);
-		int modey = MeasureSpec.getMode(heightmeasurespec);
-		if(modex == MeasureSpec.AT_MOST)
-		{
-			width = Math.min(MeasureSpec.getSize(widthmeasurespec), width);
-		}
-		else if(modex == MeasureSpec.EXACTLY)
-		{
-			width = MeasureSpec.getSize(widthmeasurespec);
-		}
-		if(modey == MeasureSpec.AT_MOST)
-		{
-			height = Math.min(MeasureSpec.getSize(heightmeasurespec), height);
-		}
-		else if(modey == MeasureSpec.EXACTLY)
-		{
-			height = MeasureSpec.getSize(heightmeasurespec);
-		}
-		*/
-		Log.d("Angband","onMeasure "+canvas_width+","+canvas_height+";"+width+","+height);
-
 		setMeasuredDimension(width, height);
+		Log.d("Angband","onMeasure "+canvas_width+","+canvas_height+";"+width+","+height);
 	}
 
 	@Override
@@ -396,17 +376,9 @@ public class TermView extends View implements OnGestureListener {
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		super.onSizeChanged(w, h, oldw, oldh);
 		Log.d("Angband", "onSizeChanged");
-
-		if (pausing) {
-			pausing = false;
-		}
-		else if (resuming || new_instance) {
-			resuming = false;
-			new_instance = false;
-			AngbandActivity.xb.startBand();
-		}
+		super.onSizeChanged(w, h, oldw, oldh);
+		AngbandActivity.xb.startBand();
   	}
 
 	/* Xband interface */
@@ -715,18 +687,14 @@ public class TermView extends View implements OnGestureListener {
 	}
 
 	public void onResume() {
-		vibrate = Preferences.getVibrate();
-		pausing = false;
-		resuming = true;
 		Log.d("Angband","Termview.onResume()");
+		vibrate = Preferences.getVibrate();
 	}
 
 	public void onPause() {
 		Log.d("Angband","Termview.onPause()");
 		// this is the only guaranteed safe place to save state 
 		// according to SDK docs
-		pausing = true;
-		resuming = false;
 		AngbandActivity.xb.saveBand();
 	}
 }
