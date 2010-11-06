@@ -257,6 +257,11 @@ public class AngbandActivity extends Activity {
 		return term.onKeyDown(keyCode,event);
 	}
 
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		return term.onKeyUp(keyCode,event);
+	}
+
 	void extractAngbandResources(int plugin) {
 
 		try {
