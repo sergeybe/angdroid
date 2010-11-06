@@ -91,19 +91,6 @@ public class AngbandActivity extends Activity {
 		if (xb == null) {
 			xb = new NativeWrapper();
 		}
-
-/* TODO: fix title bar problem on portrait (vkeyboard) startup
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		if (Preferences.getFullScreen()) {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-		}
-		else {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		}
-*/
 	}
 
 	public void onStart() {
@@ -156,28 +143,12 @@ public class AngbandActivity extends Activity {
 		super.finish();
 	}
 
-	/* TODO: move native code handling out of TermView, then rebuildViews 
-		on the fly, and re-link new TermView to native code.
-
-	public void onConfigurationChanged(Configuration newConfig)
-	{
-		super.onConfigurationChanged(newConfig);
-
-		Configuration config = this.getResources().getConfiguration();		
-		if(config.orientation == Configuration.ORIENTATION_PORTRAIT)
-			Log.d("Angband","onConfigurationChanged: Portrait");
-		else
-			Log.d("Angband","onConfigurationChanged: Landscape");
-	}
-	*/
-
 	protected void rebuildViews() {
 		Log.d("Angband", "rebuildViews");
 
 	    kbVisible = Preferences.getEnableVirtualKeyboard();
 		rebuildViews(kbVisible);
 	}
-
 
 	protected void rebuildViews(boolean kb) {
 		Log.d("Angband", "rebuildViews");
@@ -204,6 +175,7 @@ public class AngbandActivity extends Activity {
 										  LayoutParams.WRAP_CONTENT, 
 										  1.0f)
 		);
+		term.setFocusable(false);
 
 		registerForContextMenu(term);
 
@@ -212,18 +184,14 @@ public class AngbandActivity extends Activity {
 
 		if (kb) {
 			AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this.term);
-			virtualKeyboard.virtualKeyboardView.setLayoutParams(
-				new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
-											  LayoutParams.WRAP_CONTENT, 
-											  0)
-			);
 			screenLayout.addView(virtualKeyboard.virtualKeyboardView);
 		}
 
 		setContentView(screenLayout);
 
+		
 		xb.linkTermView(term);
-		term.requestFocus();
+		term.invalidate();
 	}
 
 	@Override
@@ -285,11 +253,7 @@ public class AngbandActivity extends Activity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		// Dirty hack for BACK key
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
+		return term.onKeyDown(keyCode,event);
 	}
 
 	void extractAngbandResources(int plugin) {
