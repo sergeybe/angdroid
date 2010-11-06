@@ -60,7 +60,6 @@ public class AngbandActivity extends Activity {
 
 	private LinearLayout screenLayout = null; 
 	private TermView term = null;
-	private boolean kbVisible = false;
 
 	protected static final int CONTEXTMENU_FITWIDTH_ITEM = 0;
 	protected static final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
@@ -144,15 +143,6 @@ public class AngbandActivity extends Activity {
 	}
 
 	protected void rebuildViews() {
-		Log.d("Angband", "rebuildViews");
-
-	    kbVisible = Preferences.getEnableVirtualKeyboard();
-		rebuildViews(kbVisible);
-	}
-
-	protected void rebuildViews(boolean kb) {
-		Log.d("Angband", "rebuildViews");
-
 	    int orient = Preferences.getOrientation();
 		switch (orient) {
 		case 0: // sensor
@@ -182,7 +172,14 @@ public class AngbandActivity extends Activity {
 		screenLayout.setOrientation(LinearLayout.VERTICAL);
 		screenLayout.addView(term);
 
-		if (kb) {
+		Configuration config = this.getResources().getConfiguration();		
+		boolean kbVisible = false;
+		if(config.orientation == Configuration.ORIENTATION_PORTRAIT)		
+			kbVisible = Preferences.getPortraitKeyboard();
+		else		
+			kbVisible = Preferences.getLandscapeKeyboard();
+
+		if (kbVisible) {
 			AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this.term);
 			screenLayout.addView(virtualKeyboard.virtualKeyboardView);
 		}
@@ -223,8 +220,12 @@ public class AngbandActivity extends Activity {
 			xb.redraw();
 			return true; 
 		case CONTEXTMENU_VKEY_ITEM:
-			kbVisible = !kbVisible;
-			rebuildViews(kbVisible);
+			Configuration config = this.getResources().getConfiguration();		
+			if(config.orientation == Configuration.ORIENTATION_PORTRAIT)		
+				Preferences.setPortraitKeyboard(!Preferences.getPortraitKeyboard());
+			else		
+				Preferences.setLandscapeKeyboard(!Preferences.getLandscapeKeyboard());
+			rebuildViews();
 			return true; 
 		}
 		return false;

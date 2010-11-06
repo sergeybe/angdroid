@@ -21,7 +21,8 @@ final public class Preferences {
 
 	static final String KEY_ENABLEVOLKEYFONTSIZE = "angband.enablevolkeyfontsize";
 	static final String KEY_ENABLETOUCH = "angband.enabletouch";
-	static final String KEY_ENABLEVKEY = "angband.enablevkey";
+	static final String KEY_PORTRAITKB = "angband.portraitkb";
+	static final String KEY_LANDSCAPEKB = "angband.landscapekb";
 	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
 
 	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
@@ -78,7 +79,7 @@ final public class Preferences {
 	}
 
 	public static int getOrientation() {
-		return Integer.parseInt(pref.getString(Preferences.KEY_ORIENTATION, "2"));
+		return Integer.parseInt(pref.getString(Preferences.KEY_ORIENTATION, "0"));
 	}
 
 	public static int getDefaultFontSize() {
@@ -96,10 +97,23 @@ final public class Preferences {
 		return pref.getBoolean(Preferences.KEY_ENABLEVOLKEYFONTSIZE, true);
 	}
 
-	public static boolean getEnableVirtualKeyboard() {
-		return pref.getBoolean(Preferences.KEY_ENABLEVKEY, false);
+	public static boolean getPortraitKeyboard() {
+		return pref.getBoolean(Preferences.KEY_PORTRAITKB, true);
+	}
+	public static void setPortraitKeyboard(boolean value) {
+		SharedPreferences.Editor ed = pref.edit();
+		ed.putBoolean(Preferences.KEY_PORTRAITKB, value);
+		ed.commit();			
 	}
 
+	public static boolean getLandscapeKeyboard() {
+		return pref.getBoolean(Preferences.KEY_LANDSCAPEKB, false);
+	}
+	public static void setLandscapeKeyboard(boolean value) {
+		SharedPreferences.Editor ed = pref.edit();
+		ed.putBoolean(Preferences.KEY_LANDSCAPEKB, value);
+		ed.commit();			
+	}
 	public static boolean getEnableTouch() {
 		return pref.getBoolean(Preferences.KEY_ENABLETOUCH, true);
 	}
