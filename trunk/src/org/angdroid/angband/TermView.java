@@ -27,6 +27,7 @@ import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Typeface;
 import android.graphics.Rect;
 import android.os.Vibrator;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -130,20 +131,20 @@ public class TermView extends View implements OnGestureListener {
 
 	private Vibrator vibrator;
 	private boolean vibrate;
+	private Handler handler = null;
 
 	private GestureDetector gesture;
-	private AngbandActivity aa = null;
 
 	public TermView(Context context) {
 		super(context);
 		initTermView(context);
-		aa = (AngbandActivity)context;
+		handler = ((AngbandActivity)context).getHandler();
 	}
 
 	public TermView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initTermView(context);
-		aa = (AngbandActivity)context;
+		handler = ((AngbandActivity)context).getHandler();
 	}
 
 	protected void initTermView(Context context) {
@@ -276,7 +277,7 @@ public class TermView extends View implements OnGestureListener {
 		fore.setTextSize(font_text_size);		
 		
 		if (persist) {
-			if(aa.isPortraitOrientation())
+			if(Preferences.isScreenPortraitOrientation())
 				Preferences.setPortraitFontSize(font_text_size);
 			else
 				Preferences.setLandscapeFontSize(font_text_size);			
@@ -294,7 +295,7 @@ public class TermView extends View implements OnGestureListener {
 		int width = MeasureSpec.getSize(widthmeasurespec);
 
 		int fs = 0;
-		if(aa.isPortraitOrientation())
+		if(Preferences.isScreenPortraitOrientation())
 			fs = Preferences.getPortraitFontSize();
 		else
 			fs = Preferences.getLandscapeFontSize();
@@ -350,8 +351,7 @@ public class TermView extends View implements OnGestureListener {
 	public void onLongPress(MotionEvent e)
 	{
 		Log.d("Angband", "onLongPress");		
-		aa.openContextMenu(this);
-		
+		handler.sendMessage(handler.obtainMessage(40));
 	}
 	public void onShowPress(MotionEvent e)
 	{

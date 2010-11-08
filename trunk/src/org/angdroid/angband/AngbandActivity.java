@@ -18,14 +18,6 @@
 
 package org.angdroid.angband;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -44,13 +36,16 @@ import android.view.MenuItem;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup.LayoutParams;
-import android.os.Environment;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfo;
 import android.content.ComponentName;
-import android.content.res.Configuration;
 import android.widget.LinearLayout;
 import android.content.pm.ActivityInfo;
+import android.content.DialogInterface;
+import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.os.Handler;
+import android.os.Message;
 
 import com.flurry.android.FlurryAgent;
 
@@ -65,9 +60,14 @@ public class AngbandActivity extends Activity {
 	protected static final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
 	protected static final int CONTEXTMENU_VKEY_ITEM = 2;
 
+	protected Handler handler = null;
+	protected ProgressDialog progressDialog = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		Log.d("Angband", "onCreate");		
 
 		String version = "unknown";
 		try {
@@ -83,9 +83,26 @@ public class AngbandActivity extends Activity {
 			version
 		);
 
-		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
-			extractAngbandResources(Preferences.getInstalledPlugins()[i]);
-		}
+		final AngbandActivity aa = this;
+		handler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+				case 10: // display progress
+					aa.showProgress((String)msg.obj);
+					break;
+				case 20: // dismiss progress
+					aa.dismissProgress();
+					break;
+				case 30: // fatal error
+					aa.fatalAlert((String)msg.obj);
+					break;
+				case 40: // display context menu
+					aa.openContextMenu();
+					break;
+				}
+			}
+		};
 
 		if (xb == null) {
 			xb = new NativeWrapper();
@@ -166,55 +183,42 @@ public class AngbandActivity extends Activity {
 										  1.0f)
 		);
 		term.setFocusable(false);
-
 		registerForContextMenu(term);
+		xb.link(term, handler);
 
 		screenLayout.setOrientation(LinearLayout.VERTICAL);
 		screenLayout.addView(term);
 
-		Configuration config = this.getResources().getConfiguration();		
-		boolean kbVisible = false;
-		if(config.orientation == Configuration.ORIENTATION_PORTRAIT)		
-			kbVisible = Preferences.getPortraitKeyboard();
+		Boolean kb = false;
+		if(Preferences.isScreenPortraitOrientation())
+			kb = Preferences.getPortraitKeyboard();
 		else		
-			kbVisible = Preferences.getLandscapeKeyboard();
+			kb = Preferences.getLandscapeKeyboard();
 
-		if (kbVisible) {
+		if (kb) {
 			AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this.term);
 			screenLayout.addView(virtualKeyboard.virtualKeyboardView);
 		}
 
 		setContentView(screenLayout);
-
-		
-		xb.linkTermView(term);
 		term.invalidate();
 	}
 
-	@Override
-	public void openContextMenu(View view) {
-		Log.d("Angband", "openContextMenu");		
-		super.openContextMenu(view);
+	public void openContextMenu() {
+		super.openContextMenu(term);
 	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 									ContextMenuInfo menuInfo) {
-		Log.d("Angband", "onCreateContextMenu");
 		menu.setHeaderTitle("Quick Settings");
 		menu.add(0, CONTEXTMENU_FITWIDTH_ITEM, 0, "Fit Width"); 
 		menu.add(0, CONTEXTMENU_FITHEIGHT_ITEM, 0, "Fit Height"); 
 		menu.add(0, CONTEXTMENU_VKEY_ITEM, 0, "Toggle Keyboard"); 
 	}
 
-	public boolean isPortraitOrientation() {
-		Configuration config = this.getResources().getConfiguration();		
-		return (config.orientation == Configuration.ORIENTATION_PORTRAIT);
-	}
-
 	@Override
 	public boolean onContextItemSelected(MenuItem aItem) {
-		Log.d("Angband", "onContextItemSelected");		
 		switch (aItem.getItemId()) {
 		case CONTEXTMENU_FITWIDTH_ITEM:
 			term.autoSizeFontByWidth(0);
@@ -225,7 +229,7 @@ public class AngbandActivity extends Activity {
 			xb.redraw();
 			return true; 
 		case CONTEXTMENU_VKEY_ITEM:
-			if(isPortraitOrientation())
+			if(Preferences.isScreenPortraitOrientation())
 				Preferences.setPortraitKeyboard(!Preferences.getPortraitKeyboard());
 			else		
 				Preferences.setLandscapeKeyboard(!Preferences.getLandscapeKeyboard());
@@ -266,83 +270,27 @@ public class AngbandActivity extends Activity {
 		return term.onKeyUp(keyCode,event);
 	}
 
-	void extractAngbandResources(int plugin) {
-
-		try {
-			File f = new File(Preferences.getAngbandFilesDirectory(plugin));
-			f.mkdirs();
-			String abs_path = f.getAbsolutePath();
-
-			File cookie = new File(abs_path + "/installed-" + Preferences.getVersion()); 
-			// drop a cookie to indicate we've extracted the files
-			if (!cookie.createNewFile()) {
-				return; 
-			}
-
-			InputStream is = null;
-			if (plugin == Preferences.Plugin.Angband.getId())
-				is = getResources().openRawResource(R.raw.zipangband);
-			else if (plugin == Preferences.Plugin.Angband306.getId())
-				is = getResources().openRawResource(R.raw.zipangband306);
-			/*
-			else if (plugin == Preferences.Plugin.ToME.getId())
-				is = getResources().openRawResource(R.raw.ziptome);
-			else if (plugin == Preferences.Plugin.Sangband.getId())
-				is = getResources().openRawResource(R.raw.zipsangband);
-			else if (plugin == Preferences.Plugin.NPP.getId())
-				is = getResources().openRawResource(R.raw.zipnpp);
-			*/
-
-			ZipInputStream zis = new ZipInputStream(is);
-			ZipEntry ze;
-
-			while ((ze = zis.getNextEntry()) != null) {
-				String ze_name = ze.getName();
-				Log.v("Angband", "extracting " + ze_name);
-
-				String filename = abs_path + "/" + ze_name;
-				File myfile = new File(filename);
-
-				if (ze.isDirectory()) {
-					myfile.mkdirs();
-					continue;
-				}
-
-				byte contents[] = new byte[(int) ze.getSize()];
-
-				FileOutputStream fos = new FileOutputStream(myfile);
-				int remaining = (int) ze.getSize();
-
-				while (remaining > 0) {
-					int readlen = zis.read(contents, 0, remaining);
-					fos.write(contents, 0, readlen);
-					remaining -= readlen;
-				}
-
-				fos.close();
-				zis.closeEntry();
-			}
-			zis.close();
-		} catch (Exception e) {
-			Log.v("Angband", "error extracting files: " + e);
-		}
+	public Handler getHandler() {
+		return handler;
 	}
 
-	public static boolean deleteDir(File dir) {
-		if (dir.isDirectory()) {
-			String[] children = dir.list();
-			for (int i=0; i<children.length; i++) {
-				boolean success = deleteDir(new File(dir, children[i]));
-				if (!success) {
-					return false;
-				}
-			}
-		}
-		// The directory is now empty so delete it
-		//Log.d("Angband", "delete old file: "+dir.getAbsolutePath());
-		return dir.delete();
+	public void showProgress(String msg) {
+		progressDialog = ProgressDialog.show(this, "Angband", msg, true);
+	}
+	public void dismissProgress() {
+		progressDialog.dismiss();
 	}
 
+	public int fatalAlert(String msg) {
+		new AlertDialog.Builder(this) 
+			.setTitle("Angband") 
+			.setMessage(msg) 
+			.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {finish();}
+			}
+		).show();
+		return 0;
+	}
 
 	private void startFlurry() {
 		// test key

@@ -2,6 +2,8 @@ package org.angdroid.angband;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import android.os.Handler;
+import android.os.Message;
 
 import android.util.Log;
 
@@ -29,6 +31,8 @@ public class NativeWrapper implements Runnable {
 
 	/* screen state */
 	private TermView term = null;
+	private Handler	handler = null;
+
 	private int rows = 24;
 	private int cols = 80;
 	private char[][] charBuffer = new char[cols][rows];
@@ -40,14 +44,20 @@ public class NativeWrapper implements Runnable {
 	/* cached prefs */
 	private boolean always_run = true;
 
+	/* installer state */
+	private static Thread installWorker = null;
+	private static String install_lock = "lock";
+	public static int installResult = -1; 
+
 	// Call native methods from library
 	native void gameStart(String pluginPath, int argc, String[] argv);
 	native int gameQueryRedraw(int x1, int y1, int x2, int y2);
 	native int gameQueryInt(int argc, String[] argv);
 	native String gameQueryString(int argc, String[] argv);
 
-	public void linkTermView(TermView aterm) {
+	public void link(TermView aterm, Handler ahandler) {
 		synchronized (display_lock) {
+			handler = ahandler;
 			term = aterm;
 			always_run = Preferences.getAlwaysRun();
 		}
@@ -173,14 +183,31 @@ public class NativeWrapper implements Runnable {
 		running_plugin = Preferences.getActivePluginName();
 	    String pluginPath = Preferences.getActivityFilesDirectory()
 			+"/../lib/lib"+Preferences.getActivePluginName()+".so";
-	    gameStart(
-			pluginPath, 
-			2, 
-			new String[]{
-				Preferences.getAngbandFilesDirectory(),
-				Preferences.getActiveProfile().getSaveFile()
-			}
-	    );
+
+		// wait for and validate install processing (if any);
+		waitForInstall();
+
+		if (installResult == 1) {
+			handler.sendMessage(handler.obtainMessage(30,0,0,"Error: external storage card not found, cannot continue."));
+			onExitGame();
+			return;
+		}
+
+		if (installResult > 1) {
+			handler.sendMessage(handler.obtainMessage(30,0,0,"Error: failed to write and verify files to external storage, cannot continue."));
+			onExitGame();
+			return;
+		}
+
+		/* game is not running, so start it up */
+		gameStart(
+				  pluginPath, 
+				  2, 
+				  new String[]{
+					  Preferences.getAngbandFilesDirectory(),
+					  Preferences.getActiveProfile().getSaveFile()
+				  }
+		);
 	}
 
 	//this is called from native thread just before exiting
@@ -193,7 +220,9 @@ public class NativeWrapper implements Runnable {
 			game_fully_initialized = false;
 
 			// if game exited normally, restart!
-			local_restart = game_restart = (!signal_game_exit || plugin_change);
+			local_restart 
+				= game_restart 
+				= ((!signal_game_exit || plugin_change) && installResult == 0);
 		}
 
 		if	(local_restart) startBand();
@@ -237,7 +266,20 @@ public class NativeWrapper implements Runnable {
 				return;
 			}
 
-			/* game is not running, so start it up */
+			installResult = 0;
+			Installer installer = new Installer();
+			if (installer.needsInstall() && installResult <= 0) {
+
+				handler.sendMessage(handler.obtainMessage(10,0,0,"Installing files..."));
+
+				installWorker = new Thread() {  
+						public void run() {
+							new Installer().install();
+							handler.sendMessage(handler.obtainMessage(20));
+						}
+					};
+				installWorker.start();
+			}
 
 			synchronized (display_lock) {
 				term.onXbandStarting();
@@ -260,10 +302,21 @@ public class NativeWrapper implements Runnable {
 			signal_game_exit = false;
 		}
 
-		Log.d("Angband","startAngband().reallyStarting");
+		Log.d("Angband","startBand().starting loader thread");
 
 		thread = new Thread(this);
 		thread.start();
+	}
+
+	public static void waitForInstall() {
+		if (installWorker != null) {
+			try {
+				installWorker.join();
+				installWorker = null;
+			} catch (Exception e) {
+				Log.d("Angband","installWorker "+e.toString());
+			}
+		}
 	}
 
 	public void saveBand() {
@@ -279,7 +332,6 @@ public class NativeWrapper implements Runnable {
 			}
 		}
 
-		Log.d("Angband","saveBand().before sync");
 		synchronized (keybuffer) {
 			keybuffer.clear();
 			keybuffer.offer(-1);
@@ -288,7 +340,6 @@ public class NativeWrapper implements Runnable {
 				keybuffer.notify();
 			}
 		}	
-		Log.d("Angband","saveBand().after sync");	   
 	}
 
 	public void stopBand() {
@@ -321,13 +372,13 @@ public class NativeWrapper implements Runnable {
 	private void signalGameExit() {
 		signal_game_exit = true;
 
-		Log.d("Angband","signalGameExit.waiting on thread.join()");
-
 		term.onXbandStopping();
 
 		synchronized (keybuffer) {
 			keybuffer.notify();
 		}
+
+		Log.d("Angband","signalGameExit.waiting on thread.join()");
 
 		try {
 			thread.join();
