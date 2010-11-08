@@ -3,11 +3,20 @@ package org.angdroid.angband;
 import java.io.File;
 import java.lang.reflect.Array;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import android.os.Environment;
 import android.content.res.Resources;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.app.AlertDialog;
 import android.util.Log;
 
@@ -34,6 +43,8 @@ final public class Preferences {
 	static final String KEY_PROFILES = "angband.profiles";
 	static final String KEY_ACTIVEPROFILE = "angband.activeprofile";
 
+	static final String KEY_INSTALLEDVERSION = "angband.installedversion";
+
 	public enum Plugin {
 		Angband(0), Angband306(1), ToME(2), Sangband(3), NPP(4);
 
@@ -56,12 +67,14 @@ final public class Preferences {
 	private static ProfileList profiles;
 	private static String version;
 	private static int fontSize = 17;
+	private static Resources resources;
 
 	Preferences() {}
 
-	public static void init(File filesDir, Resources resources, SharedPreferences sharedPrefs, String pversion) {
+	public static void init(File filesDir, Resources res, SharedPreferences sharedPrefs, String pversion) {
 		activityFilesPath = filesDir.getAbsolutePath();
 		pref = sharedPrefs;
+		resources = res;
 
 		String[] gamePluginsStr = resources.getStringArray(R.array.gamePlugins);
 		gamePlugins = (int[])Array.newInstance(int.class, gamePluginsStr.length);
@@ -76,8 +89,22 @@ final public class Preferences {
 		return version;
 	}
 
+	public static String getInstalledVersion() {
+		return pref.getString(Preferences.KEY_INSTALLEDVERSION, "");
+	}
+	public static void setInstalledVersion(String value) {
+		SharedPreferences.Editor ed = pref.edit();
+		ed.putString(Preferences.KEY_INSTALLEDVERSION, value);
+		ed.commit();			
+	}
+
 	public static boolean getFullScreen() {
 		return pref.getBoolean(Preferences.KEY_FULLSCREEN, true);
+	}
+
+	public static boolean isScreenPortraitOrientation() {
+		Configuration config = resources.getConfiguration();		
+		return (config.orientation == Configuration.ORIENTATION_PORTRAIT);
 	}
 
 	public static int getOrientation() {
@@ -178,6 +205,23 @@ final public class Preferences {
 
 	public static String getActivityFilesDirectory() {
 		return activityFilesPath;
+	}
+
+	public static ZipInputStream getPluginZip(int plugin) {
+		InputStream is = null;
+		if (plugin == Preferences.Plugin.Angband.getId())
+			is = resources.openRawResource(R.raw.zipangband);
+		else if (plugin == Preferences.Plugin.Angband306.getId())
+			is = resources.openRawResource(R.raw.zipangband306);
+		/*
+		  else if (plugin == Preferences.Plugin.ToME.getId())
+		  is = resources.openRawResource(R.raw.ziptome);
+		  else if (plugin == Preferences.Plugin.Sangband.getId())
+		  is = resources.openRawResource(R.raw.zipsangband);
+		  else if (plugin == Preferences.Plugin.NPP.getId())
+		  is = resources.openRawResource(R.raw.zipnpp);
+		*/
+		return new ZipInputStream(is);
 	}
 
 	public static String getActivePluginName() {
