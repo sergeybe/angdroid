@@ -402,14 +402,28 @@ public class NativeWrapper implements Runnable {
 		return -1;
 	}
 
-	public void cachePoint(int col, int row, byte c, byte a) {
-		charBuffer[col][row] = (char)c;
-		colorBuffer[col][row] = a;
-	}
-
 	public int text(final int x, final int y, final int n, final byte a,
 					final byte[] cp) {
 		synchronized (display_lock) {
+			byte c;
+			int col = x;
+			int row = y;
+			for (int i = 0; i < n; i++) {
+				c = cp[i];
+				if (c > 19 && c < 128) {
+					charBuffer[col][row] = (char)c;
+					colorBuffer[col][row] = a;
+					col++;
+					if (col >= 80) {
+						row++;
+						col = 0;
+					}
+					if (row >= 24) {
+						row = 23;
+					}
+				}
+			}
+
 			if (term != null) return term.text(x,y,n,a,cp);
 			else return 0;
 		}

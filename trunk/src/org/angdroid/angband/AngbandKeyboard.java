@@ -15,15 +15,12 @@ public class AngbandKeyboard implements OnKeyboardActionListener
 	Keyboard virtualKeyboardSymbols;
 	Keyboard virtualKeyboardSymbolsShift;
 
-	TermView term;
-
-	AngbandKeyboard(TermView term)
+	AngbandKeyboard(Context ctx)
 	{
-		this.term = term;
-		virtualKeyboardQwerty = new Keyboard(term.getContext(), R.xml.keyboard_qwerty);
-		virtualKeyboardSymbols = new Keyboard(term.getContext(), R.xml.keyboard_sym);
-		virtualKeyboardSymbolsShift = new Keyboard(term.getContext(), R.xml.keyboard_symshift);
-		LayoutInflater inflater = LayoutInflater.from(term.getContext());
+		virtualKeyboardQwerty = new Keyboard(ctx, R.xml.keyboard_qwerty);
+		virtualKeyboardSymbols = new Keyboard(ctx, R.xml.keyboard_sym);
+		virtualKeyboardSymbolsShift = new Keyboard(ctx, R.xml.keyboard_symshift);
+		LayoutInflater inflater = LayoutInflater.from(ctx);
 		virtualKeyboardView = (KeyboardView)inflater.inflate(
 				R.layout.input, null);
 		virtualKeyboardView.setKeyboard(virtualKeyboardQwerty);
