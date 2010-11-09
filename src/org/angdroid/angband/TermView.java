@@ -605,9 +605,6 @@ public class TermView extends View implements OnGestureListener {
 			c = cp[i];
 			if (c > 19 && c < 128) {
 				wipe(row, col, 1);
-
-				AngbandActivity.xb.cachePoint(col, row, c, a);
-		
 				putchar((char)c);
 			}
 		}

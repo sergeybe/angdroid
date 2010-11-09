@@ -196,7 +196,7 @@ public class AngbandActivity extends Activity {
 			kb = Preferences.getLandscapeKeyboard();
 
 		if (kb) {
-			AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this.term);
+			AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this);
 			screenLayout.addView(virtualKeyboard.virtualKeyboardView);
 		}
 
