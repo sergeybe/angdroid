@@ -1,6 +1,6 @@
 How to compile the Angband Native port for Android.
 
-To build, you should use Ant 1.7.1. See here http://ant.anache.org/.
+To build, you should use Ant 1.8.1. See here http://ant.apache.org/.
 
 1. Edit build.properties file and set ndk-location and sdk-location properties:
 
