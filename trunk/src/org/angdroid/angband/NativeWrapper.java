@@ -47,7 +47,7 @@ public class NativeWrapper implements Runnable {
 	/* installer state */
 	private static Thread installWorker = null;
 	private static String install_lock = "lock";
-	public static int installResult = -1; 
+	public static int installResult = -2; // install state unknown
 
 	// Call native methods from library
 	native void gameStart(String pluginPath, int argc, String[] argv);
@@ -255,7 +255,7 @@ public class NativeWrapper implements Runnable {
 				stopBand();
 			}
 			else {
-				Log.d("Angband","redraw.game initialized - redrawing");
+				Log.d("Angband","startBand.game initialized - redrawing");
 				redraw();
 			}			
 			return; // done.
@@ -263,13 +263,16 @@ public class NativeWrapper implements Runnable {
 
 		synchronized(game_thread_lock) {
 			if (game_thread_running) {
+				Log.d("Angband","startBand.game already running, not initialized");
+				redraw();
 				return;
 			}
 
-			installResult = 0;
+			installResult = -2; // install state unknown
 			Installer installer = new Installer();
 			if (installer.needsInstall() && installResult <= 0) {
-
+				installResult = -1; // in progress
+			
 				handler.sendMessage(handler.obtainMessage(10,0,0,"Installing files..."));
 
 				installWorker = new Thread() {  
@@ -279,6 +282,9 @@ public class NativeWrapper implements Runnable {
 						}
 					};
 				installWorker.start();
+			}
+			else {
+				installResult = 0;
 			}
 
 			synchronized (display_lock) {
@@ -328,6 +334,10 @@ public class NativeWrapper implements Runnable {
 			}
 			if (thread == null)  {
 				Log.d("Angband","saveBand().no thread");
+				return;
+			}
+			if (installResult!=0) {
+				Log.d("Angband","saveBand().install not finished or not successful");
 				return;
 			}
 		}

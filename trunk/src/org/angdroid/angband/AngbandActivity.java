@@ -52,6 +52,7 @@ import com.flurry.android.FlurryAgent;
 public class AngbandActivity extends Activity {
 
 	public static NativeWrapper xb = null;
+	private static String progress_lock = "lock";
 
 	private LinearLayout screenLayout = null; 
 	private TermView term = null;
@@ -155,53 +156,63 @@ public class AngbandActivity extends Activity {
 
 	@Override
 	public void finish() {
+		Log.d("Angband","finish");
 		xb.stopBand();
 		super.finish();
 	}
 
 	protected void rebuildViews() {
-	    int orient = Preferences.getOrientation();
-		switch (orient) {
-		case 0: // sensor
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-			break;
-		case 1: // portrait
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-			break;
-		case 2: // landscape
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-			break;
+		synchronized (progress_lock) {
+			//Log.d("Angband","rebuildViews");
+			dismissProgress();
+
+			int orient = Preferences.getOrientation();
+			switch (orient) {
+			case 0: // sensor
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+				break;
+			case 1: // portrait
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				break;
+			case 2: // landscape
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+				break;
+			}
+
+			if (screenLayout != null) screenLayout.removeAllViews();
+			screenLayout = new LinearLayout(this);
+
+			term = new TermView(this);
+			term.setLayoutParams(
+								 new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
+															   LayoutParams.WRAP_CONTENT, 
+															   1.0f)
+								 );
+			term.setFocusable(false);
+			registerForContextMenu(term);
+			xb.link(term, handler);
+
+			screenLayout.setOrientation(LinearLayout.VERTICAL);
+			screenLayout.addView(term);
+
+			Boolean kb = false;
+			if(Preferences.isScreenPortraitOrientation())
+				kb = Preferences.getPortraitKeyboard();
+			else		
+				kb = Preferences.getLandscapeKeyboard();
+
+			if (kb) {
+				AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this);
+				screenLayout.addView(virtualKeyboard.virtualKeyboardView);
+			}
+
+			setContentView(screenLayout);
+
+			if (xb.installResult == -1) // install in progress
+				showProgress("Installing files...");
+
+			term.invalidate();
 		}
-
- 		if (screenLayout != null) screenLayout.removeAllViews();
-		screenLayout = new LinearLayout(this);
-
-		term = new TermView(this);
-		term.setLayoutParams(
-			new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
-										  LayoutParams.WRAP_CONTENT, 
-										  1.0f)
-		);
-		term.setFocusable(false);
-		registerForContextMenu(term);
-		xb.link(term, handler);
-
-		screenLayout.setOrientation(LinearLayout.VERTICAL);
-		screenLayout.addView(term);
-
-		Boolean kb = false;
-		if(Preferences.isScreenPortraitOrientation())
-			kb = Preferences.getPortraitKeyboard();
-		else		
-			kb = Preferences.getLandscapeKeyboard();
-
-		if (kb) {
-			AngbandKeyboard virtualKeyboard = new AngbandKeyboard(this);
-			screenLayout.addView(virtualKeyboard.virtualKeyboardView);
-		}
-
-		setContentView(screenLayout);
-		term.invalidate();
 	}
 
 	public void openContextMenu() {
@@ -274,11 +285,20 @@ public class AngbandActivity extends Activity {
 		return handler;
 	}
 
-	public void showProgress(String msg) {
-		progressDialog = ProgressDialog.show(this, "Angband", msg, true);
+	public void showProgress(String msg) {		
+		synchronized (progress_lock) {
+			Log.d("Angband", "showProgress");		
+			progressDialog = ProgressDialog.show(this, "Angband", msg, true);
+		}
 	}
 	public void dismissProgress() {
-		progressDialog.dismiss();
+		synchronized (progress_lock) {
+			Log.d("Angband", "dismissProgress");		
+			if (progressDialog != null) {
+				progressDialog.dismiss();
+				progressDialog = null;
+			}
+		}
 	}
 
 	public int fatalAlert(String msg) {
