@@ -28,7 +28,7 @@ public class Installer {
 	}
 
 	public void install() {
-		if (NativeWrapper.installResult > 0) return;
+		if (NativeWrapper.installResult > 0) return; // media error
 
 		boolean result = true;;
 		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
