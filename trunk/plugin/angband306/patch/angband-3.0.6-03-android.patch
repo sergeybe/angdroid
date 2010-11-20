@@ -1,6 +1,89 @@
+diff -Nru --strip-trailing-cr angband-3.0.6/src/birth.c angband-3.0.6-android/src/birth.c
+--- angband-3.0.6/src/birth.c	2010-11-20 11:15:40.979459000 -0800
++++ angband-3.0.6-android/src/birth.c	2010-11-20 11:29:44.396441000 -0800
+@@ -854,7 +854,7 @@
+ /*
+  * Player race
+  */
+-static bool get_player_race(void)
++static int get_player_race(void)
+ {
+ 	int i, res;
+ 	birth_menu *races;
+@@ -886,7 +886,7 @@
+ 	rp_ptr = &p_info[p_ptr->prace];
+ 
+ 	/* Success */
+-	return (TRUE);
++	return (res);
+ }
+ 
+ 
+@@ -924,7 +924,7 @@
+ /*
+  * Player class
+  */
+-static bool get_player_class(void)
++static int get_player_class(void)
+ {
+ 	int i, res;
+ 	birth_menu *classes;
+@@ -962,14 +962,14 @@
+ 	cp_ptr = &c_info[p_ptr->pclass];
+ 	mp_ptr = &cp_ptr->spells;
+ 
+-	return (TRUE);
++	return (res);
+ }
+ 
+ 
+ /*
+  * Player sex
+  */
+-static bool get_player_sex(void)
++static int get_player_sex(void)
+ {
+ 	int i, res;
+ 	birth_menu genders[MAX_SEXES];
+@@ -995,7 +995,7 @@
+ 	/* Save the sex pointer */
+ 	sp_ptr = &sex_info[p_ptr->psex];
+ 
+-	return (TRUE);
++	return (res);
+ }
+ 
+ 
+@@ -1247,7 +1247,7 @@
+ 		ch = inkey();
+ 
+ 		/* Quit */
+-		if (ch == 'Q') quit(NULL);
++		if (ch == 'Q' || ch == KTRL('X')) quit(NULL);
+ 
+ 		/* Start over */
+ 		if (ch == 'S') return (FALSE);
+@@ -1599,7 +1599,7 @@
+ 			ch = inkey();
+ 
+ 			/* Quit */
+-			if (ch == 'Q') quit(NULL);
++			if (ch == 'Q' || ch == KTRL('X')) quit(NULL);
+ 
+ 			/* Start over */
+ 			if (ch == 'S') return (FALSE);
+@@ -1686,7 +1686,7 @@
+ 	ch = inkey();
+ 
+ 	/* Quit */
+-	if (ch == 'Q') quit(NULL);
++	if (ch == 'Q' || ch == KTRL('X')) quit(NULL);
+ 
+ 	/* Start over */
+ 	if (ch == 'S') return (FALSE);
 diff -Nru --strip-trailing-cr angband-3.0.6/src/defines.h angband-3.0.6-android/src/defines.h
---- angband-3.0.6/src/defines.h	2005-06-18 10:37:15.000000000 -0700
-+++ angband-3.0.6-android/src/defines.h	2010-09-28 20:34:55.072791619 -0700
+--- angband-3.0.6/src/defines.h	2010-11-20 11:15:40.999464000 -0800
++++ angband-3.0.6-android/src/defines.h	2010-11-20 11:13:32.487442000 -0800
 @@ -47,7 +47,7 @@
  /*
   * Current version string
@@ -10,36 +93,9 @@ diff -Nru --strip-trailing-cr angband-3.0.6/src/defines.h angband-3.0.6-android/
  
  
  /*
-diff -Nru --strip-trailing-cr angband-3.0.6/src/h-config.h angband-3.0.6-android/src/h-config.h
---- angband-3.0.6/src/h-config.h	2003-02-14 13:45:22.000000000 -0800
-+++ angband-3.0.6-android/src/h-config.h	2010-09-28 20:34:55.068794463 -0700
-@@ -196,7 +196,7 @@
-  */
- #if !defined(MACINTOSH) && !defined(WINDOWS) && \
-     !defined(MSDOS) && !defined(USE_EMX) && \
--    !defined(AMIGA) && !defined(RISCOS) && !defined(VM)
-+    !defined(AMIGA) && !defined(RISCOS) && !defined(VM) && !defined(USE_AND)
- # define SET_UID
- #endif
- 
-diff -Nru --strip-trailing-cr angband-3.0.6/src/util.c angband-3.0.6-android/src/util.c
---- angband-3.0.6/src/util.c	2004-12-12 03:58:05.000000000 -0800
-+++ angband-3.0.6-android/src/util.c	2010-09-28 21:14:48.000000000 -0700
-@@ -349,7 +349,12 @@
- 	int fd;
- 
- 	/* Prepare the buffer for mkstemp */
-+#ifdef USE_AND
-+	my_strcpy(buf, ANGBAND_DIR_USER, max);
-+	my_strcat(buf, "/anXXXXXX", max);
-+#else
- 	my_strcpy(buf, "/tmp/anXXXXXX", max);
-+#endif
- 
- 	/* Secure creation of a temporary file */
- 	fd = mkstemp(buf);
---- angband-3.0.6/src/files.c	2010-09-29 20:30:20.481793682 -0700
-+++ angband-3.0.6-android/src/files.c	2010-09-29 19:47:41.000000000 -0700
+diff -Nru --strip-trailing-cr angband-3.0.6/src/files.c angband-3.0.6-android/src/files.c
+--- angband-3.0.6/src/files.c	2010-11-20 11:15:41.012438000 -0800
++++ angband-3.0.6-android/src/files.c	2010-11-20 11:13:32.515439000 -0800
 @@ -4243,9 +4243,9 @@
  			/* Exit */
  			case ESCAPE:
@@ -53,3 +109,31 @@ diff -Nru --strip-trailing-cr angband-3.0.6/src/util.c angband-3.0.6-android/src
  				break;
  			}
  
+diff -Nru --strip-trailing-cr angband-3.0.6/src/h-config.h angband-3.0.6-android/src/h-config.h
+--- angband-3.0.6/src/h-config.h	2003-02-14 13:45:22.000000000 -0800
++++ angband-3.0.6-android/src/h-config.h	2010-11-20 11:13:32.491439000 -0800
+@@ -196,7 +196,7 @@
+  */
+ #if !defined(MACINTOSH) && !defined(WINDOWS) && \
+     !defined(MSDOS) && !defined(USE_EMX) && \
+-    !defined(AMIGA) && !defined(RISCOS) && !defined(VM)
++    !defined(AMIGA) && !defined(RISCOS) && !defined(VM) && !defined(USE_AND)
+ # define SET_UID
+ #endif
+ 
+diff -Nru --strip-trailing-cr angband-3.0.6/src/util.c angband-3.0.6-android/src/util.c
+--- angband-3.0.6/src/util.c	2010-11-20 11:15:41.123440000 -0800
++++ angband-3.0.6-android/src/util.c	2010-11-20 11:13:32.507438000 -0800
+@@ -349,7 +349,12 @@
+ 	int fd;
+ 
+ 	/* Prepare the buffer for mkstemp */
++#ifdef USE_AND
++	my_strcpy(buf, ANGBAND_DIR_USER, max);
++	my_strcat(buf, "/anXXXXXX", max);
++#else
+ 	my_strcpy(buf, "/tmp/anXXXXXX", max);
++#endif
+ 
+ 	/* Secure creation of a temporary file */
+ 	fd = mkstemp(buf);
