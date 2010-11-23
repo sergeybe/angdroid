@@ -30,12 +30,12 @@ public class Installer {
 	public void install() {
 		if (NativeWrapper.installResult > 0) return; // media error
 
-		boolean result = true;;
+		boolean success = true;;
 		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
-			if (!extractPluginResources(Preferences.getInstalledPlugins()[i]))
-				result = false;
+			success = extractPluginResources(Preferences.getInstalledPlugins()[i]);
+			if (!success) break;
 		}
-		if (result) {
+		if (success) {
 			Preferences.setInstalledVersion(Preferences.getVersion());
 			NativeWrapper.installResult = 0;
 		}
@@ -49,6 +49,7 @@ public class Installer {
 			File f = new File(Preferences.getAngbandFilesDirectory(plugin));
 			f.mkdirs();
 			String abs_path = f.getAbsolutePath();
+			Log.v("Angband", "installing to " + abs_path);
 
 			ZipInputStream zis = Preferences.getPluginZip(plugin);
 			ZipEntry ze;
@@ -83,6 +84,7 @@ public class Installer {
 				// perform a basic length validation
 				myfile = new File(filename);
 				if (myfile.length() != totalRead) {
+					Log.v("Angband", "Installer.length mismatch: " + filename);
 					throw new IllegalStateException();					
 				}
 				

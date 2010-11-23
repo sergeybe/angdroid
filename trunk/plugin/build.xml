@@ -62,6 +62,8 @@
 	    <arg value="${extract.arg2}"/>
 	    <arg value="${src.url.file}"/>
 	  </exec>        
+	  <!-- todo needed for npp only:  cp -r npp-0.5.1-src-beta2/* . -->
+	  <!--                            rm -rf npp-0.5.1-src-beta2 -->
 	</target>
 
     <target name="patch-updates">

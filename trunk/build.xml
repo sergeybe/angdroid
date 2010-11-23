@@ -41,13 +41,13 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="angband306"/>
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="tome"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
-	    <property name="plugin.name" value="sangband"/>
+	    <property name="plugin.name" value="sang"/>
 	</ant>
+<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="npp"/>
 	</ant>
@@ -69,13 +69,13 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="angband306"/>
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="tome"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
-	    <property name="plugin.name" value="sangband"/>
+	    <property name="plugin.name" value="sang"/>
 	</ant>
+<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="npp"/>
 	</ant>
@@ -86,6 +86,11 @@
 	  	<and>
         	<available file="plugin/angband/extsrc/lib" type="dir" />
 			<available file="plugin/angband306/extsrc/lib" type="dir" />	  
+			<available file="plugin/tome/extsrc/lib" type="dir" />	  
+			<available file="plugin/sang/extsrc/lib" type="dir" />	  
+<!--
+			<available file="plugin/npp/extsrc/lib" type="dir" />	  
+-->
 		</and>
     </condition>
 	<target name="check-plugin-src" unless="is.exist.libs">
@@ -110,23 +115,24 @@
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="tome"/>
-	    <property name="src.url.base" value="http://www.t-o-m-e.net/dl/src"/>
+<!--	    <property name="src.url.base" value="http://www.t-o-m-e.net/dl/src"/> -->
+<property name="src.url.base" value="ftp://ftp.eenet.ee/pub/FreeBSD/distfiles"/>
 	    <property name="src.url.file" value="tome-235-src.tar.bz2"/>
 		<property name="extract.command" value="tar" />
-		<property name="extract.arg1" value="-xjf" />
-		<property name="extract.arg2" value="- -strip-components=1" />		
+		<property name="extract.arg1" value="--strip-components=1" />		
+		<property name="extract.arg2" value="-xjf" />
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
-	    <property name="plugin.name" value="sangband"/>
+	    <property name="plugin.name" value="sang"/>
 	    <property name="src.url.base" value="http://sites.google.com/site/middendorfproject"/>
 	    <property name="src.url.file" value="sang-src-100-lf3.zip"/>
 		<property name="extract.command" value="unzip" />
 		<property name="extract.arg1" value="-q" />
 		<property name="extract.arg2" value="-d." />		
 	</ant>
+<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="npp"/>
 	    <property name="src.url.base" value="http://download.nppangband.org"/>
@@ -155,17 +161,15 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="angband306"/>
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="tome"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
-	    <property name="plugin.name" value="sangband"/>
+	    <property name="plugin.name" value="sang"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="npp"/>
 	</ant>
--->
     </target>
 
     <target name="clean" depends="clean-plugins">
