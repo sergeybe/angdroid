@@ -185,16 +185,12 @@ public class NativeWrapper implements Runnable {
 			+"/../lib/lib"+Preferences.getActivePluginName()+".so";
 
 		// wait for and validate install processing (if any);
+		//Log.d("Angband","run.waiting for install");
 		waitForInstall();
 
-		if (installResult == 1) {
-			handler.sendMessage(handler.obtainMessage(30,0,0,"Error: external storage card not found, cannot continue."));
-			onExitGame();
-			return;
-		}
-
-		if (installResult > 1) {
-			handler.sendMessage(handler.obtainMessage(30,0,0,"Error: failed to write and verify files to external storage, cannot continue."));
+		if (installResult != 0) {
+			//Log.d("Angband","run.sending fatal message");
+			handler.sendMessage(handler.obtainMessage(30));
 			onExitGame();
 			return;
 		}
@@ -268,20 +264,25 @@ public class NativeWrapper implements Runnable {
 				return;
 			}
 
-			installResult = -2; // install state unknown
+			//installResult = -2; // install state unknown
 			Installer installer = new Installer();
-			if (installer.needsInstall() && installResult <= 0) {
-				installResult = -1; // in progress
+			if (installer.needsInstall()) {
+				if (installResult == -2) {
+					installResult = -1; // in progress
 			
-				handler.sendMessage(handler.obtainMessage(10,0,0,"Installing files..."));
+					handler.sendMessage(handler.obtainMessage(10,0,0,"Installing files..."));
 
-				installWorker = new Thread() {  
-						public void run() {
-							new Installer().install();
-							handler.sendMessage(handler.obtainMessage(20));
-						}
-					};
-				installWorker.start();
+					installWorker = new Thread() {  
+							public void run() {
+								new Installer().install();
+								handler.sendMessage(handler.obtainMessage(20));
+							}
+						};
+					installWorker.start();
+				}
+				else {
+					return; // install is in error or in progress, cancel
+				}
 			}
 			else {
 				installResult = 0;

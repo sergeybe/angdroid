@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := sangband
+LOCAL_MODULE := sang
 LOCAL_CFLAGS := -DUSE_AND -DHAVE_MKSTEMP -DANGDROID_SANGBAND_PLUGIN
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include \

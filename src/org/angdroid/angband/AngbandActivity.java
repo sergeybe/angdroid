@@ -88,6 +88,7 @@ public class AngbandActivity extends Activity {
 		handler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
+				//Log.d("Angband","handleMessage: "+msg.what);		
 				switch (msg.what) {
 				case 10: // display progress
 					aa.showProgress((String)msg.obj);
@@ -96,7 +97,7 @@ public class AngbandActivity extends Activity {
 					aa.dismissProgress();
 					break;
 				case 30: // fatal error
-					aa.fatalAlert((String)msg.obj);
+					aa.showFatalAlert();
 					break;
 				case 40: // display context menu
 					aa.openContextMenu();
@@ -210,6 +211,8 @@ public class AngbandActivity extends Activity {
 
 			if (xb.installResult == -1) // install in progress
 				showProgress("Installing files...");
+			if (xb.installResult > 0) // install fatal error
+				showFatalAlert();
 
 			term.invalidate();
 		}
@@ -301,12 +304,28 @@ public class AngbandActivity extends Activity {
 		}
 	}
 
+	public void showFatalAlert() {
+		//Log.d("Angband","showFatalAlert");		
+		String errMsg = "Error: an unknown error occurred, cannot continue.";
+		switch(xb.installResult) {
+		case 1:
+			errMsg = "Error: external storage card not found, cannot continue.";
+			break;
+		case 2:
+			errMsg = "Error: failed to write and verify files to external storage, cannot continue.";
+			break;
+		}
+		fatalAlert(errMsg);
+	}
+
 	public int fatalAlert(String msg) {
+		//Log.d("Angband","fatalAlert");		
+		//dismissProgress();
 		new AlertDialog.Builder(this) 
 			.setTitle("Angband") 
 			.setMessage(msg) 
 			.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {finish();}
+					public void onClick(DialogInterface dialog, int whichButton) {xb.installResult=-2; finish();}
 			}
 		).show();
 		return 0;

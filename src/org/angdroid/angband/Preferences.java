@@ -213,13 +213,13 @@ final public class Preferences {
 			is = resources.openRawResource(R.raw.zipangband);
 		else if (plugin == Preferences.Plugin.Angband306.getId())
 			is = resources.openRawResource(R.raw.zipangband306);
+		else if (plugin == Preferences.Plugin.ToME.getId())
+			is = resources.openRawResource(R.raw.ziptome);
+		else if (plugin == Preferences.Plugin.Sangband.getId())
+			is = resources.openRawResource(R.raw.zipsang);
 		/*
-		  else if (plugin == Preferences.Plugin.ToME.getId())
-		  is = resources.openRawResource(R.raw.ziptome);
-		  else if (plugin == Preferences.Plugin.Sangband.getId())
-		  is = resources.openRawResource(R.raw.zipsangband);
-		  else if (plugin == Preferences.Plugin.NPP.getId())
-		  is = resources.openRawResource(R.raw.zipnpp);
+		else if (plugin == Preferences.Plugin.NPP.getId())
+			is = resources.openRawResource(R.raw.zipnpp);
 		*/
 		return new ZipInputStream(is);
 	}

@@ -357,19 +357,33 @@ static errr Term_xtra_and(int n, int v)
 			 *
 			 * This action is required.
 			 */
-			
+
 			key = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_getch, v);
 			if (key == -1) {
 				LOGD("TERM_XTRA_EVENT.saving game");
+
 				if (turn_save != turn 
 					&& turn > 1 
 					&& p_ptr != NULL 
-					&& !p_ptr->is_dead) {
-#if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
-					save_game();
+#ifdef ANGDROID_TOME_PLUGIN
+					&& p_ptr->chp >= 0) {
 #else
+					&& !p_ptr->is_dead) {
+#endif
+
+#ifdef ANGDROID_ANGBAND306_PLUGIN
 					if (!borg_active) do_cmd_save_game();
 #endif
+#ifdef ANGDROID_TOME_PLUGIN
+					do_cmd_save_game();
+#endif
+#ifdef ANGDROID_SANGBAND_PLUGIN
+					do_cmd_save_game(FALSE);
+#endif
+#ifdef ANGDROID_ANGBAND_PLUGIN
+					save_game();
+#endif
+
 					turn_save = turn;
 					LOGD("TERM_XTRA_EVENT.saved game success");
 				}
