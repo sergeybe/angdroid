@@ -1,6 +1,108 @@
-diff -Nru --strip-trailing-cr tome-2.5.3/src/h-config.h tome-2.5.3-android/src/h-config.h
---- tome-2.5.3/src/h-config.h	2008-05-12 11:44:03.000000000 -0700
-+++ tome-2.5.3-android/src/h-config.h	2010-09-26 09:02:44.000000000 -0700
+diff -Nru --strip-trailing-cr tome-2.3.5/src/birth.c tome-2.3.5-android/src/birth.c
+--- tome-2.3.5/src/birth.c	2008-05-12 11:44:03.000000000 -0700
++++ tome-2.3.5-android/src/birth.c	2010-11-28 17:25:49.860540000 -0800
+@@ -1702,7 +1702,7 @@
+ 		{
+ 			put_str("Use quick start (y/n)?", 20, 2);
+ 			c = inkey();
+-			if (c == 'Q') quit(NULL);
++			if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 			else if (c == 'S') return (FALSE);
+ 			else if ((c == 'y') || (c == 'Y'))
+ 			{
+@@ -1751,7 +1751,7 @@
+ 			strnfmt(buf, 200, "Choose a sex (%c-%c), * for random, = for options: ", I2A(0), I2A(n - 1));
+ 			put_str(buf, 20, 2);
+ 			c = inkey();
+-			if (c == 'Q') quit(NULL);
++			if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 			if (c == 'S') return (FALSE);
+ 			if (c == '*')
+ 			{
+@@ -1813,7 +1813,7 @@
+ 				put_str(buf, 17, 2);
+ 
+ 				c = inkey();
+-				if (c == 'Q') quit(NULL);
++				if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 				if (c == 'S') return (FALSE);
+ 				if (c == '*')
+ 				{
+@@ -1934,7 +1934,7 @@
+ 					        I2A(0), I2A(max_racem - 1));
+ 					put_str(buf, 17, 2);
+ 					c = inkey();
+-					if (c == 'Q') quit(NULL);
++					if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 					if (c == 'S') return (FALSE);
+ 					if (c == '*')
+ 					{
+@@ -2034,7 +2034,7 @@
+ 				strnfmt(buf, 200, "Choose a class type (a-%c), * for random, = for options: ", I2A(max_mc_idx - 1));
+ 				put_str(buf, 15, 2);
+ 				c = inkey();
+-				if (c == 'Q') quit(NULL);
++				if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 				if (c == 'S') return (FALSE);
+ 				if (c == '*')
+ 				{
+@@ -2079,7 +2079,7 @@
+ 				strnfmt(buf, 200, "Choose a class (%c-%c), * for random, = for options, 8/2/4 for up/down/back: ", I2A(0), (n <= 25) ? I2A(n - 1) : I2D(n - 26-1));
+ 				put_str(buf, 15, 2);
+ 				c = inkey();
+-				if (c == 'Q') quit(NULL);
++				if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 				if (c == 'S') return (FALSE);
+ 				if (c == '*')
+ 				{
+@@ -2172,7 +2172,7 @@
+ 				strnfmt(buf, 200, "Choose a class specialisation (%c-%c), * for random, = for options, 8/2/4/6 for up/down/left/right: ", I2A(0), (n <= 25) ? I2A(n - 1) : I2D(n - 26-1));
+ 				put_str(buf, 15, 2);
+ 				c = inkey();
+-				if (c == 'Q') quit(NULL);
++				if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 				if (c == 'S') return (FALSE);
+ 				if (c == '*')
+ 				{
+@@ -2281,7 +2281,7 @@
+ 				put_str(buf, 19, 2);
+ 
+ 				c = inkey();
+-				if (c == 'Q') quit(NULL);
++				if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 				if (c == 'S')
+ 				{
+ 					C_FREE(choice, max_gods, int);
+@@ -2690,7 +2690,7 @@
+ 		ch = inkey();
+ 
+ 		/* Quit */
+-		if (ch == 'Q') quit(NULL);
++		if (ch == 'Q' || ch == KTRL('X')) quit(NULL);
+ 
+ 		/* Start over */
+ 		if (ch == 'S') return (FALSE);
+@@ -3021,7 +3021,7 @@
+ 			c = inkey();
+ 
+ 			/* Quit */
+-			if (c == 'Q') quit(NULL);
++			if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 
+ 			/* Start over */
+ 			if (c == 'S') return (FALSE);
+@@ -3238,7 +3238,7 @@
+ 		c = inkey();
+ 
+ 		/* Quit */
+-		if (c == 'Q') quit(NULL);
++		if (c == 'Q' || c == KTRL('X')) quit(NULL);
+ 
+ 		/* Start over */
+ 		if (c == 'S') return (FALSE);
+diff -Nru --strip-trailing-cr tome-2.3.5/src/h-config.h tome-2.3.5-android/src/h-config.h
+--- tome-2.3.5/src/h-config.h	2008-05-12 11:44:03.000000000 -0700
++++ tome-2.3.5-android/src/h-config.h	2010-11-22 18:01:44.970852000 -0800
 @@ -193,7 +193,7 @@
   */
  #if !defined(MACINTOSH) && !defined(WINDOWS) && \
@@ -10,9 +112,9 @@ diff -Nru --strip-trailing-cr tome-2.5.3/src/h-config.h tome-2.5.3-android/src/h
  # define SET_UID
  #endif
  
-diff -Nru --strip-trailing-cr tome-2.5.3/src/util.c tome-2.5.3-android/src/util.c
---- tome-2.5.3/src/util.c	2008-05-12 11:44:03.000000000 -0700
-+++ tome-2.5.3-android/src/util.c	2010-09-26 17:55:43.000000000 -0700
+diff -Nru --strip-trailing-cr tome-2.3.5/src/util.c tome-2.3.5-android/src/util.c
+--- tome-2.3.5/src/util.c	2008-05-12 11:44:03.000000000 -0700
++++ tome-2.3.5-android/src/util.c	2010-11-22 18:01:44.998852000 -0800
 @@ -287,7 +287,7 @@
  */
  errr path_temp(char *buf, int max)
