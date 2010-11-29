@@ -1,9 +1,9 @@
-diff -Nru --strip-trailing-cr sangband-100.lf3/src/birth.c sangband-100.lf3-android/src/birth.c
---- sangband-100.lf3/src/birth.c	2007-09-07 23:28:16.000000000 -0700
-+++ sangband-100.lf3-android/src/birth.c	2010-11-28 17:21:07.596542000 -0800
-@@ -1175,1 +1175,1 @@
+diff -Nru --strip-trailing-cr sangband-100lf3/src/birth.c sangband-100lf3-android/src/birth.c
+--- sangband-100lf3/src/birth.c	2007-09-07 23:28:16.000000000 -0700
++++ sangband-100lf3-android/src/birth.c	2010-11-28 19:35:39.783539831 -0800
+@@ -1175,7 +1175,7 @@
  			ch = inkey(FALSE);
-
+ 
  			/* Quit */
 -			if ((ch == 'Q') || (ch == 'q')) quit(NULL);
 +			if ((ch == 'Q') || (ch == 'q') || (ch == KTRL('X'))) quit(NULL);
@@ -24,13 +24,13 @@ diff -Nru --strip-trailing-cr sangband-100.lf3/src/birth.c sangband-100.lf3-andr
  
  	/* Quit */
 -	if ((ch == 'Q') || (ch == 'q')) quit(NULL);
-+	if ((ch == 'Q') || (ch == 'q') || ch == KTRL('X')) quit(NULL);
++	if ((ch == 'Q') || (ch == 'q') || (ch == KTRL('X'))) quit(NULL);
  
  	/* Start over */
  	if ((ch == 'S') || (ch == 's')) return (0);
-diff -Nru --strip-trailing-cr sangband-100.lf3/src/files.c sangband-100.lf3-android/src/files.c
---- sangband-100.lf3/src/files.c	2007-09-16 19:46:44.000000000 -0700
-+++ sangband-100.lf3-android/src/files.c	2010-11-28 17:51:26.011540000 -0800
+diff -Nru --strip-trailing-cr sangband-100lf3/src/files.c sangband-100lf3-android/src/files.c
+--- sangband-100lf3/src/files.c	2007-09-16 19:46:44.000000000 -0700
++++ sangband-100lf3-android/src/files.c	2010-11-28 17:51:26.011540000 -0800
 @@ -6768,6 +6768,10 @@
  		switch (ch)
  		{
@@ -42,9 +42,9 @@ diff -Nru --strip-trailing-cr sangband-100.lf3/src/files.c sangband-100.lf3-andr
  			case ESCAPE:
  			{
  				if (get_check("Do you want to quit?"))
-diff -Nru --strip-trailing-cr sangband-100.lf3/src/h-config.h sangband-100.lf3-android/src/h-config.h
---- sangband-100.lf3/src/h-config.h	2007-08-03 16:48:58.000000000 -0700
-+++ sangband-100.lf3-android/src/h-config.h	2010-11-22 18:02:01.747852000 -0800
+diff -Nru --strip-trailing-cr sangband-100lf3/src/h-config.h sangband-100lf3-android/src/h-config.h
+--- sangband-100lf3/src/h-config.h	2007-08-03 16:48:58.000000000 -0700
++++ sangband-100lf3-android/src/h-config.h	2010-11-22 18:02:01.747852000 -0800
 @@ -101,7 +101,7 @@
   * or for the "Atari" platform which is Unix-like, apparently.
   */
