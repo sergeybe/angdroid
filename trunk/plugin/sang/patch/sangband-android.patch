@@ -1,6 +1,50 @@
+diff -Nru --strip-trailing-cr sangband-100.lf3/src/birth.c sangband-100.lf3-android/src/birth.c
+--- sangband-100.lf3/src/birth.c	2007-09-07 23:28:16.000000000 -0700
++++ sangband-100.lf3-android/src/birth.c	2010-11-28 17:21:07.596542000 -0800
+@@ -1175,1 +1175,1 @@
+ 			ch = inkey(FALSE);
+
+ 			/* Quit */
+-			if ((ch == 'Q') || (ch == 'q')) quit(NULL);
++			if ((ch == 'Q') || (ch == 'q') || (ch == KTRL('X'))) quit(NULL);
+ 
+ 			/* Start over */
+ 			else if ((ch == 'S') || (ch == 's')) return (0);
+@@ -1835,7 +1835,7 @@
+ 			ch = inkey(FALSE);
+ 
+ 			/* Quit */
+-			if ((ch == 'Q') || (ch == 'q')) quit(NULL);
++			if ((ch == 'Q') || (ch == 'q') || (ch == KTRL('X'))) quit(NULL);
+ 
+ 			/* Start over */
+ 			if ((ch == 'S') || (ch == 's')) return (FALSE);
+@@ -1933,7 +1933,7 @@
+ 	ch = inkey(FALSE);
+ 
+ 	/* Quit */
+-	if ((ch == 'Q') || (ch == 'q')) quit(NULL);
++	if ((ch == 'Q') || (ch == 'q') || ch == KTRL('X')) quit(NULL);
+ 
+ 	/* Start over */
+ 	if ((ch == 'S') || (ch == 's')) return (0);
+diff -Nru --strip-trailing-cr sangband-100.lf3/src/files.c sangband-100.lf3-android/src/files.c
+--- sangband-100.lf3/src/files.c	2007-09-16 19:46:44.000000000 -0700
++++ sangband-100.lf3-android/src/files.c	2010-11-28 17:51:26.011540000 -0800
+@@ -6768,6 +6768,10 @@
+ 		switch (ch)
+ 		{
+ 			/* Exit */
++			case KTRL('X'):
++				wants_to_quit = TRUE;
++				break;	
++
+ 			case ESCAPE:
+ 			{
+ 				if (get_check("Do you want to quit?"))
 diff -Nru --strip-trailing-cr sangband-100.lf3/src/h-config.h sangband-100.lf3-android/src/h-config.h
 --- sangband-100.lf3/src/h-config.h	2007-08-03 16:48:58.000000000 -0700
-+++ sangband-100.lf3-android/src/h-config.h	2010-10-16 06:59:23.000000000 -0700
++++ sangband-100.lf3-android/src/h-config.h	2010-11-22 18:02:01.747852000 -0800
 @@ -101,7 +101,7 @@
   * or for the "Atari" platform which is Unix-like, apparently.
   */
