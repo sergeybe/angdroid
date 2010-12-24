@@ -109,8 +109,8 @@
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="angband"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/3.1"/>
-	    <property name="src.url.file" value="angband-3.1.2v2-src.tar.gz"/>
+	    <property name="src.url.base" value="http://rephial.org/downloads/3.2"/>
+	    <property name="src.url.file" value="angband-3.2.0.tar.gz"/>
 		<property name="extract.command" value="tar" />
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
