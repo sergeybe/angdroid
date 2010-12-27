@@ -60,6 +60,7 @@ public class AngbandActivity extends Activity {
 	protected static final int CONTEXTMENU_FITWIDTH_ITEM = 0;
 	protected static final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
 	protected static final int CONTEXTMENU_VKEY_ITEM = 2;
+	protected static final int CONTEXTMENU_FULLSCREEN_ITEM = 3;
 
 	protected Handler handler = null;
 	protected ProgressDialog progressDialog = null;
@@ -228,6 +229,7 @@ public class AngbandActivity extends Activity {
 		menu.setHeaderTitle("Quick Settings");
 		menu.add(0, CONTEXTMENU_FITWIDTH_ITEM, 0, "Fit Width"); 
 		menu.add(0, CONTEXTMENU_FITHEIGHT_ITEM, 0, "Fit Height"); 
+		menu.add(0, CONTEXTMENU_FULLSCREEN_ITEM, 0, "Toggle Fullscreen"); 
 		menu.add(0, CONTEXTMENU_VKEY_ITEM, 0, "Toggle Keyboard"); 
 	}
 
@@ -249,6 +251,11 @@ public class AngbandActivity extends Activity {
 				Preferences.setLandscapeKeyboard(!Preferences.getLandscapeKeyboard());
 			rebuildViews();
 			return true; 
+		case CONTEXTMENU_FULLSCREEN_ITEM:
+			Preferences.setFullScreen(!Preferences.getFullScreen());
+			setScreen();
+			rebuildViews();
+			return true; 
 		}
 		return false;
 	}
@@ -258,11 +265,7 @@ public class AngbandActivity extends Activity {
 		//Log.d("Angband", "onResume");
 		super.onResume();
 
-		if (Preferences.getFullScreen()) {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		} else {
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		}
+		setScreen();
 
 		term.onResume();
 	}
@@ -282,6 +285,14 @@ public class AngbandActivity extends Activity {
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		return term.onKeyUp(keyCode,event);
+	}
+
+	public void setScreen() {
+		if (Preferences.getFullScreen()) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		} else {
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
 	}
 
 	public Handler getHandler() {
