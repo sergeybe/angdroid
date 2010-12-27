@@ -1,12 +1,8 @@
 diff -Nru --strip-trailing-cr angband-3.2.0/src/death.c angband-3.2.0-android/src/death.c
 --- angband-3.2.0/src/death.c	2010-12-24 05:13:59.000000000 -0800
 +++ angband-3.2.0-android/src/death.c	2010-12-24 11:05:09.343486000 -0800
-@@ -434,8 +434,15 @@
- 
- 	menu_layout(death_menu, &area);
- 
-+	int done = 0;
- 	do
+@@ -437,5 +437,11 @@
+  	do
  	{
  		menu_select(death_menu, 0);
 -	} while (!get_check("Do you want to quit? "));
@@ -14,9 +10,9 @@ diff -Nru --strip-trailing-cr angband-3.2.0/src/death.c angband-3.2.0-android/sr
 +		// hack to allow KTRL('X') to exit the game here
 +		char opts[4] = {'y', 'n', KTRL('X'), '\0'};
 +		char gckey = get_char("Do you want to quit?", &opts[0], 2, 'n');
-+		done == (gckey == KTRL('X') || gckey == 'y' || gckey == 'Y');
++		if (gckey == KTRL('X') || gckey == 'y' || gckey == 'Y') break;
 +
-+	} while (!done);
++	} while (TRUE);
  }
 diff -Nru --strip-trailing-cr angband-3.2.0/src/h-basic.h angband-3.2.0-android/src/h-basic.h
 --- angband-3.2.0/src/h-basic.h	2010-12-24 05:13:59.000000000 -0800
