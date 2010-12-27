@@ -101,7 +101,11 @@ final public class Preferences {
 	public static boolean getFullScreen() {
 		return pref.getBoolean(Preferences.KEY_FULLSCREEN, true);
 	}
-
+	public static void setFullScreen(boolean value) {
+		SharedPreferences.Editor ed = pref.edit();
+		ed.putBoolean(Preferences.KEY_FULLSCREEN, value);
+		ed.commit();			
+	}
 	public static boolean isScreenPortraitOrientation() {
 		Configuration config = resources.getConfiguration();		
 		return (config.orientation == Configuration.ORIENTATION_PORTRAIT);
