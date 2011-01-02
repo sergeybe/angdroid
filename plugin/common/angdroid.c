@@ -115,6 +115,8 @@ static jclass NativeWrapperClass;
 static jobject NativeWrapperObj;
 
 /* Methods of TermView */
+static jmethodID NativeWrapper_fatalError;
+static jmethodID NativeWrapper_warnError;
 static jmethodID NativeWrapper_text;
 static jmethodID NativeWrapper_wipe;
 static jmethodID NativeWrapper_clear;
@@ -831,6 +833,7 @@ static void hook_plog(cptr str)
 	if (str)
 	{
 		LOGW(str);
+		(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_warnError, (*env)->NewStringUTF(env, str));
 	}
 }
 
@@ -840,7 +843,13 @@ static void hook_plog(cptr str)
  */
 static void hook_quit(cptr str)
 {
-	if (str) LOGE(str);
+	if (str) {
+		LOGE(str);
+
+		(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_fatalError, (*env)->NewStringUTF(env, str));
+
+	}
+
 
 	LOGD("hook_quit()");
 
@@ -1040,6 +1049,8 @@ void initGame ()
 
 
 	/* NativeWrapper Methods */
+	NativeWrapper_fatalError = (*env)->GetMethodID(env, NativeWrapperClass, "fatalError", "(Ljava/lang/String;)V");	
+	NativeWrapper_warnError = (*env)->GetMethodID(env, NativeWrapperClass, "warnError", "(Ljava/lang/String;)V");
 	NativeWrapper_text = (*env)->GetMethodID(env, NativeWrapperClass, "text", "(IIIB[B)I");
 	NativeWrapper_wipe = (*env)->GetMethodID(env, NativeWrapperClass, "wipe", "(III)V");
 	NativeWrapper_clear = (*env)->GetMethodID(env, NativeWrapperClass, "clear", "()V");
@@ -1180,7 +1191,8 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	cleanup_angband();
 #endif
 
-	quit("exit normally");
+	LOGD("exit normally");
+	quit(NULL);
 }
 
 #endif

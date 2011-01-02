@@ -22,6 +22,9 @@ import android.util.Log;
 
 final public class Preferences {
 
+	public static final int rows = 24;
+	public static final int cols = 80;
+
 	static final String NAME = "angband";
 
 	static final String KEY_VIBRATE = "angband.vibrate";
