@@ -41,9 +41,6 @@ import android.content.pm.PackageInfo;
 import android.content.ComponentName;
 import android.widget.LinearLayout;
 import android.content.pm.ActivityInfo;
-import android.content.DialogInterface;
-import android.app.ProgressDialog;
-import android.app.AlertDialog;
 import android.os.Handler;
 import android.os.Message;
 
@@ -51,19 +48,20 @@ import com.flurry.android.FlurryAgent;
 
 public class AngbandActivity extends Activity {
 
+	public static StateManager state = null;
 	public static NativeWrapper xb = null;
-	private static String progress_lock = "lock";
+
+	private AngbandDialog dialog = null;
 
 	private LinearLayout screenLayout = null; 
 	private TermView term = null;
 
-	protected static final int CONTEXTMENU_FITWIDTH_ITEM = 0;
-	protected static final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
-	protected static final int CONTEXTMENU_VKEY_ITEM = 2;
-	protected static final int CONTEXTMENU_FULLSCREEN_ITEM = 3;
+	protected final int CONTEXTMENU_FITWIDTH_ITEM = 0;
+	protected final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
+	protected final int CONTEXTMENU_VKEY_ITEM = 2;
+	protected final int CONTEXTMENU_FULLSCREEN_ITEM = 3;
 
 	protected Handler handler = null;
-	protected ProgressDialog progressDialog = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -85,31 +83,21 @@ public class AngbandActivity extends Activity {
 			version
 		);
 
-		final AngbandActivity aa = this;
-		handler = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				//Log.d("Angband","handleMessage: "+msg.what);		
-				switch (msg.what) {
-				case 10: // display progress
-					aa.showProgress((String)msg.obj);
-					break;
-				case 20: // dismiss progress
-					aa.dismissProgress();
-					break;
-				case 30: // fatal error
-					aa.showFatalAlert();
-					break;
-				case 40: // display context menu
-					aa.openContextMenu();
-					break;
-				}
-			}
-		};
-
 		if (xb == null) {
 			xb = new NativeWrapper();
 		}
+		if (state == null) {
+			state = new StateManager();
+		}
+
+		dialog = new AngbandDialog(this,state);
+		final AngbandDialog ad = dialog;
+		handler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				ad.HandleMessage(msg);
+			}
+		};
 	}
 
 	public void onStart() {
@@ -164,9 +152,9 @@ public class AngbandActivity extends Activity {
 	}
 
 	protected void rebuildViews() {
-		synchronized (progress_lock) {
+		synchronized (state.progress_lock) {
 			//Log.d("Angband","rebuildViews");
-			dismissProgress();
+			dialog.dismissProgress();
 
 			int orient = Preferences.getOrientation();
 			switch (orient) {
@@ -192,7 +180,7 @@ public class AngbandActivity extends Activity {
 								 );
 			term.setFocusable(false);
 			registerForContextMenu(term);
-			xb.link(term, handler);
+			xb.link(term, handler, state);
 
 			screenLayout.setOrientation(LinearLayout.VERTICAL);
 			screenLayout.addView(term);
@@ -209,11 +197,7 @@ public class AngbandActivity extends Activity {
 			}
 
 			setContentView(screenLayout);
-
-			if (xb.installResult == -1) // install in progress
-				showProgress("Installing files...");
-			if (xb.installResult > 0) // install fatal error
-				showFatalAlert();
+			dialog.restoreDialog();
 
 			term.invalidate();
 		}
@@ -297,49 +281,6 @@ public class AngbandActivity extends Activity {
 
 	public Handler getHandler() {
 		return handler;
-	}
-
-	public void showProgress(String msg) {		
-		synchronized (progress_lock) {
-			Log.d("Angband", "showProgress");		
-			progressDialog = ProgressDialog.show(this, "Angband", msg, true);
-		}
-	}
-	public void dismissProgress() {
-		synchronized (progress_lock) {
-			Log.d("Angband", "dismissProgress");		
-			if (progressDialog != null) {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		}
-	}
-
-	public void showFatalAlert() {
-		//Log.d("Angband","showFatalAlert");		
-		String errMsg = "Error: an unknown error occurred, cannot continue.";
-		switch(xb.installResult) {
-		case 1:
-			errMsg = "Error: external storage card not found, cannot continue.";
-			break;
-		case 2:
-			errMsg = "Error: failed to write and verify files to external storage, cannot continue.";
-			break;
-		}
-		fatalAlert(errMsg);
-	}
-
-	public int fatalAlert(String msg) {
-		//Log.d("Angband","fatalAlert");		
-		//dismissProgress();
-		new AlertDialog.Builder(this) 
-			.setTitle("Angband") 
-			.setMessage(msg) 
-			.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {xb.installResult=-2; finish();}
-			}
-		).show();
-		return 0;
 	}
 
 	private void startFlurry() {

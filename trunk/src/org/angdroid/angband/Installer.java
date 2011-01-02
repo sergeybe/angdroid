@@ -10,17 +10,49 @@ import java.util.zip.ZipInputStream;
 
 import android.util.Log;
 import android.os.Environment;
+import android.os.Handler;
 
 public class Installer {
 
-	public Installer() {}
+	private StateManager state = null;
+	private Handler handler = null;
+	private static Thread installWorker = null;
+
+	public Installer(StateManager s, Handler h) {
+		state = s;
+		handler = h;
+	}
+
+	public synchronized void checkInstall() {
+		if (needsInstall()) {
+			if (state.installState == StateManager.InstallState.Unknown) {
+				state.installState = StateManager.InstallState.InProgress;
+			
+				handler.sendEmptyMessage(AngbandDialog.Action.ShowProgress.ordinal());
+
+				installWorker = new Thread() {  
+						public void run() {
+							install();
+							handler.sendEmptyMessage(AngbandDialog.Action.DismissProgress.ordinal());
+						}
+					};
+				installWorker.start();
+			}
+			else {
+				return; // install is in error or in progress, cancel
+			}
+		}
+		else {
+			state.installState = StateManager.InstallState.Success;
+		}
+	}
 
 	public boolean needsInstall() {
 		// validate sdcard here
 		String check = Environment.getExternalStorageState();
 		Log.v("Angband", "media check:" + check);
 		if (check.compareTo(Environment.MEDIA_MOUNTED) != 0) {
-			NativeWrapper.installResult = 1;
+			state.installState = StateManager.InstallState.MediaNotReady;
 			return true;
 		}
 
@@ -28,19 +60,19 @@ public class Installer {
 	}
 
 	public void install() {
-		if (NativeWrapper.installResult > 0) return; // media error
+		if (state.installState != StateManager.InstallState.Unknown) return; // in progress or error
 
-		boolean success = true;;
+		boolean success = true;
 		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
 			success = extractPluginResources(Preferences.getInstalledPlugins()[i]);
 			if (!success) break;
 		}
 		if (success) {
 			Preferences.setInstalledVersion(Preferences.getVersion());
-			NativeWrapper.installResult = 0;
+			state.installState = StateManager.InstallState.Success;
 		}
 		else
-			NativeWrapper.installResult = 2;
+			state.installState = StateManager.InstallState.Failure;
 	}
 
 	private boolean extractPluginResources(int plugin) {
@@ -96,6 +128,17 @@ public class Installer {
 			Log.v("Angband", "error extracting files: " + e);
 		}
 		return result;
+	}
+
+	public static void waitForInstall() {
+		if (installWorker != null) {
+			try {
+				installWorker.join();
+				installWorker = null;
+			} catch (Exception e) {
+				Log.d("Angband","installWorker "+e.toString());
+			}
+		}
 	}
 
 	/*
