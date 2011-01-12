@@ -17,7 +17,9 @@ public class AngbandDialog {
 			,InstallFatalAlert
 			,OpenContextMenu
 			,GameFatalAlert
-			,GameWarnAlert;
+			,GameWarnAlert
+			,StartGame
+			,OnGameExiting;
 
 		public static Action convert(int value)
 		{
@@ -52,6 +54,12 @@ public class AngbandDialog {
 		case GameWarnAlert: // warning from angband (native side)
 			warnAlert(state.getWarnError());
 			break;
+		case StartGame: // start angband
+			state.gameThread.send(GameThread.Request.StartGame);
+			break;
+		case OnGameExiting: // angband is exiting
+			state.gameThread.send(GameThread.Request.OnGameExiting);
+			break;
 		}
 	}
 
@@ -68,13 +76,13 @@ public class AngbandDialog {
 
 	public void showProgress(String msg) {		
 		synchronized (state.progress_lock) {
-			Log.d("Angband", "showProgress");		
+			//Log.d("Angband", "showProgress");		
 			progressDialog = ProgressDialog.show(activity, "Angband", msg, true);
 		}
 	}
 	public void dismissProgress() {
 		synchronized (state.progress_lock) {
-			Log.d("Angband", "dismissProgress");		
+			//Log.d("Angband", "dismissProgress");		
 			if (progressDialog != null) {
 				progressDialog.dismiss();
 				progressDialog = null;

@@ -45,7 +45,7 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
 {
 	pthread_t game_thread;
 
-	LOGD("loader.startGame.syncwait");
+	//LOGD("loader.startGame.syncwait");
 
 	// begin synchronize
 
@@ -60,7 +60,7 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
 
 	pthread_mutex_lock (&muQuery);
 
-	LOGD("loader.startGame.initializing");
+	//LOGD("loader.startGame.initializing");
 
 	pass_env1 = env1;
 	pass_obj1 = obj1;
@@ -88,7 +88,7 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
 		return;
 	}	
 
-	LOGD("loader.create_thread");
+	//LOGD("loader.create_thread");
 	// start thread to call entry point
 	pthread_create(&game_thread, NULL, run_angband, (void*) NULL);	
 
@@ -110,11 +110,15 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
 	angdroid_gameQueryString = NULL;
 
 	// signal game has exited
+	//LOGD("loader.call NativeWrapper.onExitGame");
 	(*env1)->CallVoidMethod(env1, NativeWrapperObj, NativeWrapper_onExitGame);
 
+	//LOGD("loader.unlock mutexes");
 	// end synchronize
 	pthread_mutex_unlock (&muQuery);
 	pthread_mutex_unlock (&muGame);
+
+	LOGD("loader.return");
 }
 
 JNIEXPORT jstring JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryString

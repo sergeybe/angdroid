@@ -266,7 +266,7 @@ static void Term_init_and(term *t)
 {
 	term_data *td = (term_data*)(t->data);
 
-	LOGD("Term_init_and");
+	//LOGD("Term_init_and");
 
 	/* XXX XXX XXX */
 }
@@ -284,7 +284,7 @@ static void Term_nuke_and(term *t)
 {
 	term_data *td = (term_data*)(t->data);
 
-	LOGD("Term_nuke_and");
+	//LOGD("Term_nuke_and");
 
 	/* XXX XXX XXX */
 }
@@ -305,7 +305,7 @@ static errr Term_user_and(int n)
 {
 	term_data *td = (term_data*)(Term->data);
 
-	LOGD("Term_user_and");
+	//LOGD("Term_user_and");
 
 	/* XXX XXX XXX */
 
@@ -418,7 +418,7 @@ static errr Term_xtra_and(int n, int v)
 			 *
 			 * This action is required, but may not be "essential".
 			 */
-			LOGD("TERM_XTRA_FLUSH");
+			//LOGD("TERM_XTRA_FLUSH");
 			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_clearKeyBuffer);
 
 			return 0;
@@ -469,7 +469,7 @@ static errr Term_xtra_and(int n, int v)
 			 * that the "TERM_XTRA_FRESH" entry below takes care of any
 			 * necessary flushing issues.
 			 */
-			LOGD("TERM_XTRA_FROSH");
+			//LOGD("TERM_XTRA_FROSH");
 			return 0;
 		}
 
@@ -500,7 +500,7 @@ static errr Term_xtra_and(int n, int v)
 			 *
 			 * This action is optional, but convenient.
 			 */
-			LOGD("TERM_XTRA_NOISE");
+			//LOGD("TERM_XTRA_NOISE");
 			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_noise);
 			return 0;
 		}
@@ -512,7 +512,7 @@ static errr Term_xtra_and(int n, int v)
 			 *
 			 * This action is optional, and normally not important
 			 */
-			LOGD("TERM_XTRA_BORED");
+			//LOGD("TERM_XTRA_BORED");
 			return 0;
 		}
 
@@ -528,7 +528,7 @@ static errr Term_xtra_and(int n, int v)
 			 * handling "color changes" and the "arg_sound" and/or
 			 * "arg_graphics" options.
 			 */
-			LOGD("TERM_XTRA_REACT");
+			//LOGD("TERM_XTRA_REACT");
 			
 			return 0;
 		}
@@ -548,7 +548,7 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is currently only used by "main-gcu.c",
 			 * on UNIX machines, to allow proper "suspending".
 			 */
-			LOGD("TERM_XTRA_ALIVE");
+			//LOGD("TERM_XTRA_ALIVE");
 			return 0;
 		}
 
@@ -569,7 +569,7 @@ static errr Term_xtra_and(int n, int v)
 			 * on what term is active handle activation themself, or if only
 			 * one "term_data" structure is supported by this file.
 			 */
-			LOGD("TERM_XTRA_LEVEL");
+			//LOGD("TERM_XTRA_LEVEL");
 			return 0;
 		}
 
@@ -639,7 +639,7 @@ static errr Term_wipe_and(int x, int y, int n)
 {
 	term_data *td = (term_data*)(Term->data);
 
-	LOGD("Term_wipe_and");
+	//LOGD("Term_wipe_and");
 
 	/* XXX XXX XXX */
 	(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_wipe, x , y , n);
@@ -735,7 +735,7 @@ static errr Term_pict_and(int x, int y, int n, const byte *ap, const char *cp,
 {
 	term_data *td = (term_data*)(Term->data);
 
-	LOGD("Term_pict_and");
+	//LOGD("Term_pict_and");
 
 	/* XXX XXX XXX */
 
@@ -957,7 +957,7 @@ static void init_stuff()
 	/* Hack -- Add a path separator (only if needed) */
 	if (!suffix(android_files_path, PATH_SEP)) my_strcat(android_files_path, PATH_SEP, sizeof(android_files_path));
 
-	LOGD(android_files_path);
+	//LOGD(android_files_path);
 
 	/* Prepare the filepaths */
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
@@ -1017,14 +1017,14 @@ static errr and_get_cmd(cmd_context context, bool wait)
 bool private_check_user_directory(cptr dirpath)
 {
 	// todo: used in ToME figure out if we need it in android
-	LOGD("private_check_user_directory %s",dirpath);
+	//LOGD("private_check_user_directory %s",dirpath);
 	return TRUE;
 }
 
 #ifdef ANDROID
 void initGame ()
 {
-	LOGD("initGame");
+	//LOGD("angdroid.initGame");
 
 	plog_aux = hook_plog;
 	quit_aux = hook_quit;
@@ -1066,21 +1066,12 @@ void initGame ()
 	/* Set up the command hook */
 	cmd_get_hook = and_get_cmd;
 
-	LOGD("init_display()");
+	//LOGD("init_display()");
 	init_display();
 #else
 	LOGD("init_angband()");
 	init_angband();
 #endif /* ANGDROID_ANGBAND_PLUGIN */
-}
-
-JNIEXPORT jint JNICALL angdroid_gameQueryRedraw
-(JNIEnv *env1, jobject obj1, jint x1, jint y1, jint x2, jint y2)
-{
-	LOGD("angdroid.angdroid_gameQueryRedraw %d %d %d %d", x1, y1, x2, y2);
-
-	//return (jint)Term_redraw_section(x1, y1, x2, y2);
-	return 0;
 }
 
 JNIEXPORT jstring JNICALL angdroid_gameQueryString
@@ -1134,8 +1125,6 @@ JNIEXPORT void JNICALL angdroid_gameStart
 		LOGE("Error: Can't get JavaVM!");
 	}
 
-	LOGD("startGame()");
-
 	(*jvm)->AttachCurrentThread(jvm, &env, NULL);
 
 	// process argc/argv 
@@ -1170,7 +1159,7 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	initGame();
 
 	/* Start main loop of game */
-	LOGD("play_game()");
+	LOGD("angdroid_gameStart.play_game()");
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	play_game();
 #else
@@ -1187,11 +1176,11 @@ JNIEXPORT void JNICALL angdroid_gameStart
 
 #ifndef ANGDROID_TOME_PLUGIN
 	/* Free resources */
-	LOGD("cleanup_angband()");
+	LOGD("angdroid_gameStart.cleanup_angband()");
 	cleanup_angband();
 #endif
 
-	LOGD("exit normally");
+	LOGD("angdroid_gameStart.exit normally");
 	quit(NULL);
 }
 

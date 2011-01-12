@@ -49,8 +49,6 @@ import com.flurry.android.FlurryAgent;
 public class AngbandActivity extends Activity {
 
 	public static StateManager state = null;
-	public static NativeWrapper xb = null;
-
 	private AngbandDialog dialog = null;
 
 	private LinearLayout screenLayout = null; 
@@ -67,7 +65,7 @@ public class AngbandActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Log.d("Angband", "onCreate");		
+		//Log.d("Angband", "onCreate");		
 
 		String version = "unknown";
 		try {
@@ -83,9 +81,6 @@ public class AngbandActivity extends Activity {
 			version
 		);
 
-		if (xb == null) {
-			xb = new NativeWrapper();
-		}
 		if (state == null) {
 			state = new StateManager();
 		}
@@ -147,7 +142,7 @@ public class AngbandActivity extends Activity {
 	@Override
 	public void finish() {
 		Log.d("Angband","finish");
-		xb.stopBand();
+		state.gameThread.send(GameThread.Request.StopGame);
 		super.finish();
 	}
 
@@ -180,7 +175,7 @@ public class AngbandActivity extends Activity {
 								 );
 			term.setFocusable(false);
 			registerForContextMenu(term);
-			xb.link(term, handler, state);
+			state.link(term, handler);
 
 			screenLayout.setOrientation(LinearLayout.VERTICAL);
 			screenLayout.addView(term);
@@ -222,11 +217,11 @@ public class AngbandActivity extends Activity {
 		switch (aItem.getItemId()) {
 		case CONTEXTMENU_FITWIDTH_ITEM:
 			term.autoSizeFontByWidth(0);
-			xb.redraw();
+			state.nativew.redraw();
 			return true; 
 		case CONTEXTMENU_FITHEIGHT_ITEM:
 			term.autoSizeFontByHeight(0);
-			xb.redraw();
+			state.nativew.redraw();
 			return true; 
 		case CONTEXTMENU_VKEY_ITEM:
 			if(Preferences.isScreenPortraitOrientation())
@@ -281,6 +276,10 @@ public class AngbandActivity extends Activity {
 
 	public Handler getHandler() {
 		return handler;
+	}
+
+	public StateManager getStateManager() { 
+		return state;
 	}
 
 	private void startFlurry() {
