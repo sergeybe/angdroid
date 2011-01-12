@@ -14,9 +14,12 @@ public class AngbandKeyboard implements OnKeyboardActionListener
 	Keyboard virtualKeyboardQwerty;
 	Keyboard virtualKeyboardSymbols;
 	Keyboard virtualKeyboardSymbolsShift;
+	StateManager state = null;
 
 	AngbandKeyboard(Context ctx)
 	{
+		state = ((AngbandActivity)ctx).getStateManager();
+
 		virtualKeyboardQwerty = new Keyboard(ctx, R.xml.keyboard_qwerty);
 		virtualKeyboardSymbols = new Keyboard(ctx, R.xml.keyboard_sym);
 		virtualKeyboardSymbolsShift = new Keyboard(ctx, R.xml.keyboard_symshift);
@@ -93,7 +96,7 @@ public class AngbandKeyboard implements OnKeyboardActionListener
 		}
 		if(c != 0)
 		{
-			AngbandActivity.xb.addToKeyBuffer(c);
+			state.keyBuffer.add(c);
 		}
 	}
 	

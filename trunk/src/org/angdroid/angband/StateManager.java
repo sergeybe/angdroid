@@ -1,5 +1,7 @@
 package org.angdroid.angband;
 
+import android.os.Handler;
+
 public class StateManager {
 	/* screen state */
 	public char[][] charBuffer = null; 
@@ -16,6 +18,15 @@ public class StateManager {
 
 	/* progress dialog state */
 	public static String progress_lock = "lock";
+
+	/* keybuffer */
+	public KeyBuffer keyBuffer = null;
+
+	/* native angband library interface */
+	public NativeWrapper nativew = null;
+
+	/* game thread */
+	public GameThread gameThread = null;
 
 	/* installer state */
 	public enum InstallState {
@@ -37,6 +48,13 @@ public class StateManager {
 	StateManager() {
 		colorBuffer = new byte[Preferences.cols][Preferences.rows];
 		charBuffer = new char[Preferences.cols][Preferences.rows];
+		nativew = new NativeWrapper(this);
+		gameThread = new GameThread(this, nativew);
+	}
+
+	public void link(TermView t, Handler h) {
+		nativew.link(t, h);
+		gameThread.link(h);		
 	}
 
 	public String getInstallError() {

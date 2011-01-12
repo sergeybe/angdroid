@@ -130,7 +130,7 @@ public class TermView extends View implements OnGestureListener {
 	private Vibrator vibrator;
 	private boolean vibrate;
 	private Handler handler = null;
-	private NativeWrapper nativew = null;
+	private StateManager state = null;
 
 	private GestureDetector gesture;
 
@@ -138,14 +138,14 @@ public class TermView extends View implements OnGestureListener {
 		super(context);
 		initTermView(context);
 		handler = ((AngbandActivity)context).getHandler();
-		nativew = AngbandActivity.xb;
+		state = ((AngbandActivity)context).getStateManager();
 	}
 
 	public TermView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initTermView(context);
 		handler = ((AngbandActivity)context).getHandler();
-		nativew = AngbandActivity.xb;
+		state = ((AngbandActivity)context).getStateManager();
 	}
 
 	protected void initTermView(Context context) {
@@ -211,7 +211,7 @@ public class TermView extends View implements OnGestureListener {
 			font_text_size -= 1;
 			setFontSize(font_text_size);
 		}
-		Log.d("Angband","autoSizeFontHeight "+font_text_size);
+		//Log.d("Angband","autoSizeFontHeight "+font_text_size);
 	}
 
 	public void autoSizeFontByWidth(int maxWidth) {
@@ -232,7 +232,7 @@ public class TermView extends View implements OnGestureListener {
 			font_text_size -= 1;
 			setFontSize(font_text_size);
 		}
-		Log.d("Angband","autoSizeFontWidth "+font_text_size+","+maxWidth);
+		//Log.d("Angband","autoSizeFontWidth "+font_text_size+","+maxWidth);
 	}
 
 	private void setFontSizeLegacy() {
@@ -286,7 +286,7 @@ public class TermView extends View implements OnGestureListener {
  
 		char_height = (int)Math.ceil(fore.getFontSpacing()); 
 		char_width = (int)fore.measureText("X", 0, 1);	
-		Log.d("Angband","setSizeFont "+font_text_size);
+		//Log.d("Angband","setSizeFont "+font_text_size);
 	}
 
 	@Override
@@ -312,7 +312,7 @@ public class TermView extends View implements OnGestureListener {
 		int minwidth = getSuggestedMinimumWidth();
 
 		setMeasuredDimension(width, height);
-		Log.d("Angband","onMeasure "+canvas_width+","+canvas_height+";"+width+","+height);
+		//Log.d("Angband","onMeasure "+canvas_width+","+canvas_height+";"+width+","+height);
 	}
 
 	@Override
@@ -351,7 +351,7 @@ public class TermView extends View implements OnGestureListener {
 	}
 	public void onLongPress(MotionEvent e)
 	{
-		Log.d("Angband", "onLongPress");	
+		//Log.d("Angband", "onLongPress");	
 		
 		handler.sendEmptyMessage(AngbandDialog.Action.OpenContextMenu.ordinal());
 	}
@@ -371,16 +371,16 @@ public class TermView extends View implements OnGestureListener {
 
 		int key = (2 - r) * 3 + c + '1';
 
-		nativew.addDirectionToKeyBuffer(key);
+		state.keyBuffer.addDirection(key);
 			
 		return true;
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		Log.d("Angband", "onSizeChanged");
+		//Log.d("Angband", "onSizeChanged");
 		super.onSizeChanged(w, h, oldw, oldh);
-		nativew.startBand();
+		handler.sendEmptyMessage(AngbandDialog.Action.StartGame.ordinal());
   	}
 
 	/* Xband interface */
@@ -391,7 +391,7 @@ public class TermView extends View implements OnGestureListener {
 		// sanity 
 		if (canvas_width == 0 || canvas_height == 0) return false;
 
-		Log.d("Angband","createBitmap "+canvas_width+","+canvas_height);
+		//Log.d("Angband","createBitmap "+canvas_width+","+canvas_height);
 		bitmap = Bitmap.createBitmap(canvas_width, canvas_height, Bitmap.Config.RGB_565);
 		canvas = new Canvas(bitmap);		
 		/*
@@ -424,7 +424,7 @@ public class TermView extends View implements OnGestureListener {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
-		Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
+		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_UP:
 			key = ARROW_UP;
@@ -482,7 +482,7 @@ public class TermView extends View implements OnGestureListener {
 			if (Preferences.getVolumeKeyFontSizing()) {
 				setFontSize(font_text_size+1);
 				//computeCanvasSize();
-				nativew.redraw();
+				state.nativew.redraw();
 			}
 			return true;
 			//break;
@@ -490,7 +490,7 @@ public class TermView extends View implements OnGestureListener {
 			if (Preferences.getVolumeKeyFontSizing()) {
 				setFontSize(font_text_size-1);
 				//computeCanvasSize();
-				nativew.redraw();
+				state.nativew.redraw();
 			}
 			return true;
 			//break;
@@ -537,7 +537,7 @@ public class TermView extends View implements OnGestureListener {
 			key |= MOD_CTRL;
 		}
 
-		nativew.addToKeyBuffer(key);
+		state.keyBuffer.add(key);
 		return true; 
 		// two \r's in a row force pop up context menu
 		// there may be other Android behaviors like this,
@@ -661,12 +661,12 @@ public class TermView extends View implements OnGestureListener {
 	}
 
 	public void redraw(char[][] charmap, byte[][] colormap) {
-		Log.d("Angband","Termview.redraw()");
+		//Log.d("Angband","Termview.redraw()");
 		int row_save = row;
 		int col_save = col;
 
 		if (canvas != null) {
-			Log.d("Angband","Termview.really redrawing");
+			//Log.d("Angband","Termview.really redrawing");
 			
 			canvas.drawPaint(back);
 			for(int r = 0; r < Preferences.rows; r++) {
@@ -686,14 +686,14 @@ public class TermView extends View implements OnGestureListener {
 	}
 
 	public void onResume() {
-		Log.d("Angband","Termview.onResume()");
+		//Log.d("Angband","Termview.onResume()");
 		vibrate = Preferences.getVibrate();
 	}
 
 	public void onPause() {
-		Log.d("Angband","Termview.onPause()");
+		//Log.d("Angband","Termview.onPause()");
 		// this is the only guaranteed safe place to save state 
 		// according to SDK docs
-		nativew.saveBand();
+		state.gameThread.send(GameThread.Request.SaveGame);
 	}
 }
