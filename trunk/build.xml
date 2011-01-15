@@ -30,7 +30,7 @@
 		  <exclude name="**/override/**" />
 		  <exclude name="**/plugin/angband/**" />
 		  <exclude name="**/plugin/angband306/**" />
-		  <exclude name="**/plugin/include/**" />
+		  <exclude name="**/plugin/include/*.h" />
 		  <exclude name="**/plugin/loader/libs/**" />
 		  <exclude name="**/plugin/loader/obj/**" />
 		  <exclude name="**/res/raw/**" />
