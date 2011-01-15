@@ -86,22 +86,25 @@ public class NativeWrapper {
 
 	public int text(final int x, final int y, final int n, final byte a,
 					final byte[] cp) {
+
 		synchronized (display_lock) {
 			byte c;
 			int col = x;
 			int row = y;
+
 			for (int i = 0; i < n; i++) {
 				c = cp[i];
 				if (c > 19 && c < 128) {
-					state.charBuffer[col][row] = (char)c;
-					state.colorBuffer[col][row] = a;
+					
+					cachePoint(col,row,(char)c,a);
+
 					col++;
-					if (col >= 80) {
+					if (col >= Preferences.cols) {
 						row++;
 						col = 0;
 					}
-					if (row >= 24) {
-						row = 23;
+					if (row >= Preferences.rows) {
+						row = Preferences.rows-1;
 					}
 				}
 			}
@@ -111,11 +114,20 @@ public class NativeWrapper {
 		}
 	}
 
+	private void cachePoint(int acol, int arow, char c, byte a) {
+		if (acol>-1 && acol<Preferences.cols 
+			&& arow>-1 && arow<Preferences.rows) {
+			state.charBuffer[acol][arow] = c;
+			state.colorBuffer[acol][arow] = a;
+		}
+		else {
+			Log.d("Angband","text out of bounds: "+acol+","+arow);
+		}
+	} 
+
 	public void wipe(final int row, final int col, final int n) {
 		synchronized (display_lock) {
-			state.charBuffer[col][row] = '\0';
-			state.colorBuffer[col][row] = 0;
-
+			cachePoint(col,row,'\0',(byte)0);
 			if (term != null) term.wipe(row,col,n);
 		}
 	}

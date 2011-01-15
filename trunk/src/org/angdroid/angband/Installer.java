@@ -60,8 +60,6 @@ public class Installer {
 	}
 
 	public void install() {
-		if (state.installState != StateManager.InstallState.Unknown) return; // in progress or error
-
 		boolean success = true;
 		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
 			success = extractPluginResources(Preferences.getInstalledPlugins()[i]);
@@ -76,6 +74,7 @@ public class Installer {
 	}
 
 	private boolean extractPluginResources(int plugin) {
+		//Log.d("Angband","extractPluginResources "+plugin);
 		boolean result = true;
 		try {
 			File f = new File(Preferences.getAngbandFilesDirectory(plugin));
@@ -83,7 +82,7 @@ public class Installer {
 			String abs_path = f.getAbsolutePath();
 			Log.v("Angband", "installing to " + abs_path);
 
-			ZipInputStream zis = Preferences.getPluginZip(plugin);
+			ZipInputStream zis = Plugins.getPluginZip(plugin);
 			ZipEntry ze;
 			while ((ze = zis.getNextEntry()) != null) {
 				String ze_name = ze.getName();
