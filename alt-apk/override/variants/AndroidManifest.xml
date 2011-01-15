@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="org.angdroid.variants" android:versionCode="1"
+	android:versionName="2.3.5.1"
+	android:installLocation="auto">
+
+	<application android:icon="@drawable/icon" 
+				 android:label="@string/app_name"
+				 android:allowClearUserData="true" 
+				 android:description="@string/description">
+
+		<activity android:name=".AngbandActivity" 
+				  android:label="@string/app_name"
+				  android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+				  android:configChanges="keyboardHidden" 
+				  android:windowSoftInputMode="stateHidden"
+				  android:multiprocess="false" 
+				  android:launchMode="singleTask" 
+				  android:icon="@drawable/icon">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+
+		<activity android:name=".HelpActivity" android:label="@string/angband_help"
+			>
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
+
+		<activity android:name=".PreferencesActivity" android:label="@string/preferences"
+			>
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
+
+		<activity android:name=".ProfilesActivity" android:label="@string/profiles"
+			>
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
+
+		<activity android:name=".ProfileAddActivity" android:label="@string/profileadd"
+			>
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
+	</application>
+	<uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8" />
+
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+</manifest>
