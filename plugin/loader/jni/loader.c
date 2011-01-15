@@ -40,7 +40,7 @@ void* run_angband(void* foo)
 	return foo;
 }
 
-JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
+void gameStart
 (JNIEnv *env1, jobject obj1, jstring pluginPath, jint argc, jobjectArray argv)
 {
 	pthread_t game_thread;
@@ -121,44 +121,30 @@ JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
 	LOGD("loader.return");
 }
 
+JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
+(JNIEnv *env1, jobject obj1, jstring pluginPath, jint argc, jobjectArray argv)
+{
+	gameStart(env1,obj1,pluginPath,argc,argv);
+}
+
+JNIEXPORT void JNICALL Java_org_angdroid_variants_NativeWrapper_gameStart
+(JNIEnv *env1, jobject obj1, jstring pluginPath, jint argc, jobjectArray argv)
+{
+	gameStart(env1,obj1,pluginPath,argc,argv);
+}
+
 JNIEXPORT jstring JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryString
   (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	return (jstring)0; // null indicates error
 }
-
-JNIEXPORT jint JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryRedraw
-(JNIEnv *env1, jobject obj1, jint x1, jint y1, jint x2, jint y2)
+JNIEXPORT jstring JNICALL Java_org_angdroid_variants_NativeWrapper_gameQueryString
+  (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
-	jint result = -1; // -1 indicates error
-
-	// begin synchronize
-	pthread_mutex_lock (&muQuery);
-
-	LOGD("loader.angdroid_gameQueryRedraw %d %d %d %d", x1, y1, x2, y2);
-
-	if (handle) {
-		if (!angdroid_gameQueryRedraw)
-		  	// find entry point
-		  	angdroid_gameQueryRedraw = dlsym(handle, "angdroid_gameQueryRedraw");   
-
-		if (angdroid_gameQueryRedraw)
-			result = angdroid_gameQueryRedraw(env1, obj1, x1, y1, x2, y2);
-		else
-			LOGE("dlsym failed on angdroid_gameQueryRedraw");
-	}
-	else {
-		LOGE("dlopen failed -- angdroid_gameQueryRedraw");
-	}
-
-	// end synchronize
-	pthread_mutex_unlock (&muQuery);
-
-	return result;
+	return (jstring)0; // null indicates error
 }
 
-
-JNIEXPORT jint JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryInt
+jint gameQueryInt
 (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	jint result = -1; // -1 indicates error
@@ -185,3 +171,15 @@ JNIEXPORT jint JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryInt
 
 	return result;
 }
+
+JNIEXPORT jint JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryInt
+(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
+{
+	return gameQueryInt(env1,obj1,argc,argv);
+}
+JNIEXPORT jint JNICALL Java_org_angdroid_variants_NativeWrapper_gameQueryInt
+(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
+{
+	return gameQueryInt(env1,obj1,argc,argv);
+}
+

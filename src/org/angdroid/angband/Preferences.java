@@ -7,9 +7,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import android.os.Environment;
 import android.content.res.Resources;
@@ -48,21 +45,6 @@ final public class Preferences {
 
 	static final String KEY_INSTALLEDVERSION = "angband.installedversion";
 
-	public enum Plugin {
-		Angband(0), Angband306(1), ToME(2), Sangband(3), NPP(4);
-
-		private int id;
-
-		private Plugin(int id) {
-			this.id = id;
-		}
-		public int getId() {
-			return id;
-		}
-	}
-
-	static final String DEFAULT_PROFILE = "0~Default~PLAYER~0~0|0~Borg~BORGSAVE~1~1";
-
 	private static String activityFilesPath;
 	private static SharedPreferences pref;
 	private static int[] gamePlugins;
@@ -90,6 +72,10 @@ final public class Preferences {
 
 	public static String getVersion() {
 		return version;
+	}
+
+	public static Resources getResources() {
+		return resources;
 	}
 
 	public static String getInstalledVersion() {
@@ -214,23 +200,6 @@ final public class Preferences {
 		return activityFilesPath;
 	}
 
-	public static ZipInputStream getPluginZip(int plugin) {
-		InputStream is = null;
-		if (plugin == Preferences.Plugin.Angband.getId())
-			is = resources.openRawResource(R.raw.zipangband);
-		else if (plugin == Preferences.Plugin.Angband306.getId())
-			is = resources.openRawResource(R.raw.zipangband306);
-		else if (plugin == Preferences.Plugin.ToME.getId())
-			is = resources.openRawResource(R.raw.ziptome);
-		else if (plugin == Preferences.Plugin.Sangband.getId())
-			is = resources.openRawResource(R.raw.zipsang);
-		/*
-		else if (plugin == Preferences.Plugin.NPP.getId())
-			is = resources.openRawResource(R.raw.zipnpp);
-		*/
-		return new ZipInputStream(is);
-	}
-
 	public static String getActivePluginName() {
 		int activePlugin;
 		int prefPlugin = getActiveProfile().getPlugin();
@@ -248,7 +217,7 @@ final public class Preferences {
 			//Log.d("Angband", "loading profiles");
 			String s = pref.getString(Preferences.KEY_PROFILES, "");
 			if (s.length() == 0) {
-				profiles = ProfileList.deserialize(DEFAULT_PROFILE);
+				profiles = ProfileList.deserialize(Plugins.DEFAULT_PROFILE);
 				saveProfiles();
 
 				// for some reason ProfileListPreference needs a persisted value to display

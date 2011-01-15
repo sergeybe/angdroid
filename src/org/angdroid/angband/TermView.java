@@ -151,7 +151,7 @@ public class TermView extends View implements OnGestureListener {
 	protected void initTermView(Context context) {
 		fore = new Paint();
 		fore.setTextAlign(Paint.Align.LEFT);
-		fore.setColor(colors[1]);
+		setForeColor(1);
 
 		back = new Paint();
 		back.setColor(colors[0]);
@@ -166,6 +166,12 @@ public class TermView extends View implements OnGestureListener {
 
 		setFocusableInTouchMode(true);
 		gesture = new GestureDetector(context, this);
+	}
+
+	protected void setForeColor(int a) {
+		if (a > 0 && a < colors.length) {
+			fore.setColor(colors[a]);			
+		}
 	}
 
 	protected void onDraw(Canvas canvas) {
@@ -400,19 +406,10 @@ public class TermView extends View implements OnGestureListener {
 		  )); // this seems to have no effect, why?
 		*/		
 
-		if (Preferences.getActiveProfile().getPlugin()
-			== Preferences.Plugin.Angband.getId()) {
-			ARROW_DOWN = 0x8A;
-			ARROW_LEFT = 0x8B;
-			ARROW_RIGHT = 0x8C;
-			ARROW_UP = 0x8D;
-		}
-		else {
-			ARROW_DOWN = '2';
-			ARROW_LEFT = '4';
-			ARROW_RIGHT = '6';
-			ARROW_UP = '8';
-		}
+		ARROW_DOWN = '2';
+		ARROW_LEFT = '4';
+		ARROW_RIGHT = '6';
+		ARROW_UP = '8';
 
 		return true;
 	}
@@ -600,7 +597,7 @@ public class TermView extends View implements OnGestureListener {
 		Log.d("Angband","text"+result.toString());
 		*/
 
-		fore.setColor(colors[a]);
+		setForeColor(a);
 
 		byte c;
 		for (int i = 0; i < n; i++) {
@@ -671,7 +668,7 @@ public class TermView extends View implements OnGestureListener {
 			canvas.drawPaint(back);
 			for(int r = 0; r < Preferences.rows; r++) {
 				for(int c=0; c < Preferences.cols; c++) {
-					fore.setColor(colors[colormap[c][r]]);
+					setForeColor(colormap[c][r]);
 					move(c, r);
 
 					char ch = charmap[c][r]; 

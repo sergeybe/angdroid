@@ -19,9 +19,7 @@ public class KeyBuffer {
 	public KeyBuffer(NativeWrapper n) {
 		nativew = n;
 		clear();
-		if (Preferences.getActiveProfile().getPlugin()
-			== Preferences.Plugin.Angband306.getId()
-			&& Preferences.getAutoStartBorg()) {
+		if (Preferences.getAutoStartBorg()) {
 			add(32); //space
 			add(26); //ctrl-v
 			add(122); //v

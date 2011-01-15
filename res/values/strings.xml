@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">Angband</string>
+
+    <string-array name="gamePluginDescriptions">
+      <item>Vanilla 3.2.0</item>
+      <item>Vanilla 3.0.6 squelch+borg</item>
+    </string-array>
+    <string-array name="gamePluginNames">
+      <item>angband</item>
+      <item>angband306</item>
+    </string-array>
+    <string-array name="gamePlugins">
+      <item>0</item>
+      <item>1</item>
+    </string-array>
+
     <string name="version">0.0.0.1</string>
 
     <string name="menu_preferences">Preferences</string>
@@ -50,31 +65,6 @@
     <string name="preferences_autostartborg_title">Auto-start borg</string>
     <string name="preferences_autostartborg_summary">Automatically starts your borg (Vanilla 3.0.6 only)</string>
 
-    <string-array name="gamePluginDescriptions">
-      <item>Vanilla 3.2.0</item>
-      <item>Vanilla 3.0.6 squelch+borg</item>
-      <item>ToME 2.5.3</item>
-      <item>Sangband 1.0.0 lf3</item>
-<!--
-      <item>NPPAngband 0.5.1 beta2</item>
--->
-    </string-array>
-    <string-array name="gamePluginNames">
-      <item>angband</item>
-      <item>angband306</item>
-      <item>tome</item>
-      <item>sang</item>
-      <item>npp</item>
-    </string-array>
-    <string-array name="gamePlugins">
-      <item>0</item>
-      <item>1</item>
-      <item>2</item>
-      <item>3</item>
-<!--
-      <item>4</item>
--->
-    </string-array>
     <string-array name="orientationDescriptions">
       <item>Sensor</item>
 	  <item>Portrait</item>

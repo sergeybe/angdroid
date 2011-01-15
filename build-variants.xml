@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AngbandVariants" default="angband-debug">
+
+    <target name="variants-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
+
+    <target name="variants-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
+
+<!--
+    ************************************************************************
+    *                                                                      *
+    *  Plugins                                                             *
+    *                                                                      *
+    ************************************************************************
+-->
+
+    <target name="plugin-resources">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="tome"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="sang"/>
+	</ant>
+<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="npp"/>
+	</ant>
+-->
+    </target>
+
+    <target name="angband-javah" depends="compile">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
+	</ant>
+	</target>
+
+    <target name="plugin-libs" depends="angband-javah">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="loader"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="tome"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="sang"/>
+	</ant>
+<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="npp"/>
+	</ant>
+-->
+    </target>
+
+    <condition property="is.exist.libs">
+	  	<and>
+			<available file="plugin/tome/extsrc/lib" type="dir" />	  
+			<available file="plugin/sang/extsrc/lib" type="dir" />	  
+<!--
+			<available file="plugin/npp/extsrc/lib" type="dir" />	  
+-->
+		</and>
+    </condition>
+	<target name="check-plugin-src" unless="is.exist.libs">
+		<antcall target="plugin-src">
+		</antcall>
+	</target>
+
+    <target name="plugin-src">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="tome"/>
+		<property name="src.url.base" value="ftp://ftp.eenet.ee/pub/FreeBSD/distfiles"/>
+	    <property name="src.url.file" value="tome-235-src.tar.bz2"/>
+		<property name="extract.command" value="tar" />
+		<property name="extract.arg1" value="--strip-components=1" />		
+		<property name="extract.arg2" value="-xjf" />
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="sang"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="sang-src-100-lf3.tar.gz"/>
+		<property name="extract.command" value="tar" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
+	</ant>
+<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="npp"/>
+	    <property name="src.url.base" value="http://download.nppangband.org"/>
+	    <property name="src.url.file" value="npp-0.5.1-src-beta2.zip"/>
+		<property name="extract.command" value="unzip" />
+		<property name="extract.arg1" value="-q" />
+		<property name="extract.arg2" value="-d." />		
+	</ant>
+-->
+    </target>
+<!--
+    ************************************************************************
+    *                                                                      *
+    *  Clean                                                               *
+    *                                                                      *
+    ************************************************************************
+-->
+
+    <target name="clean-plugins">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="loader"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="tome"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="sang"/>
+	</ant>
+<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="npp"/>
+	</ant>
+-->
+    </target>
+
+    <target name="clean" depends="clean-plugins">
+		<delete includeemptydirs="true">
+		  <fileset dir="bin" includes="**/*"/>
+		</delete>
+		<delete includeemptydirs="true">
+		  <fileset dir="gen" includes="**/*"/>
+		</delete>
+		<delete includeemptydirs="true">
+		  <fileset dir="libs/armeabi" includes="**/*"/>
+		</delete>
+		<delete file="plugin/include/angdroid.h"/>
+    </target>
+
+
+<!--
+    ************************************************************************
+    *                                                                      *
+    *  Android SDK Setup, etc                                              *
+    *                                                                      *
+    ************************************************************************
+-->
+
+    <target name="obfuscate" depends="variants-release">
+	<proguard>
+	    -libraryjars ${android.jar}: ${external-libs-folder}
+	    -injars      ${out-classes-location}
+	    -outjars     ${obfuscate-location}/classes.min.jar
+	    -keep public class * extends android.app.Activity
+	    -optimizations !code/simplification/cast
+       </proguard>
+    </target>
+
+    <path id="android.antlibs">
+        <pathelement path="${sdk-location}/tools/lib/anttasks.jar" />
+        <pathelement path="${sdk-location}/tools/lib/sdklib.jar" />
+        <pathelement path="${sdk-location}/tools/lib/androidprefs.jar" />
+        <pathelement path="${sdk-location}/tools/lib/apkbuilder.jar" />
+        <pathelement path="${sdk-location}/tools/lib/jarutils.jar" />
+    </path>
+
+    <taskdef name="setup"
+        classname="com.android.ant.SetupTask"
+        classpathref="android.antlibs"/>
+
+    <setup/>
+
+</project>
