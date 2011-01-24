@@ -82,9 +82,11 @@
 #include "main.h"
 #endif
 #ifdef ANGDROID_ANGBAND306_PLUGIN
-#define BASIC_COLORS 16
 #include "borg1.h"
 #endif
+#ifndef BASIC_COLORS
+#define BASIC_COLORS 16
+#endif 
 
 static char android_files_path[1024];
 static char android_savefile[50];
@@ -539,7 +541,11 @@ static errr Term_wipe_and(int x, int y, int n)
 	/* Place cursor */
 	move(y, x);
 
+#ifdef ANGDROID_SANGBAND_PLUGIN
+	if (x + n >= td->t.cols)
+#else
 	if (x + n >= td->t.wid)
+#endif
 		/* Clear to end of line */
 		clrtoeol();
 	else
@@ -912,11 +918,18 @@ void initGame ()
 	LOGD("angdroid.initGame");
 
 	/* Initialize the curses colors to our own RGB definitions */
-	for (int i = 0; i < BASIC_COLORS; i++) {
+	int i;
+	for (i = 0; i < BASIC_COLORS; i++) {
 		color_data[i] = ((u32b)(0xFF << 24))
+#ifdef ANGDROID_SANGBAND_PLUGIN
+			| ((u32b)(color_table[i].rv << 16))
+			| ((u32b)(color_table[i].gv << 8))
+			| ((u32b)(color_table[i].bv));
+#else
 			| ((u32b)(angband_color_table[i][1] << 16))
 			| ((u32b)(angband_color_table[i][2] << 8))
 			| ((u32b)(angband_color_table[i][3]));
+#endif
 	}
 
 	plog_aux = hook_plog;
