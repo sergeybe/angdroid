@@ -18,6 +18,31 @@ final public class Plugins {
 		}
 	}
 
+	public static int getKeyDown(Plugin p) {
+		switch (p) {
+		default: return '2';
+		}
+	}
+
+	public static int getKeyUp(Plugin p) {
+		switch (p) {
+		default: return '8';
+		}
+	}
+
+	public static int getKeyLeft(Plugin p) {
+		switch (p) {
+		default: return '4';
+		}
+	}
+
+	public static int getKeyRight(Plugin p) {
+		switch (p) {
+		default: return '6';
+		}
+	}
+
+
 	static final String DEFAULT_PROFILE = "0~Default~PLAYER~0~0";
 
 	public static ZipInputStream getPluginZip(int plugin) {

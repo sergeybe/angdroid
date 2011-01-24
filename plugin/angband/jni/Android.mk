@@ -6,11 +6,13 @@ LOCAL_MODULE := angband
 LOCAL_CFLAGS := -DUSE_AND -DANGDROID_ANGBAND_PLUGIN -std=c99
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include \
+$(LOCAL_PATH)/../../curses \
 $(LOCAL_PATH)/../extsrc/src
 
 LOCAL_LDLIBS := -llog
 
 LOCAL_SRC_FILES := \
+../../curses/curses.c \
 ../../common/angdroid.c \
 ../extsrc/src/player/calcs.c \
 ../extsrc/src/player/player.c \

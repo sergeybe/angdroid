@@ -18,6 +18,37 @@ final public class Plugins {
 		public int getId() {
 			return id;
 		}
+		public static Plugin convert(int value) {
+			return Plugin.class.getEnumConstants()[value];
+		}
+	}
+
+	public static int getKeyDown(Plugin p) {
+		switch (p) {
+		case Angband: return 0x8A;
+		default: return '2';
+		}
+	}
+
+	public static int getKeyUp(Plugin p) {
+		switch (p) {
+		case Angband: return 0x8D;
+		default: return '8';
+		}
+	}
+
+	public static int getKeyLeft(Plugin p) {
+		switch (p) {
+		case Angband: return 0x8B;
+		default: return '4';
+		}
+	}
+
+	public static int getKeyRight(Plugin p) {
+		switch (p) {
+		case Angband: return 0x8C;
+		default: return '6';
+		}
 	}
 
 	static final String DEFAULT_PROFILE = "0~Default~PLAYER~0~0|0~Borg~BORGSAVE~1~1";

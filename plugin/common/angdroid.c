@@ -75,62 +75,22 @@
  * Initial framework (and all code) by Ben Harrison (benh@phial.com).
  */
 
-
-#ifdef USE_AND
+#include <string.h>
+#include "curses.h"
 
 #ifndef ANGDROID_TOME_PLUGIN
 #include "main.h"
 #endif
 #ifdef ANGDROID_ANGBAND306_PLUGIN
+#define BASIC_COLORS 16
 #include "borg1.h"
 #endif
-
-#include "angdroid.h"
-#include <jni.h>
-#include <android/log.h>
-#include <pthread.h>
-#include <string.h>
-
-#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "Angband", __VA_ARGS__)
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "Angband", __VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO   , "Angband", __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN   , "Angband", __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR  , "Angband", __VA_ARGS__) 
-
-/* FIXME __android_log_write or __android_log_print ??? */
-#define LOG(msg) (__android_log_write(ANDROID_LOG_DEBUG, "Angband", (msg)));
-
-/*
- * JNI staff
- */
-
-/* JVM enviroment */
-static JavaVM *jvm;
-static JNIEnv *env;
-
-/* Classes */
-static jclass NativeWrapperClass;
-
-/* Objects */
-static jobject NativeWrapperObj;
-
-/* Methods of TermView */
-static jmethodID NativeWrapper_fatalError;
-static jmethodID NativeWrapper_warnError;
-static jmethodID NativeWrapper_text;
-static jmethodID NativeWrapper_wipe;
-static jmethodID NativeWrapper_clear;
-static jmethodID NativeWrapper_noise;
-static jmethodID NativeWrapper_refresh;
-static jmethodID NativeWrapper_getch;
-static jmethodID NativeWrapper_postInvalidate;
-static jmethodID NativeWrapper_setCursorXY;
-static jmethodID NativeWrapper_setCursorVisible;
-static jmethodID NativeWrapper_clearKeyBuffer;
 
 static char android_files_path[1024];
 static char android_savefile[50];
 static int turn_save = 0;
+
+static u32b color_data[BASIC_COLORS];
 
 /*
  * Extra data to associate with each "window"
@@ -175,84 +135,7 @@ static bool new_game = FALSE;
  */
 static term_data data[MAX_AND_TERM];
 
-/*
- * Often, it is helpful to create an array of "color data" containing
- * a representation of the "angband_color_table" array in some "local" form.
- *
- * Often, the "Term_xtra(TERM_XTRA_REACT, 0)" hook is used to initialize
- * "color_data" from "angband_color_table".  XXX XXX XXX
- */
-/*
-static local_color_data_type color_data[MAX_COLORS];
- */
-
-/*
-static errr CheckEvents(int wait);
-*/
-
-#ifdef ANGDROID_TOME_PLUGIN
-/*
- * The my_strcpy() function copies up to 'bufsize'-1 characters from 'src'
- * to 'buf' and NUL-terminates the result.  The 'buf' and 'src' strings may
- * not overlap.
- *
- * my_strcpy() returns strlen(src).  This makes checking for truncation
- * easy.  Example: if (my_strcpy(buf, src, sizeof(buf)) >= sizeof(buf)) ...;
- *
- * This function should be equivalent to the strlcpy() function in BSD.
- */
-size_t my_strcpy(char *buf, const char *src, size_t bufsize)
-{
-	size_t len = strlen(src);
-	size_t ret = len;
-
-	/* Paranoia */
-	if (bufsize == 0) return ret;
-
-	/* Truncate */
-	if (len >= bufsize) len = bufsize - 1;
-
-	/* Copy the string and terminate it */
-	(void)memcpy(buf, src, len);
-	buf[len] = '\0';
-
-	/* Return strlen(src) */
-	return ret;
-}
-
-
-/*
- * The my_strcat() tries to append a string to an existing NUL-terminated string.
- * It never writes more characters into the buffer than indicated by 'bufsize' and
- * NUL-terminates the buffer.  The 'buf' and 'src' strings may not overlap.
- *
- * my_strcat() returns strlen(buf) + strlen(src).  This makes checking for
- * truncation easy.  Example:
- * if (my_strcat(buf, src, sizeof(buf)) >= sizeof(buf)) ...;
- *
- * This function should be equivalent to the strlcat() function in BSD.
- */
-size_t my_strcat(char *buf, const char *src, size_t bufsize)
-{
-	size_t dlen = strlen(buf);
-
-	/* Is there room left in the buffer? */
-	if (dlen < bufsize - 1)
-	{
-		/* Append as much as possible  */
-		return (dlen + my_strcpy(buf + dlen, src, bufsize - dlen));
-	}
-	else
-	{
-		/* Return without appending */
-		return (dlen + strlen(src));
-	}
-}
-#endif /* ANGDROID_TOME_PLUGIN */
-
-
 /*** Function hooks needed by "Term" ***/
-
 
 /*
  * Init a new "term"
@@ -360,7 +243,8 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is required.
 			 */
 
-			key = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_getch, v);
+			key = angdroid_getch(v);
+
 			if (key == -1) {
 				LOGD("TERM_XTRA_EVENT.saving game");
 
@@ -397,7 +281,7 @@ static errr Term_xtra_and(int n, int v)
 				while (key != 0)
 				{
 					Term_keypress(key);
-					key = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_getch, v);
+					key = angdroid_getch(v);
 				}
 			}
 			else {
@@ -419,7 +303,8 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is required, but may not be "essential".
 			 */
 			//LOGD("TERM_XTRA_FLUSH");
-			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_clearKeyBuffer);
+
+			flushinp();
 
 			return 0;
 		}
@@ -435,7 +320,9 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is required.
 			 */
 			//LOGD("TERM_XTRA_CLEAR");
-			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_clear);
+			
+			clear();
+
 			return 0;
 		}
 
@@ -451,8 +338,9 @@ static errr Term_xtra_and(int n, int v)
 			 * efficiency (and attractiveness) of the program.
 			 */
 			//LOGD("TERM_XTRA_SHAPE");
-			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_setCursorVisible, v);
-			
+
+			curs_set(v);
+
 			return 0;
 		}
 
@@ -470,6 +358,7 @@ static errr Term_xtra_and(int n, int v)
 			 * necessary flushing issues.
 			 */
 			//LOGD("TERM_XTRA_FROSH");
+
 			return 0;
 		}
 
@@ -487,7 +376,9 @@ static errr Term_xtra_and(int n, int v)
 			 * necessary flushing issues.
 			 */
 			//LOGD("TERM_XTRA_FRESH");
-			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_postInvalidate);
+
+			refresh();
+
 			return 0;
 		}
 
@@ -501,7 +392,9 @@ static errr Term_xtra_and(int n, int v)
 			 * This action is optional, but convenient.
 			 */
 			//LOGD("TERM_XTRA_NOISE");
-			(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_noise);
+
+			noise();
+
 			return 0;
 		}
 
@@ -529,7 +422,6 @@ static errr Term_xtra_and(int n, int v)
 			 * "arg_graphics" options.
 			 */
 			//LOGD("TERM_XTRA_REACT");
-			
 			return 0;
 		}
 
@@ -621,7 +513,8 @@ static errr Term_curs_and(int x, int y)
 	//LOGD("Term_curs_and");
 
 	/* XXX XXX XXX */
-	(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_setCursorXY, x , y);
+
+	move(y,x);
 
 	/* Success */
 	return 0;
@@ -639,10 +532,19 @@ static errr Term_wipe_and(int x, int y, int n)
 {
 	term_data *td = (term_data*)(Term->data);
 
-	//LOGD("Term_wipe_and");
+	LOGD("Term_wipe_and");
 
 	/* XXX XXX XXX */
-	(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_wipe, x , y , n);
+
+	/* Place cursor */
+	move(y, x);
+
+	if (x + n >= td->t.wid)
+		/* Clear to end of line */
+		clrtoeol();
+	else
+		/* Clear some characters */
+		hline(' ', n);
 
 	/* Success */
 	return 0;
@@ -683,25 +585,21 @@ static errr Term_wipe_and(int x, int y, int n)
  */
 static errr Term_text_and(int x, int y, int n, byte a, const char *cp)
 {
-	char tmp[1024];
 	term_data *td = (term_data*)(Term->data);
-	jint ret;
 
-	jbyteArray array = (*env)->NewByteArray(env, n);
-	
-	if (array == NULL)
-	{
-		quit("Error: Out of memory");
+	if (a>=0 && a<BASIC_COLORS) angdroid_attrset(color_data[a]);
+	move(y, x);
+	addnstr(n, cp);
+	/*
+	while (n--) {
+		unsigned int c = (unsigned char) *(s++);
+		addch(c);
 	}
-
-	(*env)->SetByteArrayRegion(env, array, 0, n, cp);
-
-	ret = (*env)->CallIntMethod(env, NativeWrapperObj, NativeWrapper_text, x, y, n, a, array);
-
-	(*env)->DeleteLocalRef(env, array);
+	*/
+	angdroid_attrset(color_data[TERM_DARK]);
 
 	/* Success */
-	return ret;
+	return 0;
 }
 
 /*
@@ -818,6 +716,7 @@ static void term_data_link(int i)
 #ifndef ANGDROID_TOME_PLUGIN
 	t->pict_hook = Term_pict_and;
 #endif
+
 	/* Remember where we came from */
 	t->data = td;
 
@@ -830,11 +729,7 @@ static void term_data_link(int i)
 
 static void hook_plog(cptr str)
 {
-	if (str)
-	{
-		LOGW(str);
-		(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_warnError, (*env)->NewStringUTF(env, str));
-	}
+	angdroid_warn(str);
 }
 
 
@@ -843,19 +738,8 @@ static void hook_plog(cptr str)
  */
 static void hook_quit(cptr str)
 {
-	if (str) {
-		LOGE(str);
-
-		(*env)->CallVoidMethod(env, NativeWrapperObj, NativeWrapper_fatalError, (*env)->NewStringUTF(env, str));
-
-	}
-
-
 	LOGD("hook_quit()");
-
-	(*jvm)->DetachCurrentThread(jvm);
-
-	pthread_exit(NULL);
+	angdroid_quit(str);
 }
 
 /*
@@ -945,6 +829,8 @@ static void and_sound(int v)
 
 static void init_stuff()
 {
+	LOGD("angdroid.init_stuff");
+
 	/* Prepare the path XXX XXX XXX */
 	/* This must in some way prepare the "path" variable */
 	/* so that it points at the "lib" directory.  Every */
@@ -1021,10 +907,17 @@ bool private_check_user_directory(cptr dirpath)
 	return TRUE;
 }
 
-#ifdef ANDROID
 void initGame ()
 {
-	//LOGD("angdroid.initGame");
+	LOGD("angdroid.initGame");
+
+	/* Initialize the curses colors to our own RGB definitions */
+	for (int i = 0; i < BASIC_COLORS; i++) {
+		color_data[i] = ((u32b)(0xFF << 24))
+			| ((u32b)(angband_color_table[i][1] << 16))
+			| ((u32b)(angband_color_table[i][2] << 8))
+			| ((u32b)(angband_color_table[i][3]));
+	}
 
 	plog_aux = hook_plog;
 	quit_aux = hook_quit;
@@ -1034,33 +927,8 @@ void initGame ()
 	/* XXX XXX XXX */
 	ANGBAND_SYS = "and";
 
-#ifdef SET_UID
-
-	/* Get the user id */
-	player_uid = getuid();
-
-	/* Save the effective GID for later recall */
-	player_egid = getegid();
-
-#endif /* SET_UID */
-
 	/* Initialize some stuff */
 	init_stuff();
-
-
-	/* NativeWrapper Methods */
-	NativeWrapper_fatalError = (*env)->GetMethodID(env, NativeWrapperClass, "fatalError", "(Ljava/lang/String;)V");	
-	NativeWrapper_warnError = (*env)->GetMethodID(env, NativeWrapperClass, "warnError", "(Ljava/lang/String;)V");
-	NativeWrapper_text = (*env)->GetMethodID(env, NativeWrapperClass, "text", "(IIIB[B)I");
-	NativeWrapper_wipe = (*env)->GetMethodID(env, NativeWrapperClass, "wipe", "(III)V");
-	NativeWrapper_clear = (*env)->GetMethodID(env, NativeWrapperClass, "clear", "()V");
-	NativeWrapper_noise = (*env)->GetMethodID(env, NativeWrapperClass, "noise", "()V");
-	NativeWrapper_refresh = (*env)->GetMethodID(env, NativeWrapperClass, "refresh", "()V");
-	NativeWrapper_getch = (*env)->GetMethodID(env, NativeWrapperClass, "getch", "(I)I");
-	NativeWrapper_postInvalidate = (*env)->GetMethodID(env, NativeWrapperClass, "postInvalidate", "()V");
-	NativeWrapper_setCursorXY = (*env)->GetMethodID(env, NativeWrapperClass, "setCursorXY", "(II)V");
-	NativeWrapper_setCursorVisible = (*env)->GetMethodID(env, NativeWrapperClass, "setCursorVisible", "(I)V");
-	NativeWrapper_clearKeyBuffer = (*env)->GetMethodID(env, NativeWrapperClass, "clearKeyBuffer", "()V");
 
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	/* Set up the command hook */
@@ -1074,31 +942,15 @@ void initGame ()
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
-JNIEXPORT jstring JNICALL angdroid_gameQueryString
-	(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
-{
-	return (jstring)0; // null indicates error
-}
-
-JNIEXPORT jint JNICALL angdroid_gameQueryInt
-	(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
-{
-	jint result = -1; // -1 indicates error
-
-	// process argc/argv 
-	jstring argv0 = NULL;
-	int i = 0;
-
-	argv0 = (*env1)->GetObjectArrayElement(env1, argv, i);
-	const char *copy_argv0 = (*env1)->GetStringUTFChars(env1, argv0, 0);
-
-	if (strcmp(copy_argv0,"pv")==0) {
+int queryInt(const char* argv0) {
+	int result = -1;
+	if (strcmp(argv0,"pv")==0) {
 		result = 1;
 	}
-	else if (strcmp(copy_argv0,"px")==0) {
+	else if (strcmp(argv0,"px")==0) {
 		result = p_ptr->px;
 	}
-	else if (strcmp(copy_argv0,"rl")==0) {
+	else if (strcmp(argv0,"rl")==0) {
 		result = 0;
 #if defined (ANGDROID_ANGBAND_PLUGIN) 
 		if (op_ptr && OPT(rogue_like_commands)) result=1;
@@ -1109,81 +961,63 @@ JNIEXPORT jint JNICALL angdroid_gameQueryInt
 	else {
 		result = -1; //unknown command
 	}
-
-	(*env1)->ReleaseStringUTFChars(env1, argv0, copy_argv0);
-
 	return result;
 }
 
-JNIEXPORT void JNICALL angdroid_gameStart
-(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
-{
-	env = env1;
-
-	if ((*env)->GetJavaVM(env, &jvm) < 0)
-	{
-		LOGE("Error: Can't get JavaVM!");
+void angdroid_process_argv(int i, const char* argv) {
+	switch(i){
+	case 0: //files path
+		my_strcpy(android_files_path, argv, strlen(argv)+1);
+		break;
+	case 1: //savefile
+		my_strcpy(android_savefile, argv, strlen(argv)+1);
+		break;
+	default:
+		break;
 	}
+}
 
-	(*jvm)->AttachCurrentThread(jvm, &env, NULL);
+void angdroid_main() {
 
-	// process argc/argv 
-	jstring argv0 = NULL;
-	int i;
-	for(i = 0; i < argc; i++) {
-		argv0 = (*env1)->GetObjectArrayElement(env1, argv, i);
-		const char *copy_argv0 = (*env1)->GetStringUTFChars(env1, argv0, 0);
-
-		LOGD("loader argv%d = %s",i,copy_argv0);
-
-		switch(i){
-		case 0: //files path
-			my_strcpy(android_files_path, copy_argv0, strlen(copy_argv0)+1);
-			break;
-		case 1: //savefile
-			my_strcpy(android_savefile, copy_argv0, strlen(copy_argv0)+1);
-			break;
-		default:
-			break;
-		}
-
-		(*env1)->ReleaseStringUTFChars(env1, argv0, copy_argv0);
-	}
-
-	/* Save objects */
-	NativeWrapperObj = obj1;
-
-	/* Get NativeWrapper class */
-	NativeWrapperClass = (*env)->GetObjectClass(env, NativeWrapperObj);
+	LOGD("angdroid_main()");
 
 	initGame();
 
-	/* Start main loop of game */
-	LOGD("angdroid_gameStart.play_game()");
+	/*
+	angdroid_attrset(color_data[1]);
+	move(10,2);
+	addnstr(5,"Hello!!");
+	angdroid_attrset(color_data[5]);
+	addstr(" World");
+	angdroid_attrset(color_data[10]);
+	addstr("!!!");
+	refresh();
+	while(1) usleep(1000);
+	*/
+
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	play_game();
-#else
-#ifdef ANGDROID_SANGBAND_PLUGIN
-	/* Wait for response */
-	pause_line(Term->rows - 1);
-	play_game(FALSE);
-#else
-	/* Wait for response */
-	pause_line(Term->hgt - 1);
-	play_game(FALSE);
-#endif /* ANGDROID_SANGBAND_PLUGIN */
-#endif /* ANGDROID_ANGBAND_PLUGIN */
-
-#ifndef ANGDROID_TOME_PLUGIN
-	/* Free resources */
-	LOGD("angdroid_gameStart.cleanup_angband()");
 	cleanup_angband();
 #endif
 
-	LOGD("angdroid_gameStart.exit normally");
-	quit(NULL);
-}
-
+#ifdef ANGDROID_SANGBAND_PLUGIN
+	pause_line(Term->rows - 1);
+	play_game(FALSE);
+	cleanup_angband();
 #endif
 
-#endif /* USE_AND */
+#if defined (ANGDROID_ANGBAND306_PLUGIN) 
+	pause_line(Term->hgt - 1);
+	play_game(FALSE);
+	cleanup_angband();
+#endif 
+
+#if defined (ANGDROID_TOME_PLUGIN)
+	pause_line(Term->hgt - 1);
+	play_game(FALSE);
+	//cleanup_angband(); todo
+#endif 
+
+	LOGD("angdroid_main exit normally");
+	quit(NULL);
+}

@@ -217,11 +217,11 @@ public class AngbandActivity extends Activity {
 		switch (aItem.getItemId()) {
 		case CONTEXTMENU_FITWIDTH_ITEM:
 			term.autoSizeFontByWidth(0);
-			state.nativew.redraw();
+			state.nativew.resize();
 			return true; 
 		case CONTEXTMENU_FITHEIGHT_ITEM:
 			term.autoSizeFontByHeight(0);
-			state.nativew.redraw();
+			state.nativew.resize();
 			return true; 
 		case CONTEXTMENU_VKEY_ITEM:
 			if(Preferences.isScreenPortraitOrientation())
@@ -258,12 +258,12 @@ public class AngbandActivity extends Activity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		return term.onKeyDown(keyCode,event);
+		return state.keyBuffer.onKeyDown(keyCode,event);
 	}
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		return term.onKeyUp(keyCode,event);
+		return state.keyBuffer.onKeyUp(keyCode,event);
 	}
 
 	public void setScreen() {

@@ -11,6 +11,9 @@
     <target name="angband-release">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-release" />
     </target>
+    <target name="angband-plugin-src">
+	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="plugin-src" />
+    </target>
 
     <target name="variants-debug" depends="variants-copy">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-debug" />
