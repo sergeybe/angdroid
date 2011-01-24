@@ -3,15 +3,17 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := tome
-LOCAL_CFLAGS := -DUSE_AND -DHAS_USLEEP -DANGDROID_TOME_PLUGIN
+LOCAL_CFLAGS := -DUSE_AND -DHAS_USLEEP -DANGDROID_TOME_PLUGIN -DUSE_MY_STR
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include \
+$(LOCAL_PATH)/../../curses \
 $(LOCAL_PATH)/../extsrc/src \
 $(LOCAL_PATH)/../extsrc/src/lua
 
 LOCAL_LDLIBS := -llog
 
 LOCAL_SRC_FILES := \
+../../curses/curses.c \
 ../../common/angdroid.c \
 ../extsrc/src/birth.c \
 ../extsrc/src/bldg.c \

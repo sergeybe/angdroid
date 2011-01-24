@@ -6,11 +6,13 @@ LOCAL_MODULE := sang
 LOCAL_CFLAGS := -DUSE_AND -DHAVE_MKSTEMP -DUSE_BACKQUOTE_AS_ESCAPE -DANGDROID_SANGBAND_PLUGIN
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include \
+$(LOCAL_PATH)/../../curses \
 $(LOCAL_PATH)/../extsrc/src
 
 LOCAL_LDLIBS := -llog
 
 LOCAL_SRC_FILES := \
+../../curses/curses.c \
 ../../common/angdroid.c \
 ../extsrc/src/attack.c \
 ../extsrc/src/birth.c \

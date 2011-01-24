@@ -113,6 +113,10 @@ int curs_set(int v) {
 }
 
 /*
+
+WINDOW* newwin() {
+}
+
 int overwrite(const WINDOW *src, WINDOW *dst){
 	return 0;
 }

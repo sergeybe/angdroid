@@ -16,6 +16,9 @@ final public class Plugins {
 		public int getId() {
 			return id;
 		}
+		public static Plugin convert(int value) {
+			return Plugin.class.getEnumConstants()[value];
+		}
 	}
 
 	public static int getKeyDown(Plugin p) {
