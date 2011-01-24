@@ -19,7 +19,7 @@ public class AngbandDialog {
 			,GameFatalAlert
 			,GameWarnAlert
 			,StartGame
-			,OnGameExiting;
+			,OnGameExit;
 
 		public static Action convert(int value)
 		{
@@ -57,8 +57,8 @@ public class AngbandDialog {
 		case StartGame: // start angband
 			state.gameThread.send(GameThread.Request.StartGame);
 			break;
-		case OnGameExiting: // angband is exiting
-			state.gameThread.send(GameThread.Request.OnGameExiting);
+		case OnGameExit: // angband is exiting
+			state.gameThread.send(GameThread.Request.OnGameExit);
 			break;
 		}
 	}

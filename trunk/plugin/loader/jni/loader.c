@@ -32,7 +32,7 @@ pthread_mutex_t muGame = PTHREAD_MUTEX_INITIALIZER;
 
 static jclass NativeWrapperClass;
 static jobject NativeWrapperObj;
-static jmethodID NativeWrapper_onExitGame;
+static jmethodID NativeWrapper_onGameExit;
 
 void* run_angband(void* foo)
 {
@@ -70,7 +70,7 @@ void gameStart
 	/* Init exit game callback */
 	NativeWrapperObj = obj1;
 	NativeWrapperClass = (*env1)->GetObjectClass(env1, NativeWrapperObj);
-	NativeWrapper_onExitGame = (*env1)->GetMethodID(env1, NativeWrapperClass, "onExitGame", "()V");
+	NativeWrapper_onGameExit = (*env1)->GetMethodID(env1, NativeWrapperClass, "onGameExit", "()V");
 
 	// load game plugin lib
 	const char *copy_pluginPath = (*env1)->GetStringUTFChars(env1, pluginPath, 0);
@@ -110,8 +110,7 @@ void gameStart
 	angdroid_gameQueryString = NULL;
 
 	// signal game has exited
-	//LOGD("loader.call NativeWrapper.onExitGame");
-	(*env1)->CallVoidMethod(env1, NativeWrapperObj, NativeWrapper_onExitGame);
+	(*env1)->CallVoidMethod(env1, NativeWrapperObj, NativeWrapper_onGameExit);
 
 	//LOGD("loader.unlock mutexes");
 	// end synchronize

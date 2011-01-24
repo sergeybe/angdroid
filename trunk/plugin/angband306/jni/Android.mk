@@ -3,15 +3,17 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := angband306
-LOCAL_CFLAGS := -DUSE_AND -DHAVE_MKSTEMP -DANGDROID_ANGBAND306_PLUGIN
+LOCAL_CFLAGS := -DUSE_AND -DHAVE_MKSTEMP -DANGDROID_ANGBAND306_PLUGIN -std=c99
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include \
+$(LOCAL_PATH)/../../curses \
 $(LOCAL_PATH)/../extsrc/src
 
 LOCAL_LDLIBS := -llog
 
 # note: includes 3.0.6 squelch & borg patches
 LOCAL_SRC_FILES := \
+../../curses/curses.c \
 ../../common/angdroid.c \
 ../extsrc/src/birth.c \
 ../extsrc/src/borg1.c \

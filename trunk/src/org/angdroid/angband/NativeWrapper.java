@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import android.os.Handler;
 import android.os.Message;
+import android.view.KeyEvent;
 
 import android.util.Log;
 	
@@ -21,7 +22,6 @@ public class NativeWrapper {
 
 	// Call native methods from library
 	native void gameStart(String pluginPath, int argc, String[] argv);
-	native int gameQueryRedraw(int x1, int y1, int x2, int y2);
 	native int gameQueryInt(int argc, String[] argv);
 	native String gameQueryString(int argc, String[] argv);
 
@@ -42,33 +42,43 @@ public class NativeWrapper {
 	}
 
 	//this is called from native thread just before exiting
-	public void onExitGame() {
-		//Log.d("Angband","NativeWrapper.onExitGame.sendEmptyMessage.OnGameExiting");
-		handler.sendEmptyMessage(AngbandDialog.Action.OnGameExiting.ordinal());
+	public void onGameExit() {
+		handler.sendEmptyMessage(AngbandDialog.Action.OnGameExit.ordinal());
 	}
 
-	public void redraw() {
+	public boolean onGameStart() {
 		synchronized (display_lock) {
-			term.onXbandStarting();
-			term.redraw(state.charBuffer, state.colorBuffer);
+			return term.onGameStart();
 		}
 	}
 
-	public void onGameStarting() {
+	public void increaseFontSize() {
 		synchronized (display_lock) {
-			term.onXbandStarting();
+			term.increaseFontSize();
+			resize();
 		}
 	}
 
-	public void onGameStopping() {
-		term.onXbandStopping();
+	public void decreaseFontSize() {
+		synchronized (display_lock) {
+			term.decreaseFontSize();
+			resize();
+		}
 	}
 
-	public void clearKeyBuffer() {
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		return term.onKeyUp(keyCode,event);
+	}
+
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		return term.onKeyDown(keyCode,event);
+	}
+
+	public void flushinp() {
 		state.keyBuffer.clear();
 	}
 
-	public void fatalError(String msg) {
+	public void fatal(String msg) {
 		synchronized (display_lock) {
 			state.fatalMessage = msg;
 			state.fatalError = true;
@@ -76,7 +86,7 @@ public class NativeWrapper {
 		}
 	}
 
-	public void warnError(String msg) {
+	public void warn(String msg) {
 		synchronized (display_lock) {
 			state.warnMessage = msg;
 			state.warnError = true;
@@ -84,64 +94,66 @@ public class NativeWrapper {
 		}
 	}
 
-	public int text(final int x, final int y, final int n, final byte a,
-					final byte[] cp) {
-
+	public void resize() {
 		synchronized (display_lock) {
-			byte c;
-			int col = x;
-			int row = y;
+			term.onGameStart();
+			refresh(state.stdscr, true);
+		}
+	}
 
-			for (int i = 0; i < n; i++) {
-				c = cp[i];
-				if (c > 19 && c < 128) {
-					
-					cachePoint(col,row,(char)c,a);
+	public void refresh() {
+		synchronized (display_lock) {
+			refresh(state.stdscr, false);
+		}
+	}
 
-					col++;
-					if (col >= Preferences.cols) {
-						row++;
-						col = 0;
-					}
-					if (row >= Preferences.rows) {
-						row = Preferences.rows-1;
+	private void refresh(TermWindow w, boolean resize) {
+		synchronized(display_lock) {
+			for(int r = 0; r<w.rows; r++) {
+				for(int c = 0; c<w.cols; c++) {
+					TermWindow.TermPoint p = w.buffer[r][c];
+					if (p.isDirty || resize) {
+						//Log.d("Angband","TermView.refresh -- dirty '"+p.Char+"'");
+						term.drawPoint(r, c, p.Char, p.Color);
+						p.isDirty = false;
 					}
 				}
 			}
 
-			if (term != null) return term.text(x,y,n,a,cp);
-			else return 0;
+			term.postInvalidate();
+		
+			if (resize)
+				term.onScroll(null,null,0,0);  // sanitize scroll position
 		}
 	}
 
-	private void cachePoint(int acol, int arow, char c, byte a) {
-		if (acol>-1 && acol<Preferences.cols 
-			&& arow>-1 && arow<Preferences.rows) {
-			state.charBuffer[acol][arow] = c;
-			state.colorBuffer[acol][arow] = a;
-		}
-		else {
-			Log.d("Angband","text out of bounds: "+acol+","+arow);
-		}
-	} 
-
-	public void wipe(final int row, final int col, final int n) {
+	public void addnstr(final int n, final byte[] cp) {
 		synchronized (display_lock) {
-			cachePoint(col,row,'\0',(byte)0);
-			if (term != null) term.wipe(row,col,n);
+			state.stdscr.addnstr(n, cp);
+		}
+	}
+
+	public void attrset(final int a) {
+		synchronized (display_lock) {
+			state.stdscr.attrset(a);
+		}
+	}
+
+	public void hline(final byte c, final int n) {
+		synchronized (display_lock) {
+			state.stdscr.hline((char)c, n);
 		}
 	}
 
 	public void clear() {
 		synchronized (display_lock) {
-			for(int r=0;r<Preferences.rows;r++) {
-				for(int c=0;c<Preferences.cols;c++) {
-					state.charBuffer[c][r] = '\0';
-					state.colorBuffer[c][r] = 0;
-				}
-			}
+			state.stdscr.clear();
+		}
+	}
 
-			if (term != null) term.clear();
+	public void clrtoeol() {
+		synchronized (display_lock) {
+			state.stdscr.clrtoeol();
 		}
 	}
 
@@ -151,34 +163,17 @@ public class NativeWrapper {
 		}
 	}
 
-	public void refresh() {
+	public void move(final int y, final int x) {
 		synchronized (display_lock) {
-			if (term != null) term.refresh();
-		}
-	}
-	public void move(final int col, final int row) {
-		synchronized (display_lock) {
-			if (term != null) term.move(col,row);
-		}
+			state.stdscr.move(y,x);
+		}		
 	}
 
-	public void setCursorXY(final int x, final int y) {
-		//Log.d("Angband", "setCursor() x = " + x + ", y = " + y);
-		state.cur_x = x;
-		state.cur_y = y;
-	}
-
-	public void setCursorVisible(final int v) {
+	public void curs_set(final int v) {
 		if (v == 1) {
-			state.cursor_visible = true;
+			state.stdscr.cursor_visible = true;
 		} else if (v == 0) {
-			state.cursor_visible = false;
-		}
-	}
-
-	public void postInvalidate() {
-		synchronized (display_lock) {
-			if (term != null) term.postInvalidate();
+			state.stdscr.cursor_visible = false;
 		}
 	}
 }

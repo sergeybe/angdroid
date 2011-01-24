@@ -11,7 +11,7 @@ public class GameThread implements Runnable {
 		StartGame
 			,StopGame
 			,SaveGame
-			,OnGameExiting;
+			,OnGameExit;
 
 		public static Request convert(int value)
 		{
@@ -51,8 +51,8 @@ public class GameThread implements Runnable {
 		case SaveGame:
 			save();
 			break;
-		case OnGameExiting:
-			onGameExiting();
+		case OnGameExit:
+			onGameExit();
 			break;
 		}
 	}
@@ -86,7 +86,7 @@ public class GameThread implements Runnable {
 			}
 			else {
 				//Log.d("Angband","startBand.redrawing");
-				nativew.redraw();
+				state.nativew.resize();
 			}			
 		}
 		else {
@@ -98,10 +98,10 @@ public class GameThread implements Runnable {
 			installer.checkInstall();
 
 			/* notify wrapper game is about to start */
-			nativew.onGameStarting();
+			nativew.onGameStart();
 			
  			/* initialize keyboard buffer */
-			state.keyBuffer = new KeyBuffer(nativew);
+			state.keyBuffer = new KeyBuffer(state);
 
 			game_thread_running = true;
 
@@ -159,10 +159,10 @@ public class GameThread implements Runnable {
 		state.keyBuffer.signalSave();
 	}
 
-	private void onGameExiting() {
+	private void onGameExit() {
 		boolean local_restart = false;
 			
-		Log.d("Angband","GameThread.onGameExiting()");
+		Log.d("Angband","GameThread.onGameExit()");
 		game_thread_running = false;
 		game_fully_initialized = false;
 
@@ -207,7 +207,7 @@ public class GameThread implements Runnable {
 		if (state.installState != StateManager.InstallState.Success) {
 			//Log.d("Angband","run.sending fatal message");
 			handler.sendEmptyMessage(AngbandDialog.Action.InstallFatalAlert.ordinal());
-			onGameExiting();
+			onGameExit();
 			return;
 		}
 

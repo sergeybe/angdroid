@@ -1,20 +1,20 @@
 package org.angdroid.angband;
 
 import android.os.Handler;
+import java.util.Map;
+import java.util.HashMap;
 
 public class StateManager {
 	/* screen state */
-	public char[][] charBuffer = null; 
-	public byte[][] colorBuffer = null; 
-	public boolean cursor_visible;
-	public int cur_x = 0;
-	public int cur_y = 0;
+	public Map<Integer,TermWindow> termwins = null;
+	public TermWindow stdscr = null;
 
 	/* alert dialog state */
 	public boolean fatalError = false;
 	public boolean warnError = false;
 	public String fatalMessage = "";
 	public String warnMessage = "";
+	public Plugins.Plugin currentPlugin;
 
 	/* progress dialog state */
 	public static String progress_lock = "lock";
@@ -46,8 +46,10 @@ public class StateManager {
 	public static InstallState installState = InstallState.Unknown;
 
 	StateManager() {
-		colorBuffer = new byte[Preferences.cols][Preferences.rows];
-		charBuffer = new char[Preferences.cols][Preferences.rows];
+		termwins = new HashMap<Integer,TermWindow>();
+		stdscr = new TermWindow(Preferences.rows,Preferences.cols,0,0);
+		termwins.put(0,stdscr);
+
 		nativew = new NativeWrapper(this);
 		gameThread = new GameThread(this, nativew);
 	}
@@ -55,6 +57,13 @@ public class StateManager {
 	public void link(TermView t, Handler h) {
 		nativew.link(t, h);
 		gameThread.link(h);		
+	}
+
+	public TermWindow getWin(int handle) {
+		if (termwins.containsKey(handle))
+			return termwins.get(handle);
+		else
+			return null;
 	}
 
 	public String getInstallError() {
@@ -76,5 +85,18 @@ public class StateManager {
 
 	public String getWarnError() {
 		return "Angband sent the following warning: "+warnMessage;
+	}
+
+	public int getKeyUp() {
+		return Plugins.getKeyUp(currentPlugin);
+	}
+	public int getKeyDown() {
+	    return Plugins.getKeyDown(currentPlugin);
+	}
+	public int getKeyLeft() {
+		return Plugins.getKeyLeft(currentPlugin);
+	}
+	public int getKeyRight() {
+		return Plugins.getKeyRight(currentPlugin);
 	}
 }
