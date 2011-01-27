@@ -4,7 +4,9 @@
 #define JAVA_CALL_INT(...) ((*env)->CallIntMethod(env, NativeWrapperObj, __VA_ARGS__))
 #define JAVA_METHOD(m,s) ((*env)->GetMethodID(env, NativeWrapperClass, m, s))
 
-WINDOW* stdscr = (void*)0;
+WINDOW _stdscr = {0};
+WINDOW* stdscr = &_stdscr;
+WINDOW _newwin = {0};
 
 /* JVM enviroment */
 static JavaVM *jvm;
@@ -18,15 +20,21 @@ static jmethodID NativeWrapper_fatal;
 static jmethodID NativeWrapper_warn;
 static jmethodID NativeWrapper_addnstr;
 static jmethodID NativeWrapper_attrset;
+static jmethodID NativeWrapper_overwrite;
+static jmethodID NativeWrapper_touchwin;
 static jmethodID NativeWrapper_hline;
 static jmethodID NativeWrapper_clear;
 static jmethodID NativeWrapper_clrtoeol;
+static jmethodID NativeWrapper_clrtobot;
 static jmethodID NativeWrapper_noise;
+static jmethodID NativeWrapper_newwin;
 static jmethodID NativeWrapper_refresh;
 static jmethodID NativeWrapper_getch;
 static jmethodID NativeWrapper_move;
 static jmethodID NativeWrapper_curs_set;
 static jmethodID NativeWrapper_flushinp;
+static jmethodID NativeWrapper_getcury;
+static jmethodID NativeWrapper_getcurx;
 
 /*
    does not take curses standard attribute pair,
@@ -94,37 +102,43 @@ int clear(void){
 	return 0;
 }
 
-/*
+int initscr() {
+	return 0;
+}
+
 int clrtobot(void){
+	JAVA_CALL(NativeWrapper_clrtobot);
 	return 0;
 }
 
 int getcurx(WINDOW *w){
-	return 0;
+	return JAVA_CALL_INT(NativeWrapper_getcurx);
 }
 
 int getcury(WINDOW *w){
-	return 0;
+	return JAVA_CALL_INT(NativeWrapper_getcury);
 }
-*/
 
 int curs_set(int v) {
 	JAVA_CALL(NativeWrapper_curs_set, v);
 }
 
-/*
-
-WINDOW* newwin() {
+WINDOW* newwin(int rows, int cols, 
+			   int begin_y, int begin_x) {
+	int k = JAVA_CALL_INT(NativeWrapper_newwin, rows,cols,begin_y,begin_x);
+	_newwin.w = k; //hack!
+	return &_newwin;
 }
 
 int overwrite(const WINDOW *src, WINDOW *dst){
+	JAVA_CALL(NativeWrapper_overwrite, src->w, dst->w);
 	return 0;
 }
 
 int touchwin(WINDOW *w){
+	JAVA_CALL(NativeWrapper_touchwin, w->w);
 	return 0;
 }
-*/
 
 int refresh(void){
 	JAVA_CALL(NativeWrapper_refresh);
@@ -184,12 +198,18 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	NativeWrapper_warn = JAVA_METHOD("warn", "(Ljava/lang/String;)V");
 	NativeWrapper_addnstr = JAVA_METHOD("addnstr", "(I[B)V");
 	NativeWrapper_attrset = JAVA_METHOD("attrset", "(I)V");
+	NativeWrapper_overwrite = JAVA_METHOD("overwrite", "(II)V");
+	NativeWrapper_touchwin = JAVA_METHOD("touchwin", "(I)V");
 	NativeWrapper_hline = JAVA_METHOD("hline", "(BI)V");
-	NativeWrapper_clrtoeol= JAVA_METHOD("clrtoeol", "()V");
+	NativeWrapper_clrtobot = JAVA_METHOD("clrtobot", "()V");
+	NativeWrapper_clrtoeol = JAVA_METHOD("clrtoeol", "()V");
 	NativeWrapper_clear = JAVA_METHOD("clear", "()V");
 	NativeWrapper_noise = JAVA_METHOD("noise", "()V");
 	NativeWrapper_refresh = JAVA_METHOD("refresh", "()V");
 	NativeWrapper_getch = JAVA_METHOD("getch", "(I)I");
+	NativeWrapper_getcury = JAVA_METHOD("getcury", "()I");
+	NativeWrapper_getcurx = JAVA_METHOD("getcurx", "()I");
+	NativeWrapper_newwin = JAVA_METHOD("newwin", "(IIII)I");
 	NativeWrapper_move = JAVA_METHOD("move", "(II)V");
 	NativeWrapper_curs_set = JAVA_METHOD("curs_set", "(I)V");
 	NativeWrapper_flushinp = JAVA_METHOD("flushinp", "()V");

@@ -3,6 +3,9 @@
 #include <android/log.h>
 #include <pthread.h>
 
+#define LINES 24
+#define COLS 80
+
 #define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "Angband", __VA_ARGS__)
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "Angband", __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO   , "Angband", __VA_ARGS__)
@@ -29,6 +32,7 @@ int hline(const char, int);
 int clrtobot(void);
 int clrtoeol(void);
 int clear(void);
+int initscr(void);
 int curs_set(int);
 int getcurx(WINDOW *);
 int getcury(WINDOW *);
