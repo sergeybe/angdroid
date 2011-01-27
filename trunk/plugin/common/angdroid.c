@@ -947,7 +947,7 @@ void initGame ()
 	/* Set up the command hook */
 	cmd_get_hook = and_get_cmd;
 
-	//LOGD("init_display()");
+	LOGD("init_display()");
 	init_display();
 #else
 	LOGD("init_angband()");
@@ -1009,6 +1009,7 @@ void angdroid_main() {
 	*/
 
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
+	LOGD("play_game()");
 	play_game();
 	cleanup_angband();
 #endif

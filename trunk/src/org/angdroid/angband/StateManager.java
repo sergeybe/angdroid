@@ -47,7 +47,7 @@ public class StateManager {
 
 	StateManager() {
 		termwins = new HashMap<Integer,TermWindow>();
-		stdscr = new TermWindow(Preferences.rows,Preferences.cols,0,0);
+		stdscr = new TermWindow(0,0,0,0);
 		termwins.put(0,stdscr);
 
 		nativew = new NativeWrapper(this);

@@ -113,7 +113,6 @@ public class NativeWrapper {
 				for(int c = 0; c<w.cols; c++) {
 					TermWindow.TermPoint p = w.buffer[r][c];
 					if (p.isDirty || resize) {
-						//Log.d("Angband","TermView.refresh -- dirty '"+p.Char+"'");
 						term.drawPoint(r, c, p.Char, p.Color);
 						p.isDirty = false;
 					}
@@ -157,6 +156,12 @@ public class NativeWrapper {
 		}
 	}
 
+	public void clrtobot() {
+		synchronized (display_lock) {
+			state.stdscr.clrtobot();
+		}
+	}
+
 	public void noise() {
 		synchronized (display_lock) {
 			if (term != null) term.noise();
@@ -175,5 +180,39 @@ public class NativeWrapper {
 		} else if (v == 0) {
 			state.stdscr.cursor_visible = false;
 		}
+	}
+
+	public void touchwin (final int w) {
+		synchronized (display_lock) {
+			state.getWin(w).touch();
+		}		
+	}
+
+	public int newwin (final int rows, final int cols, 
+						final int begin_y, final int begin_x) {
+		synchronized (display_lock) {
+			if (state.termwins.size()>1)
+				return 1; //hack!
+			else {
+				TermWindow w = new TermWindow(rows,cols,begin_y,begin_x);
+				int key = state.termwins.size();
+				state.termwins.put(key,w);
+				return key;
+			}
+		}		
+	}
+
+	public void overwrite (final int wsrc, final int wdst) {
+		synchronized (display_lock) {
+			state.getWin(wdst).overwrite(state.getWin(wsrc));
+		}		
+	}
+
+	int getcury() {
+		return state.stdscr.getcury();
+	}
+
+	int getcurx() {
+		return state.stdscr.getcurx();
 	}
 }

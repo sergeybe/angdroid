@@ -32,6 +32,7 @@
 		  <exclude name="**/libs/armeabi/**" />
 		  <exclude name="**/override/**" />
 		  <exclude name="**/plugin/angband/**" />
+		  <exclude name="**/plugin/frogknows/**" />
 		  <exclude name="**/plugin/angband306/**" />
 		  <exclude name="**/plugin/include/*.h" />
 		  <exclude name="**/plugin/loader/libs/**" />
