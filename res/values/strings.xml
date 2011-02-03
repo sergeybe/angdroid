@@ -6,7 +6,7 @@
     <string-array name="gamePluginDescriptions">
 	  <item>Vanilla 3.2.0</item> 
       <item>Vanilla 3.0.6 squelch+borg</item>
-      <item>Vanilla 2.4.frogknows</item>
+      <item>Vanilla 2.4.Frog-knows</item>
     </string-array>
     <string-array name="gamePluginNames">
       <item>angband</item> 
@@ -78,4 +78,25 @@
       <item>1</item>
       <item>2</item>
     </string-array>
+
+	<string-array name="keyActionDescriptions">
+		<item>None</item>
+		<item>Ctrl Key</item>
+		<item>Esc Key</item>
+		<item>Shift Key</item>
+		<item>Virtual Keyboard</item>
+		<item>Zoom In</item>
+		<item>Zoom Out</item>
+		<item>Forward to System</item>
+	</string-array>
+	<string-array name="keyActions">
+		<item>None</item>
+		<item>CtrlKey</item>
+		<item>EscKey</item>
+		<item>ShiftKey</item>
+		<item>VirtualKeyboard</item>
+		<item>ZoomIn</item>
+		<item>ZoomOut</item>
+		<item>ForwardToSystem</item>
+	</string-array>
 </resources>

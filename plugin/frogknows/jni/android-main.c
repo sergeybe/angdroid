@@ -124,13 +124,13 @@ void textcolor(int c){
 		rgb = 0xFF008040;		
 		break;
 	case CYAN:
-		rgb = 0xFF00A0A0;
+		rgb = 0xFF00B0B0; //0xFF00A0A0;
 		break;
 	case RED:
 		rgb = 0xFFC00000;
 		break;
 	case MAGENTA:
-		rgb = 0xFFFF00A0;
+		rgb = 0xFFFF00B0; //0xFFFF00A0;
 		break;
 	case BROWN: 
 		rgb = 0xFFC08040;
@@ -142,19 +142,19 @@ void textcolor(int c){
 		rgb = 0xFF808080;
 		break;
 	case LIGHTBLUE:
-		rgb = 0xFF00FFFF;
+		rgb = 0xFF00EFFF;
 		break;
 	case LIGHTGREEN: 
 		rgb = 0xFF00FF00;
 		break;
 	case LIGHTCYAN:	
-		rgb = 0xFF20FFDC;
+		rgb = 0xFF10FFCC; //0xFF20FFDC;
 		break;
 	case LIGHTRED: 
-		rgb = 0xFFFF4040;
+		rgb = 0xFFFF5050; //0xFFFF4040;
 		break;
 	case LIGHTMAGENTA: 
-		rgb = 0xFFB8A8FF;
+		rgb = 0xFFA898EF; //0xFFB8A8FF;
 		break;
 	case YELLOW:
 		rgb = 0xFFFFFF00;
