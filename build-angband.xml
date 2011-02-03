@@ -20,11 +20,9 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="angband306"/>
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="frogknows"/>
 	</ant>
--->
     </target>
 
     <target name="angband-javah" depends="compile">
@@ -42,11 +40,9 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="angband306"/>
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="frogknows"/>
 	</ant>
--->
     </target>
 
     <condition property="is.exist.libs">
@@ -77,16 +73,14 @@
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="frogknows"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/2.4"/>
-	    <property name="src.url.file" value="angband-2.4.fk.tar.gz"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="pcangband-1.4-src.tar.gz"/>
 		<property name="extract.command" value="tar" />
-		<property name="extract.arg1" value="- -strip-components=1" />
+		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
--->
     </target>
 <!--
     ************************************************************************
@@ -106,11 +100,9 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="angband306"/>
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="frogknows"/>
 	</ant>
--->
     </target>
 
     <target name="clean" depends="clean-plugins">
