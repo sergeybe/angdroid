@@ -47,6 +47,87 @@
 		 android:defaultValue="true" 
 		 android:title="@string/preferences_enablevolkeyfontsize_title"
 		 android:summary="@string/preferences_enablevolkeyfontsize_summary" />
+		<PreferenceScreen
+			android:title="Key Bindings">
+			<ListPreference
+				android:title="Back Button"
+				android:summary="Select functionality for Back button."
+				android:key="angband.backbuttonfunc"
+				android:defaultValue="EscKey"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Camera Button"
+				android:summary="Select functionality for Camera button."
+				android:key="angband.camerabuttonfunc"
+				android:defaultValue="VirtualKeyboard"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Emoticon Key"
+				android:summary="Select functionality for Emoticon Key."
+				android:key="angband.emoticonkeyfunc"
+				android:defaultValue="CtrlKey"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Menu Button"
+				android:summary="Select functionality for Menu button."
+				android:key="angband.menubuttonfunc"
+				android:defaultValue="ForwardToSystem"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Search Button"
+				android:summary="Select functionality for Search button."
+				android:key="angband.searchbuttonfunc"
+				android:defaultValue="CtrlKey"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Left Alt Key"
+				android:summary="Select functionality for Left Alt key."
+				android:key="angband.leftaltkeyfunc"
+				android:defaultValue="ForwardToSystem"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Right Alt Key"
+				android:summary="Select functionality for Right Alt key."
+				android:key="angband.rightaltkeyfunc"
+				android:defaultValue="ForwardToSystem"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Left Shift Key"
+				android:summary="Select functionality for Left Shift key."
+				android:key="angband.leftshiftkeyfunc"
+				android:defaultValue="ShiftKey"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Right Shift Key"
+				android:summary="Select functionality for Right Shift key."
+				android:key="angband.rightshiftkeyfunc"
+				android:defaultValue="ShiftKey"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Volume Up Button"
+				android:summary="Select functionality for Volume Up button."
+				android:key="angband.volumeupbuttonfunc"
+				android:defaultValue="ZoomIn"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Volume Down Button"
+				android:summary="Select functionality for Volume Down button."
+				android:key="angband.volumedownbuttonfunc"
+				android:defaultValue="ZoomOut"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+
+		</PreferenceScreen>
 	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/game_category">
 		<org.angdroid.angband.ProfileListPreference 
