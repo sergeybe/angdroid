@@ -36,6 +36,8 @@ static jmethodID NativeWrapper_flushinp;
 static jmethodID NativeWrapper_getcury;
 static jmethodID NativeWrapper_getcurx;
 
+void (*angdroid_quit_hook)(void) = NULL;
+
 /*
    does not take curses standard attribute pair,
    instead takes an RGB value for text forecolor
@@ -164,6 +166,10 @@ void angdroid_quit(const char* msg) {
 	if (msg) {
 		LOGE(msg);
 		JAVA_CALL(NativeWrapper_fatal, (*env)->NewStringUTF(env, msg));
+	}
+
+	if (angdroid_quit_hook){
+		(*angdroid_quit_hook)();
 	}
 
 	(*jvm)->DetachCurrentThread(jvm);

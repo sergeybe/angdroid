@@ -34,6 +34,7 @@ int clrtoeol(void);
 int clear(void);
 int initscr(void);
 int curs_set(int);
+WINDOW* newwin(int,int,int,int);
 int getcurx(WINDOW *);
 int getcury(WINDOW *);
 int overwrite(const WINDOW *, WINDOW *);
@@ -57,3 +58,5 @@ void angdroid_process_argv(int, const char*);
 void angdroid_main(void);
 int queryInt(const char* argv0);
 
+/* game may implement these */
+extern void (*angdroid_quit_hook)(void);

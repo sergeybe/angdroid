@@ -68,7 +68,7 @@ public class TermWindow {
 	}
 
 	public void clear() {
-		Log.d("Angband","TermWindow.clear start "+rows+","+cols);
+		//Log.d("Angband","TermWindow.clear start "+rows+","+cols);
 		for(int r=0;r<rows;r++) {
 			for(int c=0;c<cols;c++) {
 				//Log.d("Angband","TermWindow.clear clearPoint "+r+","+c);
@@ -76,7 +76,7 @@ public class TermWindow {
 				newPoint(p);
 			}
 		}
-		Log.d("Angband","TermWindow.clear end");
+		//Log.d("Angband","TermWindow.clear end");
 	}
 
 	public void clrtoeol() {
@@ -174,13 +174,13 @@ public class TermWindow {
 				advance();
 			}
 			else if (c == 9) {  // recurse to expand that tab
-				Log.d("Angband","TermWindow.addch - tab expand");				
+				//Log.d("Angband","TermWindow.addch - tab expand");				
 				int ss = col % 8;
 				if (ss==0) ss=8;
 				for(int i=0;i<ss;i++) addch(' ');
 			}
 			else {
-				Log.d("Angband","TermWindow.addch - invalid character: "+(int)c);
+				//Log.d("Angband","TermWindow.addch - invalid character: "+(int)c);
 				advance();
 			}
 		}

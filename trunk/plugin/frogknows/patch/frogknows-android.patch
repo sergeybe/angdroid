@@ -1,0 +1,1450 @@
+diff -Nru --strip-trailing-cr frogknows/src/config.h frogknows-android/src/config.h
+--- frogknows/src/config.h	1993-04-07 22:00:42.000000000 -0700
++++ frogknows-android/src/config.h	2011-02-02 06:58:14.000000000 -0800
+@@ -17,6 +17,25 @@
+ 
+ /* files used by moria, set these to valid pathnames */
+ /* probably unix */
++#ifdef ANDROID
++
++extern char ANGBAND_TST       []; //LIBDIR"/test"
++extern char ANGBAND_HOU       []; //LIBDIR"/files/hours"
++extern char ANGBAND_MOR       []; //LIBDIR"/files/news"
++extern char ANGBAND_TOP       []; //LIBDIR"/files/newscores"
++extern char ANGBAND_BONES     []; //LIBDIR"/bones/"
++extern char ANGBAND_HELP      []; //LIBDIR"/files/roglcmds.hlp"
++extern char ANGBAND_ORIG_HELP []; //LIBDIR"/files/origcmds.hlp"
++extern char ANGBAND_WIZ_HELP  []; //LIBDIR"/files/rwizcmds.hlp"
++extern char ANGBAND_OWIZ_HELP []; //LIBDIR"/files/owizcmds.hlp"
++extern char ANGBAND_WELCOME   []; //LIBDIR"/files/welcome.hlp"
++extern char ANGBAND_LOG       []; //LIBDIR"/files/ANGBAND.log"
++extern char ANGBAND_VER       []; //LIBDIR"/files/version.hlp"
++extern char ANGBAND_LOAD      []; //LIBDIR"/files/loadcheck"
++extern char ANGBAND_WIZ       []; //LIBDIR"/files/wizards"
++extern char ANGBAND_SAV       []; //LIBDIR"/save"
++
++#else
+ #ifndef MSDOS
+ 
+ #define ANGBAND_TST       LIBDIR"/est"
+@@ -56,6 +75,7 @@
+ #define ANGBAND_DESC	"mon_desc.dat" /* added -CFT */
+ 
+ #endif
++#endif
+ 
+ /*#define ANNOY 142*/
+ /*#define SET_UID*/
+@@ -124,7 +144,7 @@
+ #define ultrix
+ #endif
+ 
+-#ifdef MSDOS
++#if defined (MSDOS) || defined(ANDROID)
+ #define register      /* MSC 4.0 still has a problem with register bugs ... */
+ #endif
+ 
+@@ -162,7 +182,31 @@
+ #define geteuid() PlayerUID
+ #endif
+ 
+-
++#ifdef ANDROID
++#include <string.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/stat.h>
++#undef unix
++#undef exit
++#define exit(x) angdroid_quit((x)?"unknown error":NULL)
++#undef srandom
++#define srandom angband_srandom
++#undef initstate
++#define initstate angband_initstate
++#define stricmp strcasecmp
++#define L_SET SEEK_SET
++#define gotoxy(x,y) move((y)-1,(x)-1)
++#define clreol clrtoeol
++#define cputs addstr
++#define putch addch
++#undef putchar
++#define putchar addch
++#define wherex(x) getcurx(stdscr)
++#define kbhit(x) check_input(0)
++#undef perror
++#define perror angdroid_quit
++#endif
+ 
+ 
+ 
+diff -Nru --strip-trailing-cr frogknows/src/constant.h frogknows-android/src/constant.h
+--- frogknows/src/constant.h	1994-03-02 18:47:20.000000000 -0800
++++ frogknows-android/src/constant.h	2011-01-31 18:43:35.000000000 -0800
+@@ -243,7 +243,12 @@
+ #undef CTRL
+ #define CTRL(x)		(x & 0x1F)
+ #define DELETE		0x7f
++
++#ifdef ANDROID
++#define ESCAPE        '`'
++#else
+ #define ESCAPE	      '\033'	/* ESCAPE character -CJS- */
++#endif
+ 
+ #ifndef NULL
+ #define NULL (char *)0
+diff -Nru --strip-trailing-cr frogknows/src/create.c frogknows-android/src/create.c
+--- frogknows/src/create.c	1993-11-08 17:09:46.000000000 -0800
++++ frogknows-android/src/create.c	2011-02-02 07:10:11.000000000 -0800
+@@ -329,6 +329,9 @@
+ 	exit_flag = TRUE;
+       else if (s == '?')
+ 	helpfile (ANGBAND_WELCOME);
++	  else if (s == CTRL('X'))
++		exit_game();
++
+       else
+ 	bell ();
+     }
+@@ -498,6 +501,9 @@
+ 	}
+       else if (c == '?')
+ 	helpfile (ANGBAND_WELCOME);
++	  else if (c == CTRL('X'))
++	exit_game();
++
+       else
+ 	bell ();
+     }
+@@ -582,7 +588,7 @@
+     MAX_PLAYER_LEVEL;
+   max_value = (MAX_PLAYER_LEVEL*5 * (m_ptr->hitdie-1))/8 +
+     MAX_PLAYER_LEVEL;
+-#ifndef MSDOS /* is_wizard() is always true on PCs... and I don't like
++#if !defined (MSDOS) && !defined(ANDROID) /* is_wizard() is always true on PCs... and I don't like
+ 		it anyways -CFT */
+   if (is_wizard(player_uid) && !(peek || wizard)) {
+     min_value = (MAX_PLAYER_LEVEL * (m_ptr->hitdie-1))/2 +
+@@ -709,6 +715,8 @@
+ 	}
+       else if (s == '?')
+         helpfile(ANGBAND_WELCOME);
++      else if (s == CTRL('X'))
++		exit_game();
+       else
+         bell();
+     } while (!exit_flag);
+@@ -718,7 +726,7 @@
+ /* Given a stat value, return a monetary value, which affects the amount
+    of gold a player has. */
+ static int monval (i)
+-int16u i;
++int16 i;
+ {
+   return 5 * ((int)i - 10);
+ }
+@@ -780,6 +788,9 @@
+     c=inkey();
+     if (c == '?')
+       helpfile(ANGBAND_WELCOME);
++	else if (c == CTRL('X'))
++		exit_game();
++
+   } while ((c != 'y') && (c != 'Y') && (c != 'n') && (c != 'N'));
+   
+   if ((c == 'Y') || (c == 'y')){
+@@ -816,7 +827,14 @@
+       do{
+        exit_flag=0;
+        inp[0] = '\000';
++#ifdef ANDROID
++       if (!get_string(inp, 16+i, 19, 3)) {
++		   if (angdroid_getch(0)==CTRL('X') || angdroid_getch(0)==CTRL('X'))
++			   exit_game();
++	   }
++#else
+        get_string(inp, 16+i, 19, 3);
++#endif
+        stat[stat_idx]=atoi(inp);
+       } while (stat[stat_idx]>118 || stat[stat_idx]<0);
+       exit_flag=1;
+@@ -840,7 +858,7 @@
+   	   (stat[A_CHR] > py.stats.use_stat[A_CHR]) ||
+   	   (stat[A_CON] > py.stats.use_stat[A_CON]) ||
+   	   (stat[A_WIS] > py.stats.use_stat[A_WIS]))
+-#if (defined(unix) || defined(ATART_ST))
++#if (defined(unix) || defined(ATART_ST) || defined(ANDROID))
+   	    && (!check_input(1)));
+ #elif (defined(MSDOS) || defined(VMS))  /* #if/elif/else rewritten -CFT */
+ 	    && (!kbhit()));
+diff -Nru --strip-trailing-cr frogknows/src/death.c frogknows-android/src/death.c
+--- frogknows/src/death.c	1993-11-13 15:44:30.000000000 -0800
++++ frogknows-android/src/death.c	2011-02-02 06:58:38.000000000 -0800
+@@ -136,13 +136,17 @@
+   int from, to;
+   int hl_rank; /* if positive, which rank to highlight, else unused -CFT */
+ 		/* currently only used if TC_COLOR being used -CFT */
+-#ifdef MSDOS /* fix this gluttonous stack usage to avoid stack overflow -CFT */
++#if defined (MSDOS) || defined(ANDROID) /* fix this gluttonous stack usage to avoid stack overflow -CFT */
+ {
+   register int i = 0, tt;
+   int fd;
+   int rank, not_eof = 1, input;
+   high_scores score;
++#ifdef ANDROID
++  char string[1124];
++#else
+   char string[100];
++#endif
+ 
+   vtype tmp_str;
+ 
+@@ -491,10 +495,10 @@
+ /* Enters a players name on a hi-score table...    SM */
+ int top_twenty()
+ {
+-#ifdef MSDOS /* fix this gluttonous stack usage to avoid stack overflow -CFT */
++#if defined (MSDOS) || defined (ANDROID) /* fix this gluttonous stack usage to avoid stack overflow -CFT */
+   register int i, j, not_eof;
+   high_scores myscore, new_entry, cur_entry;
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(ANDROID)
+   FILE *highscore_fp; /* used in opening file instead of locking it */
+   vtype string; /* used in error msgs -CFT */
+ #endif
+@@ -541,7 +545,7 @@
+   /*  First, get a lock on the high score file so no-one else tries */
+   /*  to write to it while we are using it, on VMS and IBMPCs only one
+       process can have the file open at a time, so we just open it here */
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(ANDROID)
+ #if defined(MAC) || defined(MSDOS)
+   if ((highscore_fp = fopen(ANGBAND_TOP, "rb+")) == NULL)
+ #else
+@@ -831,7 +835,7 @@
+   register int i, j, k;
+   high_scores scores[MAX_SAVE_HISCORES];
+   char *tmp;
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(ANDROID)
+   FILE *highscore_fp; /* used in opening file instead of locking it */
+   vtype string; /* used in error msgs -CFT */
+ #endif
+@@ -839,7 +843,7 @@
+   /*  First, get a lock on the high score file so no-one else tries */
+   /*  to write to it while we are using it, on VMS and IBMPCs only one
+       process can have the file open at a time, so we just open it here */
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(ANDROID)
+ #if defined(MAC) || defined(MSDOS)
+   if ((highscore_fp = fopen(ANGBAND_TOP, "rb+")) == NULL)
+ #else
+@@ -980,7 +984,13 @@
+   FILE *highscore_fp; /* used in opening file instead of locking it */
+   FILE *tfile_fp; /* temp file: when done, it will be renamed to hiscore file */
+   int tfile_fd;
+-  char string[80], tfname[16]; /* used in error msgs -CFT */
++  char 
++#ifdef ANDROID
++	  string[1124], tfname[1024];
++#else
++      string[80], tfname[16]; /* used in error msgs -CFT */
++#endif
++
+   int8u not_eof;
+   
+   if ((highscore_fp = fopen(ANGBAND_TOP, "rb")) == NULL)
+@@ -990,8 +1000,18 @@
+   					  happen bacause rest of code
+   					  assumes fd, not fp  -CFT */
+ 
++#ifdef ANDROID
++  sprintf(tfname, "%s.tmp", ANGBAND_TOP);
++  unlink(tfname);
++#else
+   tmpnam(tfname); /* get a filename for temp file */
++#endif
++
++#ifdef ANDROID
++  if ((tfile_fp = fopen(tfname, "w")) == NULL)
++#else
+   if ((tfile_fp = fopen(tfname, "wb")) == NULL)
++#endif
+     {
+       (void) sprintf (string, "delete_hs_saved:Error opening temp file \"%s\"\n", tfname);
+       perror(string);
+diff -Nru --strip-trailing-cr frogknows/src/dungeon.c frogknows-android/src/dungeon.c
+--- frogknows/src/dungeon.c	1994-03-06 18:46:24.000000000 -0800
++++ frogknows-android/src/dungeon.c	2011-02-02 05:56:16.000000000 -0800
+@@ -38,7 +38,9 @@
+ static void jamdoor(ARG_VOID);
+ static void refill_lamp(ARG_VOID);
+ static int regen_monsters(ARG_VOID);
++#ifndef ANDROID
+ int kbhit(ARG_VOID);
++#endif
+ 
+ extern int8u peek;
+ extern int rating;
+@@ -150,7 +152,7 @@
+   else if (cave_ptr->fval == GRANITE_WALL || cave_ptr->fval == BOUNDARY_WALL
+ 	   || highlight_seams == FALSE)
+     {
+-#ifdef MSDOS
++#if defined (MSDOS) || defined(ANDROID)
+       return wallsym;
+ #else
+ #ifndef ATARIST_MWC
+@@ -177,7 +179,7 @@
+     }
+ }
+ 
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+ int mon_color(int c){
+   if ((c >= 1) && (c <= 15))
+     return c;
+@@ -1412,7 +1414,9 @@
+ 			}
+ 
+ 		      msg_flag = FALSE;
++			  cursor_hide = TRUE;
+ 		      command = inkey();
++			  cursor_hide = FALSE;
+ 		      i = 0;
+ 		      /* Get a count for a command. */
+ 		      if ((rogue_like_commands
+@@ -2722,7 +2726,7 @@
+   flag=FALSE;
+   while (!flag){
+     if (!get_com(out_str, &choice))  /* on escape, get_com returns false: */
+-      choice = '\033';	/* so it's set here to ESC.  Wierd huh? -CFT */
++      choice = ESCAPE;	/* so it's set here to ESC.  Wierd huh? -CFT */
+     if ((choice=='*') && !redraw) { /* don't save screen again if it's already
+     					listed, OW it doesn't clear -CFT */
+       save_screen();
+@@ -2758,7 +2762,7 @@
+         }
+       else if (choice>='a' && choice<=('a'+(num-1)))
+ 	choice-='a';
+-      else if (choice=='\033') {
++      else if (choice==ESCAPE) {
+         if (redraw) {
+ 	  restore_screen();
+ 	  redraw = FALSE;
+diff -Nru --strip-trailing-cr frogknows/src/externs.h frogknows-android/src/externs.h
+--- frogknows/src/externs.h	1994-02-26 11:35:56.000000000 -0800
++++ frogknows-android/src/externs.h	2011-02-01 21:03:36.000000000 -0800
+@@ -7,7 +7,7 @@
+    included in all such copies. */
+ 
+ /* TURBOC wants full prototypes, or it bitches... */
+-#ifdef __TURBOC__
++#if defined (__TURBOC__) || defined(ANDROID)
+ #define ARG_VOID void
+ #define ARG_INT int
+ #define ARG_INT8U int8u
+@@ -60,7 +60,7 @@
+ #endif
+ 
+ /* many systems don't define these anywhere */
+-#ifndef MSDOS
++#if !defined (MSDOS) && !defined(ANDROID)
+ #if defined(USG) || defined(DGUX) || defined(atarist)
+ extern int sprintf();
+ #else
+@@ -68,7 +68,7 @@
+ #endif
+ #endif
+ 
+-#ifndef MSDOS
++#if !defined(MSDOS) && !defined(ANDROID)
+ extern int errno;
+ #endif
+ 
+@@ -90,7 +90,7 @@
+ extern vtype savefile;			/* The save file. -CJS- */
+ 
+ /* These are options, set with set_options command -CJS- */
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+ extern int8u rogue_like_commands;
+ extern int8u find_cut;			/* Cut corners on a run */
+ extern int8u find_examine;		/* Check corners on a run */
+@@ -395,7 +395,7 @@
+ extern int8u light_flag;
+ #endif
+ 
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+ extern int8u	floorsym, wallsym;
+ extern int	ansi, saveprompt;
+ extern char	moriatop[], moriasav[];
+@@ -403,6 +403,7 @@
+ 
+ extern int feel_chance; /* used in Shawn Collenburg's new style feelings
+ 				code */
++extern int cursor_hide;
+ 
+ /* function return values */
+ /* only extern functions declared here, static functions declared inside
+@@ -735,7 +736,7 @@
+ #else
+ int save_char(void);
+ #endif
+-int _save_char(char *);
++int _save_char(char *,int);
+ int get_char(int *);
+ 
+ /* scrolls.c */
+@@ -1290,7 +1291,7 @@
+ #else
+ int save_char(ARG_VOID);
+ #endif
+-int _save_char(ARG_CHAR_PTR);
++int _save_char(ARG_CHAR_PTR ARG_COMMA ARG_INT);
+ int get_char(ARG_INT_PTR);
+ 
+ /* scrolls.c */
+@@ -1498,6 +1499,9 @@
+ 
+ #endif
+ 
++
++#ifndef ANDROID
++
+ #ifdef MSDOS /* need to define delay() function somewhere : acts like
+ 		usleep(), but with millisecs not usecs -CFT */
+ void delay(unsigned);
+@@ -1522,3 +1526,5 @@
+ #define open topen
+ #define fopen tfopen
+ #endif
++
++#endif //ANDROID
+diff -Nru --strip-trailing-cr frogknows/src/files.c frogknows-android/src/files.c
+--- frogknows/src/files.c	1993-10-25 17:07:46.000000000 -0700
++++ frogknows-android/src/files.c	2011-01-25 17:30:35.000000000 -0800
+@@ -47,6 +47,11 @@
+ #endif
+ #endif
+ 
++#ifdef ANDROID
++#include <string.h>
++#include <stdio.h>
++#endif
++
+ /* Not touched for Mac port */
+ /*
+  *  init_scorefile
+diff -Nru --strip-trailing-cr frogknows/src/generate.c frogknows-android/src/generate.c
+--- frogknows/src/generate.c	1994-02-21 17:09:22.000000000 -0800
++++ frogknows-android/src/generate.c	2011-02-01 21:04:18.000000000 -0800
+@@ -79,10 +79,11 @@
+ static void place_door(ARG_INT ARG_COMMA ARG_INT);
+ 
+ /* misc. prototypes */
++#ifndef ANDROID
+ void *malloc(ARG_INT16U);
+ void free(ARG_VOID_PTR);
+ int stricmp(ARG_CHAR_PTR ARG_COMMA ARG_CHAR_PTR);
+-
++#endif
+ 
+ /* Always picks a correct direction		*/
+ static void correct_dir(rdir, cdir, y1, x1, y2, x2)
+@@ -1918,7 +1919,7 @@
+     }
+   else { /* moved from build_pit, because don't want it already set if
+   		we abort because of bad position -CFT */
+-#ifndef MSDOS
++#if !defined(MSDOS) && !defined(ANDROID)
+     if (randint((dun_level*dun_level*dun_level)+1)<25000) good_item_flag = TRUE;
+ #else
+     if (randint((dun_level*dun_level+1))<650) good_item_flag = TRUE;
+diff -Nru --strip-trailing-cr frogknows/src/main.c frogknows-android/src/main.c
+--- frogknows/src/main.c	1994-01-15 15:37:52.000000000 -0800
++++ frogknows-android/src/main.c	2011-02-02 06:42:40.000000000 -0800
+@@ -182,7 +182,11 @@
+   int force_rogue_like = FALSE;
+   int force_keys_to, FORGET;
+   char temphost[10], thishost[10], discard[80];
++#ifdef ANDROID
++  char string[1124];
++#else
+   char string[80];
++#endif
+ #ifndef MSDOS
+   struct rlimit rlp;
+ #endif
+@@ -230,7 +234,7 @@
+ 
+   init_files();
+ 
+-#ifndef MSDOS
++#if !defined(MSDOS) && !defined(ANDROID)
+   if ((player_uid = getuid())<= 0) {
+     perror("Can't set permissions correctly!  Getuid call failed.\n");
+     exit(0);
+@@ -256,7 +260,7 @@
+   be_nasty=FALSE;
+ #endif
+ 
+-#ifndef MSDOS
++#if !defined(MSDOS) && !defined(ANDROID)
+   (void)gethostname(thishost, sizeof thishost);	/* get host */
+   if ((fp=fopen(ANGBAND_LOAD, "r")) == NULL) {
+     perror("Can't get load-check.\n");
+@@ -406,7 +410,7 @@
+   /* must come after init_curses as some of the signal handlers use curses */
+   init_signals();
+ 
+-#ifdef MSDOS
++#if defined (MSDOS) || defined(ANDROID)
+ #ifdef TC_COLOR
+   textbackground(0); /* clear bkgnd color to avoid ansi prompts */
+   textcolor(0); /* clear color to avoid ansi prompts */
+@@ -441,12 +445,14 @@
+      hence, this code is not necessary */
+ #endif
+ 
+-#ifdef MSDOS /* cut out of Um55 code... */
++#if defined (MSDOS) /* cut out of Um55 code... */
+   /* Auto-restart of saved file */
+   if (argv[0] != NULL)
+     (void) strcpy (savefile, argv[0]);
+   else
+     (void) strcpy(savefile, ANGBAND_SAV);
++#elif defined (ANDROID)
++  (void) sprintf(savefile, "%s/%s", ANGBAND_SAV, py.misc.name);
+ #else  
+   (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, py.misc.name);
+ #endif
+@@ -485,7 +491,7 @@
+       exit_game();
+ #endif
+   if ((new_game == FALSE) && result) {
+-#ifdef MSDOS /* this function (in death.c) is written for the PC, and won't
++#if defined (MSDOS) || defined (ANDROID) /* this function (in death.c) is written for the PC, and won't
+ 		run w/o a bit of work on non-PC systems -CFT */
+ 
+ /* erase the "(saved)" entry from the highscore list, otherwise it will
+diff -Nru --strip-trailing-cr frogknows/src/misc1.c frogknows-android/src/misc1.c
+--- frogknows/src/misc1.c	1994-03-01 22:12:12.000000000 -0800
++++ frogknows-android/src/misc1.c	2011-02-01 21:05:40.000000000 -0800
+@@ -81,7 +81,9 @@
+ void init_seeds(seed)
+ int32u seed;
+ {
++#ifndef ANDROID
+   char *malloc(size_t);
++#endif
+   
+   old_state = (char *) malloc(256); /* excellent R.N.G. */
+   dummy_state = (char *) malloc(8); /* so-so R.N.G., but who cares? -CFT */
+@@ -133,7 +135,7 @@
+   struct statstime st;
+ #endif
+ 
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+   return TRUE;  /* no time limits on a PC... -CFT */
+ #else
+   clock = time((long *)0);
+@@ -5026,7 +5028,7 @@
+   { "Rogue like commands",			&rogue_like_commands },
+   { "Show weights in inventory",		&show_weight_flag },
+   { "Highlight and notice mineral seams",	&highlight_seams },
+-#ifdef MSDOS
++#if defined(MSDOS) || defined(ANDROID)
+   { "Beep for invalid character",		&sound_beep_flag },
+   { "Turn off haggling",			&no_haggle_flag },
+ #ifdef TC_COLOR
+diff -Nru --strip-trailing-cr frogknows/src/misc2.c frogknows-android/src/misc2.c
+--- frogknows/src/misc2.c	1994-03-05 13:18:30.000000000 -0800
++++ frogknows-android/src/misc2.c	2011-02-01 21:06:44.000000000 -0800
+@@ -21,6 +21,11 @@
+ 
+ #include <ctype.h>
+ 
++#ifdef ANDROID
++#include <stdio.h>
++#include <string.h>
++#endif
++
+ #ifdef USG
+ #ifndef ATARIST_MWC
+ #include <string.h>
+@@ -54,7 +59,9 @@
+ 
+ extern int8u peek;
+ extern int rating;
++#ifndef ANDROID
+ char *malloc();
++#endif
+ 
+ /* Places a particular trap at location y, x		-RAK-	*/
+ void place_trap(y, x, subval)
+@@ -1133,7 +1140,7 @@
+ 
+ int16u modify_stat (stat, amount)
+ int stat;
+-int16 amount;
++int16u amount;
+ {
+   register int loop, i;
+   register int16u tmp_stat;
+diff -Nru --strip-trailing-cr frogknows/src/moria1.c frogknows-android/src/moria1.c
+--- frogknows/src/moria1.c	1994-03-05 11:14:02.000000000 -0800
++++ frogknows-android/src/moria1.c	2011-02-01 21:07:50.000000000 -0800
+@@ -1670,7 +1670,7 @@
+       c_ptr->fval=NT_LIGHT_FLOOR;
+     else if (c_ptr->fval==DARK_FLOOR)
+       c_ptr->fval=LIGHT_FLOOR;
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+     lite_spot(y,x); /* this does all that; plus color-safe -CFT */
+ #else
+     if ((y-panel_row_prt)<23 && (y-panel_row_prt)>0 &&
+@@ -1701,7 +1701,7 @@
+       c_ptr->fval=NT_DARK_FLOOR;
+     else if (c_ptr->fval==LIGHT_FLOOR)
+       c_ptr->fval=DARK_FLOOR;
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+     if (panel_contains(y,x)) {
+       if (c_ptr->fval < MIN_CLOSED_SPACE){
+         c_ptr->pl = FALSE;
+@@ -1852,7 +1852,7 @@
+     }
+   for (i = top; i <= bottom; i++)
+     for (j = left; j <= right; j++)   /* Leftmost to rightmost do*/
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+       lite_spot(i, j); /* this does that, plus panel check + color safe */
+ #else
+       print(loc_symbol(i, j), i, j);
+@@ -1874,7 +1874,7 @@
+ 	for (j = x1-1; j <= x1+1; j++)
+ 	  {
+ 	    cave[i][j].tl = FALSE;
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+ 	    lite_spot(i,j);
+ #else
+ 	    print(loc_symbol(i, j), i, j);
+@@ -1883,7 +1883,7 @@
+       light_flag = FALSE;
+     }
+   else if (!find_flag || find_prself) /* um55 change -CFT */
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+     lite_spot(y1, x1);
+ #else
+     print(loc_symbol(y1, x1), y1, x1);
+@@ -2373,7 +2373,7 @@
+ 
+   if (!mmove(dir, &y, &x))	/* check to see if movement there possible */
+     return TRUE;
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+ #ifdef TC_COLOR
+   else if ((c = loc_symbol(y, x)) == wallsym)
+ #else
+diff -Nru --strip-trailing-cr frogknows/src/random.c frogknows-android/src/random.c
+--- frogknows/src/random.c	1994-02-21 18:05:34.000000000 -0800
++++ frogknows-android/src/random.c	2011-01-25 17:50:25.000000000 -0800
+@@ -28,13 +28,14 @@
+  */
+ 
+ #include <stdio.h>
++#include "config.h"
+ 
+ /* some prototypes - cba */
+ #ifndef NO_LINT_ARGS
+ #ifdef __STDC__
+ extern long bsd_random(void); /* bsd_ added because of clash w/ TCC's
+ 				random() function -CFT */
+-extern void srandom(unsigned int);
++extern int srandom(unsigned int);
+ extern char *initstate(unsigned int, char *, int);
+ extern char *setstate(char *);
+ #else
+diff -Nru --strip-trailing-cr frogknows/src/recall.c frogknows-android/src/recall.c
+--- frogknows/src/recall.c	1994-01-23 12:14:34.000000000 -0800
++++ frogknows-android/src/recall.c	2011-02-01 21:09:48.000000000 -0800
+@@ -15,8 +15,9 @@
+ #include <stdio.h>
+ 
+ static void roff(ARG_CHAR_PTR);
++#ifndef ANDROID
+ int strlen(ARG_CHAR_PTR);
+-
++#endif
+ 
+ static char *desc_atype[] = {
+   "do something undefined",
+@@ -235,7 +236,7 @@
+   int32u rcdefense;  /* this was int16u, but c_recall[] uses int32u -CFT */
+   recall_type save_mem;
+   int breath=FALSE, magic=FALSE;
+-#ifdef MSDOS
++#if defined (MSDOS)
+ /* added to allow external description file -CFT */
+   FILE *descfile;
+ #define MAX_DESC_LEN 1024 /* even morgorth's fits... -CFT */
+diff -Nru --strip-trailing-cr frogknows/src/save.c frogknows-android/src/save.c
+--- frogknows/src/save.c	2011-02-01 21:15:08.000000000 -0800
++++ frogknows-android/src/save.c	2011-02-02 06:20:03.000000000 -0800
+@@ -34,10 +34,10 @@
+ #include "monster.h"  /* needed for monster heal bug work-around -CFT */
+ 
+ static int sv_write(ARG_VOID);
+-static void wr_byte(ARG_INT8U);
++static int wr_byte(ARG_INT8U);
+ static void wr_short(ARG_INT16U);
+ static void wr_long(ARG_INT32U);
+-static void wr_bytes(ARG_INT8U_PTR ARG_COMMA ARG_INT);
++static void wr_bytes(void* ARG_COMMA ARG_INT);
+ static void wr_string(ARG_CHAR_PTR);
+ static void wr_shorts(ARG_INT16U_PTR ARG_COMMA ARG_INT);
+ static void wr_item(ARG_INV_PTR);
+@@ -53,8 +53,10 @@
+ static void wr_unique(ARG_UNIQ_PTR);
+ static void rd_unique(ARG_UNIQ_PTR);
+ static char *basename(ARG_CHAR_PTR);
++#ifndef ANDROID
+ int access(ARG_CHAR_PTR ARG_COMMA ARG_INT);
+ int chmod(ARG_CHAR_PTR ARG_COMMA ARG_INT);
++#endif
+ #ifdef MSDOS
+ int setmode(ARG_INT ARG_COMMA ARG_INT);
+ #endif
+@@ -66,12 +68,15 @@
+ long time(ARG_INT32_PTR);
+ #endif
+ #else
+-char *malloc();
++#ifndef ANDROIDchar *malloc();
++#endif
+ #endif
+ 
++#ifndef ANDROID
+ #ifndef SET_UID
+ #include <sys/stat.h>
+ #endif
++#endif
+ 
+ /* these are used for the save file, to avoid having to pass them to every
+    procedure */
+@@ -164,7 +169,7 @@
+     l |= 128;
+   if (find_ignore_doors)
+     l |= 256;
+-#ifdef MSDOS
++#if defined (MSDOS) || defined(ANDROID)
+   if (sound_beep_flag)
+     l |= 0x200L;
+   if (no_haggle_flag)
+@@ -651,10 +656,10 @@
+ #endif
+   if (death && NO_SAVE) return TRUE;
+ 
+-#ifdef MSDOS
+-  return _save_char(savefile);
++#if defined (MSDOS) || defined(ANDROID)
++  return _save_char(savefile,FALSE);
+ #else
+-  if (_save_char(savefile)) {
++  if (_save_char(savefile,FALSE)) {
+ 
+     tmp2=basename(savefile);
+ 
+@@ -671,8 +676,9 @@
+ #endif
+ }
+ 
+-int _save_char(fnam)
++int _save_char(fnam,save_and_continue)
+ char *fnam;
++int save_and_continue;
+ {
+   vtype temp;
+   register int ok, fd;
+@@ -684,8 +690,10 @@
+   nosignals();
+   put_qio();
+   disturb (1, 0);		/* Turn off resting and searching. */
+-  change_speed(-pack_heavy);	/* Fix the speed */
+-  pack_heavy = 0;
++  if(!save_and_continue) {
++    change_speed(-pack_heavy);	/* Fix the speed */
++    pack_heavy = 0;
++  }
+   ok = FALSE;
+ #ifndef ATARIST_MWC
+   fd = -1;
+@@ -696,7 +704,7 @@
+   fd = open(fnam, O_RDWR|O_CREAT|O_EXCL, 0666);
+ #endif
+   if (fd < 0 && access(fnam, 0) >= 0 &&
+-      (from_savefile ||
++      (from_savefile || !save_and_continue ||
+        (wizard && get_check("Can't make new savefile. Overwrite old?"))))
+     {
+ #ifdef SET_UID
+@@ -713,9 +721,9 @@
+ #endif /* !ATARIST_MWC */
+       /* GCC for atari st defines atarist */
+ #if defined(atarist) || defined(ATARIST_MWC) || defined(MSDOS)
+-      fileptr = fopen(savefile, "wb");
++      fileptr = fopen(fnam, "wb");
+ #else
+-      fileptr = fopen(savefile, "w");
++      fileptr = fopen(fnam, "w");
+ #endif
+ #ifndef ATARIST_MWC
+     }
+@@ -751,10 +759,10 @@
+       msg_print(temp);
+       return FALSE;
+     }
+-  else { /* successful save, now add char to highscore table, and
++  else if (!save_and_continue) { /* successful save, now add char to highscore table, and
+   		show him where he stands... */
+     if (!wizard && !to_be_wizard && !noscore) {
+-#ifdef MSDOS
++#if defined (MSDOS)
+       int t;
+ 
+       msg_print(NULL); /* clear msg line's "saving..." note */
+@@ -768,9 +776,14 @@
+     else msg_print("Score not registered.");
+ 
+     character_saved = 1;
+-  }
++
+   turn = -1;
+   log_index = -1;
++  }
++
++  if (save_and_continue) {
++	  from_savefile = 1;
++  }
+ 
+   signals();
+ 
+@@ -883,7 +896,7 @@
+ #ifdef MSDOS
+ #define READ_FN rd_byte
+ #else
+-#define READ_FN rd_long
++#define READ_FN(x) rd_long((int32u *)(x))
+ #endif
+       READ_FN(&GROND);
+       READ_FN(&RINGIL);
+@@ -1008,7 +1021,7 @@
+ #ifdef MSDOS
+ 	rd_short(&quests[i]);
+ #else	
+-	rd_long(&quests[i]);
++	  rd_long((int32u*)&quests[i]);
+ #endif
+       if (to_be_wizard) prt("Loaded Quests", 4, 0);
+ 
+@@ -1078,7 +1091,7 @@
+ 	find_ignore_doors = TRUE;
+       else
+ 	find_ignore_doors = FALSE;
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+       if (l & 0x200L)
+       	sound_beep_flag = TRUE;
+       else
+@@ -1285,7 +1298,7 @@
+ 	      || (version_min == 1 && patch_level >= 3)) {
+ 	    rd_long(&time_saved);
+ #ifndef SET_UID
+-#ifndef MSDOS /* accuses people of having a fiddled savefile if write took
++#if !defined (MSDOS) && !defined(ANDROID) /* accuses people of having a fiddled savefile if write took
+ 		too long, like if DOS6's undelete decided to take control
+ 		of the disk for a while... */
+ 	    if (!to_be_wizard) {
+@@ -1621,11 +1634,11 @@
+   return FALSE;	/* not reached, unless on mac */
+ }
+ 
+-static void wr_byte(c)
++static int wr_byte(c)
+ int8u c;
+ {
+   xor_byte ^= c;
+-  (void) putc((int)xor_byte, fileptr);
++  return putc((int)xor_byte, fileptr);
+ }
+ 
+ static void wr_short(s)
+@@ -1651,7 +1664,7 @@
+ }
+ 
+ static void wr_bytes(c, count)
+-int8u *c;
++void *c;
+ register int count;
+ {
+   register int i;
+diff -Nru --strip-trailing-cr frogknows/src/signals.c frogknows-android/src/signals.c
+--- frogknows/src/signals.c	1993-08-10 10:30:42.000000000 -0700
++++ frogknows-android/src/signals.c	2011-02-02 05:59:23.000000000 -0800
+@@ -11,7 +11,7 @@
+ 
+ /* Signals have no significance on the Mac */
+ 
+-#ifdef MAC
++#if defined (MAC) || defined(ANDROID)
+ 
+ void nosignals()
+ {
+@@ -170,7 +170,7 @@
+   else
+     {
+       death = TRUE;
+-      (void) _save_char(savefile);	/* Quietly save the memory anyway. */
++      (void) _save_char(savefile,FALSE);	/* Quietly save the memory anyway. */
+     }
+   restore_term();
+ #ifndef MSDOS
+diff -Nru --strip-trailing-cr frogknows/src/spells.c frogknows-android/src/spells.c
+--- frogknows/src/spells.c	1994-03-05 13:17:40.000000000 -0800
++++ frogknows-android/src/spells.c	2011-02-01 21:15:59.000000000 -0800
+@@ -3402,7 +3402,7 @@
+ /* Attempts to destroy a type of creature.  Success depends on	*/
+ /* the creatures level VS. the player's level		 -RAK-	 */
+ int dispel_creature(cflag, damage)
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+ int32u cflag; /* ring o power passes 0xffffffffL */
+ #else
+ int cflag;
+diff -Nru --strip-trailing-cr frogknows/src/store1.c frogknows-android/src/store1.c
+--- frogknows/src/store1.c	1993-09-02 12:46:50.000000000 -0700
++++ frogknows-android/src/store1.c	2011-01-31 18:00:11.000000000 -0800
+@@ -494,7 +494,7 @@
+   register int flagnoneed;
+   register store_type *s_ptr;
+ 
+-#ifdef MSDOS
++#if defined (MSDOS) || defined(ANDROID)
+   if (no_haggle_flag) return TRUE; /* turn off haggling as an option... */
+ #endif  
+   s_ptr = &store[store_num];
+diff -Nru --strip-trailing-cr frogknows/src/tcio.c frogknows-android/src/tcio.c
+--- frogknows/src/tcio.c	1994-02-25 23:42:28.000000000 -0800
++++ frogknows-android/src/tcio.c	2011-02-02 06:51:36.000000000 -0800
+@@ -9,6 +9,7 @@
+ /* This I/O module doesn't need PCcurses.  You may also need to make some
+    changes to ms_misc.c.  */
+ 
++#ifndef ANDROID
+ #include <alloc.h>  /* malloc() */
+ #include <ctype.h>
+ #include <dos.h>
+@@ -20,6 +21,7 @@
+ #ifdef __TURBOC__
+ #include	<string.h>
+ #endif /* __TURBOC__ */
++#endif //ANDROID
+ 
+ #include "config.h"
+ #include "constant.h"
+@@ -27,18 +29,30 @@
+ #include "externs.h"
+ 
+ #define MSG_LEN  73
++#ifndef ANDROID
+ #define LINES 25
+ #define COLS 80
++#endif
+ 
++#ifdef ANDROID
++#include "curses.h"
++static WINDOW *savescr; /* pointer to a saved screen */
++#else
+ static void *savescr; /* pointer to a saved screen */
++#endif
+ 
+ void init_curses(void){
++#ifdef ANDROID
++	clear();
++	savescr = newwin(0,0,0,0);
++#else
+   if((savescr=malloc(LINES*COLS*2))==NULL){
+     puts("Out of memory in init_curses()");
+     exit(1);
+   }
+   clrscr();
+   msdos_raw();
++#endif
+ }
+ 
+ 
+@@ -116,16 +130,25 @@
+ 
+ void put_qio(void){
+ /* nothing to do */
++#ifdef ANDROID
++	refresh();
++#endif
+ }
+ 
+ void restore_term(void){
++#ifdef ANDROID
++	clear();
++	refresh();
++#else
+   _setcursortype(_NORMALCURSOR);
+   fflush(stdout);
+   clear_screen();
+   msdos_noraw();
++#endif
+ }
+ 
+ void shell_out(void){
++#ifndef ANDROID
+   char *comspec;
+ #ifndef __TURBOC__
+   char key;
+@@ -148,34 +171,57 @@
+   }
+   restore_signals();
+   restore_screen();
++#endif //ANDROID
+ }
+ 
+ void save_screen(void){
++#ifdef ANDROID
++	overwrite(stdscr, savescr);
++#else
+   gettext(1,1,COLS,LINES,savescr);
++#endif
+ }
+ 
+ void restore_screen(void){
++#ifdef ANDROID
++	overwrite(savescr, stdscr);
++	touchwin(stdscr);
++#else
+   puttext(1,1,COLS,LINES,savescr);
++#endif
+ }
+ 
+ void clear_screen(void){
++#ifdef ANDROID
++	clear();
++#else
+   window(1,1,COLS,LINES);
+ /*
+ I think later I might want to define seperate windows, so the above line
+ is definsive code.
+ */
+   clrscr();
++#endif
+ }
+ 
+ void clear_from(int row){
++#ifdef ANDROID
++	move(row,0);
++	clrtobot();
++#else
+   window(1,row+1,COLS,LINES);
+   clrscr();
+   window(1,1,COLS,LINES);
++#endif
+ }
+ 
+ void flush(void){
++#ifdef ANDROID
++	flushinp();
++#else
+   while(kbhit())
+     getch();
++#endif
+ }
+ 
+ void erase_line(int row, int col){
+@@ -186,6 +232,18 @@
+ }
+ 
+ char inkey(void){
++#ifdef ANDROID
++	command_count=0;
++	if (!cursor_hide) curs_set(1);
++	refresh();
++	int i=angdroid_getch(1);
++	if (i==-1) {
++		angdroid_save();
++		while (i==-1) {i = angdroid_getch(1);}
++	}
++	curs_set(0);
++	return (char)i;
++#else
+   int i;
+ 
+   command_count=0;
+@@ -221,6 +279,7 @@
+   return (char)i;
+   } /* while loop */
+ #endif
++#endif //ANDROID
+ }
+ 
+ void print(char ch, int row, int col){
+@@ -338,11 +397,14 @@
+       t_len = strlen(old_msg[last_msg])+1;
+       if (t_len > MSG_LEN) t_len = MSG_LEN;
+       put_buffer("-more-", MSG_LINE, t_len);
++#ifdef ANDROID
++        in_char=inkey();
++#else
+       do{
+         in_char=inkey();
+         }while((in_char!=' ')&&(in_char!=ESCAPE)&&(in_char!='\n')&&
+ 	   (in_char!='\r'));
+-
++#endif
+       gotoxy(1,MSG_LINE+1); /* clear old mesg... */
+       clreol();
+ 
+@@ -379,10 +441,14 @@
+       t_len = strlen(old_msg[last_msg])+1;
+       if (t_len > MSG_LEN) t_len = MSG_LEN;
+       put_buffer("-more-", MSG_LINE, t_len);
++#ifdef ANDROID
++        in_char=inkey();
++#else
+       do{
+         in_char=inkey();
+         }while((in_char!=' ')&&(in_char!=ESCAPE)&&(in_char!='\n')&&
+ 	   (in_char!='\r'));
++#endif
+       gotoxy(1,MSG_LINE+1); /* clear old mesg... */
+       clreol();
+       msg_flag = FALSE; /* no message to worry about */
+@@ -435,15 +501,24 @@
+   *command=inkey();
+   if(*command==ESCAPE)
+     res=FALSE;
++  else if (*command==-1) {
++	  angdroid_save(turn);
++	  *command=ESCAPE;
++	  res=FALSE;
++  }
+   else
+     res=TRUE;
+   erase_line(MSG_LINE,0);
+   return(res);
+ }
+ void bell(void){
++#ifdef ANDROID
++	noise();
++#else
+   if (! sound_beep_flag)
+     return;
+   putchar('\007');
++#endif
+ }
+ 
+ /* the rest is just modified -ev- */
+diff -Nru --strip-trailing-cr frogknows/src/treasure.c frogknows-android/src/treasure.c
+--- frogknows/src/treasure.c	1994-02-25 23:04:36.000000000 -0800
++++ frogknows-android/src/treasure.c	2011-01-25 19:52:59.000000000 -0800
+@@ -66,7 +66,7 @@
+ /* Object list (All objects must be defined here)		 */
+ #ifdef MACGAME
+ treasure_type *object_list;
+-#else              0
++#else              
+ treasure_type object_list[MAX_OBJECTS] = {
+ /* Dungeon items from 0 to MAX_DUNGEON_OBJ */
+ {"Poison"			,0x00000001L,	TV_FOOD, ',',	/*  0*/
+diff -Nru --strip-trailing-cr frogknows/src/types.h frogknows-android/src/types.h
+--- frogknows/src/types.h	1993-12-12 21:16:32.000000000 -0800
++++ frogknows-android/src/types.h	2011-02-02 06:40:51.000000000 -0800
+@@ -15,8 +15,13 @@
+    but still treat it like an unsigned character, let's just avoid it,
+    any variable which can ever hold a negative value must be 16 or 32 bits */
+ 
++#ifdef ANDROID
++#define VTYPESIZ	1160
++#define BIGVTYPESIZ	1300
++#else
+ #define VTYPESIZ	160
+ #define BIGVTYPESIZ	300
++#endif
+ typedef char vtype[VTYPESIZ];
+ /* note that since its output can easily exceed 80 characters, objdes must
+    always be called with a bigvtype as the first paramter */
+@@ -222,7 +227,7 @@
+   struct stats
+     {
+       int16u max_stat[6];	/* What is restored */
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+       int16u cur_stat[6];	/* What is natural */
+ #else /* why is this only int8u?  save.c uses wr_shorts to write!  -CFT */
+       int8u cur_stat[6];	/* What is natural */
+diff -Nru --strip-trailing-cr frogknows/src/vars1.c frogknows-android/src/vars1.c
+--- frogknows/src/vars1.c	1994-02-21 16:58:12.000000000 -0800
++++ frogknows-android/src/vars1.c	2011-02-01 20:04:23.000000000 -0800
+@@ -90,7 +90,7 @@
+ 
+ 
+ /* options set via the '=' command */
+-#ifdef MSDOS
++#if defined (MSDOS) || defined(ANDROID)
+ int8u find_cut = TRUE;
+ int8u find_examine = TRUE;
+ int8u find_bound = FALSE;
+@@ -172,3 +172,4 @@
+ /* global variable for feelings msg control... */
+ int feel_chance;
+ 
++int cursor_hide = FALSE;
+diff -Nru --strip-trailing-cr frogknows/src/wizard.c frogknows-android/src/wizard.c
+--- frogknows/src/wizard.c	1993-08-14 22:25:52.000000000 -0700
++++ frogknows-android/src/wizard.c	2011-02-01 06:34:44.000000000 -0800
+@@ -910,177 +910,177 @@
+       (i_ptr->tval==TV_DIGGING)) {
+ 	if (get_com("Slay Evil? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SLAY_EVIL;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Slay Animal? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SLAY_ANIMAL;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Slay Undead? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SLAY_UNDEAD;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Slay Giant? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_SLAY_GIANT;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Slay Demon? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_SLAY_DEMON;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Slay Troll? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_SLAY_TROLL;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Slay Orc? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_SLAY_ORC;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Slay Dragon? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SLAY_DRAGON;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Execute Dragon? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SLAY_X_DRAGON;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Frost Brand? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags |= TR_FROST_BRAND;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Fire Brand? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags |= TR_FLAME_TONGUE;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Lightning Brand? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_LIGHTNING;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+ 	if (get_com("Earthquake Brand? [yn]: ", &ch)) {
+ 	  if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_IMPACT;
+-	} else if (ch=='\033') goto end;
++	} else if (ch==ESCAPE) goto end;
+       }
+ 
+   if (get_com("Affect Strength? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_STR;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Affect Intelligence? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_INT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Affect Wisdom? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_WIS;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Affect Dexterity? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_DEX;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Affect Constitution? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_CON;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Affect Charisma? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_CHR;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Automatic Searching? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SEARCH;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Slow Digestion? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SLOW_DIGEST;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Stealth? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_STEALTH;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Aggravate Monsters? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_AGGRAVATE;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Regeneration? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_REGEN;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Speed? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SPEED;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Fire? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_RES_FIRE;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Cold? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_RES_COLD;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Acid? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_RES_ACID;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Lightning? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_RES_LIGHT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Poison? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_POISON;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Confusion? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_CONF;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Sound? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_SOUND;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Light? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_LT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Dark? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_DARK;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Chaos? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_CHAOS;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Disenchantment? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_DISENCHANT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Shards? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_SHARDS;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Nexus? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_NEXUS;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Nether? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_NETHER;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist Blindness? [yn]: ",&ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_RES_BLIND;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Sustain a stat (Magic value 10 for all stats)? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SUST_STAT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("See invisible? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_SEE_INVIS;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Free Action? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_FREE_ACT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Feather Falling? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_FFALL;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Tunneling? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_TUNNEL;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Infra-vision? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_INFRA;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Resist life level loss? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_HOLD_LIFE;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Telepathy? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_TELEPATHY;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Immune to Fire? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_IM_FIRE;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Immune to Cold? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_IM_COLD;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Immune to Acid? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_IM_ACID;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Immune to Lightning? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_IM_LIGHT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Immune to Poison? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_IM_POISON;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Give off Light? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_LIGHT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Activatable Item? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_ACTIVATE;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Is it an Artifact? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags2 |= TR_ARTIFACT;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   if (get_com("Cursed? [yn]: ", &ch)) {
+     if (ch=='y'||ch=='Y') i_ptr->flags |= TR_CURSED;
+-  } else if (ch=='\033') goto end;
++  } else if (ch==ESCAPE) goto end;
+   } /* end if TV_MAX_WEAR >= i_ptr->tval >= TV_MIN_WEAR -CFT */
+ 
+   prt("Cost : ", 0, 0);
