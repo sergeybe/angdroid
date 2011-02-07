@@ -117,6 +117,19 @@ int initscr() {
 	return 0;
 }
 
+int crmode() {
+	return 0;
+}
+int nonl() {
+	return 0;
+}
+int noecho() {
+	return 0;
+}
+int endwin() {
+	return 0;
+}
+
 int clrtobot(void){
 	JAVA_CALL(NativeWrapper_clrtobot);
 	return 0;

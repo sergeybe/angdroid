@@ -90,7 +90,7 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="rogue"/>
 	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
-	    <property name="src.url.file" value="rogue-clone-iv-src.tar.gz"/>
+	    <property name="src.url.file" value="rogue210-source.tar.gz"/>
 		<property name="extract.command" value="tar" />
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
