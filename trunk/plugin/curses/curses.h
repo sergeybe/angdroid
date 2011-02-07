@@ -42,6 +42,10 @@ int overwrite(const WINDOW *, WINDOW *);
 int touchwin(WINDOW *);
 int refresh(void);
 int mvinch(int, int);
+int crmode();
+int nonl();
+int noecho();
+int endwin();
 
 int angdroid_getch(int v);
 int flushinp(void);
