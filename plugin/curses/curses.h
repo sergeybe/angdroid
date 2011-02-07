@@ -22,6 +22,7 @@ extern WINDOW* stdscr;
 #define getyx(w, y, x)     (y = getcury(w), x = getcurx(w))
 
 int angdroid_attrset(int);
+int angdroid_attrget(int, int);
 int addch(const char);
 int addstr(const char *);
 int addnstr(int, const char *);
@@ -40,6 +41,7 @@ int getcury(WINDOW *);
 int overwrite(const WINDOW *, WINDOW *);
 int touchwin(WINDOW *);
 int refresh(void);
+int mvinch(int, int);
 
 int angdroid_getch(int v);
 int flushinp(void);

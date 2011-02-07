@@ -112,6 +112,22 @@ public class TermWindow {
 		}
 	}
 
+	public int inch() {
+		return buffer[this.row][this.col].Char;
+	}
+
+	public int mvinch(int row, int col) {
+		move(row,col);
+		return inch();
+	}
+
+	public int attrget(int row, int col) {
+		if (col>-1 && col<cols && row>-1 & row<rows) {
+			return buffer[row][col].Color;
+		}
+		return -1;
+	}
+
 	public int getcury() {
 		return row;
 	}

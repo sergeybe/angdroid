@@ -132,6 +132,18 @@ public class NativeWrapper {
 		}
 	}
 
+	public int mvinch(final int r, final int c) {
+		synchronized (display_lock) {
+			return state.stdscr.mvinch(r, c);
+		}
+	}
+
+	public int attrget(final int r, final int c) {
+		synchronized (display_lock) {
+			return state.stdscr.attrget(r, c);
+		}
+	}
+
 	public void attrset(final int a) {
 		synchronized (display_lock) {
 			state.stdscr.attrset(a);
