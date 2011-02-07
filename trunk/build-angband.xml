@@ -23,6 +23,9 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="frogknows"/>
 	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="rogue"/>
+	</ant>
     </target>
 
     <target name="angband-javah" depends="compile">
@@ -42,6 +45,9 @@
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="frogknows"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="rogue"/>
 	</ant>
     </target>
 
@@ -81,6 +87,14 @@
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="rogue"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="rogue-clone-iv-src.tar.gz"/>
+		<property name="extract.command" value="tar" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
+	</ant>
     </target>
 <!--
     ************************************************************************
@@ -102,6 +116,9 @@
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="frogknows"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="rogue"/>
 	</ant>
     </target>
 

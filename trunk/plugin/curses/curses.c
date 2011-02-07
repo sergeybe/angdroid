@@ -20,6 +20,7 @@ static jmethodID NativeWrapper_fatal;
 static jmethodID NativeWrapper_warn;
 static jmethodID NativeWrapper_addnstr;
 static jmethodID NativeWrapper_attrset;
+static jmethodID NativeWrapper_attrget;
 static jmethodID NativeWrapper_overwrite;
 static jmethodID NativeWrapper_touchwin;
 static jmethodID NativeWrapper_hline;
@@ -31,6 +32,7 @@ static jmethodID NativeWrapper_newwin;
 static jmethodID NativeWrapper_refresh;
 static jmethodID NativeWrapper_getch;
 static jmethodID NativeWrapper_move;
+static jmethodID NativeWrapper_mvinch;
 static jmethodID NativeWrapper_curs_set;
 static jmethodID NativeWrapper_flushinp;
 static jmethodID NativeWrapper_getcury;
@@ -45,6 +47,11 @@ void (*angdroid_quit_hook)(void) = NULL;
 int angdroid_attrset(int attrs) {
 	JAVA_CALL(NativeWrapper_attrset, attrs);
 	return 0;
+}
+
+int angdroid_attrget(int row, int col) {
+	int attrs = JAVA_CALL_INT(NativeWrapper_attrget, row, col);
+	return attrs;
 }
 
 /*
@@ -105,6 +112,8 @@ int clear(void){
 }
 
 int initscr() {
+	clear();
+	touchwin(stdscr);
 	return 0;
 }
 
@@ -150,6 +159,11 @@ int refresh(void){
 int angdroid_getch(int v) {
 	int k = JAVA_CALL_INT(NativeWrapper_getch, v);
 	return k;
+}
+
+int mvinch(int r, int c) {
+	int ch = JAVA_CALL_INT(NativeWrapper_mvinch, r, c);
+	return ch;
 }
 
 int flushinp() {
@@ -204,6 +218,7 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	NativeWrapper_warn = JAVA_METHOD("warn", "(Ljava/lang/String;)V");
 	NativeWrapper_addnstr = JAVA_METHOD("addnstr", "(I[B)V");
 	NativeWrapper_attrset = JAVA_METHOD("attrset", "(I)V");
+	NativeWrapper_attrget = JAVA_METHOD("attrget", "(II)I");
 	NativeWrapper_overwrite = JAVA_METHOD("overwrite", "(II)V");
 	NativeWrapper_touchwin = JAVA_METHOD("touchwin", "(I)V");
 	NativeWrapper_hline = JAVA_METHOD("hline", "(BI)V");
@@ -217,6 +232,7 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	NativeWrapper_getcurx = JAVA_METHOD("getcurx", "()I");
 	NativeWrapper_newwin = JAVA_METHOD("newwin", "(IIII)I");
 	NativeWrapper_move = JAVA_METHOD("move", "(II)V");
+	NativeWrapper_mvinch = JAVA_METHOD("mvinch", "(II)I");
 	NativeWrapper_curs_set = JAVA_METHOD("curs_set", "(I)V");
 	NativeWrapper_flushinp = JAVA_METHOD("flushinp", "()V");
 

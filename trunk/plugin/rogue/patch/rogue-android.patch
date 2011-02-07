@@ -1,0 +1,454 @@
+diff -Nru --strip-trailing-cr rogue210-source/src/init.c rogue210-source-android/src/init.c
+--- rogue210-source/src/init.c	2004-02-15 20:01:46.000000000 -0800
++++ rogue210-source-android/src/init.c	2011-02-06 15:02:13.000000000 -0800
+@@ -135,6 +135,7 @@
+     return (rest_file!=NULL);
+ }
+ 
++#ifndef ANDROID
+ make_filename(char **fname, char *name) {
+     char *p, *punct = "_^$~!#%&-{}()@'`";
+ 
+@@ -155,6 +156,7 @@
+     }
+     strcat(*fname, ".SAV");
+ }
++#endif
+ 
+ player_init()
+ {
+diff -Nru --strip-trailing-cr rogue210-source/src/invent.c rogue210-source-android/src/invent.c
+--- rogue210-source/src/invent.c	2004-02-15 23:07:32.000000000 -0800
++++ rogue210-source-android/src/invent.c	2011-02-06 07:39:40.000000000 -0800
+@@ -161,6 +161,23 @@
+ 	'r',		"r       read scroll",
+ 	'/',		"/       identify object",
+ 	'e',		"e       eat food",
++#ifdef ANDROID
++	'h',		"h       left",
++	'w',		"w       wield a weapon",
++	'j',		"j       down",
++	'W',		"W       wear armor",
++	'k',		"k       up",
++	'T',		"T       take armor off",
++	'l',		"l       right",
++	'P',		"P       put on ring",
++	'y',		"y       up & left",
++	'R',		"R       remove ring",
++	'u',		"u       up & right",
++	'd',		"d       drop object",
++	'b',		"b       down & left",
++	'c',		"c       call object",
++	'n',		"n       down & right",
++#else
+ 	'h',		"h \033     left",
+ 	'w',		"w       wield a weapon",
+ 	'j',		"j \031     down",
+@@ -176,6 +193,7 @@
+ 	'b',		"b End   down & left",
+ 	'c',		"c       call object",
+ 	'n',		"n PgDn  down & right",
++#endif
+ 	(char)NULL,	"<SHIFT><dir>: run that way",
+ 	')',		")       print current weapon",
+ 	(char)NULL,	"<CTRL><dir>: run till adjacent",
+@@ -191,11 +209,15 @@
+ 	'\022',		"^R      redraw screen",
+ 	'\020',		"^P      repeat last message",
+ 	's',		"s       search for trap/secret door",
+-	'\033',		"ESC     cancel command",
++	CANCEL,		"ESC     cancel command",
+ 	'>',		">       go down a staircase",
+ 	'S',		"S       save game",
+ 	'<',		"<       go up a staircase",
++#ifdef ANDROID
++	'\024',	    "^X      save & quit",
++#else
+ 	'Q',		"Q       quit",
++#endif
+ 	'.',		".       rest for a turn",
+ 	'!',		"!       shell escape",
+ 	',',		",       pick something up",
+@@ -208,7 +230,11 @@
+ #endif
+ 	'v',		"v       print version number",
+ 	'q',		"q       quaff potion",
++#ifdef ANDROID
++	'&',		"&       save screen into 'save/screen'"
++#else
+ 	'&',		"&       save screen into '" _PATH_SCREENFILE "'"
++#endif
+ };
+ 
+ extern boolean wizard, use_color;
+diff -Nru --strip-trailing-cr rogue210-source/src/main.c rogue210-source-android/src/main.c
+--- rogue210-source/src/main.c	2004-01-30 15:33:04.000000000 -0800
++++ rogue210-source-android/src/main.c	2011-02-06 15:03:07.000000000 -0800
+@@ -70,9 +70,17 @@
+ 		print_stats(STAT_ALL);
+ 
+ PL:    if(!welcomed) {
++#ifdef ANDROID
++            message(" ", 0);
++#endif
+             message(welcome, 0);
+             welcomed = 1;
+         }
++#ifdef ANDROID
++		else {
++			refresh();
++		}
++#endif
+         
+ 		play_level();		
+ 		free_stuff(&level_objects);
+diff -Nru --strip-trailing-cr rogue210-source/src/object.c rogue210-source-android/src/object.c
+--- rogue210-source/src/object.c	2004-02-14 08:42:32.000000000 -0800
++++ rogue210-source-android/src/object.c	2011-02-06 15:03:38.000000000 -0800
+@@ -729,12 +729,16 @@
+ 	}
+ 	message("type of object?", 0);
+ 
++#ifdef ANDROID
++	while (r_index("!?:)]=/,`", (ch = rgetchar()), 0) == -1) {
++#else
+ 	while (r_index("!?:)]=/,\033", (ch = rgetchar()), 0) == -1) {
++#endif
+ 		sound_bell();
+ 	}
+ 	check_message();
+ 
+-	if (ch == '\033') {
++	if (ch == CANCEL) {
+ 		return;
+ 	}
+ 	obj = alloc_object();
+diff -Nru --strip-trailing-cr rogue210-source/src/pack.c rogue210-source-android/src/pack.c
+--- rogue210-source/src/pack.c	2004-02-18 20:40:00.000000000 -0800
++++ rogue210-source-android/src/pack.c	2011-02-05 16:08:22.000000000 -0800
+@@ -261,7 +261,11 @@
+     char c;
+     do {
+         c = rgetchar();
++#if ANDROID
++    } while (c!=' ' && c!='\n' && c!='\r' && c!=CANCEL);
++#else
+     } while (c!=' ' && c!='\n' && c!='\r');
++#endif
+ }
+ 
+ pack_letter(prompt, mask)
+diff -Nru --strip-trailing-cr rogue210-source/src/paths.h rogue210-source-android/src/paths.h
+--- rogue210-source/src/paths.h	2004-02-15 20:01:46.000000000 -0800
++++ rogue210-source-android/src/paths.h	2011-02-05 18:48:13.000000000 -0800
+@@ -28,7 +28,11 @@
+  *
+  * @(#)pathnames.h 8.1 (Berkeley) 5/31/93
+  */
+-
++#ifdef ANDROID
++extern char _PATH_SCOREFILE[]; //"rogue.sco"
++extern char _PATH_ERRORFILE[]; //"rogue.sav"
++extern char _PATH_SCREENFILE[]; //"screen.txt"
++#else
+ #ifdef _MSC_VER
+ #define _PATH_SCOREFILE "rogue.sco"
+ #define _PATH_ERRORFILE "rogue.sav"
+@@ -38,3 +42,4 @@
+ #define _PATH_ERRORFILE "ROGUE.SAV"
+ #define _PATH_SCREENFILE "SCREEN.TXT"
+ #endif
++#endif
+diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android/src/play.c
+--- rogue210-source/src/play.c	2004-02-15 20:01:46.000000000 -0800
++++ rogue210-source-android/src/play.c	2011-02-06 15:04:32.000000000 -0800
+@@ -47,6 +47,10 @@
+ #include "rogue.h"
+ #include "version.h"
+ 
++#ifdef ANDROID
++extern int angdroid_save_flag;
++#endif
++
+ boolean interrupted = 0;
+ char *unknown_command = "unknown command";
+ 
+@@ -216,6 +220,22 @@
+ 		case 'v':
+ 			message(LONG_VERSION_STRING, 0);
+ 			break;
++#ifdef ANDROID
++		case '\022': /* ^R */
++			refresh();
++			break;
++		case '&':
++			save_screen();
++	    	break;
++		case CANCEL:
++			break;
++		case (char)24:
++			message("Saving...", 0);
++			refresh();
++			angdroid_save();
++			clean_up("");
++			break;
++#endif
+ 		case 'Q':
+ 			quit(0);
+ 		case '0':
+@@ -294,5 +314,8 @@
+ 			message(unknown_command, 0);
+ 			break;
+ 		}
++#ifdef ANDROID
++		if (strchr(".,sfFtTwWzcodPRmrqe<>^hjklyubnHJKLYUBN",ch)) angdroid_save_flag = 1;
++#endif
+ 	}
+ }
+diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-android/src/rogue.h
+--- rogue210-source/src/rogue.h	2004-02-14 08:42:32.000000000 -0800
++++ rogue210-source-android/src/rogue.h	2011-02-06 15:07:05.000000000 -0800
+@@ -43,6 +43,19 @@
+  *         gain or profit.
+  */
+ 
++#ifdef ANDROID
++#include <string.h>
++#include <stdlib.h>
++#include <stdio.h>
++#define do_shell(x)
++#define md_control_keybord(x)
++#define md_ignore_signals(x)
++#define md_heed_signals(x)
++#define md_lock(x)
++#define md_link_count(x) (0)
++#define md_exit(x) angdroid_quit((x)?"unknown error":NULL)
++#endif
++
+ #ifdef _MSC_VER
+ /* supress warnings about parameters and return values,
+  * at least until we write proper prototypes */
+@@ -486,7 +499,11 @@
+ #define MOVED 0
+ #define MOVE_FAILED -1
+ #define STOPPED_ON_SOMETHING -2
++#ifdef ANDROID
++#define CANCEL '`'
++#else
+ #define CANCEL '\033'
++#endif
+ #define LIST '*'
+ 
+ #define HUNGRY 300
+diff -Nru --strip-trailing-cr rogue210-source/src/room.c rogue210-source-android/src/room.c
+--- rogue210-source/src/room.c	2004-02-17 22:34:20.000000000 -0800
++++ rogue210-source-android/src/room.c	2011-02-05 13:34:14.000000000 -0800
+@@ -242,7 +242,11 @@
+ 			cc.b8.color = use_color ?
+ 				MAKE_COLOR(scrTerrain[i].fgcolor, scrTerrain[i].bgcolor) :
+ 				MAKE_COLOR(WHITE, BLACK);
++#ifdef ANDROID
++			cc.b8.ch = scrTerrain[i].ch;
++#else
+ 			cc.b8.ch = use_doschars ? scrTerrain[i].dosch : scrTerrain[i].ch;
++#endif
+ 
+ 			return cc;
+ 		}
+@@ -348,7 +352,11 @@
+ 			cc.b8.color = use_color ?
+ 				MAKE_COLOR(scrObjects[i].fgcolor, scrObjects[i].bgcolor) :
+ 				MAKE_COLOR(WHITE, BLACK);
++#ifdef ANDROID
++			cc.b8.ch = scrObjects[i].ch;
++#else
+ 			cc.b8.ch = use_doschars ? scrObjects[i].dosch : scrObjects[i].ch;
++#endif
+ 			return cc;
+ 		}
+ 	}
+@@ -367,7 +375,11 @@
+ 	color_char cc;
+ 
+ 	cc.b8.color = (use_color) ? rogue.color : MAKE_COLOR(WHITE,BLACK);
++#ifdef ANDROID
++	cc.b8.ch = rogue.fchar;
++#else
+ 	cc.b8.ch = (use_doschars) ? rogue.dosfchar : rogue.fchar;
++#endif
+ 	return cc;
+ }
+ 
+@@ -716,7 +728,7 @@
+ 		ch = rgetchar();
+ CH:
+ 		switch(ch) {
+-		case '\033':
++		case CANCEL:
+ 			done = 1;
+ 			break;
+ 		case '\012':
+@@ -769,7 +781,7 @@
+ 					}
+ 					refresh();
+ 					ch = rgetchar();
+-				} while ((ch != '\012') && (ch != '\015') && (ch != '\033'));
++				} while ((ch != '\012') && (ch != '\015') && (ch != CANCEL));
+ 				if (j != 0) {
+ 				    strip(buf, options[i].add_blank);
+ 					(void) strcpy(*(options[i].strval), buf);
+@@ -834,6 +846,7 @@
+ 	move(i, strlen(options[i].prompt));
+ }
+ 
++#ifndef ANDROID
+ do_shell()
+ {
+ 	char *sh;
+@@ -851,7 +864,7 @@
+ 	redraw();
+ 	md_heed_signals();
+ }
+-
++#endif
+ 
+ /* Gets a random object character for Xeroc disguises and hallucinations.
+  * NS: moved this here from monster.c.  This returns a random color
+@@ -883,7 +896,12 @@
+ 	}
+ 
+ 	/* construct the color character */
++#ifdef ANDROID
++	cc.b8.ch = sc->ch;
++#else
+ 	cc.b8.ch = (use_doschars) ? sc->dosch : sc->ch;
++#endif
++
+ 	cc.b8.color = (use_color) ?	MAKE_COLOR(sc->fgcolor, sc->bgcolor) :
+ 								MAKE_COLOR(WHITE, BLACK);
+ 	return cc;
+diff -Nru --strip-trailing-cr rogue210-source/src/save.c rogue210-source-android/src/save.c
+--- rogue210-source/src/save.c	2004-02-16 10:30:58.000000000 -0800
++++ rogue210-source-android/src/save.c	2011-02-06 15:08:19.000000000 -0800
+@@ -81,6 +81,9 @@
+ extern char *fruit;
+ 
+ extern boolean msg_cleared;
++#ifdef ANDROID
++extern int angdroid_save_flag;
++#endif
+ 
+ save_game()
+ {
+@@ -90,8 +93,13 @@
+     if (rgetchar() == 'y') {
+         check_message();
+         message("", 0);
++#ifdef ANDROID
++		angdroid_save_flag = 1;
++		angdroid_save();
++#else
+         make_filename(&save_file, login_name);
+         save_into_file(save_file);
++#endif
+     }
+     
+     check_message();
+@@ -168,7 +176,9 @@
+ 	if (write_failed) {
+ 		(void) md_df(sfile);	/* delete file */
+ 	} else {
++#ifndef ANDROID
+ 		clean_up("");
++#endif
+ 	}
+ }
+ 
+@@ -249,9 +259,11 @@
+ 		clear();
+ 		clean_up("sorry, file has been touched");
+ 	}
++#ifndef ANDROID
+ 	if ((!wizard) && !md_df(fname)) {
+ 		clean_up("cannot delete file");
+ 	}
++#endif
+ 	ring_stats(0);
+ }
+ 
+diff -Nru --strip-trailing-cr rogue210-source/src/score.c rogue210-source-android/src/score.c
+--- rogue210-source/src/score.c	2004-02-15 20:01:46.000000000 -0800
++++ rogue210-source-android/src/score.c	2011-02-06 10:13:04.000000000 -0800
+@@ -54,6 +54,9 @@
+ extern boolean score_only, display_skull, msg_cleared, use_color, use_doschars;
+ extern char *byebye_string;
+ 
++#ifdef ANDROID
++extern int angdroid_save_flag;
++#endif
+ /*  NS:  Added color support
+  */
+ killed_by(monster, other)
+@@ -65,6 +68,10 @@
+ 	color_char boxchars[6];
+ 
+ 	md_ignore_signals();
++#ifdef ANDROID
++	angdroid_save_flag = 0;
++	angdroid_unlink_save();
++#endif
+ 
+ 	if (other != QUIT) {
+ 		rogue.gold = ((rogue.gold * 9) / 10);
+@@ -102,7 +109,11 @@
+ 	if ((!other) && (display_skull)) {
+ 	    clear();
+ 
++#ifdef ANDROID
++		if(1){
++#else
+ 	    if(!use_doschars) { /* classic skull */
++#endif
+ 		mvaddstr(4,  32, "__---------__");
+ 		mvaddstr(5,  30, "_~             ~_");
+ 		mvaddstr(6,  29, "/                 \\");
+@@ -520,6 +531,7 @@
+ char *buf;
+ short n;
+ {
++#ifndef ANDROID
+ 	short i;
+ 	unsigned char c;
+ 
+@@ -530,6 +542,7 @@
+ 
+ 		buf[i] ^= c;
+ 	}
++#endif
+ }
+ 
+ long
+diff -Nru --strip-trailing-cr rogue210-source/src/throw.c rogue210-source-android/src/throw.c
+--- rogue210-source/src/throw.c	2004-01-30 15:33:04.000000000 -0800
++++ rogue210-source-android/src/throw.c	2011-02-05 15:49:48.000000000 -0800
+@@ -257,7 +257,7 @@
+ rand_around(i, r, c)
+ short i, *r, *c;
+ {
+-	static char* pos = "\010\007\001\003\004\005\002\006\0";
++	static pos[9] = {'\010','\007','\001','\003','\004','\005','\002','\006','\0'};
+ 	static short row, col;
+ 	short j;
+ 
+diff -Nru --strip-trailing-cr rogue210-source/src/version.h rogue210-source-android/src/version.h
+--- rogue210-source/src/version.h	2004-02-21 23:06:20.000000000 -0800
++++ rogue210-source-android/src/version.h	2011-02-06 07:40:40.000000000 -0800
+@@ -85,6 +85,8 @@
+   #endif
+ #elif defined(_WIN32) || defined(__WINDOWS__)
+   #define PORT "Windows"
++#elif defined(ANDROID)
++  #define PORT "Android"
+ #else
+   #define PORT "???"
+ #endif

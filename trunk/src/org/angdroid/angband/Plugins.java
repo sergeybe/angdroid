@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 final public class Plugins {
 	public enum Plugin {
-		Angband(0), Angband306(1), FrogKnows(2);
+		Angband(0), Angband306(1), FrogKnows(2), Rogue(3);
 		private int id;
 
 		private Plugin(int id) {
@@ -22,6 +22,7 @@ final public class Plugins {
 	public static int getKeyDown(Plugin p) {
 		switch (p) {
 		case Angband: return 0x8A;
+		case Rogue: return 'j';
 		default: return '2';
 		}
 	}
@@ -29,6 +30,7 @@ final public class Plugins {
 	public static int getKeyUp(Plugin p) {
 		switch (p) {
 		case Angband: return 0x8D;
+		case Rogue: return 'k';
 		default: return '8';
 		}
 	}
@@ -36,6 +38,7 @@ final public class Plugins {
 	public static int getKeyLeft(Plugin p) {
 		switch (p) {
 		case Angband: return 0x8B;
+		case Rogue: return 'h';
 		default: return '4';
 		}
 	}
@@ -43,6 +46,7 @@ final public class Plugins {
 	public static int getKeyRight(Plugin p) {
 		switch (p) {
 		case Angband: return 0x8C;
+		case Rogue: return 'l';
 		default: return '6';
 		}
 	}
@@ -57,6 +61,8 @@ final public class Plugins {
 			is = Preferences.getResources().openRawResource(R.raw.zipangband306);
 		else if (plugin == Plugin.FrogKnows.getId())
 			is = Preferences.getResources().openRawResource(R.raw.zipfrogknows);
+		else if (plugin == Plugin.Rogue.getId())
+			is = Preferences.getResources().openRawResource(R.raw.ziprogue);
 		return new ZipInputStream(is);
 	}
 }
