@@ -196,15 +196,10 @@ int angdroid_save() {
 		sprintf(new_savefile, "%s.new", savefile);
 		sprintf(old_savefile, "%s.old", savefile);
 
-		LOGD("ns:%s",new_savefile);
-		LOGD("os:%s",old_savefile);
-
 		/* Make sure that the savefile doesn't already exist */
-		LOGD("save_into.1");
 		unlink(new_savefile);
 		unlink(old_savefile);
 
-		LOGD("save_into.2");
 		save_into_file(new_savefile); //save and continue
 		int char_saved = file_exists(new_savefile);
 
