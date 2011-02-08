@@ -1,0 +1,1206 @@
+diff -Nru --strip-trailing-cr mor552cs/ibmpc/tcio.c mor552cs-android/ibmpc/tcio.c
+--- mor552cs/ibmpc/tcio.c	2002-08-29 09:39:16.000000000 -0700
++++ mor552cs-android/ibmpc/tcio.c	2011-02-07 18:16:50.000000000 -0800
+@@ -10,6 +10,7 @@
+    changes to ms_misc.c; in particular, you need to comment out the #include
+    of curses.h. */
+ 
++#ifndef ANDROID
+ #include <alloc.h>  /* malloc() */
+ #include <ctype.h>
+ #include <dos.h>
+@@ -17,6 +18,7 @@
+ #include <stdio.h> /* putch */
+ #include <process.h> /* spawnl() */
+ #include <conio.h> /* window(), gotoxy() */
++#endif
+ 
+ #ifdef __TURBOC__
+ #include	<string.h>
+@@ -28,8 +30,10 @@
+ #include "externs.h"
+ 
+ #define MSG_LEN  73
++#ifndef ANDROID
+ #define LINES 25
+ #define COLS 80
++#endif
+ 
+ #ifdef TURBOC_COLOR
+ /* Flag for displaying in monochrome. 0=false, nonzero is true. --EL */
+@@ -49,12 +53,17 @@
+ static void *savescr; /* pointer to a saved screen */
+ 
+ void init_curses(void){
++#ifdef ANDROID
++	clear();
++	savescr = newwin(0,0,0,0);
++#else
+   if((savescr=malloc(LINES*COLS*2))==NULL){
+     puts("Out of memory in init_curses()");
+     exit(1);
+   }
+   clrscr();
+   msdos_raw();
++#endif
+ }
+ 
+ 
+@@ -135,12 +144,18 @@
+ }
+ 
+ void restore_term(void){
++#ifdef ANDROID
++	clear();
++	refresh();
++#else
+   fflush(stdout);
+   clear_screen();
+   msdos_noraw();
++#endif
+ }
+ 
+ void shell_out(void){
++#ifndef ANDROID
+   char *comspec;
+ #ifndef __TURBOC__
+   char key;
+@@ -163,34 +178,57 @@
+   }
+   restore_signals();
+   restore_screen();
++#endif
+ }
+ 
+ void save_screen(void){
++#ifdef ANDROID
++  overwrite(stdscr, savescr);
++#else
+   gettext(1,1,COLS,LINES,savescr);
++#endif
+ }
+ 
+ void restore_screen(void){
++#ifdef ANDROID
++  overwrite(savescr, stdscr);
++  touchwin(stdscr);
++#else
+   puttext(1,1,COLS,LINES,savescr);
++#endif
+ }
+ 
+ void clear_screen(void){
++#ifdef ANDROID
++	clear();
++#else
+   window(1,1,COLS,LINES);
+ /*
+ I think later I might want to define seperate windows, so the above line
+ is definsive code.
+ */
+   clrscr();
++#endif
+ }
+ 
+ void clear_from(int row){
++#ifdef ANDROID
++	move(row,0);
++	clrtobot();
++#else
+   window(1,row+1,COLS,LINES);
+   clrscr();
+   window(1,1,COLS,LINES);
++#endif
+ }
+ 
+ void flush(void){
++#ifdef ANDROID
++	flushinp();
++#else
+   while(kbhit())
+     getch();
++#endif
+ }
+ 
+ void erase_line(int row, int col){
+@@ -201,6 +239,18 @@
+ }
+ 
+ char inkey(void){
++#ifdef ANDROID
++	command_count=0;
++	if (!cursor_hide) curs_set(1);
++	refresh();
++	int i=angdroid_getch(1);
++	if (i==-1) {
++		angdroid_save();
++		while (i==-1) {i = angdroid_getch(1);}
++	}
++	curs_set(0);
++	return (char)i;
++#else
+   int i;
+ 
+   command_count=0;
+@@ -228,6 +278,7 @@
+     break;
+   }
+   return (CTRL('R'));
++#endif //ANDROID
+ }
+ 
+ void print(char ch, int row, int col){
+@@ -275,10 +326,14 @@
+       old_len=MSG_LEN;
+     put_buffer("-more-",MSG_LINE, old_len);
+     wait_for_more=1;
++#ifndef ANDROID
+     do{
++#endif
+       in_char=inkey();
++#ifndef ANDROID
+     }while((in_char!=' ')&&(in_char!=ESCAPE)&&(in_char!='\n')&&
+ 	   (in_char!='\r'));
++#endif
+     wait_for_more=0;
+   }
+   gotoxy(1,MSG_LINE+1);
+diff -Nru --strip-trailing-cr mor552cs/src/config.h mor552cs-android/src/config.h
+--- mor552cs/src/config.h	2002-08-13 16:02:16.000000000 -0700
++++ mor552cs-android/src/config.h	2011-02-06 19:11:40.000000000 -0800
+@@ -92,6 +92,20 @@
+ 
+ /* Files used by moria, set these to valid pathnames for your system.  */
+ 
++#ifdef ANDROID
++extern char MORIA_SAV	[]; //moriasav
++extern char MORIA_TOP	[]; //moriatop
++extern char MORIA_MOR	[]; //"news"
++extern char MORIA_TOP_NAME [];	//"scores"
++extern char MORIA_SAV_NAME	[]; //"MORIA.SAV"
++extern char MORIA_CNF_NAME	[]; //"MORIA.CNF"
++extern char MORIA_HELP	[]; //"roglcmds.hlp"
++extern char MORIA_ORIG_HELP	[]; //"origcmds.hlp"
++extern char MORIA_WIZ_HELP	[]; //"rwizcmds.hlp"
++extern char MORIA_OWIZ_HELP	[]; //"owizcmds.hlp"
++extern char MORIA_WELCOME	[]; //"welcome.hlp"
++extern char MORIA_VER	[]; //"version.hlp"
++#else
+ #ifdef MSDOS
+ /* Files which can be in a varying place */
+ #define MORIA_SAV	moriasav
+@@ -222,7 +236,7 @@
+ #endif
+ #endif
+ #endif
+-
++#endif
+ 
+ /* This sets the default user interface.  */
+ /* To use the original key bindings (keypad for movement) set ROGUE_LIKE
+@@ -339,3 +353,48 @@
+ #define __STDC__	0
+ #endif
+ #endif
++
++
++#ifdef ANDROID
++#include <string.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include "curses.h"
++#define	BLACK 0
++#define	BLUE 1
++#define GREEN 2 
++#define CYAN 3
++#define RED 4
++#define MAGENTA 5
++#define BROWN 6
++#define LIGHTGRAY 7
++#define DARKGRAY 8
++#define LIGHTBLUE 9
++#define LIGHTGREEN 10
++#define LIGHTCYAN 11
++#define LIGHTRED 12
++#define LIGHTMAGENTA 13
++#define YELLOW 14
++#define WHITE 15
++//#define MULTI 16
++//#define ANY 17
++#undef unix
++#undef exit
++#define exit(x) angdroid_quit((x)?"unknown error":NULL)
++//#undef srandom
++//#define srandom angband_srandom
++//#undef initstate
++//#define initstate angband_initstate
++#define stricmp strcasecmp
++#define L_SET SEEK_SET
++#define gotoxy(x,y) move((y)-1,(x)-1)
++#define clreol clrtoeol
++#define cputs addstr
++#define putch addch
++#undef putchar
++#define putchar addch
++#define wherex(x) getcurx(stdscr)
++#define kbhit(x) check_input(0)
++#undef perror
++#define perror angdroid_quit
++#endif
+diff -Nru --strip-trailing-cr mor552cs/src/constant.h mor552cs-android/src/constant.h
+--- mor552cs/src/constant.h	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/constant.h	2011-02-06 20:21:36.000000000 -0800
+@@ -238,8 +238,12 @@
+ #ifdef VMS
+ #define ESCAPE        '\032'	/* Use CTRL-Z instead of ESCAPE.  */
+ #else
++#ifdef ANDROID
++#define ESCAPE	      '`'	
++#else
+ #define ESCAPE	      '\033'	/* ESCAPE character -CJS-  */
+ #endif
++#endif
+ 
+ /* This used to be NULL, but that was technically incorrect.  CNIL is used
+    instead of null to help avoid lint errors.  */
+diff -Nru --strip-trailing-cr mor552cs/src/create.c mor552cs-android/src/create.c
+--- mor552cs/src/create.c	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/create.c	2011-02-07 18:36:24.000000000 -0800
+@@ -180,9 +180,12 @@
+ 	exit_flag = TRUE;
+       else if (s == '?')
+ 	helpfile (MORIA_WELCOME);
++#ifdef ANDROID
++	  else if (s == CTRL('X'))
++		exit_game();
++#endif
+       else
+-	bell ();
+-    }
++	bell ();}
+   while (!exit_flag);
+ 
+   p_ptr = &py;
+@@ -318,6 +321,10 @@
+ 	}
+       else if (c == '?')
+ 	helpfile (MORIA_WELCOME);
++#ifdef ANDROID
++	  else if (c == CTRL('X'))
++		exit_game();
++#endif
+       else
+ 	bell ();
+     }
+@@ -467,6 +474,10 @@
+ 	}
+       else if (s == '?')
+ 	helpfile (MORIA_WELCOME);
++#ifdef ANDROID
++	  else if (s == CTRL('X'))
++		exit_game();
++#endif
+       else
+ 	bell ();
+     }
+@@ -540,6 +551,10 @@
+ 	  put_misc1();
+ 	  put_stats();
+ 	}
++#ifdef ANDROID
++	  else if (c == CTRL('X'))
++		exit_game();
++#endif
+       else
+ 	bell ();
+     }		    /* done with stats generation */
+diff -Nru --strip-trailing-cr mor552cs/src/death.c mor552cs-android/src/death.c
+--- mor552cs/src/death.c	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/death.c	2011-02-07 07:04:05.000000000 -0800
+@@ -50,6 +50,7 @@
+ #endif
+ #endif
+ 
++#ifndef ANDROID
+ #ifdef VMS
+ unsigned int getuid(), getgid();
+ #else
+@@ -67,6 +68,7 @@
+ #endif
+ #endif
+ #endif
++#endif
+ 
+ #ifdef USG
+ #ifndef ATARIST_MWC
+@@ -103,6 +105,7 @@
+ #endif
+ #endif
+ 
++#ifndef ANDROID
+ #ifndef VMS
+ #ifndef MAC
+ #if defined(ultrix) || defined(USG)
+@@ -110,6 +113,7 @@
+ #endif
+ #endif
+ #endif
++#endif
+ 
+ #if defined(LINT_ARGS)
+ static void date(char *);
+@@ -165,6 +169,7 @@
+ }
+ 
+ 
++#ifndef ANDROID
+ #ifndef __TURBOC__
+ #if (defined(USG) || defined(atarist) || defined(HPUX)) && !defined(VMS)
+ #if !defined(AMIGA) && !defined(MAC) && !defined(ATARIST_TC)
+@@ -225,6 +230,7 @@
+ #endif
+ #endif
+ #endif
++#endif
+ 
+ void display_scores(show_player)
+ int show_player;
+@@ -607,7 +613,7 @@
+   char *tmp;
+   int8u version_maj, version_min, patch_level;
+   long curpos;
+-#if defined(VMS) || defined(MSDOS) || defined(AMIGA) || defined(MAC) || defined(APOLLO)
++#if defined(VMS) || defined(MSDOS) || defined(AMIGA) || defined(MAC) || defined(APOLLO) || defined(ANDROID)
+   char string[100];
+ #endif
+ 
+@@ -660,14 +666,18 @@
+   /*  First, get a lock on the high score file so no-one else tries */
+   /*  to write to it while we are using it, on VMS and IBMPCs only one
+       process can have the file open at a time, so we just open it here */
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(ANDROID)
+ #if defined(MAC) || defined(MSDOS)
+   if ((highscore_fp = fopen(MORIA_TOP, "rb+")) == NULL)
+ #else
+   if ((highscore_fp = fopen(MORIA_TOP, "r+")) == NULL)
+ #endif
+     {
++#ifdef ANDROID
++      (void) sprintf (string, "Error opening score file\n");
++#else
+       (void) sprintf (string, "Error opening score file \"%s\"\n", MORIA_TOP);
++#endif
+       msg_print(string);
+       msg_print(CNIL);
+       return;
+@@ -734,7 +744,7 @@
+     {
+       /* No need to print a message, a subsequent call to display_scores()
+ 	 will print a message.  */
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(ANDROID)
+       (void) fclose (highscore_fp);
+ #endif
+       return;
+@@ -762,7 +772,7 @@
+ 	       && new_entry.race == old_entry.race
+ 	       && new_entry.class == old_entry.class)
+ 	{
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(APOLLO)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(APOLLO) || defined(ANDROID)
+ 	  (void) fclose (highscore_fp);
+ #endif
+ 	  return;
+@@ -770,7 +780,7 @@
+       else if (++i >= SCOREFILE_SIZE)
+ 	{
+ 	  /* only allow one thousand scores in the score file */
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(ANDROID)
+ 	  (void) fclose (highscore_fp);
+ #endif
+ 	  return;
+@@ -848,7 +858,7 @@
+ 	}
+     }
+ 
+-#if !defined(VMS) && !defined(MSDOS) && !defined(AMIGA) && !defined(MAC) && !defined(APOLLO)
++#if !defined(VMS) && !defined(MSDOS) && !defined(AMIGA) && !defined(MAC) && !defined(APOLLO) && !defined(ANDROID)
+ #ifdef ATARIST_TC
+   /* Flock never called for Atari ST with TC.  */
+ #else
+@@ -909,25 +919,30 @@
+   /* Prevent strange things from happening */
+   enablefilemenu(FALSE);
+ #endif
+-
++  LOGD("exit_game.1");
+   /* What happens upon dying.				-RAK-	 */
+   msg_print(CNIL);
++  LOGD("exit_game.2");
+   flush ();  /* flush all input */
++  LOGD("exit_game.3");
+   nosignals ();	 /* Can't interrupt or suspend. */
+   /* If the game has been saved, then save sets turn back to -1, which
+      inhibits the printing of the tomb.	 */
++  LOGD("exit_game.4");
+   if (turn >= 0)
+     {
+       if (total_winner)
+ 	kingly();
+       print_tomb();
+     }
++  LOGD("exit_game.5");
+   if (character_generated && !character_saved)
+ #ifdef MAC
+     (void) save_char (TRUE);		/* Save the memory at least. */
+ #else
+     (void) save_char ();		/* Save the memory at least. */
+ #endif
++  LOGD("exit_game.6");
+   /* add score to scorefile if applicable */
+   if (character_generated)
+     {
+@@ -935,9 +950,11 @@
+ 	 from recursively calling exit_game() when there has been an eof
+ 	 on stdin detected.  */
+       character_saved = FALSE;
++  LOGD("exit_game.7");
+       highscores();
+       display_scores (TRUE);
+     }
++  LOGD("exit_game.8");
+   erase_line (23, 0);
+   restore_term ();
+ #ifdef MAC
+@@ -946,6 +963,7 @@
+   /* Long jump back into the Mac wrapper, in lieu of exit () */
+   goback();
+ #else
++  LOGD("exit_game.9");
+   exit (0);
+ #endif
+ }
+diff -Nru --strip-trailing-cr mor552cs/src/desc.c mor552cs-android/src/desc.c
+--- mor552cs/src/desc.c	2002-08-13 16:23:24.000000000 -0700
++++ mor552cs-android/src/desc.c	2011-02-06 18:45:22.000000000 -0800
+@@ -26,6 +26,7 @@
+ 
+ #if defined(LINT_ARGS)
+ static void unsample(struct inven_type *);
++void invcopy(struct inven_type*, int);
+ #else
+ static void unsample();
+ #endif
+diff -Nru --strip-trailing-cr mor552cs/src/dungeon.c mor552cs-android/src/dungeon.c
+--- mor552cs/src/dungeon.c	2002-09-29 16:11:10.000000000 -0700
++++ mor552cs-android/src/dungeon.c	2011-02-07 19:49:06.000000000 -0800
+@@ -930,7 +930,9 @@
+ 		      command = inkeydir();
+ 		      enablesavecmd(FALSE);
+ #else
++			  cursor_hide = TRUE;
+ 		      command = inkey();
++			  cursor_hide = FALSE;
+ #endif
+ 		      i = 0;
+ 		      /* Get a count for a command. */
+diff -Nru --strip-trailing-cr mor552cs/src/externs.h mor552cs-android/src/externs.h
+--- mor552cs/src/externs.h	2003-06-01 09:35:56.000000000 -0700
++++ mor552cs-android/src/externs.h	2011-02-07 18:25:58.000000000 -0800
+@@ -15,6 +15,9 @@
+ #ifdef ATARIST_TC
+ #define LINT_ARGS
+ #endif
++#ifdef ANDROID
++#define LINT_ARGS
++#endif
+ 
+ /* This causes more trouble than it is worth, and very few systems still
+    have this bug in their include files.  */
+@@ -36,7 +39,7 @@
+ #endif
+ 
+ /* to avoid 'psect' problem with VMS declaration of errno */
+-#ifndef VMS
++#if !defined (VMS) && !defined(ANDROID)
+ extern int errno;
+ #endif
+ 
+@@ -245,7 +248,7 @@
+ /* Track if temporary light about player.  */
+ extern int light_flag;
+ 
+-#ifdef MSDOS
++#if defined (MSDOS) || defined (ANDROID)
+ extern int8u	floorsym, wallsym;
+ extern int	ansi, saveprompt;
+ extern char	moriatop[], moriasav[];
+@@ -630,7 +633,7 @@
+ #else
+ int save_char(void);
+ #endif
+-int _save_char(char *);
++int _save_char(char *,int);
+ int get_char(int *);
+ #if defined(STDIO_LOADED)
+ void set_fileptr(FILE *);
+@@ -1322,3 +1325,7 @@
+ #if defined(atarist) && defined(__GNUC__)
+ extern char extended_file_name[80];
+ #endif
++
++#ifdef ANDROID
++extern int cursor_hide;
++#endif
+diff -Nru --strip-trailing-cr mor552cs/src/files.c mor552cs-android/src/files.c
+--- mor552cs/src/files.c	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/files.c	2011-02-06 18:39:55.000000000 -0800
+@@ -31,6 +31,7 @@
+ char *strcat();
+ #endif
+ 
++#ifndef ANDROID
+ #ifdef VMS
+ #include <string.h>
+ #include <file.h>
+@@ -50,6 +51,9 @@
+ void exit();
+ #endif
+ #endif
++#else
++#include <fcntl.h>
++#endif
+ 
+ /* This must be included after fcntl.h, which has a prototype for `open'
+    on some systems.  Otherwise, the `open' prototype conflicts with the
+diff -Nru --strip-trailing-cr mor552cs/src/magic.c mor552cs-android/src/magic.c
+--- mor552cs/src/magic.c	2002-09-22 10:32:16.000000000 -0700
++++ mor552cs-android/src/magic.c	2011-02-06 19:03:09.000000000 -0800
+@@ -12,8 +12,10 @@
+ #include "externs.h"
+ 
+ #ifdef __TURBOC__
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ /* Throw a magic spell					-RAK-	*/
+ void cast()
+diff -Nru --strip-trailing-cr mor552cs/src/main.c mor552cs-android/src/main.c
+--- mor552cs/src/main.c	2003-06-01 10:21:10.000000000 -0700
++++ mor552cs-android/src/main.c	2011-02-07 07:23:15.000000000 -0800
+@@ -125,6 +125,7 @@
+ #endif
+ #endif
+ 
++#ifndef ANDROID
+ #ifndef VMS
+ #ifndef MAC
+ #ifdef USG
+@@ -132,6 +133,7 @@
+ #endif
+ #endif
+ #endif
++#endif
+ 
+ /*
+ #if defined(atarist) && defined(__GNUC__)
+@@ -206,6 +208,8 @@
+   /* default command set defined in config.h file */
+   rogue_like_commands = ROGUE_LIKE;
+ 
++  LOGD("main.1");
++
+ #ifdef SECURE
+   Authenticate();
+ #endif
+@@ -216,10 +220,12 @@
+ 
+   /* call this routine to grab a file pointer to the highscore file */
+   /* and prepare things to relinquish setuid privileges */
++#ifndef ANDROID
+   init_scorefile();
++#endif
+ 
+ #ifndef SECURE
+-#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(MAC)
++#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(MAC) && !defined(ANDROID)
+ #if !defined(AMIGA) && !defined(ATARIST_TC)
+ #if !defined(atarist)
+   if (0 != setuid(getuid()))
+@@ -237,6 +243,8 @@
+ #endif
+ #endif
+ 
++  LOGD("main.4");
++
+   /* use curses */
+   init_curses();
+ 
+@@ -321,28 +329,36 @@
+ #endif
+       }
+ 
++  LOGD("main.5");
+ #ifndef MAC
+   /* Check operating hours			*/
+   /* If not wizard  No_Control_Y	       */
+   read_times();
+ #endif
+ 
++  LOGD("main.6");
++
+   /* Some necessary initializations		*/
+   /* all made into constants or initialized in variables.c */
+ 
+ #if (COST_ADJ != 100)
+   price_adjust();
+ #endif
++  LOGD("main.7");
+ 
+   /* Grab a random seed from the clock		*/
+   init_seeds(seed);
+ 
++  LOGD("main.8");
+   /* Init monster and treasure levels for allocate */
+   init_m_level();
++  LOGD("main.8.5");
+   init_t_level();
++  LOGD("main.9");
+ 
+   /* Init the store inventories			*/
+   store_init();
++  LOGD("main.10");
+ 
+ #ifndef MAC
+   /* On Mac, if -n is passed, no savefile is used */
+@@ -367,6 +383,7 @@
+   else
+     (void) strcpy(savefile, MORIA_SAV);
+ #endif
++  LOGD("main.11");
+ 
+ /* This restoration of a saved character may get ONLY the monster memory. In
+    this case, get_char returns false. It may also resurrect a dead character
+@@ -381,22 +398,32 @@
+ #endif
+     result = TRUE;
+ 
++  LOGD("main.11.1");
++
+   /* enter wizard mode before showing the character display, but must wait
+      until after get_char in case it was just a resurrection */
+   if (to_be_wizard)
+     if (!enter_wiz_mode())
+       exit_game();
+ 
++  LOGD("main.11.2");
++
+   if (result)
+     {
++  LOGD("main.11.3");
++
+       change_name();
+ 
++  LOGD("main.11.4");
++
+       /* could be restoring a dead character after a signal or HANGUP */
+       if (py.misc.chp < 0)
+ 	death = TRUE;
+     }
+   else
+     {	  /* Create character	   */
++  LOGD("main.11.4");
++
+       create_character();
+ #ifdef MAC
+       birth_date = time ((time_t *)0);
+@@ -425,17 +452,23 @@
+       generate = TRUE;
+     }
+ 
++  LOGD("main.12");
++
+   if (force_rogue_like)
+     rogue_like_commands = force_keys_to;
+ 
+   magic_init();
+ 
++  LOGD("main.13");
++
+   /* Begin the game				*/
+   clear_screen();
+   prt_stat_block();
+   if (generate)
+     generate_cave();
+ 
++  LOGD("main.14");
++
+   /* Loop till dead, or exit			*/
+   while(!death)
+     {
+diff -Nru --strip-trailing-cr mor552cs/src/misc1.c mor552cs-android/src/misc1.c
+--- mor552cs/src/misc1.c	2002-09-06 19:06:30.000000000 -0700
++++ mor552cs-android/src/misc1.c	2011-02-06 18:31:16.000000000 -0800
+@@ -16,8 +16,10 @@
+ #endif
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ #ifdef Pyramid
+ #include <sys/time.h>
+diff -Nru --strip-trailing-cr mor552cs/src/misc2.c mor552cs-android/src/misc2.c
+--- mor552cs/src/misc2.c	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/misc2.c	2011-02-07 19:29:57.000000000 -0800
+@@ -1026,6 +1026,9 @@
+   { "Highlight and notice mineral seams",	&highlight_seams },
+   { "Beep for invalid character",		&sound_beep_flag },
+   { "Display rest/repeat counts",		&display_counts },
++#ifdef ANDROID
++  { "Turn on haggling",			&haggling },
++#endif
+   { 0, 0 } };
+ 
+ 
+diff -Nru --strip-trailing-cr mor552cs/src/misc3.c mor552cs-android/src/misc3.c
+--- mor552cs/src/misc3.c	2003-06-01 11:44:52.000000000 -0700
++++ mor552cs-android/src/misc3.c	2011-02-07 18:29:43.000000000 -0800
+@@ -7,9 +7,11 @@
+    included in all such copies. */
+ 
+ #ifdef __TURBOC__
++#ifndef ANDROID
+ #include <stdio.h>
+ #include <conio.h>
+ #endif
++#endif
+ 
+ #include "config.h"
+ #include "constant.h"
+@@ -40,6 +42,10 @@
+ static void prt_long(int32, int, int);
+ static void prt_int(int, int, int);
+ static void gain_level(void);
++void calc_spells(int);
++void calc_mana(int);
++void prt_experience();
++void calc_hitpoints();
+ #endif
+ 
+ static char *stat_names[] = { "STR : ", "INT : ", "WIS : ",
+@@ -1439,7 +1445,7 @@
+ 
+ 
+ /* Are we strong enough for the current pack and weapon?  -CJS-	 */
+-void check_strength()
++void check_strength2(int interactive)
+ {
+   register int i;
+   register inven_type *i_ptr;
+@@ -1453,7 +1459,7 @@
+     {
+       if (weapon_heavy == FALSE)
+ 	{
+-	  msg_print("You have trouble wielding such a heavy weapon.");
++	  if (interactive) msg_print("You have trouble wielding such a heavy weapon.");
+ 	  weapon_heavy = TRUE;
+ 	  calc_bonuses();
+ 	}
+@@ -1461,7 +1467,7 @@
+   else if (weapon_heavy == TRUE)
+     {
+       weapon_heavy = FALSE;
+-      if (i_ptr->tval != TV_NOTHING)
++      if (i_ptr->tval != TV_NOTHING && interactive) 
+ 	msg_print("You are strong enough to wield your weapon.");
+       calc_bonuses();
+     }
+@@ -1472,10 +1478,10 @@
+     i = 0;
+   if (pack_heavy != i)
+     {
+-      if (pack_heavy < i)
++      if (pack_heavy < i && interactive)
+ 	msg_print("Your pack is so heavy that it slows you down.");
+       else
+-	msg_print("You move more easily under the weight of your pack.");
++	if (interactive) msg_print("You move more easily under the weight of your pack.");
+       change_speed(i - pack_heavy);
+       pack_heavy = i;
+     }
+@@ -1485,6 +1491,7 @@
+   py.flags.status &= ~PY_STR_WGT;
+ #endif
+ }
++void check_strength() {check_strength2(1);}
+ 
+ 
+ /* Add an item to players inventory.  Return the	*/
+diff -Nru --strip-trailing-cr mor552cs/src/misc4.c mor552cs-android/src/misc4.c
+--- mor552cs/src/misc4.c	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/misc4.c	2011-02-06 18:36:05.000000000 -0800
+@@ -28,6 +28,10 @@
+ #include <strings.h>
+ #endif
+ 
++#ifdef LINT_ARGS
++void inscribe(inven_type* i_ptr, char* str);
++#endif
++
+ 
+ /* Add a comment to an object description.		-CJS- */
+ void scribe_object()
+diff -Nru --strip-trailing-cr mor552cs/src/monsters.c mor552cs-android/src/monsters.c
+--- mor552cs/src/monsters.c	2002-08-14 04:29:24.000000000 -0700
++++ mor552cs-android/src/monsters.c	2011-02-06 19:03:08.000000000 -0800
+@@ -10,8 +10,10 @@
+ #include "constant.h"
+ #include "types.h"
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>  /*  Needed for changing colors.  --JMA  */
+ #endif
++#endif
+ 
+ /* Following are creature arrays and variables			*/
+ 	/* Creatures must be defined here				*/
+diff -Nru --strip-trailing-cr mor552cs/src/moria1.c mor552cs-android/src/moria1.c
+--- mor552cs/src/moria1.c	2002-08-31 16:27:06.000000000 -0700
++++ mor552cs-android/src/moria1.c	2011-02-06 19:00:00.000000000 -0800
+@@ -19,8 +19,10 @@
+ #include "externs.h"
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ #ifdef USG
+ #ifndef ATARIST_MWC
+diff -Nru --strip-trailing-cr mor552cs/src/moria2.c mor552cs-android/src/moria2.c
+--- mor552cs/src/moria2.c	2002-09-08 18:33:44.000000000 -0700
++++ mor552cs-android/src/moria2.c	2011-02-06 19:00:38.000000000 -0800
+@@ -14,8 +14,10 @@
+ #include "externs.h"
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ #if defined(LINT_ARGS)
+ static int see_wall(int, int, int);
+diff -Nru --strip-trailing-cr mor552cs/src/moria3.c mor552cs-android/src/moria3.c
+--- mor552cs/src/moria3.c	2003-06-01 10:31:54.000000000 -0700
++++ mor552cs-android/src/moria3.c	2011-02-06 19:01:09.000000000 -0800
+@@ -16,8 +16,10 @@
+ #include "externs.h"
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ #ifdef USG
+ #ifndef ATARIST_MWC
+diff -Nru --strip-trailing-cr mor552cs/src/moria4.c mor552cs-android/src/moria4.c
+--- mor552cs/src/moria4.c	2002-08-31 23:33:30.000000000 -0700
++++ mor552cs-android/src/moria4.c	2011-02-06 19:03:08.000000000 -0800
+@@ -17,8 +17,10 @@
+ #include "externs.h"
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ #ifdef USG
+ #ifndef ATARIST_MWC
+diff -Nru --strip-trailing-cr mor552cs/src/prayer.c mor552cs-android/src/prayer.c
+--- mor552cs/src/prayer.c	2002-09-01 21:13:30.000000000 -0700
++++ mor552cs-android/src/prayer.c	2011-02-06 18:50:17.000000000 -0800
+@@ -12,8 +12,10 @@
+ #include "externs.h"
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ /* Pray like HELL.					-RAK-	*/
+ void pray()
+diff -Nru --strip-trailing-cr mor552cs/src/save.c mor552cs-android/src/save.c
+--- mor552cs/src/save.c	2002-08-25 23:45:44.000000000 -0700
++++ mor552cs-android/src/save.c	2011-02-07 18:29:34.000000000 -0800
+@@ -168,6 +168,10 @@
+     l |= 0x200;
+   if (display_counts)
+     l |= 0x400;
++#ifdef ANDROID
++  if (haggling)
++    l |= 0x800L;
++#endif
+   if (death)
+     l |= 0x80000000L;	/* Sign bit */
+   if (total_winner)
+@@ -487,7 +491,7 @@
+   if (proceed)
+     {
+       changedirectory(vrefnum);
+-      rc = _save_char(savefile);
++      rc = _save_char(savefile, FALSE);
+       restoredirectory();
+     }
+   else
+@@ -514,7 +518,7 @@
+   bePlayer();
+ #endif
+ 
+-  while (!_save_char(savefile))
++  while (!_save_char(savefile, FALSE))
+     {
+       (void) sprintf(temp, "Savefile '%s' fails.", savefile);
+       msg_print(temp);
+@@ -544,14 +548,15 @@
+ }
+ #endif
+ 
+-int _save_char(fnam)
++int _save_char(fnam,save_and_continue)
+ char *fnam;
++int save_and_continue;
+ {
+   vtype temp;
+   register int ok, fd;
+   int8u char_tmp;
+ 
+-  if (character_saved)
++  if (character_saved && !save_and_continue)
+     return TRUE;	/* Nothing to save. */
+ 
+   nosignals();
+@@ -565,7 +570,7 @@
+ #if !defined(ATARIST_MWC) && !defined(VMS)
+   fd = -1;
+   fileptr = NULL;		/* Do not assume it has been init'ed */
+-#if defined(MAC) || defined(AMIGA)
++#if defined(MAC) || defined(AMIGA) || defined(ANDROID)
+   /* The Mac version automatically overwrites */
+   fd = open(fnam, O_RDWR|O_CREAT|O_TRUNC);
+ #ifdef MAC
+@@ -587,15 +592,15 @@
+ #endif /* !ATARIST_MWC && !VMS */
+       /* GCC for atari st defines atarist */
+ #if defined(atarist) || defined(ATARI_ST) || defined(THINK_C) || defined(MSDOS)
+-      fileptr = fopen(savefile, "wb");
++      fileptr = fopen(fnam, "wb");
+ #else
+-      fileptr = fopen(savefile, "w");
++      fileptr = fopen(fnam, "w");
+ #endif
+ #if !defined(ATARIST_MWC) && !defined(VMS)
+     }
+ #endif
+   DEBUG(logfile = fopen("IO_LOG", "a"));
+-  DEBUG(fprintf (logfile, "Saving data to %s\n", savefile));
++  DEBUG(fprintf (logfile, "Saving data to %s\n", fnam));
+   if (fileptr != NULL)
+     {
+       xor_byte = 0;
+@@ -631,15 +636,20 @@
+       else
+ 	(void) sprintf(temp, "Can't create new file %s", fnam);
+       msg_print(temp);
+-      return FALSE;
+     }
+-  else
++  else if (!save_and_continue) {
+     character_saved = 1;
+ 
+-  turn = -1;
+-  signals();
++	turn = -1;
++	signals();
++  }
++  else { // save_and_continue) 
++	  weapon_heavy = FALSE;
++	  pack_heavy = 0;
++	  check_strength2(0);
++  }
+ 
+-  return TRUE;
++  return ok;
+ }
+ 
+ 
+@@ -698,7 +708,6 @@
+   nosignals();
+   *generate = TRUE;
+   fd = -1;
+-
+ #ifndef MAC
+   /* Not required for Mac, because the file name is obtained through a dialog.
+      There is no way for a non existnat file to be specified.  -BS-	*/
+@@ -860,6 +869,12 @@
+       else
+ 	display_counts = FALSE;
+ 
++#ifdef ANDROID
++      if (l & 0x800L)
++      	haggling = TRUE;
++      else
++        haggling = FALSE;
++#endif
+       /* Don't allow resurrection of total_winner characters.  It causes
+ 	 problems because the character level is out of the allowed range.  */
+       if (to_be_wizard && (l & 0x40000000L))
+@@ -1070,6 +1085,7 @@
+ 	  put_qio();
+ 	  goto closefiles;
+ 	}
++
+       if (ungetc(c, fileptr) == EOF)
+ 	goto error;
+ 
+@@ -1199,6 +1215,7 @@
+ 	ok = FALSE;	/* Assume bad data. */
+       else
+ 	{
++
+ 	  /* don't overwrite the killed by string if character is dead */
+ 	  if (py.misc.chp >= 0)
+ 	    (void) strcpy(died_from, "(alive and well)");
+@@ -1226,6 +1243,7 @@
+ 	msg_print("Error during reading of file.");
+       else
+ 	{
++
+ 	  /* let the user overwrite the old savefile when save/quit */
+ 	  from_savefile = 1;
+ 
+@@ -1286,6 +1304,7 @@
+ 	      msg_print(temp);
+ 	    }
+ 
++
+ 	  if (turn >= 0)
+ 	    return TRUE;
+ 	  else
+diff -Nru --strip-trailing-cr mor552cs/src/signals.c mor552cs-android/src/signals.c
+--- mor552cs/src/signals.c	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/signals.c	2011-02-07 18:11:08.000000000 -0800
+@@ -18,7 +18,7 @@
+ 
+ /* Signals have no significance on the Mac */
+ 
+-#ifdef MAC
++#if defined (MAC) || defined (ANDROID)
+ 
+ void nosignals()
+ {
+@@ -174,7 +174,7 @@
+   else
+     {
+       death = TRUE;
+-      (void) _save_char(savefile);	/* Quietly save the memory anyway. */
++      (void) _save_char(savefile,FALSE);	/* Quietly save the memory anyway. */
+     }
+   restore_term();
+ #if !defined(MSDOS) && !defined(AMIGA) && !defined(ATARIST_TC)
+diff -Nru --strip-trailing-cr mor552cs/src/spells.c mor552cs-android/src/spells.c
+--- mor552cs/src/spells.c	2003-06-01 11:53:52.000000000 -0700
++++ mor552cs-android/src/spells.c	2011-02-06 18:56:26.000000000 -0800
+@@ -20,8 +20,10 @@
+ unsigned int boltdelay=0;
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>          /*  Needed for changing colors  --JMA  */
+ #endif
++#endif
+ 
+ #ifdef USG
+ #ifndef ATARIST_MWC
+diff -Nru --strip-trailing-cr mor552cs/src/store2.c mor552cs-android/src/store2.c
+--- mor552cs/src/store2.c	2002-08-30 10:45:16.000000000 -0700
++++ mor552cs-android/src/store2.c	2011-02-06 18:58:49.000000000 -0800
+@@ -17,8 +17,10 @@
+ #include "externs.h"
+ 
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>
+ #endif
++#endif
+ 
+ #ifdef USG
+ #ifndef ATARIST_MWC
+diff -Nru --strip-trailing-cr mor552cs/src/tables.c mor552cs-android/src/tables.c
+--- mor552cs/src/tables.c	2002-08-13 18:47:58.000000000 -0700
++++ mor552cs-android/src/tables.c	2011-02-06 19:03:09.000000000 -0800
+@@ -10,8 +10,10 @@
+ #include "constant.h"
+ #include "types.h"
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>   /*  Needed for color changing  -JMA  */
+ #endif
++#endif
+ 
+ #ifdef MORIA_HOU
+ /* Operating hours for Moria				-RAK-	*/
+diff -Nru --strip-trailing-cr mor552cs/src/treasure.c mor552cs-android/src/treasure.c
+--- mor552cs/src/treasure.c	2002-09-01 14:49:22.000000000 -0700
++++ mor552cs-android/src/treasure.c	2011-02-06 19:03:08.000000000 -0800
+@@ -10,8 +10,10 @@
+ #include "constant.h"
+ #include "types.h"
+ #ifdef TURBOC_COLOR
++#ifndef ANDROID
+ #include <conio.h>  /*  For changing colors.  --JMA  */
+ #endif
++#endif
+ 
+ /* Following are treasure arrays	and variables			*/
+ 
+diff -Nru --strip-trailing-cr mor552cs/src/types.h mor552cs-android/src/types.h
+--- mor552cs/src/types.h	2002-08-13 21:22:48.000000000 -0700
++++ mor552cs-android/src/types.h	2011-02-07 07:30:15.000000000 -0800
+@@ -14,9 +14,13 @@
+ /* some machines will not accept 'signed char' as a type, and some accept it
+    but still treat it like an unsigned character, let's just avoid it,
+    any variable which can ever hold a negative value must be 16 or 32 bits */
+-
++#ifdef ANDROID
++#define VTYPESIZ	1080
++#define BIGVTYPESIZ	1160
++#else
+ #define VTYPESIZ	80
+ #define BIGVTYPESIZ	160
++#endif
+ typedef char vtype[VTYPESIZ];
+ /* note that since its output can easily exceed 80 characters, objdes must
+    always be called with a bigvtype as the first paramter */
+diff -Nru --strip-trailing-cr mor552cs/src/variable.c mor552cs-android/src/variable.c
+--- mor552cs/src/variable.c	2003-06-01 09:37:00.000000000 -0700
++++ mor552cs-android/src/variable.c	2011-02-07 18:25:55.000000000 -0800
+@@ -103,3 +103,7 @@
+ #if defined(atarist) && defined(__GNUC__)
+ char extended_file_name[80];
+ #endif
++
++#ifdef ANDROID
++int cursor_hide = FALSE;
++#endif
