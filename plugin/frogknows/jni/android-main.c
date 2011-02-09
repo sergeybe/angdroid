@@ -52,12 +52,13 @@ int angdroid_save() {
 		sprintf(new_savefile, "%s.new", savefile);
 		sprintf(old_savefile, "%s.old", savefile);
 
-		LOGD("ns:%s",new_savefile);		
-		LOGD("os:%s",old_savefile);
-
 		/* Make sure that the savefile doesn't already exist */
 		unlink(new_savefile);
 		unlink(old_savefile);
+
+		gotoxy(1,MSG_LINE+1);
+		clreol();
+		put_buffer("Saving...",0,3);
 
 		(void) strcpy (died_from, "(saved)");
 		char_saved = _save_char(new_savefile,TRUE); //save and continue
@@ -78,28 +79,20 @@ int angdroid_save() {
 					unlink(old_savefile);
 					turn_save = turn;
 
-					gotoxy(1,MSG_LINE+1);
-					clreol();
-					put_buffer("Saved game.",0,3);
-
-					//msg_print ("Saved game."); //calls inkey, not good here
-
-					LOGD("angdroid_save.saved game success");
+					put_buffer(" done.",0,12);
 				}
 			}
 
 			if(err) {
-				LOGD("angdroid_save.saved game failed 1");
+				put_buffer(" failed.",0,12);
 			}
 
 			return err ? FALSE : TRUE;
 		} 
 		else {
-
 			/* Delete temp file */
 			unlink(new_savefile);
-
-			LOGD("angdroid_save.saved game failed 2");
+			put_buffer(" failed.",0,12);
 
 			return FALSE;
 		}

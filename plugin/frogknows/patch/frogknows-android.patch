@@ -1,6 +1,6 @@
-diff -Nru --strip-trailing-cr frogknows/src/config.h frogknows-android/src/config.h
---- frogknows/src/config.h	1993-04-07 22:00:42.000000000 -0700
-+++ frogknows-android/src/config.h	2011-02-02 06:58:14.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/config.h pcangband-1.4-android/src/config.h
+--- pcangband-1.4/src/config.h	1993-04-07 22:00:42.000000000 -0700
++++ pcangband-1.4-android/src/config.h	2011-02-07 20:02:11.000000000 -0800
 @@ -17,6 +17,25 @@
  
  /* files used by moria, set these to valid pathnames */
@@ -77,9 +77,9 @@ diff -Nru --strip-trailing-cr frogknows/src/config.h frogknows-android/src/confi
  
  
  
-diff -Nru --strip-trailing-cr frogknows/src/constant.h frogknows-android/src/constant.h
---- frogknows/src/constant.h	1994-03-02 18:47:20.000000000 -0800
-+++ frogknows-android/src/constant.h	2011-01-31 18:43:35.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/constant.h pcangband-1.4-android/src/constant.h
+--- pcangband-1.4/src/constant.h	1994-03-02 18:47:20.000000000 -0800
++++ pcangband-1.4-android/src/constant.h	2011-02-07 20:02:11.000000000 -0800
 @@ -243,7 +243,12 @@
  #undef CTRL
  #define CTRL(x)		(x & 0x1F)
@@ -93,9 +93,9 @@ diff -Nru --strip-trailing-cr frogknows/src/constant.h frogknows-android/src/con
  
  #ifndef NULL
  #define NULL (char *)0
-diff -Nru --strip-trailing-cr frogknows/src/create.c frogknows-android/src/create.c
---- frogknows/src/create.c	1993-11-08 17:09:46.000000000 -0800
-+++ frogknows-android/src/create.c	2011-02-02 07:10:11.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/create.c pcangband-1.4-android/src/create.c
+--- pcangband-1.4/src/create.c	1993-11-08 17:09:46.000000000 -0800
++++ pcangband-1.4-android/src/create.c	2011-02-07 20:02:11.000000000 -0800
 @@ -329,6 +329,9 @@
  	exit_flag = TRUE;
        else if (s == '?')
@@ -177,9 +177,9 @@ diff -Nru --strip-trailing-cr frogknows/src/create.c frogknows-android/src/creat
    	    && (!check_input(1)));
  #elif (defined(MSDOS) || defined(VMS))  /* #if/elif/else rewritten -CFT */
  	    && (!kbhit()));
-diff -Nru --strip-trailing-cr frogknows/src/death.c frogknows-android/src/death.c
---- frogknows/src/death.c	1993-11-13 15:44:30.000000000 -0800
-+++ frogknows-android/src/death.c	2011-02-02 06:58:38.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/death.c pcangband-1.4-android/src/death.c
+--- pcangband-1.4/src/death.c	1993-11-13 15:44:30.000000000 -0800
++++ pcangband-1.4-android/src/death.c	2011-02-07 20:02:11.000000000 -0800
 @@ -136,13 +136,17 @@
    int from, to;
    int hl_rank; /* if positive, which rank to highlight, else unused -CFT */
@@ -273,9 +273,9 @@ diff -Nru --strip-trailing-cr frogknows/src/death.c frogknows-android/src/death.
      {
        (void) sprintf (string, "delete_hs_saved:Error opening temp file \"%s\"\n", tfname);
        perror(string);
-diff -Nru --strip-trailing-cr frogknows/src/dungeon.c frogknows-android/src/dungeon.c
---- frogknows/src/dungeon.c	1994-03-06 18:46:24.000000000 -0800
-+++ frogknows-android/src/dungeon.c	2011-02-02 05:56:16.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/dungeon.c pcangband-1.4-android/src/dungeon.c
+--- pcangband-1.4/src/dungeon.c	1994-03-06 18:46:24.000000000 -0800
++++ pcangband-1.4-android/src/dungeon.c	2011-02-07 20:02:11.000000000 -0800
 @@ -38,7 +38,9 @@
  static void jamdoor(ARG_VOID);
  static void refill_lamp(ARG_VOID);
@@ -332,9 +332,9 @@ diff -Nru --strip-trailing-cr frogknows/src/dungeon.c frogknows-android/src/dung
          if (redraw) {
  	  restore_screen();
  	  redraw = FALSE;
-diff -Nru --strip-trailing-cr frogknows/src/externs.h frogknows-android/src/externs.h
---- frogknows/src/externs.h	1994-02-26 11:35:56.000000000 -0800
-+++ frogknows-android/src/externs.h	2011-02-01 21:03:36.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/externs.h pcangband-1.4-android/src/externs.h
+--- pcangband-1.4/src/externs.h	1994-02-26 11:35:56.000000000 -0800
++++ pcangband-1.4-android/src/externs.h	2011-02-07 20:02:11.000000000 -0800
 @@ -7,7 +7,7 @@
     included in all such copies. */
  
@@ -422,9 +422,9 @@ diff -Nru --strip-trailing-cr frogknows/src/externs.h frogknows-android/src/exte
  #endif
 +
 +#endif //ANDROID
-diff -Nru --strip-trailing-cr frogknows/src/files.c frogknows-android/src/files.c
---- frogknows/src/files.c	1993-10-25 17:07:46.000000000 -0700
-+++ frogknows-android/src/files.c	2011-01-25 17:30:35.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/files.c pcangband-1.4-android/src/files.c
+--- pcangband-1.4/src/files.c	1993-10-25 17:07:46.000000000 -0700
++++ pcangband-1.4-android/src/files.c	2011-02-07 20:02:11.000000000 -0800
 @@ -47,6 +47,11 @@
  #endif
  #endif
@@ -437,9 +437,9 @@ diff -Nru --strip-trailing-cr frogknows/src/files.c frogknows-android/src/files.
  /* Not touched for Mac port */
  /*
   *  init_scorefile
-diff -Nru --strip-trailing-cr frogknows/src/generate.c frogknows-android/src/generate.c
---- frogknows/src/generate.c	1994-02-21 17:09:22.000000000 -0800
-+++ frogknows-android/src/generate.c	2011-02-01 21:04:18.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/generate.c pcangband-1.4-android/src/generate.c
+--- pcangband-1.4/src/generate.c	1994-02-21 17:09:22.000000000 -0800
++++ pcangband-1.4-android/src/generate.c	2011-02-07 20:02:11.000000000 -0800
 @@ -79,10 +79,11 @@
  static void place_door(ARG_INT ARG_COMMA ARG_INT);
  
@@ -462,9 +462,9 @@ diff -Nru --strip-trailing-cr frogknows/src/generate.c frogknows-android/src/gen
      if (randint((dun_level*dun_level*dun_level)+1)<25000) good_item_flag = TRUE;
  #else
      if (randint((dun_level*dun_level+1))<650) good_item_flag = TRUE;
-diff -Nru --strip-trailing-cr frogknows/src/main.c frogknows-android/src/main.c
---- frogknows/src/main.c	1994-01-15 15:37:52.000000000 -0800
-+++ frogknows-android/src/main.c	2011-02-02 06:42:40.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/main.c pcangband-1.4-android/src/main.c
+--- pcangband-1.4/src/main.c	1994-01-15 15:37:52.000000000 -0800
++++ pcangband-1.4-android/src/main.c	2011-02-07 20:02:11.000000000 -0800
 @@ -182,7 +182,11 @@
    int force_rogue_like = FALSE;
    int force_keys_to, FORGET;
@@ -529,9 +529,9 @@ diff -Nru --strip-trailing-cr frogknows/src/main.c frogknows-android/src/main.c
  		run w/o a bit of work on non-PC systems -CFT */
  
  /* erase the "(saved)" entry from the highscore list, otherwise it will
-diff -Nru --strip-trailing-cr frogknows/src/misc1.c frogknows-android/src/misc1.c
---- frogknows/src/misc1.c	1994-03-01 22:12:12.000000000 -0800
-+++ frogknows-android/src/misc1.c	2011-02-01 21:05:40.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/misc1.c pcangband-1.4-android/src/misc1.c
+--- pcangband-1.4/src/misc1.c	1994-03-01 22:12:12.000000000 -0800
++++ pcangband-1.4-android/src/misc1.c	2011-02-07 20:02:11.000000000 -0800
 @@ -81,7 +81,9 @@
  void init_seeds(seed)
  int32u seed;
@@ -560,9 +560,9 @@ diff -Nru --strip-trailing-cr frogknows/src/misc1.c frogknows-android/src/misc1.
    { "Beep for invalid character",		&sound_beep_flag },
    { "Turn off haggling",			&no_haggle_flag },
  #ifdef TC_COLOR
-diff -Nru --strip-trailing-cr frogknows/src/misc2.c frogknows-android/src/misc2.c
---- frogknows/src/misc2.c	1994-03-05 13:18:30.000000000 -0800
-+++ frogknows-android/src/misc2.c	2011-02-01 21:06:44.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/misc2.c pcangband-1.4-android/src/misc2.c
+--- pcangband-1.4/src/misc2.c	1994-03-05 13:18:30.000000000 -0800
++++ pcangband-1.4-android/src/misc2.c	2011-02-07 20:02:11.000000000 -0800
 @@ -21,6 +21,11 @@
  
  #include <ctype.h>
@@ -594,9 +594,9 @@ diff -Nru --strip-trailing-cr frogknows/src/misc2.c frogknows-android/src/misc2.
  {
    register int loop, i;
    register int16u tmp_stat;
-diff -Nru --strip-trailing-cr frogknows/src/moria1.c frogknows-android/src/moria1.c
---- frogknows/src/moria1.c	1994-03-05 11:14:02.000000000 -0800
-+++ frogknows-android/src/moria1.c	2011-02-01 21:07:50.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/moria1.c pcangband-1.4-android/src/moria1.c
+--- pcangband-1.4/src/moria1.c	1994-03-05 11:14:02.000000000 -0800
++++ pcangband-1.4-android/src/moria1.c	2011-02-07 20:02:11.000000000 -0800
 @@ -1670,7 +1670,7 @@
        c_ptr->fval=NT_LIGHT_FLOOR;
      else if (c_ptr->fval==DARK_FLOOR)
@@ -651,9 +651,9 @@ diff -Nru --strip-trailing-cr frogknows/src/moria1.c frogknows-android/src/moria
  #ifdef TC_COLOR
    else if ((c = loc_symbol(y, x)) == wallsym)
  #else
-diff -Nru --strip-trailing-cr frogknows/src/random.c frogknows-android/src/random.c
---- frogknows/src/random.c	1994-02-21 18:05:34.000000000 -0800
-+++ frogknows-android/src/random.c	2011-01-25 17:50:25.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/random.c pcangband-1.4-android/src/random.c
+--- pcangband-1.4/src/random.c	1994-02-21 18:05:34.000000000 -0800
++++ pcangband-1.4-android/src/random.c	2011-02-07 20:02:11.000000000 -0800
 @@ -28,13 +28,14 @@
   */
  
@@ -670,9 +670,9 @@ diff -Nru --strip-trailing-cr frogknows/src/random.c frogknows-android/src/rando
  extern char *initstate(unsigned int, char *, int);
  extern char *setstate(char *);
  #else
-diff -Nru --strip-trailing-cr frogknows/src/recall.c frogknows-android/src/recall.c
---- frogknows/src/recall.c	1994-01-23 12:14:34.000000000 -0800
-+++ frogknows-android/src/recall.c	2011-02-01 21:09:48.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/recall.c pcangband-1.4-android/src/recall.c
+--- pcangband-1.4/src/recall.c	1994-01-23 12:14:34.000000000 -0800
++++ pcangband-1.4-android/src/recall.c	2011-02-07 20:02:11.000000000 -0800
 @@ -15,8 +15,9 @@
  #include <stdio.h>
  
@@ -693,9 +693,9 @@ diff -Nru --strip-trailing-cr frogknows/src/recall.c frogknows-android/src/recal
  /* added to allow external description file -CFT */
    FILE *descfile;
  #define MAX_DESC_LEN 1024 /* even morgorth's fits... -CFT */
-diff -Nru --strip-trailing-cr frogknows/src/save.c frogknows-android/src/save.c
---- frogknows/src/save.c	2011-02-01 21:15:08.000000000 -0800
-+++ frogknows-android/src/save.c	2011-02-02 06:20:03.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/save.c pcangband-1.4-android/src/save.c
+--- pcangband-1.4/src/save.c	2011-02-01 21:15:08.000000000 -0800
++++ pcangband-1.4-android/src/save.c	2011-02-08 06:36:52.000000000 -0800
 @@ -34,10 +34,10 @@
  #include "monster.h"  /* needed for monster heal bug work-around -CFT */
  
@@ -861,16 +861,27 @@ diff -Nru --strip-trailing-cr frogknows/src/save.c frogknows-android/src/save.c
        if (l & 0x200L)
        	sound_beep_flag = TRUE;
        else
-@@ -1285,7 +1298,7 @@
+@@ -1285,7 +1298,8 @@
  	      || (version_min == 1 && patch_level >= 3)) {
  	    rd_long(&time_saved);
  #ifndef SET_UID
 -#ifndef MSDOS /* accuses people of having a fiddled savefile if write took
-+#if !defined (MSDOS) && !defined(ANDROID) /* accuses people of having a fiddled savefile if write took
++#if !defined (MSDOS) && !defined(ANDROID) 
++		/* accuses people of having a fiddled savefile if write took
  		too long, like if DOS6's undelete decided to take control
  		of the disk for a while... */
  	    if (!to_be_wizard) {
-@@ -1621,11 +1634,11 @@
+@@ -1590,7 +1604,8 @@
+ 	    }
+ 
+ 	  if (turn >= 0) {
+-#ifndef MSDOS  /* I'm not quite sure what this does, but UM55 doesn't
++#if !defined (MSDOS) && !defined (ANDROID)   
++		  /* I'm not quite sure what this does, but UM55 doesn't
+ 		  use it, and link() is undefined on TC, so I'm ifndef-ing
+ 		  it out for now...  -CFT */
+ 	    char *tmp2;
+@@ -1621,11 +1636,11 @@
    return FALSE;	/* not reached, unless on mac */
  }
  
@@ -884,7 +895,7 @@ diff -Nru --strip-trailing-cr frogknows/src/save.c frogknows-android/src/save.c
  }
  
  static void wr_short(s)
-@@ -1651,7 +1664,7 @@
+@@ -1651,7 +1666,7 @@
  }
  
  static void wr_bytes(c, count)
@@ -893,9 +904,9 @@ diff -Nru --strip-trailing-cr frogknows/src/save.c frogknows-android/src/save.c
  register int count;
  {
    register int i;
-diff -Nru --strip-trailing-cr frogknows/src/signals.c frogknows-android/src/signals.c
---- frogknows/src/signals.c	1993-08-10 10:30:42.000000000 -0700
-+++ frogknows-android/src/signals.c	2011-02-02 05:59:23.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/signals.c pcangband-1.4-android/src/signals.c
+--- pcangband-1.4/src/signals.c	1993-08-10 10:30:42.000000000 -0700
++++ pcangband-1.4-android/src/signals.c	2011-02-07 20:02:11.000000000 -0800
 @@ -11,7 +11,7 @@
  
  /* Signals have no significance on the Mac */
@@ -914,9 +925,9 @@ diff -Nru --strip-trailing-cr frogknows/src/signals.c frogknows-android/src/sign
      }
    restore_term();
  #ifndef MSDOS
-diff -Nru --strip-trailing-cr frogknows/src/spells.c frogknows-android/src/spells.c
---- frogknows/src/spells.c	1994-03-05 13:17:40.000000000 -0800
-+++ frogknows-android/src/spells.c	2011-02-01 21:15:59.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/spells.c pcangband-1.4-android/src/spells.c
+--- pcangband-1.4/src/spells.c	1994-03-05 13:17:40.000000000 -0800
++++ pcangband-1.4-android/src/spells.c	2011-02-07 20:02:11.000000000 -0800
 @@ -3402,7 +3402,7 @@
  /* Attempts to destroy a type of creature.  Success depends on	*/
  /* the creatures level VS. the player's level		 -RAK-	 */
@@ -926,9 +937,9 @@ diff -Nru --strip-trailing-cr frogknows/src/spells.c frogknows-android/src/spell
  int32u cflag; /* ring o power passes 0xffffffffL */
  #else
  int cflag;
-diff -Nru --strip-trailing-cr frogknows/src/store1.c frogknows-android/src/store1.c
---- frogknows/src/store1.c	1993-09-02 12:46:50.000000000 -0700
-+++ frogknows-android/src/store1.c	2011-01-31 18:00:11.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/store1.c pcangband-1.4-android/src/store1.c
+--- pcangband-1.4/src/store1.c	1993-09-02 12:46:50.000000000 -0700
++++ pcangband-1.4-android/src/store1.c	2011-02-07 20:02:11.000000000 -0800
 @@ -494,7 +494,7 @@
    register int flagnoneed;
    register store_type *s_ptr;
@@ -938,9 +949,9 @@ diff -Nru --strip-trailing-cr frogknows/src/store1.c frogknows-android/src/store
    if (no_haggle_flag) return TRUE; /* turn off haggling as an option... */
  #endif  
    s_ptr = &store[store_num];
-diff -Nru --strip-trailing-cr frogknows/src/tcio.c frogknows-android/src/tcio.c
---- frogknows/src/tcio.c	1994-02-25 23:42:28.000000000 -0800
-+++ frogknows-android/src/tcio.c	2011-02-02 06:51:36.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/tcio.c pcangband-1.4-android/src/tcio.c
+--- pcangband-1.4/src/tcio.c	1994-02-25 23:42:28.000000000 -0800
++++ pcangband-1.4-android/src/tcio.c	2011-02-07 20:02:11.000000000 -0800
 @@ -9,6 +9,7 @@
  /* This I/O module doesn't need PCcurses.  You may also need to make some
     changes to ms_misc.c.  */
@@ -1155,9 +1166,9 @@ diff -Nru --strip-trailing-cr frogknows/src/tcio.c frogknows-android/src/tcio.c
  }
  
  /* the rest is just modified -ev- */
-diff -Nru --strip-trailing-cr frogknows/src/treasure.c frogknows-android/src/treasure.c
---- frogknows/src/treasure.c	1994-02-25 23:04:36.000000000 -0800
-+++ frogknows-android/src/treasure.c	2011-01-25 19:52:59.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/treasure.c pcangband-1.4-android/src/treasure.c
+--- pcangband-1.4/src/treasure.c	1994-02-25 23:04:36.000000000 -0800
++++ pcangband-1.4-android/src/treasure.c	2011-02-07 20:02:11.000000000 -0800
 @@ -66,7 +66,7 @@
  /* Object list (All objects must be defined here)		 */
  #ifdef MACGAME
@@ -1167,9 +1178,9 @@ diff -Nru --strip-trailing-cr frogknows/src/treasure.c frogknows-android/src/tre
  treasure_type object_list[MAX_OBJECTS] = {
  /* Dungeon items from 0 to MAX_DUNGEON_OBJ */
  {"Poison"			,0x00000001L,	TV_FOOD, ',',	/*  0*/
-diff -Nru --strip-trailing-cr frogknows/src/types.h frogknows-android/src/types.h
---- frogknows/src/types.h	1993-12-12 21:16:32.000000000 -0800
-+++ frogknows-android/src/types.h	2011-02-02 06:40:51.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/types.h pcangband-1.4-android/src/types.h
+--- pcangband-1.4/src/types.h	1993-12-12 21:16:32.000000000 -0800
++++ pcangband-1.4-android/src/types.h	2011-02-07 20:02:11.000000000 -0800
 @@ -15,8 +15,13 @@
     but still treat it like an unsigned character, let's just avoid it,
     any variable which can ever hold a negative value must be 16 or 32 bits */
@@ -1193,9 +1204,9 @@ diff -Nru --strip-trailing-cr frogknows/src/types.h frogknows-android/src/types.
        int16u cur_stat[6];	/* What is natural */
  #else /* why is this only int8u?  save.c uses wr_shorts to write!  -CFT */
        int8u cur_stat[6];	/* What is natural */
-diff -Nru --strip-trailing-cr frogknows/src/vars1.c frogknows-android/src/vars1.c
---- frogknows/src/vars1.c	1994-02-21 16:58:12.000000000 -0800
-+++ frogknows-android/src/vars1.c	2011-02-01 20:04:23.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/vars1.c pcangband-1.4-android/src/vars1.c
+--- pcangband-1.4/src/vars1.c	1994-02-21 16:58:12.000000000 -0800
++++ pcangband-1.4-android/src/vars1.c	2011-02-07 20:02:11.000000000 -0800
 @@ -90,7 +90,7 @@
  
  
@@ -1210,9 +1221,9 @@ diff -Nru --strip-trailing-cr frogknows/src/vars1.c frogknows-android/src/vars1.
  int feel_chance;
  
 +int cursor_hide = FALSE;
-diff -Nru --strip-trailing-cr frogknows/src/wizard.c frogknows-android/src/wizard.c
---- frogknows/src/wizard.c	1993-08-14 22:25:52.000000000 -0700
-+++ frogknows-android/src/wizard.c	2011-02-01 06:34:44.000000000 -0800
+diff -Nru --strip-trailing-cr pcangband-1.4/src/wizard.c pcangband-1.4-android/src/wizard.c
+--- pcangband-1.4/src/wizard.c	1993-08-14 22:25:52.000000000 -0700
++++ pcangband-1.4-android/src/wizard.c	2011-02-07 20:02:11.000000000 -0800
 @@ -910,177 +910,177 @@
        (i_ptr->tval==TV_DIGGING)) {
  	if (get_com("Slay Evil? [yn]: ", &ch)) {
