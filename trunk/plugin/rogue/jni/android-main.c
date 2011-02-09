@@ -200,12 +200,13 @@ int angdroid_save() {
 		unlink(new_savefile);
 		unlink(old_savefile);
 
+		clear_message();
+		message("Saving...",0);
+
 		save_into_file(new_savefile); //save and continue
 		int char_saved = file_exists(new_savefile);
 
 		if (char_saved) {
-
-			LOGD("save_into.3");
 
 			if (file_exists(savefile) && rename(savefile, old_savefile)!=0)
 				err = TRUE;
@@ -222,24 +223,20 @@ int angdroid_save() {
 					angdroid_save_flag = 0;
 
 					clear_message();
-					message("Saved game.",0);
-
-					LOGD("angdroid_save.saved game success");
+					message("Saving... done.",0);
 				}
 			}
 
 			if(err) {
-				LOGD("angdroid_save.saved game failed 1");
+				message("Saving... failed.",0);
 			}
 
 			return err ? FALSE : TRUE;
 		}
 		else {
-
 			/* Delete temp file */
 			unlink(new_savefile);
-
-			LOGD("angdroid_save.saved game failed 2");
+			message("Saving... failed.",0);
 
 			return FALSE;
 		}
@@ -343,32 +340,34 @@ void initGame(void) {
 	int i;
 	char *ptr;
 	for(i = 0; i<POTIONS; i++) {
-		ptr = (char*)malloc(MAX_TITLE_LENGTH+10);
+		ptr = (char*)malloc(strlen(id_potions[i].title)+1);
 		strcpy(ptr,id_potions[i].title);
 		id_potions[i].title = ptr;
 	}
 	for(i = 0; i<SCROLS; i++) {
-		ptr = (char*)malloc(MAX_TITLE_LENGTH+10);
+		ptr = (char*)malloc(strlen(id_scrolls[i].title)+1);
 		strcpy(ptr,id_scrolls[i].title);
 		id_scrolls[i].title = ptr;
 	}
 	for(i = 0; i<WANDS; i++) {
-		ptr = (char*)malloc(MAX_TITLE_LENGTH+10);
+		ptr = (char*)malloc(strlen(id_wands[i].title)+1);
 		strcpy(ptr,id_wands[i].title);
 		id_wands[i].title = ptr;
 	}
 	for(i = 0; i<RINGS; i++) {
-		ptr = (char*)malloc(MAX_TITLE_LENGTH+10);
+		ptr = (char*)malloc(strlen(id_rings[i].title)+1);
 		strcpy(ptr,id_rings[i].title);
 		id_rings[i].title = ptr;
 	}
 
 	strcpy(_PATH_SCOREFILE,android_files_path);
-	strcpy(_PATH_ERRORFILE,android_files_path);
-	strcpy(_PATH_SCREENFILE,android_files_path);
 	strcat(_PATH_SCOREFILE,"/save/score");
+
+	strcpy(_PATH_ERRORFILE,android_files_path);
 	strcat(_PATH_ERRORFILE,"/save/");
 	strcat(_PATH_ERRORFILE,android_savefile);
+
+	strcpy(_PATH_SCREENFILE,android_files_path);
 	strcat(_PATH_SCREENFILE,"/save/screen");
 }
 

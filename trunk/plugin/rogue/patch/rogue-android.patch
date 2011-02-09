@@ -1,6 +1,26 @@
+diff -Nru --strip-trailing-cr rogue210-source/src/hit.c rogue210-source-android/src/hit.c
+--- rogue210-source/src/hit.c	2004-02-14 08:42:32.000000000 -0800
++++ rogue210-source-android/src/hit.c	2011-02-08 21:48:23.000000000 -0800
+@@ -46,6 +46,8 @@
+ 
+ #include "rogue.h"
+ 
++#include "curses.h"
++
+ object *fight_monster = 0;
+ char hit_message[80] = "";
+ 
+@@ -191,6 +193,7 @@
+ 			i++;
+ 		}
+ 	}
++
+ 	return(total);
+ }
+ 
 diff -Nru --strip-trailing-cr rogue210-source/src/init.c rogue210-source-android/src/init.c
 --- rogue210-source/src/init.c	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/init.c	2011-02-06 16:45:47.000000000 -0800
++++ rogue210-source-android/src/init.c	2011-02-07 20:02:23.000000000 -0800
 @@ -49,6 +49,10 @@
  #include "version.h"
  #include "paths.h"
@@ -30,7 +50,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/init.c rogue210-source-android
  {
 diff -Nru --strip-trailing-cr rogue210-source/src/invent.c rogue210-source-android/src/invent.c
 --- rogue210-source/src/invent.c	2004-02-15 23:07:32.000000000 -0800
-+++ rogue210-source-android/src/invent.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/invent.c	2011-02-07 20:02:23.000000000 -0800
 @@ -161,6 +161,23 @@
  	'r',		"r       read scroll",
  	'/',		"/       identify object",
@@ -94,14 +114,8 @@ diff -Nru --strip-trailing-cr rogue210-source/src/invent.c rogue210-source-andro
  extern boolean wizard, use_color;
 diff -Nru --strip-trailing-cr rogue210-source/src/main.c rogue210-source-android/src/main.c
 --- rogue210-source/src/main.c	2004-01-30 15:33:04.000000000 -0800
-+++ rogue210-source-android/src/main.c	2011-02-06 16:28:33.000000000 -0800
-@@ -70,9 +70,17 @@
- 		print_stats(STAT_ALL);
- 
- PL:    if(!welcomed) {
-+#ifdef ANDROID
-+            message(" ", 0);
-+#endif
++++ rogue210-source-android/src/main.c	2011-02-08 06:40:05.000000000 -0800
+@@ -73,6 +73,11 @@
              message(welcome, 0);
              welcomed = 1;
          }
@@ -115,7 +129,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/main.c rogue210-source-android
  		free_stuff(&level_objects);
 diff -Nru --strip-trailing-cr rogue210-source/src/object.c rogue210-source-android/src/object.c
 --- rogue210-source/src/object.c	2004-02-14 08:42:32.000000000 -0800
-+++ rogue210-source-android/src/object.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/object.c	2011-02-08 21:22:47.000000000 -0800
 @@ -729,12 +729,16 @@
  	}
  	message("type of object?", 0);
@@ -136,7 +150,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/object.c rogue210-source-andro
  	obj = alloc_object();
 diff -Nru --strip-trailing-cr rogue210-source/src/pack.c rogue210-source-android/src/pack.c
 --- rogue210-source/src/pack.c	2004-02-18 20:40:00.000000000 -0800
-+++ rogue210-source-android/src/pack.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/pack.c	2011-02-07 20:02:23.000000000 -0800
 @@ -261,7 +261,11 @@
      char c;
      do {
@@ -151,7 +165,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/pack.c rogue210-source-android
  pack_letter(prompt, mask)
 diff -Nru --strip-trailing-cr rogue210-source/src/paths.h rogue210-source-android/src/paths.h
 --- rogue210-source/src/paths.h	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/paths.h	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/paths.h	2011-02-07 20:02:23.000000000 -0800
 @@ -28,7 +28,11 @@
   *
   * @(#)pathnames.h 8.1 (Berkeley) 5/31/93
@@ -172,7 +186,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/paths.h rogue210-source-androi
 +#endif
 diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android/src/play.c
 --- rogue210-source/src/play.c	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/play.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/play.c	2011-02-08 06:32:59.000000000 -0800
 @@ -47,6 +47,10 @@
  #include "rogue.h"
  #include "version.h"
@@ -184,10 +198,24 @@ diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android
  boolean interrupted = 0;
  char *unknown_command = "unknown command";
  
-@@ -216,6 +220,22 @@
- 		case 'v':
- 			message(LONG_VERSION_STRING, 0);
+@@ -58,6 +62,7 @@
+ {
+ 	short ch;
+ 	int count;
++	char buf[100]; //ANDROID kill this debug msg
+ 
+ 	for (;;) {
+ 		interrupted = 0;
+@@ -214,8 +219,27 @@
+ 			throw();
  			break;
+ 		case 'v':
+-			message(LONG_VERSION_STRING, 0);
++			// kill buf decl above
++			sprintf(buf,"A:%s,B:%s,C:%s",mon_tab[0].damage,mon_tab[1].damage,mon_tab[2].damage);
++			message(buf);
++			//message(LONG_VERSION_STRING, 0);
++			break;
 +#ifdef ANDROID
 +		case '\022': /* ^R */
 +			refresh();
@@ -196,7 +224,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android
 +			save_screen();
 +	    	break;
 +		case CANCEL:
-+			break;
+ 			break;
 +		case (char)24:
 +			message("Saving...", 0);
 +			refresh();
@@ -207,7 +235,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android
  		case 'Q':
  			quit(0);
  		case '0':
-@@ -294,5 +314,8 @@
+@@ -294,5 +318,8 @@
  			message(unknown_command, 0);
  			break;
  		}
@@ -218,7 +246,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android
  }
 diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-android/src/rogue.h
 --- rogue210-source/src/rogue.h	2004-02-14 08:42:32.000000000 -0800
-+++ rogue210-source-android/src/rogue.h	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/rogue.h	2011-02-08 21:27:21.000000000 -0800
 @@ -43,6 +43,19 @@
   *         gain or profit.
   */
@@ -239,7 +267,15 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
  #ifdef _MSC_VER
  /* supress warnings about parameters and return values,
   * at least until we write proper prototypes */
-@@ -486,7 +499,11 @@
+@@ -195,6 +208,7 @@
+ #define DROWS 24
+ #define DCOLS 80
+ #define NMESSAGES 5
++
+ #define MAX_TITLE_LENGTH 30
+ #define MAXSYLLABLES 40
+ #define MAX_METAL 14
+@@ -486,7 +500,11 @@
  #define MOVED 0
  #define MOVE_FAILED -1
  #define STOPPED_ON_SOMETHING -2
@@ -253,7 +289,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
  #define HUNGRY 300
 diff -Nru --strip-trailing-cr rogue210-source/src/room.c rogue210-source-android/src/room.c
 --- rogue210-source/src/room.c	2004-02-17 22:34:20.000000000 -0800
-+++ rogue210-source-android/src/room.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/room.c	2011-02-07 20:02:23.000000000 -0800
 @@ -242,7 +242,11 @@
  			cc.b8.color = use_color ?
  				MAKE_COLOR(scrTerrain[i].fgcolor, scrTerrain[i].bgcolor) :
@@ -340,7 +376,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/room.c rogue210-source-android
  	return cc;
 diff -Nru --strip-trailing-cr rogue210-source/src/save.c rogue210-source-android/src/save.c
 --- rogue210-source/src/save.c	2004-02-16 10:30:58.000000000 -0800
-+++ rogue210-source-android/src/save.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/save.c	2011-02-07 20:02:23.000000000 -0800
 @@ -81,6 +81,9 @@
  extern char *fruit;
  
@@ -389,7 +425,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/save.c rogue210-source-android
  
 diff -Nru --strip-trailing-cr rogue210-source/src/score.c rogue210-source-android/src/score.c
 --- rogue210-source/src/score.c	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/score.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/score.c	2011-02-07 20:02:23.000000000 -0800
 @@ -54,6 +54,9 @@
  extern boolean score_only, display_skull, msg_cleared, use_color, use_doschars;
  extern char *byebye_string;
@@ -441,7 +477,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/score.c rogue210-source-androi
  long
 diff -Nru --strip-trailing-cr rogue210-source/src/throw.c rogue210-source-android/src/throw.c
 --- rogue210-source/src/throw.c	2004-01-30 15:33:04.000000000 -0800
-+++ rogue210-source-android/src/throw.c	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/throw.c	2011-02-07 20:02:23.000000000 -0800
 @@ -257,7 +257,7 @@
  rand_around(i, r, c)
  short i, *r, *c;
@@ -453,7 +489,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/throw.c rogue210-source-androi
  
 diff -Nru --strip-trailing-cr rogue210-source/src/version.h rogue210-source-android/src/version.h
 --- rogue210-source/src/version.h	2004-02-21 23:06:20.000000000 -0800
-+++ rogue210-source-android/src/version.h	2011-02-06 16:28:33.000000000 -0800
++++ rogue210-source-android/src/version.h	2011-02-07 20:02:23.000000000 -0800
 @@ -85,6 +85,8 @@
    #endif
  #elif defined(_WIN32) || defined(__WINDOWS__)
