@@ -11,7 +11,7 @@ import android.util.Log;
 public class NativeWrapper {
 	// Load native library
 	static {
-		System.loadLibrary("loader");
+		System.loadLibrary(Plugins.LoaderLib);
 	}
 
 	private TermView term = null;

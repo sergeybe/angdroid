@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := loader-angband
+LOCAL_MODULE := loader-variants
 LOCAL_CFLAGS := -DUSE_AND
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include
 

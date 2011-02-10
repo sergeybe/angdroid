@@ -1,10 +1,10 @@
 package org.angdroid.angband;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -61,8 +61,15 @@ public class Installer {
 
 	public void install() {
 		boolean success = true;
-		for(int i = 0; i < Preferences.getInstalledPlugins().length; i++) {
-			success = extractPluginResources(Preferences.getInstalledPlugins()[i]);
+		int[] plugins = Preferences.getInstalledPlugins();
+		for(int i = 0; i < plugins.length; i++) {
+			
+			// basic install of required files
+			success = extractPluginResources(plugins[i]);
+			if (!success) break;
+
+			// upgrade if necessary
+			success = upgradePlugin(plugins[i]);
 			if (!success) break;
 		}
 		if (success) {
@@ -137,6 +144,52 @@ public class Installer {
 			} catch (Exception e) {
 				Log.d("Angband","installWorker "+e.toString());
 			}
+		}
+	}
+
+	private boolean upgradePlugin(int plugin) {
+		try {
+			String srcDir = Plugins.getUpgradePath(Plugins.Plugin.convert(plugin));
+			if (srcDir.length() == 0) return true; // no upgrade to do
+		
+			String dstDir = Preferences.getAngbandFilesDirectory(plugin)+"/save";
+
+			Log.d("Angband","upgrade "+srcDir+" to "+dstDir);
+
+			File fdstDir = new File(dstDir);
+			File[] saveFiles = fdstDir.listFiles();
+			if (saveFiles != null && saveFiles.length>0) return true; // save files found in dst (already upgraded)
+
+			Log.d("Angband","found no save files in dst");
+
+			File fsrcDir = new File(srcDir);
+			saveFiles = fsrcDir.listFiles();
+
+			if (saveFiles == null || saveFiles.length==0) return true; // no save files found in src
+
+			Log.d("Angband","found "+saveFiles.length+" save files in src");
+
+			// upgrade!
+			for (int i=0; i<saveFiles.length; i++) {
+				String src = saveFiles[i].getAbsolutePath();
+				String dst = dstDir +"/"+saveFiles[i].getName();
+
+				Log.d("Angband","upgrade "+src+" to "+dst);
+				InputStream in = new FileInputStream(src);
+				OutputStream out = new FileOutputStream(dst);
+
+				byte[] buf = new byte[1024];
+				int len;
+				while ((len = in.read(buf)) > 0){
+					out.write(buf, 0, len);
+				}
+				in.close();
+				out.close();
+			}
+			return true;
+		} catch (Exception e) {
+			Log.v("Angband", "error upgrading save files: " + e);
+			return false;
 		}
 	}
 

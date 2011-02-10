@@ -185,15 +185,16 @@ final public class Preferences {
 			Environment.getExternalStorageDirectory()
 			+ "/"
 			+ "Android/data/org.angdroid.angband/files/lib"
-			+ getPluginName(pluginId).replace("angband","");
+			+ Plugins.getFilesDir(Plugins.Plugin.convert(pluginId));
 	}
 
 	public static String getAngbandFilesDirectory() {
+		String dir = Plugins.getFilesDir(getActivePlugin());
 		return 
 			Environment.getExternalStorageDirectory()
 			+ "/"
 			+ "Android/data/org.angdroid.angband/files/lib"
-			+ getActivePluginName().replace("angband","");
+			+ dir;
 	}
 
 	public static String getActivityFilesDirectory() {
@@ -201,6 +202,10 @@ final public class Preferences {
 	}
 
 	public static String getActivePluginName() {
+		return getPluginName(getActivePlugin().getId());
+	}
+
+	public static Plugins.Plugin getActivePlugin() {
 		int activePlugin;
 		int prefPlugin = getActiveProfile().getPlugin();
 		activePlugin = gamePlugins[0];
@@ -209,7 +214,7 @@ final public class Preferences {
 				activePlugin = gamePlugins[i];
 		}
 
-		return getPluginName(activePlugin);
+		return Plugins.Plugin.convert(activePlugin);
 	}
 
 	public static ProfileList getProfiles() {
