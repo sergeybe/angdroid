@@ -16,9 +16,11 @@
     <target name="plugin-resources">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="tome"/>
+	    <property name="pluginzip.name" value="tome"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="sang"/>
+	    <property name="pluginzip.name" value="sang"/>
 	</ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
@@ -35,12 +37,15 @@
     <target name="plugin-libs" depends="angband-javah">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="loader"/>
+	    <property name="pluginlib.name" value="loader-variants"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="tome"/>
+	    <property name="pluginlib.name" value="tome"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="sang"/>
+	    <property name="pluginlib.name" value="sang"/>
 	</ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">

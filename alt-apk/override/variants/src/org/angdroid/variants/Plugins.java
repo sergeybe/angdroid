@@ -21,6 +21,15 @@ final public class Plugins {
 		}
 	}
 
+	static final String DEFAULT_PROFILE = "0~Default~PLAYER~0~0";
+	public static String LoaderLib ="loader-variants";
+
+	public static String getFilesDir(Plugin p) {
+		switch (p) {
+		default: return p.toString().toLowerCase();
+		}
+	}
+
 	public static int getKeyDown(Plugin p) {
 		switch (p) {
 		default: return '2';
@@ -45,9 +54,6 @@ final public class Plugins {
 		}
 	}
 
-
-	static final String DEFAULT_PROFILE = "0~Default~PLAYER~0~0";
-
 	public static ZipInputStream getPluginZip(int plugin) {
 		InputStream is = null;
 
@@ -60,4 +66,11 @@ final public class Plugins {
 
 		return new ZipInputStream(is);
 	}
+
+	public static String getUpgradePath(Plugin p) {
+		switch (p) {
+		default: return "";
+		}		
+	}
+
 }

@@ -19,18 +19,18 @@
 	      dir="plugin/${plugin.name}">
 	    <arg value="${ndk-location}/ndk-build"/>
 	</exec>
-	<copy file="plugin/${plugin.name}/libs/armeabi/lib${plugin.name}.so" 
-	      tofile="libs/armeabi/lib${plugin.name}.so"
+	<copy file="plugin/${plugin.name}/libs/armeabi/lib${pluginlib.name}.so" 
+	      tofile="libs/armeabi/lib${pluginlib.name}.so"
 	      overwrite="true"/>
     </target>
 
     <condition property="is.created.zip.resource">
-            <available file="zip${plugin.name}" type="file" filepath="${resource-folder}/raw/"/>
+            <available file="zip${pluginzip.name}" type="file" filepath="${resource-folder}/raw/"/>
     </condition>
 
     <target name="plugin-resources">
-        <delete file="${resource-folder}/raw/zip${plugin.name}"/>
-        <zip destfile="${resource-folder}/raw/zip${plugin.name}" basedir="plugin/${plugin.name}/extsrc/lib"
+        <delete file="${resource-folder}/raw/zip${pluginzip.name}"/>
+        <zip destfile="${resource-folder}/raw/zip${pluginzip.name}" basedir="plugin/${plugin.name}/extsrc/lib"
             excludes="**/Makefile **/Makefile.am **/Makefile.in **/delete.me **/*.glade **/*.bmp **/*.png **/*.wav xtra/font/*.* xtra/sound/*.* xtra/help/*.* xtra/graf/*.*" />
     </target>
 
@@ -41,7 +41,7 @@
 		<delete includeemptydirs="true">
 		  <fileset dir="plugin/${plugin.name}/obj" includes="**/*"/>
 		</delete>
-        <delete file="${resource-folder}/raw/zip${plugin.name}"/>
+        <delete file="${resource-folder}/raw/zip${pluginzip.name}"/>
     </target>
 
 	<target name="get-patch-plugin-src" depends="get-src, patch-updates, copy-updates">
@@ -62,8 +62,6 @@
 	    <arg value="${extract.arg2}"/>
 	    <arg value="${src.url.file}"/>
 	  </exec>        
-	  <!-- todo needed for npp only:  cp -r npp-0.5.1-src-beta2/* . -->
-	  <!--                            rm -rf npp-0.5.1-src-beta2 -->
 	</target>
 
     <target name="patch-updates">
@@ -80,7 +78,7 @@
 	</condition>
 
     <target name="copy-updates" if="is.exist.copy">
-      <echo>in copy-updates</echo>
+      <echo>copy-updates...</echo>
 	  <copy todir="plugin/${plugin.name}/extsrc">
 		<fileset dir="plugin/${plugin.name}/patch/copy">
 		  <include name="**/*"/>

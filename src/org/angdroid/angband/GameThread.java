@@ -198,7 +198,7 @@ public class GameThread implements Runnable {
 
 		running_plugin = Preferences.getActivePluginName();
 	    String pluginPath = Preferences.getActivityFilesDirectory()
-			+"/../lib/lib"+Preferences.getActivePluginName()+".so";
+			+"/../lib/lib"+running_plugin+".so";
 
 		// wait for and validate install processing (if any);
 		//Log.d("Angband","run.waiting for install");

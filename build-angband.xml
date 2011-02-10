@@ -16,18 +16,23 @@
     <target name="plugin-resources">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="angband"/>
+	    <property name="pluginzip.name" value="angband320"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="angband306"/>
+	    <property name="pluginzip.name" value="angband306"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="frogknows"/>
+	    <property name="pluginzip.name" value="frogknows"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="moria"/>
+	    <property name="pluginzip.name" value="moria"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="rogue"/>
+	    <property name="pluginzip.name" value="rogue"/>
 	</ant>
     </target>
 
@@ -39,28 +44,33 @@
     <target name="plugin-libs" depends="angband-javah">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="loader"/>
+	    <property name="pluginlib.name" value="loader-angband"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="angband"/>
+	    <property name="pluginlib.name" value="angband"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="angband306"/>
+	    <property name="pluginlib.name" value="angband306"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="frogknows"/>
+	    <property name="pluginlib.name" value="frogknows"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="moria"/>
+	    <property name="pluginlib.name" value="moria"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="rogue"/>
+	    <property name="pluginlib.name" value="rogue"/>
 	</ant>
     </target>
 
     <condition property="is.exist.libs">
 	  	<and>
         	<available file="plugin/angband/extsrc/lib" type="dir" />
-			<available file="plugin/angband306/extsrc/lib" type="dir" />	  
 		</and>
     </condition>
 	<target name="check-plugin-src" unless="is.exist.libs">
