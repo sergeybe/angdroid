@@ -1,6 +1,6 @@
 diff -Nru --strip-trailing-cr mor552cs/ibmpc/tcio.c mor552cs-android/ibmpc/tcio.c
 --- mor552cs/ibmpc/tcio.c	2002-08-29 09:39:16.000000000 -0700
-+++ mor552cs-android/ibmpc/tcio.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/ibmpc/tcio.c	2011-02-10 18:39:25.000000000 -0800
 @@ -10,6 +10,7 @@
     changes to ms_misc.c; in particular, you need to comment out the #include
     of curses.h. */
@@ -167,7 +167,7 @@ diff -Nru --strip-trailing-cr mor552cs/ibmpc/tcio.c mor552cs-android/ibmpc/tcio.
    gotoxy(1,MSG_LINE+1);
 diff -Nru --strip-trailing-cr mor552cs/src/config.h mor552cs-android/src/config.h
 --- mor552cs/src/config.h	2002-08-13 16:02:16.000000000 -0700
-+++ mor552cs-android/src/config.h	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/config.h	2011-02-10 18:39:25.000000000 -0800
 @@ -92,6 +92,20 @@
  
  /* Files used by moria, set these to valid pathnames for your system.  */
@@ -198,7 +198,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/config.h mor552cs-android/src/config.
  
  /* This sets the default user interface.  */
  /* To use the original key bindings (keypad for movement) set ROGUE_LIKE
-@@ -339,3 +353,48 @@
+@@ -339,3 +353,49 @@
  #define __STDC__	0
  #endif
  #endif
@@ -236,6 +236,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/config.h mor552cs-android/src/config.
 +//#define initstate angband_initstate
 +#define stricmp strcasecmp
 +#define L_SET SEEK_SET
++#define L_INCR SEEK_CUR
 +#define gotoxy(x,y) move((y)-1,(x)-1)
 +#define clreol clrtoeol
 +#define cputs addstr
@@ -249,7 +250,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/config.h mor552cs-android/src/config.
 +#endif
 diff -Nru --strip-trailing-cr mor552cs/src/constant.h mor552cs-android/src/constant.h
 --- mor552cs/src/constant.h	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/constant.h	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/constant.h	2011-02-10 18:39:25.000000000 -0800
 @@ -238,8 +238,12 @@
  #ifdef VMS
  #define ESCAPE        '\032'	/* Use CTRL-Z instead of ESCAPE.  */
@@ -265,7 +266,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/constant.h mor552cs-android/src/const
     instead of null to help avoid lint errors.  */
 diff -Nru --strip-trailing-cr mor552cs/src/create.c mor552cs-android/src/create.c
 --- mor552cs/src/create.c	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/create.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/create.c	2011-02-10 18:39:25.000000000 -0800
 @@ -180,9 +180,12 @@
  	exit_flag = TRUE;
        else if (s == '?')
@@ -316,7 +317,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/create.c mor552cs-android/src/create.
      }		    /* done with stats generation */
 diff -Nru --strip-trailing-cr mor552cs/src/death.c mor552cs-android/src/death.c
 --- mor552cs/src/death.c	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/death.c	2011-02-08 21:47:29.000000000 -0800
++++ mor552cs-android/src/death.c	2011-02-10 18:39:25.000000000 -0800
 @@ -50,6 +50,7 @@
  #endif
  #endif
@@ -365,6 +366,33 @@ diff -Nru --strip-trailing-cr mor552cs/src/death.c mor552cs-android/src/death.c
  
  void display_scores(show_player)
  int show_player;
+@@ -238,7 +244,7 @@
+   int16 player_uid;
+ #endif
+ 
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(APOLLO)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(APOLLO) || defined (ANDROID)
+ #if defined(MAC) || defined(MSDOS)
+   if ((highscore_fp = fopen(MORIA_TOP, "rb")) == NULL)
+ #else
+@@ -275,7 +281,7 @@
+       msg_print("Sorry. This scorefile is from a different version of \
+ umoria.");
+       msg_print (CNIL);
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined (ANDROID)
+       (void) fclose (highscore_fp);
+ #endif
+       return;
+@@ -332,7 +338,7 @@
+       if (input == ESCAPE)
+ 	break;
+     }
+-#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(APOLLO)
++#if defined(MSDOS) || defined(VMS) || defined(AMIGA) || defined(MAC) || defined(APOLLO) || defined (ANDROID)
+   (void) fclose (highscore_fp);
+ #endif
+ }
 @@ -607,7 +613,7 @@
    char *tmp;
    int8u version_maj, version_min, patch_level;
@@ -440,7 +468,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/death.c mor552cs-android/src/death.c
    flush ();  /* flush all input */
 diff -Nru --strip-trailing-cr mor552cs/src/desc.c mor552cs-android/src/desc.c
 --- mor552cs/src/desc.c	2002-08-13 16:23:24.000000000 -0700
-+++ mor552cs-android/src/desc.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/desc.c	2011-02-10 18:39:25.000000000 -0800
 @@ -26,6 +26,7 @@
  
  #if defined(LINT_ARGS)
@@ -451,7 +479,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/desc.c mor552cs-android/src/desc.c
  #endif
 diff -Nru --strip-trailing-cr mor552cs/src/dungeon.c mor552cs-android/src/dungeon.c
 --- mor552cs/src/dungeon.c	2002-09-29 16:11:10.000000000 -0700
-+++ mor552cs-android/src/dungeon.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/dungeon.c	2011-02-10 18:39:25.000000000 -0800
 @@ -930,7 +930,9 @@
  		      command = inkeydir();
  		      enablesavecmd(FALSE);
@@ -464,7 +492,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/dungeon.c mor552cs-android/src/dungeo
  		      /* Get a count for a command. */
 diff -Nru --strip-trailing-cr mor552cs/src/externs.h mor552cs-android/src/externs.h
 --- mor552cs/src/externs.h	2003-06-01 09:35:56.000000000 -0700
-+++ mor552cs-android/src/externs.h	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/externs.h	2011-02-10 18:39:25.000000000 -0800
 @@ -15,6 +15,9 @@
  #ifdef ATARIST_TC
  #define LINT_ARGS
@@ -512,7 +540,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/externs.h mor552cs-android/src/extern
 +#endif
 diff -Nru --strip-trailing-cr mor552cs/src/files.c mor552cs-android/src/files.c
 --- mor552cs/src/files.c	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/files.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/files.c	2011-02-10 18:39:25.000000000 -0800
 @@ -31,6 +31,7 @@
  char *strcat();
  #endif
@@ -531,9 +559,50 @@ diff -Nru --strip-trailing-cr mor552cs/src/files.c mor552cs-android/src/files.c
  
  /* This must be included after fcntl.h, which has a prototype for `open'
     on some systems.  Otherwise, the `open' prototype conflicts with the
+@@ -79,6 +83,7 @@
+   appldirectory ();
+ #endif
+ 
++
+ #if defined(atarist) || defined(ATARI_ST) || defined(MAC)
+   highscore_fp = fopen(MORIA_TOP, "rb+");
+ #else
+@@ -87,6 +92,15 @@
+ 
+   if (highscore_fp == NULL)
+     {
++#ifdef ANDROID
++      highscore_fp = fopen (MORIA_TOP, "w");	/* Create it if not there.  */
++      if (highscore_fp == NULL)
++	{
++		msg_print("unable to create score file");
++		refresh();
++		exit(1);
++	}
++#else
+ #ifdef MAC
+       highscore_fp = fopen (MORIA_TOP, "wb");	/* Create it if not there.  */
+       if (highscore_fp == NULL)
+@@ -100,13 +114,15 @@
+       (void) fprintf (stderr, "Can't open score file \"%s\"\n", MORIA_TOP);
+       exit(1);
+ #endif
++#endif
+     }
+-#if defined(MSDOS) || defined(VMS) || defined(MAC) || defined(APOLLO)
++#if defined(MSDOS) || defined(VMS) || defined(MAC) || defined(APOLLO) || defined(ANDROID)
+   /* can't leave it open, since this causes problems on networked PCs and VMS,
+      we DO want to check to make sure we can open the file, though */
+   fclose (highscore_fp);
+ #endif
+ 
++
+ #ifdef MAC
+   restoredirectory ();
+ #endif
 diff -Nru --strip-trailing-cr mor552cs/src/magic.c mor552cs-android/src/magic.c
 --- mor552cs/src/magic.c	2002-09-22 10:32:16.000000000 -0700
-+++ mor552cs-android/src/magic.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/magic.c	2011-02-10 18:39:25.000000000 -0800
 @@ -12,8 +12,10 @@
  #include "externs.h"
  
@@ -547,7 +616,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/magic.c mor552cs-android/src/magic.c
  void cast()
 diff -Nru --strip-trailing-cr mor552cs/src/main.c mor552cs-android/src/main.c
 --- mor552cs/src/main.c	2003-06-01 10:21:10.000000000 -0700
-+++ mor552cs-android/src/main.c	2011-02-08 21:46:56.000000000 -0800
++++ mor552cs-android/src/main.c	2011-02-10 18:39:25.000000000 -0800
 @@ -125,6 +125,7 @@
  #endif
  #endif
@@ -564,13 +633,8 @@ diff -Nru --strip-trailing-cr mor552cs/src/main.c mor552cs-android/src/main.c
  
  /*
  #if defined(atarist) && defined(__GNUC__)
-@@ -216,10 +218,12 @@
- 
-   /* call this routine to grab a file pointer to the highscore file */
-   /* and prepare things to relinquish setuid privileges */
-+#ifndef ANDROID
+@@ -219,7 +221,7 @@
    init_scorefile();
-+#endif
  
  #ifndef SECURE
 -#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(MAC)
@@ -580,7 +644,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/main.c mor552cs-android/src/main.c
    if (0 != setuid(getuid()))
 diff -Nru --strip-trailing-cr mor552cs/src/misc1.c mor552cs-android/src/misc1.c
 --- mor552cs/src/misc1.c	2002-09-06 19:06:30.000000000 -0700
-+++ mor552cs-android/src/misc1.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/misc1.c	2011-02-10 18:39:25.000000000 -0800
 @@ -16,8 +16,10 @@
  #endif
  
@@ -594,7 +658,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/misc1.c mor552cs-android/src/misc1.c
  #include <sys/time.h>
 diff -Nru --strip-trailing-cr mor552cs/src/misc2.c mor552cs-android/src/misc2.c
 --- mor552cs/src/misc2.c	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/misc2.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/misc2.c	2011-02-10 18:39:25.000000000 -0800
 @@ -1026,6 +1026,9 @@
    { "Highlight and notice mineral seams",	&highlight_seams },
    { "Beep for invalid character",		&sound_beep_flag },
@@ -607,7 +671,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/misc2.c mor552cs-android/src/misc2.c
  
 diff -Nru --strip-trailing-cr mor552cs/src/misc3.c mor552cs-android/src/misc3.c
 --- mor552cs/src/misc3.c	2003-06-01 11:44:52.000000000 -0700
-+++ mor552cs-android/src/misc3.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/misc3.c	2011-02-10 18:39:25.000000000 -0800
 @@ -7,9 +7,11 @@
     included in all such copies. */
  
@@ -681,7 +745,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/misc3.c mor552cs-android/src/misc3.c
  /* Add an item to players inventory.  Return the	*/
 diff -Nru --strip-trailing-cr mor552cs/src/misc4.c mor552cs-android/src/misc4.c
 --- mor552cs/src/misc4.c	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/misc4.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/misc4.c	2011-02-10 18:39:25.000000000 -0800
 @@ -28,6 +28,10 @@
  #include <strings.h>
  #endif
@@ -695,7 +759,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/misc4.c mor552cs-android/src/misc4.c
  void scribe_object()
 diff -Nru --strip-trailing-cr mor552cs/src/monsters.c mor552cs-android/src/monsters.c
 --- mor552cs/src/monsters.c	2002-08-14 04:29:24.000000000 -0700
-+++ mor552cs-android/src/monsters.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/monsters.c	2011-02-10 18:39:25.000000000 -0800
 @@ -10,8 +10,10 @@
  #include "constant.h"
  #include "types.h"
@@ -709,7 +773,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/monsters.c mor552cs-android/src/monst
  	/* Creatures must be defined here				*/
 diff -Nru --strip-trailing-cr mor552cs/src/moria1.c mor552cs-android/src/moria1.c
 --- mor552cs/src/moria1.c	2002-08-31 16:27:06.000000000 -0700
-+++ mor552cs-android/src/moria1.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/moria1.c	2011-02-10 18:39:25.000000000 -0800
 @@ -19,8 +19,10 @@
  #include "externs.h"
  
@@ -723,7 +787,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/moria1.c mor552cs-android/src/moria1.
  #ifndef ATARIST_MWC
 diff -Nru --strip-trailing-cr mor552cs/src/moria2.c mor552cs-android/src/moria2.c
 --- mor552cs/src/moria2.c	2002-09-08 18:33:44.000000000 -0700
-+++ mor552cs-android/src/moria2.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/moria2.c	2011-02-10 18:39:25.000000000 -0800
 @@ -14,8 +14,10 @@
  #include "externs.h"
  
@@ -737,7 +801,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/moria2.c mor552cs-android/src/moria2.
  static int see_wall(int, int, int);
 diff -Nru --strip-trailing-cr mor552cs/src/moria3.c mor552cs-android/src/moria3.c
 --- mor552cs/src/moria3.c	2003-06-01 10:31:54.000000000 -0700
-+++ mor552cs-android/src/moria3.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/moria3.c	2011-02-10 18:39:25.000000000 -0800
 @@ -16,8 +16,10 @@
  #include "externs.h"
  
@@ -751,7 +815,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/moria3.c mor552cs-android/src/moria3.
  #ifndef ATARIST_MWC
 diff -Nru --strip-trailing-cr mor552cs/src/moria4.c mor552cs-android/src/moria4.c
 --- mor552cs/src/moria4.c	2002-08-31 23:33:30.000000000 -0700
-+++ mor552cs-android/src/moria4.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/moria4.c	2011-02-10 18:39:25.000000000 -0800
 @@ -17,8 +17,10 @@
  #include "externs.h"
  
@@ -765,7 +829,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/moria4.c mor552cs-android/src/moria4.
  #ifndef ATARIST_MWC
 diff -Nru --strip-trailing-cr mor552cs/src/prayer.c mor552cs-android/src/prayer.c
 --- mor552cs/src/prayer.c	2002-09-01 21:13:30.000000000 -0700
-+++ mor552cs-android/src/prayer.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/prayer.c	2011-02-10 18:39:25.000000000 -0800
 @@ -12,8 +12,10 @@
  #include "externs.h"
  
@@ -779,7 +843,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/prayer.c mor552cs-android/src/prayer.
  void pray()
 diff -Nru --strip-trailing-cr mor552cs/src/save.c mor552cs-android/src/save.c
 --- mor552cs/src/save.c	2002-08-25 23:45:44.000000000 -0700
-+++ mor552cs-android/src/save.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/save.c	2011-02-10 18:39:25.000000000 -0800
 @@ -168,6 +168,10 @@
      l |= 0x200;
    if (display_counts)
@@ -936,7 +1000,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/save.c mor552cs-android/src/save.c
  	  else
 diff -Nru --strip-trailing-cr mor552cs/src/signals.c mor552cs-android/src/signals.c
 --- mor552cs/src/signals.c	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/signals.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/signals.c	2011-02-10 18:39:25.000000000 -0800
 @@ -18,7 +18,7 @@
  
  /* Signals have no significance on the Mac */
@@ -957,7 +1021,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/signals.c mor552cs-android/src/signal
  #if !defined(MSDOS) && !defined(AMIGA) && !defined(ATARIST_TC)
 diff -Nru --strip-trailing-cr mor552cs/src/spells.c mor552cs-android/src/spells.c
 --- mor552cs/src/spells.c	2003-06-01 11:53:52.000000000 -0700
-+++ mor552cs-android/src/spells.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/spells.c	2011-02-10 18:39:25.000000000 -0800
 @@ -20,8 +20,10 @@
  unsigned int boltdelay=0;
  
@@ -971,7 +1035,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/spells.c mor552cs-android/src/spells.
  #ifndef ATARIST_MWC
 diff -Nru --strip-trailing-cr mor552cs/src/store2.c mor552cs-android/src/store2.c
 --- mor552cs/src/store2.c	2002-08-30 10:45:16.000000000 -0700
-+++ mor552cs-android/src/store2.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/store2.c	2011-02-10 18:39:25.000000000 -0800
 @@ -17,8 +17,10 @@
  #include "externs.h"
  
@@ -985,7 +1049,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/store2.c mor552cs-android/src/store2.
  #ifndef ATARIST_MWC
 diff -Nru --strip-trailing-cr mor552cs/src/tables.c mor552cs-android/src/tables.c
 --- mor552cs/src/tables.c	2002-08-13 18:47:58.000000000 -0700
-+++ mor552cs-android/src/tables.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/tables.c	2011-02-10 18:39:25.000000000 -0800
 @@ -10,8 +10,10 @@
  #include "constant.h"
  #include "types.h"
@@ -999,7 +1063,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/tables.c mor552cs-android/src/tables.
  /* Operating hours for Moria				-RAK-	*/
 diff -Nru --strip-trailing-cr mor552cs/src/treasure.c mor552cs-android/src/treasure.c
 --- mor552cs/src/treasure.c	2002-09-01 14:49:22.000000000 -0700
-+++ mor552cs-android/src/treasure.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/treasure.c	2011-02-10 18:39:25.000000000 -0800
 @@ -10,8 +10,10 @@
  #include "constant.h"
  #include "types.h"
@@ -1013,7 +1077,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/treasure.c mor552cs-android/src/treas
  
 diff -Nru --strip-trailing-cr mor552cs/src/types.h mor552cs-android/src/types.h
 --- mor552cs/src/types.h	2002-08-13 21:22:48.000000000 -0700
-+++ mor552cs-android/src/types.h	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/types.h	2011-02-10 18:39:25.000000000 -0800
 @@ -14,9 +14,13 @@
  /* some machines will not accept 'signed char' as a type, and some accept it
     but still treat it like an unsigned character, let's just avoid it,
@@ -1031,7 +1095,7 @@ diff -Nru --strip-trailing-cr mor552cs/src/types.h mor552cs-android/src/types.h
     always be called with a bigvtype as the first paramter */
 diff -Nru --strip-trailing-cr mor552cs/src/variable.c mor552cs-android/src/variable.c
 --- mor552cs/src/variable.c	2003-06-01 09:37:00.000000000 -0700
-+++ mor552cs-android/src/variable.c	2011-02-07 20:02:22.000000000 -0800
++++ mor552cs-android/src/variable.c	2011-02-10 18:39:25.000000000 -0800
 @@ -103,3 +103,7 @@
  #if defined(atarist) && defined(__GNUC__)
  char extended_file_name[80];
