@@ -12,12 +12,9 @@ static char android_files_path[1024];
 static char android_savefile[50];
 static int turn_save = 0;
 
-char MORIA_SAV			[1024]; //moriasav
+char MORIA_SAV			[1024]; //???
 char MORIA_TOP			[1024]; //moriatop
 char MORIA_MOR			[1024]; //"news"
-char MORIA_TOP_NAME 	[1024];	//"scores"
-char MORIA_SAV_NAME		[1024]; //"MORIA.SAV"
-char MORIA_CNF_NAME		[1024]; //"MORIA.CNF"
 char MORIA_HELP			[1024]; //"roglcmds.hlp"
 char MORIA_ORIG_HELP 	[1024]; //"origcmds.hlp"
 char MORIA_WIZ_HELP		[1024]; //"rwizcmds.hlp"
@@ -171,7 +168,7 @@ void textcolor(int c){
    run or rest. */
 int check_input(int microsec) {
 	// sleep for microsec
-	usleep(microsec*1000);
+	usleep(microsec);
 
 	// if input available, consume & return 1
 	int ch = angdroid_getch(0);
@@ -183,7 +180,7 @@ int check_input(int microsec) {
 void user_name(buf)
   char *buf;
 {
-  (void) strcpy(buf, "PLAYER");
+  (void) strcpy(buf, android_savefile);
 }
 
 int queryInt(const char* argv0) {
@@ -219,9 +216,6 @@ void initGame(void) {
 	strcpy(MORIA_SAV,android_files_path);
 	strcpy(MORIA_TOP,android_files_path);
 	strcpy(MORIA_MOR,android_files_path);
-	strcpy(MORIA_TOP_NAME,android_files_path);
-	strcpy(MORIA_SAV_NAME,android_files_path);
-	strcpy(MORIA_CNF_NAME,android_files_path);
 	strcpy(MORIA_HELP,android_files_path);
 	strcpy(MORIA_ORIG_HELP,android_files_path);
 	strcpy(MORIA_WIZ_HELP,android_files_path);
@@ -229,12 +223,10 @@ void initGame(void) {
 	strcpy(MORIA_WELCOME,android_files_path);
 	strcpy(MORIA_VER,android_files_path);
 
-	strcat(MORIA_SAV,"/save/moriasav");
-	strcat(MORIA_TOP,"/files/moriatop");
+	strcat(MORIA_SAV,"/save/");
+	strcat(MORIA_SAV,android_savefile);
+	strcat(MORIA_TOP,"/save/moriatop");
 	strcat(MORIA_MOR,"/files/news");
-	strcat(MORIA_TOP_NAME,"/files/scores");
-	strcat(MORIA_SAV_NAME,"/save/PLAYER");
-	strcat(MORIA_CNF_NAME,"/files/moria.cnf");
 	strcat(MORIA_HELP,"/files/roglcmds.hlp");
 	strcat(MORIA_ORIG_HELP,"/files/origcmds.hlp");
 	strcat(MORIA_WIZ_HELP,"/files/rwizcmds.hlp");
@@ -244,7 +236,7 @@ void initGame(void) {
 }
 
 void delay(int ms) {
-	if (ms) usleep(ms/1000);
+	if (ms) usleep(ms*1000);
 }
 
 void angdroid_main() {

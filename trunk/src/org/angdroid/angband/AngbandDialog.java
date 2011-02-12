@@ -19,7 +19,8 @@ public class AngbandDialog {
 			,GameFatalAlert
 			,GameWarnAlert
 			,StartGame
-			,OnGameExit;
+			,OnGameExit
+			,ToggleKeyboard;
 
 		public static Action convert(int value)
 		{
@@ -47,6 +48,9 @@ public class AngbandDialog {
 			break;
 		case OpenContextMenu: // display context menu
 			activity.openContextMenu();
+			break;
+		case ToggleKeyboard: 
+			activity.toggleKeyboard();
 			break;
 		case GameFatalAlert: // fatal error from angband (native side)
 			fatalAlert(state.getFatalError());

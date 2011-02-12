@@ -7,7 +7,7 @@
 	  <item>Vanilla 3.2.0</item> 
       <item>Vanilla 3.0.6 squelch+borg</item>
       <item>Vanilla 2.4.Frog-knows</item>
-      <item>Moria 5.5.2</item>
+      <item>Umoria 5.5.2</item>
       <item>Rogue Clone IV</item>
     </string-array>
     <string-array name="gamePluginNames">
@@ -87,9 +87,12 @@
 
 	<string-array name="keyActionDescriptions">
 		<item>None</item>
+		<item>Alt/Fn Key</item>
 		<item>Ctrl Key</item>
+		<item>Enter Key</item>
 		<item>Esc Key</item>
 		<item>Shift Key</item>
+		<item>Space Key</item>
 		<item>Virtual Keyboard</item>
 		<item>Zoom In</item>
 		<item>Zoom Out</item>
@@ -97,9 +100,12 @@
 	</string-array>
 	<string-array name="keyActions">
 		<item>None</item>
+		<item>AltKey</item>
 		<item>CtrlKey</item>
+		<item>EnterKey</item>
 		<item>EscKey</item>
 		<item>ShiftKey</item>
+		<item>SpaceKey</item>
 		<item>VirtualKeyboard</item>
 		<item>ZoomIn</item>
 		<item>ZoomOut</item>

@@ -28,7 +28,6 @@ final public class Preferences {
 	static final String KEY_FULLSCREEN = "angband.fullscreen";
 	static final String KEY_ORIENTATION = "angband.orientation";
 
-	static final String KEY_ENABLEVOLKEYFONTSIZE = "angband.enablevolkeyfontsize";
 	static final String KEY_ENABLETOUCH = "angband.enabletouch";
 	static final String KEY_PORTRAITKB = "angband.portraitkb";
 	static final String KEY_LANDSCAPEKB = "angband.landscapekb";
@@ -53,6 +52,44 @@ final public class Preferences {
 	private static String version;
 	private static int fontSize = 17;
 	private static Resources resources;
+	
+	public enum KeyAction
+	{
+		None,
+			AltKey,
+			CtrlKey,
+			EnterKey,
+			EscKey,
+			ShiftKey,
+			SpaceKey,
+			VirtualKeyboard,
+			ZoomIn,
+			ZoomOut,
+			ForwardToSystem;
+
+		public static KeyAction convert(int value)
+		{
+			return KeyAction.class.getEnumConstants()[value];
+		}
+
+		public static KeyAction convert(String value)
+		{
+			return KeyAction.valueOf(value);
+		}
+	};
+	private static KeyAction menuButtonAction;
+	private static KeyAction searchButtonAction;
+	private static KeyAction backButtonAction;
+	private static KeyAction cameraButtonAction;
+	private static KeyAction dpadButtonAction;
+	private static KeyAction volumeDownButtonAction;
+	private static KeyAction volumeUpButtonAction;
+	private static KeyAction emoticonKeyAction;
+	private static KeyAction leftShiftKeyAction;
+	private static KeyAction rightShiftKeyAction;
+	private static KeyAction leftAltKeyAction;
+	private static KeyAction rightAltKeyAction;
+	private static KeyAction ctrlDoubleTapAction;
 
 	Preferences() {}
 
@@ -68,6 +105,27 @@ final public class Preferences {
 		
 		gamePluginNames = resources.getStringArray(R.array.gamePluginNames);
 		version = pversion;
+
+		initKeyBinding();
+	}
+
+	public static void initKeyBinding() {
+		searchButtonAction = KeyAction.convert(pref.getString("angband.searchbutton", "ForwardToSystem"));
+		menuButtonAction = KeyAction.convert(pref.getString("angband.menubutton", "ForwardToSystem"));
+		backButtonAction = KeyAction.convert(pref.getString("angband.backbutton", "EscKey"));
+		cameraButtonAction = KeyAction.convert(pref.getString("angband.camerabutton", "VirtualKeyboard"));
+		dpadButtonAction = KeyAction.convert(pref.getString("angband.dpadbutton", "CtrlKey"));
+		volumeDownButtonAction = KeyAction.convert(pref.getString("angband.volumedownbutton", "ZoomOut"));
+		volumeUpButtonAction = KeyAction.convert(pref.getString("angband.volumeupbutton", "ZoomIn"));
+
+		emoticonKeyAction = KeyAction.convert(pref.getString("angband.emoticonkey", "CtrlKey"));
+		leftAltKeyAction = KeyAction.convert(pref.getString("angband.leftaltkey", "AltKey"));
+		rightAltKeyAction = KeyAction.convert(pref.getString("angband.rightaltkey", "AltKey"));
+		leftShiftKeyAction = KeyAction.convert(pref.getString("angband.leftshiftkey", "ShiftKey"));
+		rightShiftKeyAction = KeyAction.convert(pref.getString("angband.rightshiftkey", "ShiftKey"));
+
+		//todo: implement more generic hardware key double tap handling
+		ctrlDoubleTapAction = KeyAction.convert(pref.getString("angband.ctrldoubletap", "EnterKey"));
 	}
 
 	public static String getVersion() {
@@ -113,10 +171,6 @@ final public class Preferences {
 
 	public static boolean getVibrate() {
 		return pref.getBoolean(Preferences.KEY_VIBRATE, false);
-	}
-
-	public static boolean getVolumeKeyFontSizing() {
-		return pref.getBoolean(Preferences.KEY_ENABLEVOLKEYFONTSIZE, true);
 	}
 
 	public static boolean getPortraitKeyboard() {
@@ -309,5 +363,45 @@ final public class Preferences {
 			}
 		).show();
 		return 0;
+	}
+
+	public static KeyAction getSearchButtonAction() {
+		return searchButtonAction;
+	}
+	public static KeyAction getMenuButtonAction() {
+		return menuButtonAction;
+	}
+	public static KeyAction getBackButtonAction() {
+		return backButtonAction;
+	}
+	public static KeyAction getCameraButtonAction() {
+		return cameraButtonAction;
+	}
+	public static KeyAction getDpadButtonAction() {
+		return dpadButtonAction;
+	}
+	public static KeyAction getVolumeDownButtonAction() {
+		return volumeDownButtonAction;
+	}
+	public static KeyAction getVolumeUpButtonAction() {
+		return volumeUpButtonAction;
+	}
+	public static KeyAction getEmoticonKeyAction() {
+		return emoticonKeyAction;
+	}
+	public static KeyAction getLeftAltKeyAction() {
+		return leftAltKeyAction;
+	}
+	public static KeyAction getRightAltKeyAction() {
+		return rightAltKeyAction;
+	}
+	public static KeyAction getLeftShiftKeyAction() {
+		return leftShiftKeyAction;
+	}
+	public static KeyAction getRightShiftKeyAction() {
+		return rightShiftKeyAction;
+	}
+	public static KeyAction getCtrlDoubleTapAction() {
+		return ctrlDoubleTapAction;
 	}
 }

@@ -1,18 +1,7 @@
 diff -Nru --strip-trailing-cr rogue210-source/src/init.c rogue210-source-android/src/init.c
 --- rogue210-source/src/init.c	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/init.c	2011-02-07 20:02:23.000000000 -0800
-@@ -49,6 +49,10 @@
- #include "version.h"
- #include "paths.h"
- 
-+#ifdef ANDROID
-+#include "curses.h"
-+#endif
-+
- char *login_name = (char *) 0;
- char welcome[80];
- char *rest_file = 0;
-@@ -135,6 +139,7 @@
++++ rogue210-source-android/src/init.c	2011-02-12 14:44:31.000000000 -0800
+@@ -135,6 +135,7 @@
      return (rest_file!=NULL);
  }
  
@@ -20,7 +9,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/init.c rogue210-source-android
  make_filename(char **fname, char *name) {
      char *p, *punct = "_^$~!#%&-{}()@'`";
  
-@@ -155,6 +160,7 @@
+@@ -155,6 +156,7 @@
      }
      strcat(*fname, ".SAV");
  }
@@ -28,9 +17,20 @@ diff -Nru --strip-trailing-cr rogue210-source/src/init.c rogue210-source-android
  
  player_init()
  {
+@@ -230,6 +232,10 @@
+ 
+ stop_window()
+ {
++#ifdef ANDROID
++	clear();
++	refresh();
++#endif
+ 	endwin();
+ 	md_control_keybord(1);
+ }
 diff -Nru --strip-trailing-cr rogue210-source/src/invent.c rogue210-source-android/src/invent.c
 --- rogue210-source/src/invent.c	2004-02-15 23:07:32.000000000 -0800
-+++ rogue210-source-android/src/invent.c	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/invent.c	2011-02-12 14:44:31.000000000 -0800
 @@ -161,6 +161,23 @@
  	'r',		"r       read scroll",
  	'/',		"/       identify object",
@@ -94,7 +94,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/invent.c rogue210-source-andro
  extern boolean wizard, use_color;
 diff -Nru --strip-trailing-cr rogue210-source/src/main.c rogue210-source-android/src/main.c
 --- rogue210-source/src/main.c	2004-01-30 15:33:04.000000000 -0800
-+++ rogue210-source-android/src/main.c	2011-02-08 06:40:05.000000000 -0800
++++ rogue210-source-android/src/main.c	2011-02-12 14:44:31.000000000 -0800
 @@ -73,6 +73,11 @@
              message(welcome, 0);
              welcomed = 1;
@@ -109,7 +109,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/main.c rogue210-source-android
  		free_stuff(&level_objects);
 diff -Nru --strip-trailing-cr rogue210-source/src/object.c rogue210-source-android/src/object.c
 --- rogue210-source/src/object.c	2004-02-14 08:42:32.000000000 -0800
-+++ rogue210-source-android/src/object.c	2011-02-08 21:22:47.000000000 -0800
++++ rogue210-source-android/src/object.c	2011-02-12 14:44:31.000000000 -0800
 @@ -729,12 +729,16 @@
  	}
  	message("type of object?", 0);
@@ -130,7 +130,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/object.c rogue210-source-andro
  	obj = alloc_object();
 diff -Nru --strip-trailing-cr rogue210-source/src/pack.c rogue210-source-android/src/pack.c
 --- rogue210-source/src/pack.c	2004-02-18 20:40:00.000000000 -0800
-+++ rogue210-source-android/src/pack.c	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/pack.c	2011-02-12 14:44:31.000000000 -0800
 @@ -261,7 +261,11 @@
      char c;
      do {
@@ -145,7 +145,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/pack.c rogue210-source-android
  pack_letter(prompt, mask)
 diff -Nru --strip-trailing-cr rogue210-source/src/paths.h rogue210-source-android/src/paths.h
 --- rogue210-source/src/paths.h	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/paths.h	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/paths.h	2011-02-12 14:44:31.000000000 -0800
 @@ -28,7 +28,11 @@
   *
   * @(#)pathnames.h 8.1 (Berkeley) 5/31/93
@@ -166,7 +166,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/paths.h rogue210-source-androi
 +#endif
 diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android/src/play.c
 --- rogue210-source/src/play.c	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/play.c	2011-02-09 06:30:25.000000000 -0800
++++ rogue210-source-android/src/play.c	2011-02-12 14:44:31.000000000 -0800
 @@ -47,6 +47,10 @@
  #include "rogue.h"
  #include "version.h"
@@ -212,8 +212,8 @@ diff -Nru --strip-trailing-cr rogue210-source/src/play.c rogue210-source-android
  }
 diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-android/src/rogue.h
 --- rogue210-source/src/rogue.h	2004-02-14 08:42:32.000000000 -0800
-+++ rogue210-source-android/src/rogue.h	2011-02-08 21:27:21.000000000 -0800
-@@ -43,6 +43,19 @@
++++ rogue210-source-android/src/rogue.h	2011-02-12 14:44:31.000000000 -0800
+@@ -43,6 +43,20 @@
   *         gain or profit.
   */
  
@@ -221,6 +221,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
 +#include <string.h>
 +#include <stdlib.h>
 +#include <stdio.h>
++#include "curses.h"
 +#define do_shell(x)
 +#define md_control_keybord(x)
 +#define md_ignore_signals(x)
@@ -233,7 +234,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
  #ifdef _MSC_VER
  /* supress warnings about parameters and return values,
   * at least until we write proper prototypes */
-@@ -195,6 +208,7 @@
+@@ -195,6 +209,7 @@
  #define DROWS 24
  #define DCOLS 80
  #define NMESSAGES 5
@@ -241,7 +242,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
  #define MAX_TITLE_LENGTH 30
  #define MAXSYLLABLES 40
  #define MAX_METAL 14
-@@ -486,7 +500,11 @@
+@@ -486,7 +501,11 @@
  #define MOVED 0
  #define MOVE_FAILED -1
  #define STOPPED_ON_SOMETHING -2
@@ -253,9 +254,16 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
  #define LIST '*'
  
  #define HUNGRY 300
+@@ -557,4 +576,6 @@
+ 	short second;	/* 0 - 59 */
+ };
+ 
++#ifndef ANDROID
+ extern int LINES, COLS;
++#endif
 diff -Nru --strip-trailing-cr rogue210-source/src/room.c rogue210-source-android/src/room.c
 --- rogue210-source/src/room.c	2004-02-17 22:34:20.000000000 -0800
-+++ rogue210-source-android/src/room.c	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/room.c	2011-02-12 14:44:31.000000000 -0800
 @@ -242,7 +242,11 @@
  			cc.b8.color = use_color ?
  				MAKE_COLOR(scrTerrain[i].fgcolor, scrTerrain[i].bgcolor) :
@@ -342,7 +350,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/room.c rogue210-source-android
  	return cc;
 diff -Nru --strip-trailing-cr rogue210-source/src/save.c rogue210-source-android/src/save.c
 --- rogue210-source/src/save.c	2004-02-16 10:30:58.000000000 -0800
-+++ rogue210-source-android/src/save.c	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/save.c	2011-02-12 14:44:31.000000000 -0800
 @@ -81,6 +81,9 @@
  extern char *fruit;
  
@@ -391,7 +399,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/save.c rogue210-source-android
  
 diff -Nru --strip-trailing-cr rogue210-source/src/score.c rogue210-source-android/src/score.c
 --- rogue210-source/src/score.c	2004-02-15 20:01:46.000000000 -0800
-+++ rogue210-source-android/src/score.c	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/score.c	2011-02-12 14:44:31.000000000 -0800
 @@ -54,6 +54,9 @@
  extern boolean score_only, display_skull, msg_cleared, use_color, use_doschars;
  extern char *byebye_string;
@@ -443,7 +451,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/score.c rogue210-source-androi
  long
 diff -Nru --strip-trailing-cr rogue210-source/src/throw.c rogue210-source-android/src/throw.c
 --- rogue210-source/src/throw.c	2004-01-30 15:33:04.000000000 -0800
-+++ rogue210-source-android/src/throw.c	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/throw.c	2011-02-12 14:44:31.000000000 -0800
 @@ -257,7 +257,7 @@
  rand_around(i, r, c)
  short i, *r, *c;
@@ -455,7 +463,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/throw.c rogue210-source-androi
  
 diff -Nru --strip-trailing-cr rogue210-source/src/version.h rogue210-source-android/src/version.h
 --- rogue210-source/src/version.h	2004-02-21 23:06:20.000000000 -0800
-+++ rogue210-source-android/src/version.h	2011-02-07 20:02:23.000000000 -0800
++++ rogue210-source-android/src/version.h	2011-02-12 14:44:31.000000000 -0800
 @@ -85,6 +85,8 @@
    #endif
  #elif defined(_WIN32) || defined(__WINDOWS__)

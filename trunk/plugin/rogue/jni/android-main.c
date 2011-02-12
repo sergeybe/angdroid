@@ -5,7 +5,6 @@
 
 #include "rogue.h"
 #include "paths.h"
-#include "curses.h"
 
 extern boolean msg_cleared;
 
@@ -361,7 +360,7 @@ void initGame(void) {
 	}
 
 	strcpy(_PATH_SCOREFILE,android_files_path);
-	strcat(_PATH_SCOREFILE,"/save/score");
+	strcat(_PATH_SCOREFILE,"/files/score");
 
 	strcpy(_PATH_ERRORFILE,android_files_path);
 	strcat(_PATH_ERRORFILE,"/save/");
