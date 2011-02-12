@@ -35,9 +35,8 @@ public class GameThread implements Runnable {
 		state = s;
 	}
 
-
 	public void link(Handler h) {
-		handler = h;
+		handler = h;		
 	}
 
 	public synchronized void send(Request rq) {
@@ -102,6 +101,7 @@ public class GameThread implements Runnable {
 			
  			/* initialize keyboard buffer */
 			state.keyBuffer = new KeyBuffer(state);
+			state.keyBuffer.link(handler);
 
 			game_thread_running = true;
 

@@ -7,6 +7,10 @@ import android.os.Message;
 import android.view.KeyEvent;
 
 import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
+
+import org.angdroid.angband.Preferences.KeyAction;
 	
 public class KeyBuffer {
 
@@ -35,6 +39,8 @@ public class KeyBuffer {
 	private boolean shift_key_pressed = false;
 	private boolean alt_key_pressed = false;
 
+	private Handler handler = null;
+
 	public KeyBuffer(StateManager state) {
 		this.state = state;
 		nativew = state.nativew;
@@ -48,6 +54,11 @@ public class KeyBuffer {
 			add(32); //space
 		}
 		quit_key_seq = 0;
+		Preferences.initKeyBinding();
+	}
+
+	public void link(Handler h) {
+		handler = h;		
 	}
 
 	public void add(int key) {
@@ -174,10 +185,110 @@ public class KeyBuffer {
 		return -1;
 	}
 
+	private KeyAction getKeyActionFromKeyCode(int keyCode)
+	{
+		KeyAction keyAction = KeyAction.None;
+		switch(keyCode) {
+		case KeyEvent.KEYCODE_BACK:
+			keyAction = Preferences.getBackButtonAction();
+			break;
+		case KeyEvent.KEYCODE_CAMERA:
+			keyAction = Preferences.getCameraButtonAction();
+			break;
+		case KeyEvent.KEYCODE_DPAD_CENTER:
+			keyAction = Preferences.getDpadButtonAction();
+			break;
+		case KeyEvent.KEYCODE_SEARCH:
+			keyAction = Preferences.getSearchButtonAction();
+			break;
+		case KeyEvent.KEYCODE_MENU:
+			keyAction = Preferences.getMenuButtonAction();
+			break;
+		case 97: //Emoticon on Samsung Epic
+			keyAction = Preferences.getEmoticonKeyAction();
+			break;
+		case KeyEvent.KEYCODE_ALT_LEFT:
+			keyAction = Preferences.getLeftAltKeyAction();
+			break;
+		case KeyEvent.KEYCODE_ALT_RIGHT:
+			keyAction = Preferences.getRightAltKeyAction();
+			break;
+		case KeyEvent.KEYCODE_SHIFT_LEFT:
+			keyAction = Preferences.getLeftShiftKeyAction();
+			break;
+		case KeyEvent.KEYCODE_SHIFT_RIGHT:
+			keyAction = Preferences.getRightShiftKeyAction();
+			break;
+		case KeyEvent.KEYCODE_VOLUME_UP:
+			keyAction = Preferences.getVolumeUpButtonAction();
+			break;
+		case KeyEvent.KEYCODE_VOLUME_DOWN:
+			keyAction = Preferences.getVolumeDownButtonAction();
+			break;
+		default:
+			break;
+		}
+		return keyAction;
+	}
+
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
 		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
+
+		KeyAction act =  getKeyActionFromKeyCode(keyCode);
+		if (act == KeyAction.CtrlKey) {
+			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
+			ctrl_mod = !ctrl_mod;
+			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
+			ctrl_down = true;
+			if (ctrl_key_overload) {
+				act = Preferences.getCtrlDoubleTapAction();
+			}
+			else {
+				return true;
+			}
+		}
+		
+		switch(act){
+		case AltKey:
+			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
+			alt_mod = !alt_mod;
+			alt_key_pressed = !alt_mod; // double tap, turn off mod
+			alt_down = true;
+			key = -1;
+			break;
+		case ShiftKey:
+			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
+			shift_mod = !shift_mod;
+			shift_key_pressed = !shift_mod; // double tap, turn off mod
+			shift_down = true;
+			key = -1;
+			break;			
+		case EnterKey:
+			key = '\r';
+			break;
+		case SpaceKey:
+			key = ' ';
+			break;
+		case EscKey:
+			key = '`';
+			break;
+		case ZoomIn:
+			nativew.increaseFontSize();
+			return true;
+		case ZoomOut:
+			nativew.decreaseFontSize();
+			return true;
+		case VirtualKeyboard:
+			// handled on keyup
+			return true;
+		case ForwardToSystem:
+			return false;
+		default:
+			break;
+		}
+
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_UP:
 			key = state.getKeyUp();
@@ -191,18 +302,6 @@ public class KeyBuffer {
 		case KeyEvent.KEYCODE_DPAD_RIGHT:
 			key = state.getKeyRight();
 			break;
-		case KeyEvent.KEYCODE_DPAD_CENTER:
-		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
-			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			ctrl_mod = !ctrl_mod;
-			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
-			ctrl_down = true;
-			if (ctrl_key_overload) key = '\r';
-			else return true;
-			break;
-		case KeyEvent.KEYCODE_BACK:
-			key = '`'; // escape key on back button
-			break;
 		case KeyEvent.KEYCODE_ENTER:
 			key = '\r';
 			break;
@@ -213,36 +312,6 @@ public class KeyBuffer {
 		case KeyEvent.KEYCODE_DEL:
 			key = '\b';
 			break;
-		case KeyEvent.KEYCODE_ALT_LEFT:
-		case KeyEvent.KEYCODE_ALT_RIGHT:
-			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			alt_mod = !alt_mod;
-			alt_key_pressed = !alt_mod; // double tap, turn off mod
-			alt_down = true;
-			key = -1;
-			break;
-		case KeyEvent.KEYCODE_SHIFT_LEFT:
-		case KeyEvent.KEYCODE_SHIFT_RIGHT:
-			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			shift_mod = !shift_mod;
-			shift_key_pressed = !shift_mod; // double tap, turn off mod
-			shift_down = true;
-			key = -1;
-			break;
-
-		/* todo: move this font-size mapping to prefs */
-		case KeyEvent.KEYCODE_VOLUME_UP:
-			if (Preferences.getVolumeKeyFontSizing()) {
-				nativew.increaseFontSize();
-			}
-			return true;
-			//break;
-		case KeyEvent.KEYCODE_VOLUME_DOWN:
-			if (Preferences.getVolumeKeyFontSizing()) {
-				nativew.decreaseFontSize();
-			}
-			return true;
-			//break;
 		}
 
 		if (key == 0) {
@@ -271,7 +340,7 @@ public class KeyBuffer {
 		ctrl_key_overload = false;
 
 		if (key <= 0) {
-			return nativew.onKeyDown(keyCode, event);
+			return false; //forward to system
 		}
 		else {
 			alt_key_pressed = alt_down;
@@ -297,24 +366,37 @@ public class KeyBuffer {
 
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		//Log.d("Angband", "onKeyUp("+keyCode+","+event+")");
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_DPAD_CENTER:
-		case 97: // emoticon key on Samsung Epic 4G (todo move to Preference)
+
+		KeyAction act =  getKeyActionFromKeyCode(keyCode);
+		switch(act){
+		case AltKey:
+			alt_down = false;		
+			alt_mod = !alt_key_pressed; // turn off mod only if used at least once		
+			break;
+		case CtrlKey:
 			ctrl_down = false;
 			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
 			ctrl_key_overload = ctrl_mod;
 			break;
-		case KeyEvent.KEYCODE_SHIFT_LEFT:
-		case KeyEvent.KEYCODE_SHIFT_RIGHT:
+		case ShiftKey:
 			shift_down = false;
 			shift_mod = !shift_key_pressed; // turn off mod only if used at least once
 			break;
-		case KeyEvent.KEYCODE_ALT_LEFT:		
-		case KeyEvent.KEYCODE_ALT_RIGHT:		
-			alt_down = false;		
-			alt_mod = !alt_key_pressed; // turn off mod only if used at least once		
+		case VirtualKeyboard:
+			handler.sendEmptyMessage(AngbandDialog.Action.ToggleKeyboard.ordinal());
+			return true;
+		case ZoomIn:
+			// handled on keydown
+			return true;	
+		case ZoomOut:
+			// handled on keydown
+			return true;
+		case ForwardToSystem:
+			return false;
+		default:
 			break;
 		}
-		return nativew.onKeyUp(keyCode, event);
+
+		return false;
 	}
 }

@@ -56,7 +56,9 @@ public class StateManager {
 
 	public void link(TermView t, Handler h) {
 		nativew.link(t, h);
-		gameThread.link(h);		
+		gameThread.link(h);
+		if (keyBuffer != null)
+			keyBuffer.link(h);
 	}
 
 	public TermWindow getWin(int handle) {

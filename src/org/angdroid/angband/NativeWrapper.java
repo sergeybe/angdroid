@@ -66,14 +66,6 @@ public class NativeWrapper {
 		}
 	}
 
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		return term.onKeyUp(keyCode,event);
-	}
-
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		return term.onKeyDown(keyCode,event);
-	}
-
 	public void flushinp() {
 		state.keyBuffer.clear();
 	}

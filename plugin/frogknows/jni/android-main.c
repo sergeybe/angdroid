@@ -176,7 +176,7 @@ void textcolor(int c){
    run or rest. */
 int check_input(int microsec) {
 	// sleep for microsec
-	usleep(microsec/1000);
+	usleep(microsec);
 
 	// if input available, consume & return 1
 	int ch = angdroid_getch(0);
@@ -243,7 +243,7 @@ void initGame(void) {
 	strcat(ANGBAND_TST,"/test");
 	strcat(ANGBAND_HOU,"/files/hours");
 	strcat(ANGBAND_MOR,"/files/news");
-	strcat(ANGBAND_TOP,"/files/newscores");
+	strcat(ANGBAND_TOP,"/save/newscores");
 	strcat(ANGBAND_BONES,"/bones/");
 	strcat(ANGBAND_HELP,"/files/roglcmds.hlp");
 	strcat(ANGBAND_ORIG_HELP,"/files/origcmds.hlp");

@@ -57,7 +57,7 @@ public class AngbandActivity extends Activity {
 	protected final int CONTEXTMENU_FITWIDTH_ITEM = 0;
 	protected final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
 	protected final int CONTEXTMENU_VKEY_ITEM = 2;
-	protected final int CONTEXTMENU_FULLSCREEN_ITEM = 3;
+	protected final int CONTEXTMENU_PREFERENCES_ITEM = 3;
 
 	protected Handler handler = null;
 
@@ -208,8 +208,8 @@ public class AngbandActivity extends Activity {
 		menu.setHeaderTitle("Quick Settings");
 		menu.add(0, CONTEXTMENU_FITWIDTH_ITEM, 0, "Fit Width"); 
 		menu.add(0, CONTEXTMENU_FITHEIGHT_ITEM, 0, "Fit Height"); 
-		menu.add(0, CONTEXTMENU_FULLSCREEN_ITEM, 0, "Toggle Fullscreen"); 
 		menu.add(0, CONTEXTMENU_VKEY_ITEM, 0, "Toggle Keyboard"); 
+		menu.add(0, CONTEXTMENU_PREFERENCES_ITEM, 0, "Preferences"); 
 	}
 
 	@Override
@@ -224,19 +224,22 @@ public class AngbandActivity extends Activity {
 			state.nativew.resize();
 			return true; 
 		case CONTEXTMENU_VKEY_ITEM:
-			if(Preferences.isScreenPortraitOrientation())
-				Preferences.setPortraitKeyboard(!Preferences.getPortraitKeyboard());
-			else		
-				Preferences.setLandscapeKeyboard(!Preferences.getLandscapeKeyboard());
-			rebuildViews();
+			toggleKeyboard();
 			return true; 
-		case CONTEXTMENU_FULLSCREEN_ITEM:
-			Preferences.setFullScreen(!Preferences.getFullScreen());
-			setScreen();
-			rebuildViews();
+		case CONTEXTMENU_PREFERENCES_ITEM:
+			Intent intent = new Intent(this, PreferencesActivity.class);
+			startActivity(intent);
 			return true; 
 		}
 		return false;
+	}
+
+	public void toggleKeyboard() {
+		if(Preferences.isScreenPortraitOrientation())
+			Preferences.setPortraitKeyboard(!Preferences.getPortraitKeyboard());
+		else		
+			Preferences.setLandscapeKeyboard(!Preferences.getLandscapeKeyboard());
+		rebuildViews();
 	}
 
 	@Override
@@ -258,12 +261,22 @@ public class AngbandActivity extends Activity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		return state.keyBuffer.onKeyDown(keyCode,event);
+		if (!state.keyBuffer.onKeyDown(keyCode,event)) {
+			return super.onKeyDown(keyCode,event);
+		}
+		else {
+			return true;
+		}
 	}
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		return state.keyBuffer.onKeyUp(keyCode,event);
+		if (!state.keyBuffer.onKeyUp(keyCode,event)) {
+			return super.onKeyUp(keyCode,event);
+		}
+		else {
+			return true;
+		}
 	}
 
 	public void setScreen() {

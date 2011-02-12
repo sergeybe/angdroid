@@ -42,87 +42,96 @@
 		 android:title="@string/preferences_alwaysrun_title"
 		 android:summary="@string/preferences_alwaysrun_summary" 
 		 android:dependency="angband.enabletouch" />
-	  <CheckBoxPreference 
-		 android:key="angband.enablevolkeyfontsize"
-		 android:defaultValue="true" 
-		 android:title="@string/preferences_enablevolkeyfontsize_title"
-		 android:summary="@string/preferences_enablevolkeyfontsize_summary" />
 		<PreferenceScreen
 			android:title="Key Bindings">
 			<ListPreference
 				android:title="Back Button"
 				android:summary="Select functionality for Back button."
-				android:key="angband.backbuttonfunc"
+				android:key="angband.backbutton"
 				android:defaultValue="EscKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Camera Button"
 				android:summary="Select functionality for Camera button."
-				android:key="angband.camerabuttonfunc"
+				android:key="angband.camerabutton"
 				android:defaultValue="VirtualKeyboard"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="Ctrl Key Double-Tap"
+				android:summary="Select functionality for CtrlKey double-tap."
+				android:key="angband.ctrldoubletap"
+				android:defaultValue="EnterKey"
+				android:entries="@array/keyActionDescriptions"
+				android:entryValues="@array/keyActions"/>
+			<ListPreference
+				android:title="DPAD/Trackball Button"
+				android:summary="Select functionality for DPAD/Trackball button."
+				android:key="angband.dpadbutton"
+				android:defaultValue="CtrlKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Emoticon Key"
 				android:summary="Select functionality for Emoticon Key."
-				android:key="angband.emoticonkeyfunc"
+				android:key="angband.emoticonkey"
 				android:defaultValue="CtrlKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Menu Button"
 				android:summary="Select functionality for Menu button."
-				android:key="angband.menubuttonfunc"
+				android:key="angband.menubutton"
 				android:defaultValue="ForwardToSystem"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Search Button"
 				android:summary="Select functionality for Search button."
-				android:key="angband.searchbuttonfunc"
+				android:key="angband.searchbutton"
 				android:defaultValue="CtrlKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
-				android:title="Left Alt Key"
-				android:summary="Select functionality for Left Alt key."
-				android:key="angband.leftaltkeyfunc"
-				android:defaultValue="ForwardToSystem"
+				android:title="Left Alt/Fn Key"
+				android:summary="Select functionality for Left Alt/Fn key."
+				android:key="angband.leftaltkey"
+				android:defaultValue="AltKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
-				android:title="Right Alt Key"
-				android:summary="Select functionality for Right Alt key."
-				android:key="angband.rightaltkeyfunc"
-				android:defaultValue="ForwardToSystem"
+				android:title="Right Alt/Fn Key"
+				android:summary="Select functionality for Right Alt/Fn key."
+				android:key="angband.rightaltkey"
+				android:defaultValue="AltKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Left Shift Key"
 				android:summary="Select functionality for Left Shift key."
-				android:key="angband.leftshiftkeyfunc"
+				android:key="angband.leftshiftkey"
 				android:defaultValue="ShiftKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Right Shift Key"
 				android:summary="Select functionality for Right Shift key."
-				android:key="angband.rightshiftkeyfunc"
+				android:key="angband.rightshiftkey"
 				android:defaultValue="ShiftKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Volume Up Button"
 				android:summary="Select functionality for Volume Up button."
-				android:key="angband.volumeupbuttonfunc"
+				android:key="angband.volumeupbutton"
 				android:defaultValue="ZoomIn"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Volume Down Button"
 				android:summary="Select functionality for Volume Down button."
-				android:key="angband.volumedownbuttonfunc"
+				android:key="angband.volumedownbutton"
 				android:defaultValue="ZoomOut"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
