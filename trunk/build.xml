@@ -18,9 +18,11 @@
     <target name="variants-debug" depends="variants-copy">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-debug" />
     </target>
-
     <target name="variants-release" depends="variants-copy">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-release" />
+    </target>
+    <target name="variants-plugin-src">
+	  <ant inheritAll="true" dir="." antfile="build-variants.xml" target="plugin-src" />
     </target>
 
 	<target name="variants-copy">
@@ -32,8 +34,10 @@
 		  <exclude name="**/libs/armeabi/**" />
 		  <exclude name="**/override/**" />
 		  <exclude name="**/plugin/angband/**" />
-		  <exclude name="**/plugin/frogknows/**" />
 		  <exclude name="**/plugin/angband306/**" />
+		  <exclude name="**/plugin/frogknows/**" />
+		  <exclude name="**/plugin/moria/**" />
+		  <exclude name="**/plugin/rogue/**" />
 		  <exclude name="**/plugin/include/*.h" />
 		  <exclude name="**/plugin/loader/libs/**" />
 		  <exclude name="**/plugin/loader/obj/**" />

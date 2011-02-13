@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 final public class Plugins {
 	public enum Plugin {
-		ToME(0), Sangband(1), Steamband(3);
+		ToME(0), Sangband(1), Steamband(2);
 		//NPP(?);
 
 		private int id;
@@ -26,6 +26,7 @@ final public class Plugins {
 
 	public static String getFilesDir(Plugin p) {
 		switch (p) {
+		case Sangband: return "sang";
 		case Steamband: return "steam";
 		default: return p.toString().toLowerCase();
 		}
