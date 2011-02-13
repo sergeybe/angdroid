@@ -60,8 +60,9 @@ final public class Preferences {
 			CtrlKey,
 			EnterKey,
 			EscKey,
+			Period,
 			ShiftKey,
-			SpaceKey,
+			Space,
 			VirtualKeyboard,
 			ZoomIn,
 			ZoomOut,
@@ -110,7 +111,7 @@ final public class Preferences {
 	}
 
 	public static void initKeyBinding() {
-		searchButtonAction = KeyAction.convert(pref.getString("angband.searchbutton", "ForwardToSystem"));
+		searchButtonAction = KeyAction.convert(pref.getString("angband.searchbutton", "ShiftKey"));
 		menuButtonAction = KeyAction.convert(pref.getString("angband.menubutton", "ForwardToSystem"));
 		backButtonAction = KeyAction.convert(pref.getString("angband.backbutton", "EscKey"));
 		cameraButtonAction = KeyAction.convert(pref.getString("angband.camerabutton", "VirtualKeyboard"));

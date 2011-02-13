@@ -64,6 +64,23 @@ public class KeyBuffer {
 	public void add(int key) {
 		//Log.d("Angband", "KebBuffer.add:"+key);
 		synchronized (keybuffer) {
+			if (key <= 127) {
+				if (key >= 'a' && key <= 'z') {
+					if (ctrl_mod) {
+						key = key - 'a' + 1;
+						ctrl_mod = ctrl_down; // if held down, mod is still active
+					}
+					else if (shift_mod) {
+						key = key - 'a'  + 'A';
+						shift_mod = shift_down; // if held down, mod is still active
+					}
+				}
+			}
+
+			alt_key_pressed = alt_down;
+			ctrl_key_pressed = ctrl_down;
+			shift_key_pressed = shift_down;
+
 			keybuffer.offer(key);
 			wakeUp();
 		}
@@ -87,20 +104,16 @@ public class KeyBuffer {
 			}
 		}
 
-		if (alwaysRun && wait) {
-			synchronized (keybuffer) {
-				if (rogueLike) {
-					key = Character.toUpperCase(key);
-				}
-				else {
-					keybuffer.offer(46); // '.' command
-				}
-				keybuffer.offer(key);
-				wakeUp();
+		if (alwaysRun && !ctrl_mod) { // let ctrl influence directionals, even with alwaysRun on
+			if (rogueLike) {
+				key = Character.toUpperCase(key);
 			}
-		} else {
-			add(key);
+			else {
+				add(46); // '.' command
+			}
 		}
+		
+		add(key);
 	}
 
 	public void clear() {
@@ -268,8 +281,11 @@ public class KeyBuffer {
 		case EnterKey:
 			key = '\r';
 			break;
-		case SpaceKey:
+		case Space:
 			key = ' ';
+			break;
+		case Period:
+			key = '.';
 			break;
 		case EscKey:
 			key = '`';
@@ -321,39 +337,24 @@ public class KeyBuffer {
 				meta |= KeyEvent.META_ALT_LEFT_ON;
 				alt_mod = alt_down; // if held down, mod is still active
 			}
+
+			// this is probably not needed, as shift mod is handled (for A-Z only) 
+			// in add() in order to include directionals from screen taps.  
+			// But I've left this code here to cover any possible hardware 
+			// shifting that is not between A-Z.
 			if(shift_mod) {
 				meta |= KeyEvent.META_SHIFT_ON;
 				meta |= KeyEvent.META_SHIFT_LEFT_ON;
 				shift_mod = shift_down; // if held down, mod is still active
 			}
 			key = event.getUnicodeChar(meta);
-			if (key <= 127) {
-				if (key >= 'a' && key <= 'z') {
-				    if (ctrl_mod) {
-					key = key - 'a' + 1;
-				        ctrl_mod = ctrl_down; // if held down, mod is still active
-				    }
-				}
-			}
 		}
-
-		ctrl_key_overload = false;
 
 		if (key <= 0) {
 			return false; //forward to system
 		}
-		else {
-			alt_key_pressed = alt_down;
-			ctrl_key_pressed = ctrl_down;
-			shift_key_pressed = shift_down;
-		}
 
-		if (event.isShiftPressed()) {
-			key |= MOD_SHFT;
-		}
-		if (event.isAltPressed()) {
-			key |= MOD_CTRL;
-		}
+		ctrl_key_overload = false;
 
 		add(key);
 		return true; 
@@ -372,16 +373,16 @@ public class KeyBuffer {
 		case AltKey:
 			alt_down = false;		
 			alt_mod = !alt_key_pressed; // turn off mod only if used at least once		
-			break;
+			return true;
 		case CtrlKey:
 			ctrl_down = false;
 			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
 			ctrl_key_overload = ctrl_mod;
-			break;
+			return true;
 		case ShiftKey:
 			shift_down = false;
 			shift_mod = !shift_key_pressed; // turn off mod only if used at least once
-			break;
+			return true;
 		case VirtualKeyboard:
 			handler.sendEmptyMessage(AngbandDialog.Action.ToggleKeyboard.ordinal());
 			return true;
@@ -390,6 +391,12 @@ public class KeyBuffer {
 			return true;	
 		case ZoomOut:
 			// handled on keydown
+			return true;
+		case None:
+		case EscKey:
+		case Space:
+		case Period:
+		case EnterKey:
 			return true;
 		case ForwardToSystem:
 			return false;
