@@ -22,6 +22,10 @@
 	    <property name="plugin.name" value="sang"/>
 	    <property name="pluginzip.name" value="sang"/>
 	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="steam"/>
+	    <property name="pluginzip.name" value="steam"/>
+	</ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="npp"/>
@@ -46,6 +50,10 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="sang"/>
 	    <property name="pluginlib.name" value="sang"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="steam"/>
+	    <property name="pluginlib.name" value="steam"/>
 	</ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
@@ -85,6 +93,14 @@
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="steam"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="Steamband-0.4.1f-SRC.tar.gz"/>
+		<property name="extract.command" value="tar" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
+	</ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="npp"/>
@@ -113,6 +129,9 @@
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="sang"/>
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="steam"/>
 	</ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
