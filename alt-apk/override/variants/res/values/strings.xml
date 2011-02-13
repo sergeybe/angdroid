@@ -94,8 +94,9 @@
 		<item>Ctrl Key</item>
 		<item>Enter Key</item>
 		<item>Esc Key</item>
+		<item>Period</item>
 		<item>Shift Key</item>
-		<item>Space Key</item>
+		<item>Space</item>
 		<item>Virtual Keyboard</item>
 		<item>Zoom In</item>
 		<item>Zoom Out</item>
@@ -107,8 +108,9 @@
 		<item>CtrlKey</item>
 		<item>EnterKey</item>
 		<item>EscKey</item>
+		<item>Period</item>
 		<item>ShiftKey</item>
-		<item>SpaceKey</item>
+		<item>Space</item>
 		<item>VirtualKeyboard</item>
 		<item>ZoomIn</item>
 		<item>ZoomOut</item>
