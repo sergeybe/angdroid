@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 final public class Plugins {
 	public enum Plugin {
-		ToME(0), Sangband(1);
-		//NPP(2);
+		ToME(0), Sangband(1), Steamband(3);
+		//NPP(?);
 
 		private int id;
 
@@ -26,6 +26,7 @@ final public class Plugins {
 
 	public static String getFilesDir(Plugin p) {
 		switch (p) {
+		case Steamband: return "steam";
 		default: return p.toString().toLowerCase();
 		}
 	}
@@ -61,6 +62,8 @@ final public class Plugins {
 			is = Preferences.getResources().openRawResource(R.raw.ziptome);
 		else if (plugin == Plugin.Sangband.getId())
 			is = Preferences.getResources().openRawResource(R.raw.zipsang);
+		else if (plugin == Plugin.Steamband.getId())
+			is = Preferences.getResources().openRawResource(R.raw.zipsteam);
 		//else if (plugin == Plugin.NPP.getId())
 		//	is = Preferences.getResources().openRawResource(R.raw.zipnpp);
 

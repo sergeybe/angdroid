@@ -1,0 +1,189 @@
+diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/defines.h Steamband-0.4.1f-SRC-android/src/defines.h
+--- Steamband-0.4.1f-SRC/src/defines.h	2007-12-24 06:43:04.000000000 -0800
++++ Steamband-0.4.1f-SRC-android/src/defines.h	2011-02-12 18:39:03.000000000 -0800
+@@ -4153,7 +4153,9 @@
+ /*
+  * Maximum number of colours, and number of "basic" Angband colours
+  */ 
++#ifndef ANDROID
+ #define MAX_COLORS		256
++#endif
+ #define BASIC_COLORS	16
+ 
+ 
+diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/files.c Steamband-0.4.1f-SRC-android/src/files.c
+--- Steamband-0.4.1f-SRC/src/files.c	2007-12-13 09:24:20.000000000 -0800
++++ Steamband-0.4.1f-SRC-android/src/files.c	2011-02-12 20:20:14.000000000 -0800
+@@ -4690,6 +4690,62 @@
+ 	pause_line(23);
+ }
+ 
++#ifdef USE_AND
++/*
++ * Hack - duplication of get_check prompt to give option of setting destroyed
++ * option to squelch.
++ *
++ * 0 - No
++ * 1 = Yes
++ * 2 = third option
++ *
++ * The "prompt" should take the form "Query? "
++ *
++ * Note that "[y/n/{char}]" is appended to the prompt.
++ */
++int get_check_other(cptr prompt, char other)
++{
++	char ch;
++
++	char buf[80];
++
++	/*default set to no*/
++	int result = 0;
++
++	/* Paranoia XXX XXX XXX */
++	message_flush();
++
++	/* Hack -- Build a "useful" prompt */
++	strnfmt(buf, 78, "%.70s[y/n/%c] ", prompt, other);
++
++	/* Prompt for it */
++	prt(buf, 0, 0);
++
++	/* Get an acceptable answer */
++	while (TRUE)
++	{
++		ch = inkey();
++		if (quick_messages) break;
++		if (ch == ESCAPE) break;
++		if (strchr("YyNn", ch)) break;
++		if (ch == toupper(other)) break;
++		if (ch == tolower(other)) break;
++		bell("Illegal response to question!");
++	}
++
++	/* Erase the prompt */
++	prt("", 0, 0);
++
++	/* Normal negation */
++	if ((ch == 'Y') || (ch == 'y')) result = 1;
++	/*other option*/
++	else if ((ch == toupper(other)) || (ch == tolower(other))) result = 2;
++	/*all else default to no*/
++
++	/* Success */
++	return (result);
++}
++#endif
+ 
+ /*
+  * Handle character death
+@@ -4743,8 +4799,14 @@
+ 			/* Exit */
+ 			case ESCAPE:
+ 			{
++#ifdef USE_AND
++				// hack to allow KTRL('X') to exit the game here
++				int gckey = get_check_other("Do you want to quit?", KTRL('X'));
++				if (gckey != 0) wants_to_quit = TRUE;
++#else
+ 				if (get_check("Do you want to quit? "))
+ 					wants_to_quit = TRUE;
++#endif
+ 
+ 				break;
+ 			}
+diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/h-config.h Steamband-0.4.1f-SRC-android/src/h-config.h
+--- Steamband-0.4.1f-SRC/src/h-config.h	2005-07-09 01:42:20.000000000 -0700
++++ Steamband-0.4.1f-SRC-android/src/h-config.h	2011-02-12 18:34:13.000000000 -0800
+@@ -223,7 +223,7 @@
+  */
+ #if !defined(MACINTOSH) && !defined(WINDOWS) && \
+     !defined(MSDOS) && !defined(USE_EMX) && \
+-    !defined(AMIGA) && !defined(ACORN) && !defined(VM)
++    !defined(AMIGA) && !defined(ACORN) && !defined(VM) && !defined(ANDROID)
+ # define SET_UID
+ #endif
+ 
+diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/h-define.h Steamband-0.4.1f-SRC-android/src/h-define.h
+--- Steamband-0.4.1f-SRC/src/h-define.h	2003-08-18 18:09:42.000000000 -0700
++++ Steamband-0.4.1f-SRC-android/src/h-define.h	2011-02-12 18:32:22.000000000 -0800
+@@ -125,8 +125,12 @@
+ #  define D2I(X)	((X) - '0')
+ #  define I2D(X)	((X) + '0')
+ #  define KTRL(X)	((X) & 0x1F)
++#ifdef ANDROID
++#  define ESCAPE	'`'
++#else
+ #  define ESCAPE	'\033'
+ #endif
++#endif
+ 
+ 
+ #endif
+diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/spells1.c Steamband-0.4.1f-SRC-android/src/spells1.c
+--- Steamband-0.4.1f-SRC/src/spells1.c	2007-12-17 10:26:36.000000000 -0800
++++ Steamband-0.4.1f-SRC-android/src/spells1.c	2011-02-12 18:45:10.000000000 -0800
+@@ -5780,7 +5780,11 @@
+ 			/* Attempt a saving throw. */
+ 			if (tmp > randint(dam))
+ 			{
++#ifdef ANDROID
++				note = " resists the curse!";
++#else
+ 				strcpy(note, " resists the curse!");
++#endif
+ 				obvious = FALSE;
+ 				dam = 0;
+ 
+@@ -5905,14 +5909,23 @@
+ 				if (m_ptr->hp > m_ptr->maxhp)
+ 				{
+ 					m_ptr->hp = m_ptr->maxhp;
++
++#ifdef ANDROID
++					note = " is cut down to size!";
++#else
+ 					strcpy(note, " is cut down to size!");
++#endif
+ 				}
+ 				else if (m_ptr->mspeed >= r_ptr->speed)
+ 				{
+ 					/* No longer hasted */
+ 					m_ptr->mspeed = r_ptr->speed;
+ 
++#ifdef ANDROID
++					note = " is no longer hasted.";
++#else
+ 					strcpy(note, " is no longer hasted.");
++#endif
+ 				}
+ 			}
+ 
+@@ -5938,7 +5951,11 @@
+ 			if (p_ptr->health_who == cave_m_idx[y][x]) p_ptr->redraw |= (PR_HEALTH);
+ 
+ 			/* Message */
++#ifdef ANDROID
++			note = " looks more powerful!";
++#else
+ 			strcpy(note, " looks more powerful!");
++#endif
+ 
+ 			if (seen) obvious = TRUE;
+ 
+diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/util.c Steamband-0.4.1f-SRC-android/src/util.c
+--- Steamband-0.4.1f-SRC/src/util.c	2007-12-13 03:13:14.000000000 -0800
++++ Steamband-0.4.1f-SRC-android/src/util.c	2011-02-12 20:17:33.000000000 -0800
+@@ -380,7 +380,12 @@
+ 	int fd;
+ 
+ 	/* Prepare the buffer for mkstemp */
++#ifdef USE_AND
++	strcpy(buf, ANGBAND_DIR_USER);
++	strcat(buf, "/anXXXXXX");
++#else
+ 	strncpy(buf, "/tmp/anXXXXXX", max);
++#endif
+ 
+ 	/* Secure creation of a temporary file */
+ 	fd = mkstemp(buf);

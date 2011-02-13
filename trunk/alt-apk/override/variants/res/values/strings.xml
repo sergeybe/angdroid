@@ -6,6 +6,7 @@
     <string-array name="gamePluginDescriptions">
       <item>ToME 2.5.3</item>
       <item>Sangband 1.0.0 lf3</item>
+      <item>Steamband 0.4.1f</item>
 <!--
       <item>NPPAngband 0.5.1 beta2</item>
 -->
@@ -13,6 +14,7 @@
     <string-array name="gamePluginNames">
       <item>tome</item>
       <item>sang</item>
+      <item>steam</item>
 <!--
       <item>npp</item>
 -->
@@ -20,6 +22,7 @@
     <string-array name="gamePlugins">
       <item>0</item>
       <item>1</item>
+      <item>2</item>
 <!--
       <item>2</item>
 -->
@@ -87,9 +90,12 @@
 
 	<string-array name="keyActionDescriptions">
 		<item>None</item>
+		<item>Alt/Fn Key</item>
 		<item>Ctrl Key</item>
+		<item>Enter Key</item>
 		<item>Esc Key</item>
 		<item>Shift Key</item>
+		<item>Space Key</item>
 		<item>Virtual Keyboard</item>
 		<item>Zoom In</item>
 		<item>Zoom Out</item>
@@ -97,9 +103,12 @@
 	</string-array>
 	<string-array name="keyActions">
 		<item>None</item>
+		<item>AltKey</item>
 		<item>CtrlKey</item>
+		<item>EnterKey</item>
 		<item>EscKey</item>
 		<item>ShiftKey</item>
+		<item>SpaceKey</item>
 		<item>VirtualKeyboard</item>
 		<item>ZoomIn</item>
 		<item>ZoomOut</item>

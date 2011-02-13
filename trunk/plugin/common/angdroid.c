@@ -78,7 +78,7 @@
 #include <string.h>
 #include "curses.h"
 
-#ifndef ANGDROID_TOME_PLUGIN
+#if !defined(ANGDROID_TOME_PLUGIN) && !defined(ANGDROID_STEAM_PLUGIN)
 #include "main.h"
 #endif
 #ifdef ANGDROID_ANGBAND306_PLUGIN
@@ -719,7 +719,7 @@ static void term_data_link(int i)
 	t->curs_hook = Term_curs_and;
 	t->wipe_hook = Term_wipe_and;
 	t->text_hook = Term_text_and;
-#ifndef ANGDROID_TOME_PLUGIN
+#if !defined(ANGDROID_TOME_PLUGIN) && !defined(ANGDROID_STEAM_PLUGIN)
 	t->pict_hook = Term_pict_and;
 #endif
 
@@ -1020,7 +1020,7 @@ void angdroid_main() {
 	cleanup_angband();
 #endif
 
-#if defined (ANGDROID_ANGBAND306_PLUGIN) 
+#if defined (ANGDROID_ANGBAND306_PLUGIN) || defined (ANGDROID_STEAM_PLUGIN) 
 	pause_line(Term->hgt - 1);
 	play_game(FALSE);
 	cleanup_angband();
