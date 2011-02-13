@@ -262,11 +262,14 @@ static errr Term_xtra_and(int n, int v)
 #ifdef ANGDROID_ANGBAND306_PLUGIN
 					if (!borg_active) do_cmd_save_game();
 #endif
+#ifdef ANGDROID_STEAM_PLUGIN
+					do_cmd_save_game(TRUE);
+#endif
 #ifdef ANGDROID_TOME_PLUGIN
 					do_cmd_save_game();
 #endif
 #ifdef ANGDROID_SANGBAND_PLUGIN
-					do_cmd_save_game(FALSE);
+					do_cmd_save_game(TRUE);
 #endif
 #ifdef ANGDROID_ANGBAND_PLUGIN
 					save_game();

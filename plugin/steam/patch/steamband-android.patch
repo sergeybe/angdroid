@@ -13,8 +13,26 @@ diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/defines.h Steamband-0.4.1
  
 diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/files.c Steamband-0.4.1f-SRC-android/src/files.c
 --- Steamband-0.4.1f-SRC/src/files.c	2007-12-13 09:24:20.000000000 -0800
-+++ Steamband-0.4.1f-SRC-android/src/files.c	2011-02-12 20:20:14.000000000 -0800
-@@ -4690,6 +4690,62 @@
++++ Steamband-0.4.1f-SRC-android/src/files.c	2011-02-13 06:56:24.000000000 -0800
+@@ -3632,13 +3632,15 @@
+ 	/* Save the player */
+ 	if (save_player())
+ 	{
+-		prt("Saving game... done.", 0, 0);
++		if (!is_autosave) prt("Saving game... done", 0, 0);
++		else prt("Autosaving the game... done", 0, 0);
+ 	}
+ 
+ 	/* Save failed (oops) */
+ 	else
+ 	{
+-		prt("Saving game... failed!", 0, 0);
++		if (!is_autosave) prt("Saving game... failed", 0, 0);
++		else prt("Autosaving the game... failed", 0, 0);
+ 	}
+ 	
+ 	/* Hack -- restore the turn count XXX */
+@@ -4690,6 +4692,62 @@
  	pause_line(23);
  }
  
@@ -77,7 +95,7 @@ diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/files.c Steamband-0.4.1f-
  
  /*
   * Handle character death
-@@ -4743,8 +4799,14 @@
+@@ -4743,8 +4801,14 @@
  			/* Exit */
  			case ESCAPE:
  			{
