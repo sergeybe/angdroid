@@ -1,0 +1,110 @@
+--- angband-3.2.0/src/player/calcs.c	2010-12-24 05:13:59.000000000 -0800
++++ angband-3.2.0-android/src/player/calcs.c	2011-02-13 14:30:04.000000000 -0800
+@@ -74,7 +74,7 @@
+ /*
+  * Stat Table (INT) -- Magic devices
+  */
+-static const byte adj_int_dev[STAT_RANGE] =
++const byte adj_int_dev[STAT_RANGE] =
+ {
+ 	0	/* 3 */,
+ 	0	/* 4 */,
+@@ -119,7 +119,7 @@
+ /*
+  * Stat Table (WIS) -- Saving throw
+  */
+-static const byte adj_wis_sav[STAT_RANGE] =
++const byte adj_wis_sav[STAT_RANGE] =
+ {
+ 	0	/* 3 */,
+ 	0	/* 4 */,
+@@ -165,7 +165,7 @@
+ /*
+  * Stat Table (DEX) -- disarming
+  */
+-static const byte adj_dex_dis[STAT_RANGE] =
++const byte adj_dex_dis[STAT_RANGE] =
+ {
+ 	0	/* 3 */,
+ 	0	/* 4 */,
+@@ -211,7 +211,7 @@
+ /*
+  * Stat Table (INT) -- disarming
+  */
+-static const byte adj_int_dis[STAT_RANGE] =
++const byte adj_int_dis[STAT_RANGE] =
+ {
+ 	0	/* 3 */,
+ 	0	/* 4 */,
+@@ -256,7 +256,7 @@
+ /*
+  * Stat Table (DEX) -- bonus to ac (plus 128)
+  */
+-static const byte adj_dex_ta[STAT_RANGE] =
++const byte adj_dex_ta[STAT_RANGE] =
+ {
+ 	128 + -4	/* 3 */,
+ 	128 + -3	/* 4 */,
+@@ -301,7 +301,7 @@
+ /*
+  * Stat Table (STR) -- bonus to dam (plus 128)
+  */
+-static const byte adj_str_td[STAT_RANGE] =
++const byte adj_str_td[STAT_RANGE] =
+ {
+ 	128 + -2	/* 3 */,
+ 	128 + -2	/* 4 */,
+@@ -347,7 +347,7 @@
+ /*
+  * Stat Table (DEX) -- bonus to hit (plus 128)
+  */
+-static const byte adj_dex_th[STAT_RANGE] =
++const byte adj_dex_th[STAT_RANGE] =
+ {
+ 	128 + -3	/* 3 */,
+ 	128 + -2	/* 4 */,
+@@ -393,7 +393,7 @@
+ /*
+  * Stat Table (STR) -- bonus to hit (plus 128)
+  */
+-static const byte adj_str_th[STAT_RANGE] =
++const byte adj_str_th[STAT_RANGE] =
+ {
+ 	128 + -3	/* 3 */,
+ 	128 + -2	/* 4 */,
+@@ -439,7 +439,7 @@
+ /*
+  * Stat Table (STR) -- weight limit in deca-pounds
+  */
+-static const byte adj_str_wgt[STAT_RANGE] =
++const byte adj_str_wgt[STAT_RANGE] =
+ {
+ 	5	/* 3 */,
+ 	6	/* 4 */,
+@@ -531,7 +531,7 @@
+ /*
+  * Stat Table (STR) -- digging value
+  */
+-static const byte adj_str_dig[STAT_RANGE] =
++const byte adj_str_dig[STAT_RANGE] =
+ {
+ 	0	/* 3 */,
+ 	0	/* 4 */,
+@@ -623,7 +623,7 @@
+ /*
+  * Stat Table (DEX) -- index into the "blow" table
+  */
+-static const byte adj_dex_blow[STAT_RANGE] =
++const byte adj_dex_blow[STAT_RANGE] =
+ {
+ 	0	/* 3 */,
+ 	0	/* 4 */,
+@@ -761,7 +761,7 @@
+ /*
+  * Stat Table (CON) -- extra 1/100th hitpoints per level
+  */
+-static const int adj_con_mhp[STAT_RANGE] =
++const int adj_con_mhp[STAT_RANGE] =
+ {
+ 	-250	/* 3 */,
+ 	-150	/* 4 */,
