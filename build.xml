@@ -5,20 +5,20 @@
     <property file="build.properties"/>
     <property file="default.properties"/>
 
-    <target name="angband-debug">
+    <target name="angband-debug" depends="angband-debug-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-debug" />
     </target>
-    <target name="angband-release">
+    <target name="angband-release" depends="angband-release-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-release" />
     </target>
     <target name="angband-plugin-src">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="plugin-src" />
     </target>
 
-    <target name="variants-debug" depends="variants-copy">
+    <target name="variants-debug" depends="variants-copy,variants-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-debug" />
     </target>
-    <target name="variants-release" depends="variants-copy">
+    <target name="variants-release" depends="variants-copy,variants-release-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-release" />
     </target>
     <target name="variants-plugin-src">
@@ -54,6 +54,27 @@
 	  </delete>
 	  <copy todir="./alt-apk/variants" overwrite="true">
 		<fileset dir="./alt-apk/override/variants" />
+	  </copy>
+    </target>
+
+	<target name="angband-debug-override">
+	  <copy todir="./" overwrite="true">
+		<fileset dir="./alt-apk/override/angband-debug" />
+	  </copy>
+    </target>
+	<target name="angband-release-override">
+	  <copy todir="./" overwrite="true">
+		<fileset dir="./alt-apk/override/angband-release" />
+	  </copy>
+    </target>
+	<target name="variants-debug-override">
+	  <copy todir="./alt-apk/variants" overwrite="true">
+		<fileset dir="./alt-apk/override/variants-debug" />
+	  </copy>
+    </target>
+	<target name="variants-release-override">
+	  <copy todir="./alt-apk/variants" overwrite="true">
+		<fileset dir="./alt-apk/override/variants-release" />
 	  </copy>
     </target>
 

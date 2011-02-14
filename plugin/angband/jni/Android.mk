@@ -3,11 +3,12 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := angband
-LOCAL_CFLAGS := -DUSE_AND -DANGDROID_ANGBAND_PLUGIN -std=c99
+LOCAL_CFLAGS := -DUSE_AND -DALLOW_BORG -DANGDROID_ANGBAND_PLUGIN -std=c99
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include \
 $(LOCAL_PATH)/../../curses \
-$(LOCAL_PATH)/../extsrc/src
+$(LOCAL_PATH)/../extsrc/src \
+$(LOCAL_PATH)/../extsrc/src/object
 
 LOCAL_LDLIBS := -llog
 
@@ -21,6 +22,15 @@ LOCAL_SRC_FILES := \
 ../extsrc/src/player/util.c \
 ../extsrc/src/attack.c \
 ../extsrc/src/birth.c \
+../extsrc/src/borg1.c \
+../extsrc/src/borg2.c \
+../extsrc/src/borg3.c \
+../extsrc/src/borg4.c \
+../extsrc/src/borg5.c \
+../extsrc/src/borg6.c \
+../extsrc/src/borg7.c \
+../extsrc/src/borg8.c \
+../extsrc/src/borg9.c \
 ../extsrc/src/button.c \
 ../extsrc/src/cave.c \
 ../extsrc/src/cmd0.c \

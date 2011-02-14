@@ -44,6 +44,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Handler;
 import android.os.Message;
 
+import org.angdroid.angband.Keys;
 import com.flurry.android.FlurryAgent;
 
 public class AngbandActivity extends Activity {
@@ -296,11 +297,7 @@ public class AngbandActivity extends Activity {
 	}
 
 	private void startFlurry() {
-		// test key
-		FlurryAgent.onStartSession(this, "382WWKEB1V2HZN1UJYBP");
-
-		// release key
-		//FlurryAgent.onStartSession(this, "GFZUMCZCJ2J9WNYI8XAV");
+		FlurryAgent.onStartSession(this, Keys.FlurryKey);
 	}
 
 	private void stopFlurry() {
