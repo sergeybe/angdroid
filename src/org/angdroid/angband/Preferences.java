@@ -91,6 +91,7 @@ final public class Preferences {
 	private static KeyAction leftAltKeyAction;
 	private static KeyAction rightAltKeyAction;
 	private static KeyAction ctrlDoubleTapAction;
+	private static KeyAction centerScreenTapAction;
 
 	Preferences() {}
 
@@ -124,6 +125,8 @@ final public class Preferences {
 		rightAltKeyAction = KeyAction.convert(pref.getString("angband.rightaltkey", "AltKey"));
 		leftShiftKeyAction = KeyAction.convert(pref.getString("angband.leftshiftkey", "ShiftKey"));
 		rightShiftKeyAction = KeyAction.convert(pref.getString("angband.rightshiftkey", "ShiftKey"));
+
+		centerScreenTapAction = KeyAction.convert(pref.getString("angband.centerscreentap", "Space"));
 
 		//todo: implement more generic hardware key double tap handling
 		ctrlDoubleTapAction = KeyAction.convert(pref.getString("angband.ctrldoubletap", "EnterKey"));
@@ -404,5 +407,8 @@ final public class Preferences {
 	}
 	public static KeyAction getCtrlDoubleTapAction() {
 		return ctrlDoubleTapAction;
+	}
+	public static KeyAction getCenterScreenTapAction() {
+		return centerScreenTapAction;
 	}
 }

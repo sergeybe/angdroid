@@ -38,8 +38,26 @@ public class KeyBuffer {
 	private boolean ctrl_key_overload = false;
 	private boolean shift_key_pressed = false;
 	private boolean alt_key_pressed = false;
+	private boolean eat_shift = false;
 
 	private Handler handler = null;
+
+	private enum ActionResult
+	{
+		Handled,
+			NotHandled,
+			ForwardToSystem;
+
+		public static ActionResult convert(int value)
+		{
+			return ActionResult.class.getEnumConstants()[value];
+		}
+
+		public static ActionResult convert(String value)
+		{
+			return ActionResult.valueOf(value);
+		}
+	};
 
 	public KeyBuffer(StateManager state) {
 		this.state = state;
@@ -64,6 +82,8 @@ public class KeyBuffer {
 	public void add(int key) {
 		//Log.d("Angband", "KebBuffer.add:"+key);
 		synchronized (keybuffer) {
+			ctrl_key_overload = false;
+
 			if (key <= 127) {
 				if (key >= 'a' && key <= 'z') {
 					if (ctrl_mod) {
@@ -71,11 +91,13 @@ public class KeyBuffer {
 						ctrl_mod = ctrl_down; // if held down, mod is still active
 					}
 					else if (shift_mod) {
-						key = key - 'a'  + 'A';
+						if (!eat_shift) key = key - 'a'  + 'A';
 						shift_mod = shift_down; // if held down, mod is still active
 					}
 				}
 			}
+
+			eat_shift = false;
 
 			alt_key_pressed = alt_down;
 			ctrl_key_pressed = ctrl_down;
@@ -96,24 +118,37 @@ public class KeyBuffer {
 			case '2': key = 'j'; break;
 			case '3': key = 'n'; break;
 			case '4': key = 'h'; break;
-			case '5': key = ' '; break;
+			//case '5': key = ' '; break; // now configurable below
 			case '6': key = 'l'; break;
 			case '7': key = 'y'; break;
 			case '8': key = 'k'; break;
 			case '9': key = 'u'; break;
-			}
-		}
-
-		if (alwaysRun && !ctrl_mod) { // let ctrl influence directionals, even with alwaysRun on
-			if (rogueLike) {
-				key = Character.toUpperCase(key);
-			}
-			else {
-				add(46); // '.' command
+			default: break;
 			}
 		}
 		
-		add(key);
+		if (key == '5') { // center tap
+			KeyAction act = Preferences.getCenterScreenTapAction();
+			
+			// screen tap Down & Up events are handled at once
+			performActionKeyDown(act, null);
+			performActionKeyUp(act, null);
+		}
+		else { // directional tap
+			if (alwaysRun && !ctrl_mod) { // let ctrl influence directionals, even with alwaysRun on
+				if (shift_mod) {  // shift temporarily overrides always run
+					eat_shift = true;
+				}
+				else if (rogueLike) {
+					key = Character.toUpperCase(key);
+				}
+				else {
+					add(46); // '.' command
+				}
+			}
+		
+			add(key);
+		}
 	}
 
 	public void clear() {
@@ -244,65 +279,121 @@ public class KeyBuffer {
 		return keyAction;
 	}
 
+	private ActionResult performActionKeyDown(KeyAction act, KeyEvent event) {
+
+		ActionResult res = ActionResult.Handled;
+
+		if (act == KeyAction.CtrlKey) {
+			if (event != null && event.getRepeatCount()>0) return ActionResult.Handled; // ignore repeat from modifiers
+			ctrl_mod = !ctrl_mod;
+			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
+			ctrl_down = true;
+			if (ctrl_key_overload) {
+				// ctrl double tap, translate into appropriate action
+				act = Preferences.getCtrlDoubleTapAction();
+			}
+		}
+		
+		switch(act){
+		case AltKey:
+			if (event != null && event.getRepeatCount()>0) return ActionResult.Handled; // ignore repeat from modifiers
+			alt_mod = !alt_mod;
+			alt_key_pressed = !alt_mod; // double tap, turn off mod
+			alt_down = true;
+			break;
+		case ShiftKey:
+			if (event != null && event.getRepeatCount()>0) return ActionResult.Handled; // ignore repeat from modifiers
+			shift_mod = !shift_mod;
+			shift_key_pressed = !shift_mod; // double tap, turn off mod
+			shift_down = true;
+			break;
+		case EnterKey:
+			add('\r');
+			break;
+		case Space:
+			add(' ');
+			break;
+		case Period:
+			add('.');
+			break;
+		case EscKey:
+			add('`');
+			break;
+		case ZoomIn:
+			nativew.increaseFontSize();
+			break;
+		case ZoomOut:
+			nativew.decreaseFontSize();
+			break;
+		case VirtualKeyboard:
+			// handled on keyup
+			break;
+		case ForwardToSystem:
+			res = ActionResult.ForwardToSystem;
+			break;
+		default:
+			res = ActionResult.NotHandled;
+			break;
+		}
+		return res;
+	}
+
+	private ActionResult performActionKeyUp(KeyAction act, KeyEvent event) {
+
+		ActionResult res = ActionResult.Handled;
+
+		switch(act){
+		case AltKey:
+			alt_down = false;		
+			alt_mod = !alt_key_pressed; // turn off mod only if used at least once		
+			break;
+		case CtrlKey:
+			ctrl_down = false;
+			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
+			ctrl_key_overload = ctrl_mod;
+			break;
+		case ShiftKey:
+			shift_down = false;
+			shift_mod = !shift_key_pressed; // turn off mod only if used at least once
+			break;
+		case VirtualKeyboard:
+			handler.sendEmptyMessage(AngbandDialog.Action.ToggleKeyboard.ordinal());
+			break;
+
+		// these are handled on keydown
+		case ZoomIn:
+		case ZoomOut:
+		case None:
+		case EscKey:
+		case Space:
+		case Period:
+		case EnterKey:
+			break;
+
+		case ForwardToSystem:
+			res = ActionResult.ForwardToSystem;
+		default:
+			res = ActionResult.NotHandled;
+			break;
+		}
+		return res;
+	}
+
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		int key = 0;
 
 		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 
 		KeyAction act =  getKeyActionFromKeyCode(keyCode);
-		if (act == KeyAction.CtrlKey) {
-			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			ctrl_mod = !ctrl_mod;
-			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
-			ctrl_down = true;
-			if (ctrl_key_overload) {
-				act = Preferences.getCtrlDoubleTapAction();
-			}
-			else {
-				return true;
-			}
-		}
-		
-		switch(act){
-		case AltKey:
-			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			alt_mod = !alt_mod;
-			alt_key_pressed = !alt_mod; // double tap, turn off mod
-			alt_down = true;
-			key = -1;
-			break;
-		case ShiftKey:
-			if (event.getRepeatCount()>0) return true; // ignore repeat from modifiers
-			shift_mod = !shift_mod;
-			shift_key_pressed = !shift_mod; // double tap, turn off mod
-			shift_down = true;
-			key = -1;
-			break;			
-		case EnterKey:
-			key = '\r';
-			break;
-		case Space:
-			key = ' ';
-			break;
-		case Period:
-			key = '.';
-			break;
-		case EscKey:
-			key = '`';
-			break;
-		case ZoomIn:
-			nativew.increaseFontSize();
+
+		ActionResult res = performActionKeyDown(act, event);
+		if (res == ActionResult.Handled)  // custom mapped key
 			return true;
-		case ZoomOut:
-			nativew.decreaseFontSize();
-			return true;
-		case VirtualKeyboard:
-			// handled on keyup
-			return true;
-		case ForwardToSystem:
+		else if (res == ActionResult.ForwardToSystem)  // key to be handled by OS
 			return false;
-		default:
-			break;
+		else { 
+			// NotHandled from keymapper
+			// fall thru for more processing
 		}
 
 		switch (keyCode) {
@@ -353,55 +444,25 @@ public class KeyBuffer {
 		if (key <= 0) {
 			return false; //forward to system
 		}
-
-		ctrl_key_overload = false;
-
-		add(key);
-		return true; 
-		// two \r's in a row force pop up context menu
-		// there may be other Android behaviors like this,
-		// and I think its best to stop them here if we've 
-		// already handled the key.
-		// return super.onKeyDown(keyCode, event);
+		else {
+			add(key);
+			return true; 
+		}
 	}
 
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		//Log.d("Angband", "onKeyUp("+keyCode+","+event+")");
 
 		KeyAction act =  getKeyActionFromKeyCode(keyCode);
-		switch(act){
-		case AltKey:
-			alt_down = false;		
-			alt_mod = !alt_key_pressed; // turn off mod only if used at least once		
+		ActionResult res = performActionKeyUp(act, event);
+
+		if (res == ActionResult.Handled)  // custom mapped key
 			return true;
-		case CtrlKey:
-			ctrl_down = false;
-			ctrl_mod = !ctrl_key_pressed; // turn off mod only if used at least once
-			ctrl_key_overload = ctrl_mod;
-			return true;
-		case ShiftKey:
-			shift_down = false;
-			shift_mod = !shift_key_pressed; // turn off mod only if used at least once
-			return true;
-		case VirtualKeyboard:
-			handler.sendEmptyMessage(AngbandDialog.Action.ToggleKeyboard.ordinal());
-			return true;
-		case ZoomIn:
-			// handled on keydown
-			return true;	
-		case ZoomOut:
-			// handled on keydown
-			return true;
-		case None:
-		case EscKey:
-		case Space:
-		case Period:
-		case EnterKey:
-			return true;
-		case ForwardToSystem:
+		else if (res == ActionResult.ForwardToSystem)  // key to be handled by OS
 			return false;
-		default:
-			break;
+		else { 
+			// NotHandled from keymapper
+			// fall thru for more processing
 		}
 
 		return false;
