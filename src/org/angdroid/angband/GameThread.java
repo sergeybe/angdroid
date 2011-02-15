@@ -25,6 +25,7 @@ public class GameThread implements Runnable {
 	private boolean game_fully_initialized = false;
 	private boolean game_restart = false;
 	private String running_plugin = null;
+	private String running_profile = null;
 	private boolean plugin_change = false;
 	private NativeWrapper nativew = null;
 	private Handler handler = null;
@@ -75,9 +76,10 @@ public class GameThread implements Runnable {
 			/* this is an onResume event */
 			if (game_fully_initialized &&
 				running_plugin != null && 
-				running_plugin.compareTo(Preferences.getActivePluginName())!=0) {
+				( running_plugin.compareTo(Preferences.getActivePluginName())!=0 ||
+				  running_profile.compareTo(Preferences.getActiveProfile().getName())!=0 ) ) {
 			
-				/* plugin has been changed */
+				/* plugin or profile has been changed */
 
 				Log.d("Angband","start.plugin changed");
 				plugin_change = true;
@@ -187,16 +189,24 @@ public class GameThread implements Runnable {
 	public void run() {		
 		if (game_restart) {
 			game_restart = false;
+			/* this hackery is no longer needed after
+				serializing all access to GameThread 
+				through the sync'd send() method and
+			 	use of handlers to initiate async actions.  */
+			/*
 			try {
 				// if restarting, pause for effect (and to let the
 				// other game thread unlock its mutex!)
 				Thread.sleep(400);
 			} catch (Exception ex) {}
+			*/
 		}
 
 		Log.d("Angband","GameThread.run");
 
 		running_plugin = Preferences.getActivePluginName();
+		running_profile = Preferences.getActiveProfile().getName();
+
 	    String pluginPath = Preferences.getActivityFilesDirectory()
 			+"/../lib/lib"+running_plugin+".so";
 
