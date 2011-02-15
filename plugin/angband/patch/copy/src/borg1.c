@@ -2648,7 +2648,7 @@ if (!borg_rand_local)
     borg_takes_nxt = 1;
 
     /* Array of objects */
-    C_MAKE(borg_takes, 255, borg_take);
+    C_MAKE(borg_takes, 256, borg_take);
 
     /* Scan the objects */
     for (i = 0; i < z_info->k_max; i++)
@@ -2669,7 +2669,7 @@ if (!borg_rand_local)
     borg_kills_nxt = 1;
 
     /* Array of monsters */
-    C_MAKE(borg_kills, 255, borg_kill);
+    C_MAKE(borg_kills, 256, borg_kill);
 
     /* Scan the monsters */
     for (i = 1; i < z_info->r_max-1; i++)
