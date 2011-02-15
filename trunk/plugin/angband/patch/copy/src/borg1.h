@@ -2032,15 +2032,6 @@ extern glyph translate_visuals[255][255];
 
 #endif /* ALLOW_BORG_GRAPHICS */
 
-// some missing macros... 
-// how does everyone else compile the borg without these?
-// -----------------------------------------------------------
-/* Allocate a wiped array of type T[N], assign to pointer P */
-#define C_MAKE(P, N, T) \
-	((P) = C_ZNEW(N, T))
-/* Allocate a wiped thing of type T, assign to pointer P */
-#define MAKE(P, T) \
-	((P) = ZNEW(T))
 
 #endif
 
