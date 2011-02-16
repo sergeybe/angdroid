@@ -25,6 +25,26 @@ char MORIA_VER			[1024]; //"version.hlp"
 int8u wallsym = '#';
 int8u floorsym = '.';
 
+// Turbo C colors
+int color_table[16] = {
+	0xFF000000, //BLACK
+	0xFF0040FF, //BLUE
+	0xFF008040, //GREEN
+	0xFF009090, //CYAN 0xFF00A0A0
+	0xFFC00000, //RED
+	0xFFFF00B0, //MAGENTA
+	0xFFC08040, //BROWN
+	0xFFC0C0C0, //LIGHTGRAY
+	0xFF808080, //DARKGRAY
+	0xFF00EFFF, //LIGHTBLUE
+	0xFF00FF00, //LIGHTGREEN 
+    0xFF10EFCC, //LIGHTCYAN 0xFF20FFDC
+	0xFFFF5050, //LIGHTRED 0xFFFF4040
+	0xFFA898EF, //LIGHTMAGENTA 0xFFB8A8FF
+	0xFFFFFF00, //YELLOW
+	0xFFFFFFFF  //WHITE
+};
+
 int file_exists(const char *fname)
 {
 	struct stat st;
@@ -96,57 +116,9 @@ int angdroid_save() {
 void textbackground(int c){
 }
 
-
 void textcolor(int c){
-	int rgb = 0xFFFFFFFF; //default to white
-	switch(c) {
-	//case BLACK:
-		//break;
-	case BLUE:
-		rgb = 0xFF0040FF;
-		break;
-	case GREEN:
-		rgb = 0xFF008040;		
-		break;
-	case CYAN:
-		rgb = 0xFF00B0B0; //0xFF00A0A0;
-		break;
-	case RED:
-		rgb = 0xFFC00000;
-		break;
-	case MAGENTA:
-		rgb = 0xFFFF00B0; //0xFFFF00A0;
-		break;
-	case BROWN: 
-		rgb = 0xFFC08040;
-		break;
-	case LIGHTGRAY:
-		rgb = 0xFFC0C0C0;
-		break;
-	case DARKGRAY: 
-		rgb = 0xFF808080;
-		break;
-	case LIGHTBLUE:
-		rgb = 0xFF00EFFF;
-		break;
-	case LIGHTGREEN: 
-		rgb = 0xFF00FF00;
-		break;
-	case LIGHTCYAN:	
-		rgb = 0xFF10FFCC; //0xFF20FFDC;
-		break;
-	case LIGHTRED: 
-		rgb = 0xFFFF5050; //0xFFFF4040;
-		break;
-	case LIGHTMAGENTA: 
-		rgb = 0xFFA898EF; //0xFFB8A8FF;
-		break;
-	case YELLOW:
-		rgb = 0xFFFFFF00;
-		break;
-	default:
-		break;
-	}
+	int rgb = color_table[15]; //default to white
+	if (c >= 0 && c<15) rgb = color_table[c];
 	angdroid_attrset(rgb);
 }
 
