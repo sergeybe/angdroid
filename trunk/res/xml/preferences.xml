@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="@string/game_category">
+		<org.angdroid.angband.ProfileListPreference 
+				android:title="@string/preferences_gameplugin_title"
+				android:key="angband.gameplugin"
+				android:summary="@string/preferences_gameplugin_summary"
+				android:entries="@array/gamePluginDescriptions"
+				android:entryValues="@array/gamePlugins" />
+		<org.angdroid.angband.ProfileCheckBoxPreference 
+				android:title="@string/preferences_skipwelcome_title"
+				android:key="angband.skipwelcome"
+				android:defaultValue="false" 
+				android:summary="@string/preferences_skipwelcome_summary" />
+		<org.angdroid.angband.ProfileCheckBoxPreference 
+				android:title="@string/preferences_autostartborg_title"
+				android:key="angband.autostartborg"
+				android:defaultValue="false" 
+				android:summary="@string/preferences_autostartborg_summary" />
+	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/display_category">
 		<CheckBoxPreference 
 			android:key="angband.vibrate"
@@ -22,94 +40,95 @@
 	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/control_category">
 		<PreferenceScreen
-			android:title="Hardware Key Binding">
+			android:title="Hardware Key Binding"
+			android:summary="Configure hardware buttons on your device to perform various functions">
 			<ListPreference
 				android:title="Back Button"
-				android:summary="Select functionality for Back button."
+				android:summary="Select functionality for Back button"
 				android:key="angband.backbutton"
 				android:defaultValue="EscKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Camera Button"
-				android:summary="Select functionality for Camera button."
+				android:summary="Select functionality for Camera button"
 				android:key="angband.camerabutton"
 				android:defaultValue="VirtualKeyboard"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Ctrl Key Double-Tap"
-				android:summary="Select functionality for CtrlKey double-tap."
+				android:summary="Affects all hardware buttons mapped to the Ctrl Key function"
 				android:key="angband.ctrldoubletap"
 				android:defaultValue="EnterKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="DPAD/Trackball Button"
-				android:summary="Select functionality for DPAD/Trackball button."
+				android:summary="Select functionality for DPAD/Trackball button"
 				android:key="angband.dpadbutton"
 				android:defaultValue="CtrlKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Emoticon Key"
-				android:summary="Select functionality for Emoticon Key."
+				android:summary="Select functionality for Emoticon Key (Samsung Epic 4G)"
 				android:key="angband.emoticonkey"
 				android:defaultValue="CtrlKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Menu Button"
-				android:summary="Select functionality for Menu button."
+				android:summary="Select functionality for Menu button"
 				android:key="angband.menubutton"
 				android:defaultValue="ForwardToSystem"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Search Button"
-				android:summary="Select functionality for Search button."
+				android:summary="Select functionality for Search button"
 				android:key="angband.searchbutton"
 				android:defaultValue="CtrlKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Left Alt/Fn Key"
-				android:summary="Select functionality for Left Alt/Fn key."
+				android:summary="Select functionality for Left Alt/Fn key"
 				android:key="angband.leftaltkey"
 				android:defaultValue="AltKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Right Alt/Fn Key"
-				android:summary="Select functionality for Right Alt/Fn key."
+				android:summary="Select functionality for Right Alt/Fn key"
 				android:key="angband.rightaltkey"
 				android:defaultValue="AltKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Left Shift Key"
-				android:summary="Select functionality for Left Shift key."
+				android:summary="Select functionality for Left Shift key"
 				android:key="angband.leftshiftkey"
 				android:defaultValue="ShiftKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Right Shift Key"
-				android:summary="Select functionality for Right Shift key."
+				android:summary="Select functionality for Right Shift key"
 				android:key="angband.rightshiftkey"
 				android:defaultValue="ShiftKey"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Volume Up Button"
-				android:summary="Select functionality for Volume Up button."
+				android:summary="Select functionality for Volume Up button"
 				android:key="angband.volumeupbutton"
 				android:defaultValue="ZoomIn"
 				android:entries="@array/keyActionDescriptions"
 				android:entryValues="@array/keyActions"/>
 			<ListPreference
 				android:title="Volume Down Button"
-				android:summary="Select functionality for Volume Down button."
+				android:summary="Select functionality for Volume Down button"
 				android:key="angband.volumedownbutton"
 				android:defaultValue="ZoomOut"
 				android:entries="@array/keyActionDescriptions"
@@ -139,30 +158,12 @@
 		 android:dependency="angband.enabletouch" />
 	  <ListPreference
 		 android:title="Center Screen Tap"
-		 android:summary="Select functionality for center screen tap."
+		 android:summary="Select functionality for center screen tap"
 		 android:key="angband.centerscreentap"
 		 android:defaultValue="Space"
 		 android:dependency="angband.enabletouch"
 		 android:entries="@array/keyActionDescriptions"
 		 android:entryValues="@array/keyActions"/>
 
-	</PreferenceCategory>
-	<PreferenceCategory android:title="@string/game_category">
-		<org.angdroid.angband.ProfileListPreference 
-				android:title="@string/preferences_gameplugin_title"
-				android:key="angband.gameplugin"
-				android:summary="@string/preferences_gameplugin_summary"
-				android:entries="@array/gamePluginDescriptions"
-				android:entryValues="@array/gamePlugins" />
-		<org.angdroid.angband.ProfileCheckBoxPreference 
-				android:title="@string/preferences_skipwelcome_title"
-				android:key="angband.skipwelcome"
-				android:defaultValue="false" 
-				android:summary="@string/preferences_skipwelcome_summary" />
-		<org.angdroid.angband.ProfileCheckBoxPreference 
-				android:title="@string/preferences_autostartborg_title"
-				android:key="angband.autostartborg"
-				android:defaultValue="false" 
-				android:summary="@string/preferences_autostartborg_summary" />
 	</PreferenceCategory>
 </PreferenceScreen>
