@@ -59,6 +59,9 @@ public class AngbandActivity extends Activity {
 	protected final int CONTEXTMENU_FITHEIGHT_ITEM = 1;
 	protected final int CONTEXTMENU_VKEY_ITEM = 2;
 	protected final int CONTEXTMENU_PREFERENCES_ITEM = 3;
+	protected final int CONTEXTMENU_PROFILES_ITEM = 4;
+	protected final int CONTEXTMENU_HELP_ITEM = 5;
+	protected final int CONTEXTMENU_QUIT_ITEM = 6;
 
 	protected Handler handler = null;
 
@@ -211,10 +214,14 @@ public class AngbandActivity extends Activity {
 		menu.add(0, CONTEXTMENU_FITHEIGHT_ITEM, 0, "Fit Height"); 
 		menu.add(0, CONTEXTMENU_VKEY_ITEM, 0, "Toggle Keyboard"); 
 		menu.add(0, CONTEXTMENU_PREFERENCES_ITEM, 0, "Preferences"); 
+		menu.add(0, CONTEXTMENU_PROFILES_ITEM, 0, "Profiles"); 
+		menu.add(0, CONTEXTMENU_HELP_ITEM, 0, "Help"); 
+		menu.add(0, CONTEXTMENU_QUIT_ITEM, 0, "Quit"); 
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem aItem) {
+		Intent intent;
 		switch (aItem.getItemId()) {
 		case CONTEXTMENU_FITWIDTH_ITEM:
 			term.autoSizeFontByWidth(0);
@@ -228,9 +235,20 @@ public class AngbandActivity extends Activity {
 			toggleKeyboard();
 			return true; 
 		case CONTEXTMENU_PREFERENCES_ITEM:
-			Intent intent = new Intent(this, PreferencesActivity.class);
+			intent = new Intent(this, PreferencesActivity.class);
 			startActivity(intent);
 			return true; 
+		case CONTEXTMENU_PROFILES_ITEM:
+			intent = new Intent(this, ProfilesActivity.class);
+			startActivity(intent);
+			return true;
+		case CONTEXTMENU_HELP_ITEM:
+			intent = new Intent(this, HelpActivity.class);
+			startActivity(intent);
+			return true;
+		case CONTEXTMENU_QUIT_ITEM:
+			finish();
+			return true;
 		}
 		return false;
 	}
