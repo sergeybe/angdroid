@@ -57,7 +57,7 @@
     <string name="preferences_orientation_title">Orientation</string>
     <string name="preferences_orientation_summary">Select screen orientation</string>
     <string name="preferences_gameplugin_title">Selected variant</string>
-    <string name="preferences_gameplugin_summary">Select Angband variant to play</string>
+    <string name="preferences_gameplugin_summary">Note that these Game settings stick to the active profile</string>
     <string name="preferences_enablevkey_title">Enable virtual keyboard</string>
     <string name="preferences_enablevkey_summary">Display virtual keyboard (forces portrait orientation)</string>
     <string name="preferences_portraitkb_title">Portrait keyboard</string>
@@ -67,15 +67,15 @@
     <string name="preferences_enablevolkeyfontsize_title">Volume key font sizing</string>
     <string name="preferences_enablevolkeyfontsize_summary">Font size changed by volume up &amp; down keys</string>
     <string name="preferences_enabletouch_title">Enable touch directionals</string>
-    <string name="preferences_enabletouch_summary">Turn on touchscreen directional controls.</string>
+    <string name="preferences_enabletouch_summary">Turn on touchscreen directional controls</string>
     <string name="preferences_alwaysrun_title">Always run</string>
     <string name="preferences_alwaysrun_summary">Always run when using touch directional commands</string>
 
     <string name="preferences_skipwelcome_title">Skip welcome screen</string>
-    <string name="preferences_skipwelcome_summary">Automatically skip the Angband welcome screen at startup.</string>
+    <string name="preferences_skipwelcome_summary">Automatically skip the Angband welcome screen at startup</string>
 
     <string name="preferences_autostartborg_title">Auto-start borg</string>
-    <string name="preferences_autostartborg_summary">Automatically starts your borg (Vanilla 3.0.6 only)</string>
+    <string name="preferences_autostartborg_summary">Automatically starts your borg (Vanilla 3.x only)</string>
 
     <string-array name="orientationDescriptions">
       <item>Sensor</item>
