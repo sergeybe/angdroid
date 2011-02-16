@@ -26,11 +26,11 @@
     >
 
     <Row>
-        <Key android:codes="64" android:keyLabel="\@" android:keyEdgeFlags="left"/>
+        <Key android:codes="126" android:keyLabel="~"/> 
+        <Key android:codes="33" android:keyLabel="!"/>
         <Key android:codes="35" android:keyLabel="\#"/>
         <Key android:codes="36" android:keyLabel="$"/>
-        <Key android:codes="33" android:keyLabel="!"/>
-        <Key android:codes="126" android:keyLabel="~"/> 
+        <Key android:codes="96" android:keyLabel="&amp;"/>
         <Key android:codes="60" android:keyLabel="&lt;"/> 
         <Key android:codes="62" android:keyLabel="&gt;"/>
         <Key android:codes="55" android:keyLabel="7"/>
@@ -52,7 +52,7 @@
     </Row>
     
     <Row>
-        <Key android:codes="96" android:keyLabel="`" android:keyEdgeFlags="left"/>
+        <Key android:codes="64" android:keyLabel="\@" android:keyEdgeFlags="left"/>
         <Key android:codes="43" android:keyLabel="+"/>
         <Key android:codes="45" android:keyLabel="-"/>
         <Key android:codes="95" android:keyLabel="_"/>
