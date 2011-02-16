@@ -39,7 +39,7 @@
     </Row>
 
     <Row>
-        <Key android:codes="27" android:keyLabel="Esc" android:keyEdgeFlags="left"/>
+        <Key android:codes="96" android:keyLabel="Esc" android:keyEdgeFlags="left"/>
         <Key android:codes="1" android:keyLabel="^A"/>
         <Key android:codes="19" android:keyLabel="^S"/>
         <Key android:codes="4" android:keyLabel="^D"/>
