@@ -8,6 +8,9 @@
     <target name="angband-debug" depends="angband-debug-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-debug" />
     </target>
+    <target name="angband-beta" depends="angband-debug-override">
+	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-release" />
+    </target>
     <target name="angband-release" depends="angband-release-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-release" />
     </target>
@@ -17,6 +20,9 @@
 
     <target name="variants-debug" depends="variants-copy,variants-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-debug" />
+    </target>
+    <target name="variants-beta" depends="variants-copy,variants-debug-override">
+	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-release" />
     </target>
     <target name="variants-release" depends="variants-copy,variants-release-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-release" />
