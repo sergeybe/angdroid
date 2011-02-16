@@ -120,12 +120,12 @@ draw_box(color_char cset[6], int ulrow, int ulcol, int height, int width)
 //bold (only used in scores)
 standout()
 {
-	//buf_stand_out = 1;
+	angdroid_attrset(color_table[YELLOW]);
 }
 //unbold
 standend()
 {
-	//buf_stand_out = 0;
+	angdroid_attrset(color_table[WHITE]);
 }
 
 colorize(char *str, byte color, color_char *cstr)
