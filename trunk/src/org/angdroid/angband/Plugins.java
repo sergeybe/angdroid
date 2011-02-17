@@ -87,4 +87,13 @@ final public class Plugins {
 		default: return "";
 		}		
 	}
+
+	public static String getStartBorgSequence() {
+		Plugin p = Preferences.getActivePlugin();
+		switch(p) {
+		case Angband: return "```=g22222y``\r\r`\r\r`\r2\r\r*\r\r```\032  y`\032z";
+		case Angband306: return "```=722222y``\r\r\r\rX\r\r\032  y`\032z";
+		default: return "";
+		}
+	}
 }

@@ -16,6 +16,7 @@ public class KeyBuffer {
 
 	/* keyboard state */
 	private Queue<Integer> keybuffer = new LinkedList<Integer>();
+	private Queue<Integer> keymacro = new LinkedList<Integer>();
 	private boolean wait = false;
 	private int quit_key_seq = 0;
 	private boolean signal_game_exit = false;
@@ -64,9 +65,10 @@ public class KeyBuffer {
 		nativew = state.nativew;
 		clear();
 		if (Preferences.getAutoStartBorg()) {
-			add(32); //space
-			add(26); //ctrl-v
-			add(122); //v
+			String magic = Plugins.getStartBorgSequence();
+			for(int i = 0; i<magic.length(); i++) {
+				keymacro.offer((int)(magic.charAt(i)));
+			}
 		}
 		else if (Preferences.getSkipWelcome()) {
 			add(32); //space
@@ -159,6 +161,7 @@ public class KeyBuffer {
 
 	public int get(int v) {
 		int key = 0;
+		
 		synchronized (keybuffer) {
 
 			int check = getSpecialKey();
@@ -172,22 +175,27 @@ public class KeyBuffer {
 				//Log.w("Angband", "process key = " + key);
 			}		
 			else if (v == 1) {
-				// Wait for key press
-				try {
-		        	//Log.d("Angband", "Wait keypress BEFORE");
-					wait = true;
-					//keybuffer.clear(); //not necessary
-					keybuffer.wait();
-					wait = false;
-					//Log.d("Angband", "Wait keypress AFTER");
-				} catch (Exception e) {
-					Log.d("Angband", "The getch() wait exception" + e);
+				// running a macro?
+				if (keymacro.peek() != null) {
+					key = keymacro.poll();
 				}
+				else { // otherwise wait for key press
+					try {
+						//Log.d("Angband", "Wait keypress BEFORE");
+						wait = true;
+						//keybuffer.clear(); //not necessary
+						keybuffer.wait();
+						wait = false;
+						//Log.d("Angband", "Wait keypress AFTER");
+					} catch (Exception e) {
+						Log.d("Angband", "The getch() wait exception" + e);
+					}
 
-				// return key after wait, if there is one
-				if (keybuffer.peek() != null) {
-					key = keybuffer.poll();
-					//Log.w("Angband", "process key = " + key);
+					// return key after wait, if there is one
+					if (keybuffer.peek() != null) {
+						key = keybuffer.poll();
+						//Log.w("Angband", "process key = " + key);
+					}
 				}		
 			}
 		}

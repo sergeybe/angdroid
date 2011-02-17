@@ -77,4 +77,8 @@ final public class Plugins {
 		}		
 	}
 
+	public static String getStartBorgSequence() {
+		return "";
+	}
+
 }
