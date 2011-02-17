@@ -50,7 +50,7 @@
 		  <exclude name="**/res/raw/**" />
 		</fileset>
 	  </copy>
-	  <exec dir="./alt-apk/variants" executable="/bin/bash">
+	  <exec dir="./alt-apk/variants" executable="${bash-location}">
 		<arg value="fix-package.sh"/>
 	  </exec>
 	  <delete> 
