@@ -38,7 +38,21 @@ public class NativeWrapper {
 
 	int getch(final int v) {
 		state.gameThread.setFullyInitialized();
-		return state.keyBuffer.get(v);
+		int key = state.keyBuffer.get(v);
+
+		/* useful when debugging borg autostart
+		if (key != 0) {
+			try{
+				Thread.sleep(1000);
+			}catch(Exception ex){}
+		}
+		else {
+			refresh();
+		}
+		*/
+
+		Log.d("Angband","key="+key);
+		return key;
 	}
 
 	//this is called from native thread just before exiting
@@ -67,6 +81,7 @@ public class NativeWrapper {
 	}
 
 	public void flushinp() {
+		Log.d("Angband","flushinp");
 		state.keyBuffer.clear();
 	}
 
