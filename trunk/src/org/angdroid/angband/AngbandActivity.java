@@ -145,7 +145,7 @@ public class AngbandActivity extends Activity {
 
 	@Override
 	public void finish() {
-		Log.d("Angband","finish");
+		//Log.d("Angband","finish");
 		state.gameThread.send(GameThread.Request.StopGame);
 		super.finish();
 	}

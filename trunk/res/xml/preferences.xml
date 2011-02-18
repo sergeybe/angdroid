@@ -40,6 +40,68 @@
 	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/control_category">
 		<PreferenceScreen
+			android:title="Hardware Key Binding (take 2)"
+			android:summary="Configure hardware buttons on your device to perform various functions">	  
+		<PreferenceScreen
+			android:title="Symbols"
+			android:summary="Punctuation and other non-alpha numeric keys">	  
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.astkey" android:title="Asterisk *"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.atkey" android:title="At @"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.bslashkey" android:title="Back Slash \\"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.colonkey" android:title="Colon :"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.commakey" android:title="Comma ,"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.dollarkey" android:title="Dollar $"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.dquotekey" android:title="Double Quote &quot;"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.equalkey" android:title="Equals ="/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.exclkey" android:title="Exclamation !"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.fslashkey" android:title="Forward Slash /"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.gtkey" android:title="Greater Than &gt;"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.lbkey" android:title="Left Brace ["/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.lckey" android:title="Left Curly {"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.lpkey" android:title="Left Paren ("/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ltkey" android:title="Less Than &lt;"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.minuskey" android:title="Minus -"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.percentkey" android:title="Percent %"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.periodkey" android:title="Period ."/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.pipekey" android:title="Pipe |"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.pluskey" android:title="Plus +"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.poundkey" android:title="Pound #"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.lbkey" android:title="Right Brace ["/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.rpkey" android:title="Right Paren )"/>	
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.rckey" android:title="Right Curly }"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.scolonkey" android:title="Semicolon ;"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.squotekey" android:title="Single Quote '"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.tildekey" android:title="Tilde ~"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.underkey" android:title="Underscore _"/>
+		</PreferenceScreen>
+		<PreferenceScreen
+			android:title="Modifiers and Movers"
+			android:summary="Esc, Ctrl, Shift, Alt, Space, Enter, Directions">	  
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.altkey" android:title="Alt/Fn Key"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.downkey" android:title="Arrow Down"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.leftkey" android:title="Arrow Left"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.rightkey" android:title="Arrow Right"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.upkey" android:title="Arrow Up"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.bkspacekey" android:title="Backspace"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ctrlkey" android:title="Control Key"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.enterkey" android:title="Enter Key"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.esckey" android:title="Esc Key"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.shiftkey" android:title="Shift Key"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.spacekey" android:title="Space"/>
+		</PreferenceScreen>
+		<PreferenceScreen
+			android:title="Other Functions"
+			android:summary="Change display, font size, virtual keyboard">	  
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.virtkeykey" android:title="Toggle Virtual Keyboard"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.zoominkey" android:title="Zoom In"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.zoomoutkey" android:title="Zoom Out"/> 
+		</PreferenceScreen>
+		  <org.angdroid.angband.KeyBindResetPreference 
+			 android:key="angband.resetallkeys" 
+			 android:title="Reset all keys"
+			 android:summary="Restores all key mappings back to the default configuration"/> 
+		</PreferenceScreen>
+		<PreferenceScreen
 			android:title="Hardware Key Binding"
 			android:summary="Configure hardware buttons on your device to perform various functions">
 			<ListPreference

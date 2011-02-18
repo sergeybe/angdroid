@@ -121,11 +121,11 @@ public class GameThread implements Runnable {
 		//Log.d("Angband","GameThread.Stop()");
 
 		if (!game_thread_running) {
-			Log.d("Angband","stop().no game running");
+			//Log.d("Angband","stop().no game running");
 			return;
 		}
 		if (thread == null)  {
-			Log.d("Angband","stop().no thread");
+			//Log.d("Angband","stop().no thread");
 			return;
 		}
 
