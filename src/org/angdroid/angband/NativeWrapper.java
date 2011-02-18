@@ -50,8 +50,6 @@ public class NativeWrapper {
 			refresh();
 		}
 		*/
-
-		Log.d("Angband","key="+key);
 		return key;
 	}
 
@@ -81,7 +79,6 @@ public class NativeWrapper {
 	}
 
 	public void flushinp() {
-		Log.d("Angband","flushinp");
 		state.keyBuffer.clear();
 	}
 
