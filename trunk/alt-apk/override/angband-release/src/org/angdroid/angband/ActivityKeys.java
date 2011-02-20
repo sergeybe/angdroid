@@ -1,5 +1,5 @@
 package org.angdroid.angband;
-final public class Keys {
+final public class ActivityKeys {
 	// angband release key
 	public static String FlurryKey = "GFZUMCZCJ2J9WNYI8XAV";
 }

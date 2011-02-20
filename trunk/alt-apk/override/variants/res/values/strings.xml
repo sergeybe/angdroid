@@ -88,9 +88,8 @@
       <item>2</item>
     </string-array>
 
-	<string-array name="keyActionDescriptions">
+	<string-array name="virtKeyActionDescriptions">
 		<item>None</item>
-		<item>Alt/Fn Key</item>
 		<item>Ctrl Key</item>
 		<item>Enter Key</item>
 		<item>Esc Key</item>
@@ -100,11 +99,9 @@
 		<item>Virtual Keyboard</item>
 		<item>Zoom In</item>
 		<item>Zoom Out</item>
-		<item>Forward to System</item>
 	</string-array>
-	<string-array name="keyActions">
+	<string-array name="virtKeyActions">
 		<item>None</item>
-		<item>AltKey</item>
 		<item>CtrlKey</item>
 		<item>EnterKey</item>
 		<item>EscKey</item>
@@ -114,6 +111,5 @@
 		<item>VirtualKeyboard</item>
 		<item>ZoomIn</item>
 		<item>ZoomOut</item>
-		<item>ForwardToSystem</item>
 	</string-array>
 </resources>

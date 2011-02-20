@@ -14,12 +14,12 @@ import android.content.DialogInterface;
 import android.app.AlertDialog;
 import android.view.KeyEvent;
 
-public class KeyBindResetPreference
+public class KeyMapResetPreference
 	extends DialogPreference implements DialogInterface.OnClickListener {
 
 	Context context;
 
-	public KeyBindResetPreference(Context context, AttributeSet attrs) {
+	public KeyMapResetPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.context = context;
 		setDialogTitle("Really reset all keys?");

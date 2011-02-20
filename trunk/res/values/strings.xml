@@ -87,7 +87,6 @@
 
 	<string-array name="virtKeyActionDescriptions">
 		<item>None</item>
-		<item>Alt/Fn Key</item>
 		<item>Ctrl Key</item>
 		<item>Enter Key</item>
 		<item>Esc Key</item>
@@ -100,7 +99,6 @@
 	</string-array>
 	<string-array name="virtKeyActions">
 		<item>None</item>
-		<item>AltKey</item>
 		<item>CtrlKey</item>
 		<item>EnterKey</item>
 		<item>EscKey</item>
