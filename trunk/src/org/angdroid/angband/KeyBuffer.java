@@ -10,7 +10,7 @@ import android.util.Log;
 import android.os.Handler;
 import android.os.Message;
 
-import org.angdroid.angband.Preferences.KeyAction;
+import org.angdroid.angband.KeyMapper.KeyAction;
 	
 public class KeyBuffer {
 
@@ -22,12 +22,6 @@ public class KeyBuffer {
 	private boolean signal_game_exit = false;
 	private NativeWrapper nativew = null;
 	private StateManager state = null;
-
-	static final int LEFT_BUTTON = 0x0200, MIDDLE_BUTTON = 0x201,
-			RIGHT_BUTTON = 0x202, LEFT_DRAG = 0x203, LEFT_RELEASE = 0x206,
-			CURSOR_UP = 0x209, CURSOR_DOWN = 0x20a, CURSOR_LEFT = 0x20b,
-			CURSOR_RIGHT = 0x20c, MOD_CTRL = 0x1000, MOD_SHFT = 0x2000,
-			MOD_NUM_KEYPAD = 0x4000;
 
 	private boolean ctrl_mod = false;
 	private boolean shift_mod = false;
@@ -43,23 +37,6 @@ public class KeyBuffer {
 
 	private Handler handler = null;
 
-	private enum ActionResult
-	{
-		Handled,
-			NotHandled,
-			ForwardToSystem;
-
-		public static ActionResult convert(int value)
-		{
-			return ActionResult.class.getEnumConstants()[value];
-		}
-
-		public static ActionResult convert(String value)
-		{
-			return ActionResult.valueOf(value);
-		}
-	};
-
 	public KeyBuffer(StateManager state) {
 		this.state = state;
 		nativew = state.nativew;
@@ -74,7 +51,6 @@ public class KeyBuffer {
 			add(32); //space
 		}
 		quit_key_seq = 0;
-		Preferences.initKeyBinding();
 	}
 
 	public void link(Handler h) {
@@ -130,11 +106,10 @@ public class KeyBuffer {
 		}
 		
 		if (key == '5') { // center tap
-			KeyAction act = Preferences.getCenterScreenTapAction();
-			
-			// screen tap Down & Up events are handled at once
-			performActionKeyDown(act, null);
-			performActionKeyUp(act, null);
+			KeyAction act = Preferences.getKeyMapper().getCenterScreenTapAction();
+
+			performActionKeyDown(act, 0, null);
+			performActionKeyUp(act);
 		}
 		else { // directional tap
 			if (alwaysRun && !ctrl_mod) { // let ctrl influence directionals, even with alwaysRun on
@@ -241,82 +216,47 @@ public class KeyBuffer {
 		return -1;
 	}
 
-	private KeyAction getKeyActionFromKeyCode(int keyCode)
+	private KeyMap getKeyMapFromKeyCode(int keyCode, KeyEvent event)
 	{
-		KeyAction keyAction = KeyAction.None;
-		switch(keyCode) {
-		case KeyEvent.KEYCODE_BACK:
-			keyAction = Preferences.getBackButtonAction();
-			break;
-		case KeyEvent.KEYCODE_CAMERA:
-			keyAction = Preferences.getCameraButtonAction();
-			break;
-		case KeyEvent.KEYCODE_DPAD_CENTER:
-			keyAction = Preferences.getDpadButtonAction();
-			break;
-		case KeyEvent.KEYCODE_SEARCH:
-			keyAction = Preferences.getSearchButtonAction();
-			break;
-		case KeyEvent.KEYCODE_MENU:
-			keyAction = Preferences.getMenuButtonAction();
-			break;
-		case 97: //Emoticon on Samsung Epic
-			keyAction = Preferences.getEmoticonKeyAction();
-			break;
-		case KeyEvent.KEYCODE_ALT_LEFT:
-			keyAction = Preferences.getLeftAltKeyAction();
-			break;
-		case KeyEvent.KEYCODE_ALT_RIGHT:
-			keyAction = Preferences.getRightAltKeyAction();
-			break;
-		case KeyEvent.KEYCODE_SHIFT_LEFT:
-			keyAction = Preferences.getLeftShiftKeyAction();
-			break;
-		case KeyEvent.KEYCODE_SHIFT_RIGHT:
-			keyAction = Preferences.getRightShiftKeyAction();
-			break;
-		case KeyEvent.KEYCODE_VOLUME_UP:
-			keyAction = Preferences.getVolumeUpButtonAction();
-			break;
-		case KeyEvent.KEYCODE_VOLUME_DOWN:
-			keyAction = Preferences.getVolumeDownButtonAction();
-			break;
-		default:
-			break;
+		int meta=0;
+		if(alt_mod) {
+			meta |= KeyEvent.META_ALT_ON;
+			meta |= KeyEvent.META_ALT_LEFT_ON;
+			alt_mod = alt_down; // if held down, mod is still active
 		}
-		return keyAction;
+		int ch = 0;
+		boolean char_mod = false;
+		if (event != null) {
+			ch = event.getUnicodeChar(meta);
+			char_mod = (ch > 32 && ch < 127);
+		}
+		int key_code = char_mod ? ch : keyCode;
+
+		String keyAssign = KeyMap.stringValue(key_code, alt_mod, char_mod);		
+		KeyMap map = Preferences.getKeyMapper().findKeyMapByAssign(keyAssign);
+		return map;
 	}
 
-	private ActionResult performActionKeyDown(KeyAction act, KeyEvent event) {
-
-		ActionResult res = ActionResult.Handled;
+	private boolean performActionKeyDown(KeyAction act, int character, KeyEvent event) {
+		boolean res = true;
 
 		if (act == KeyAction.CtrlKey) {
-			if (event != null && event.getRepeatCount()>0) return ActionResult.Handled; // ignore repeat from modifiers
+			if (event != null && event.getRepeatCount()>0) return true; // ignore repeat from modifiers
 			ctrl_mod = !ctrl_mod;
 			ctrl_key_pressed = !ctrl_mod; // double tap, turn off mod
 			ctrl_down = true;
 			if (ctrl_key_overload) {
 				// ctrl double tap, translate into appropriate action
-				act = Preferences.getCtrlDoubleTapAction();
+				act = Preferences.getKeyMapper().getCtrlDoubleTapAction();
 			}
 		}
-		
-		switch(act){
-		case AltKey:
-			if (event != null && event.getRepeatCount()>0) return ActionResult.Handled; // ignore repeat from modifiers
-			alt_mod = !alt_mod;
-			alt_key_pressed = !alt_mod; // double tap, turn off mod
-			alt_down = true;
+
+   		switch(act){
+		case CharacterKey:
+			add(character);
 			break;
-		case ShiftKey:
-			if (event != null && event.getRepeatCount()>0) return ActionResult.Handled; // ignore repeat from modifiers
-			shift_mod = !shift_mod;
-			shift_key_pressed = !shift_mod; // double tap, turn off mod
-			shift_down = true;
-			break;
-		case EnterKey:
-			add('\r');
+		case EscKey:
+			add('`');
 			break;
 		case Space:
 			add(' ');
@@ -324,8 +264,32 @@ public class KeyBuffer {
 		case Period:
 			add('.');
 			break;
-		case EscKey:
-			add('`');
+		case EnterKey:
+			add('\r');
+			break;
+		case ArrowDownKey:
+			add(state.getKeyDown());
+			break;
+		case ArrowUpKey:
+			add(state.getKeyUp());
+			break;
+		case ArrowLeftKey:
+			add(state.getKeyLeft());
+			break;
+		case ArrowRightKey:
+			add(state.getKeyRight());
+			break;
+		case AltKey:
+			if (event != null && event.getRepeatCount()>0) return true; // ignore repeat from modifiers
+			alt_mod = !alt_mod;
+			alt_key_pressed = !alt_mod; // double tap, turn off mod
+			alt_down = true;
+			break;
+		case ShiftKey:
+			if (event != null && event.getRepeatCount()>0) return true; // ignore repeat from modifiers
+			shift_mod = !shift_mod;
+			shift_key_pressed = !shift_mod; // double tap, turn off mod
+			shift_down = true;
 			break;
 		case ZoomIn:
 			nativew.increaseFontSize();
@@ -333,22 +297,21 @@ public class KeyBuffer {
 		case ZoomOut:
 			nativew.decreaseFontSize();
 			break;
+		case CtrlKey:
+			//handled above
+			break;
 		case VirtualKeyboard:
 			// handled on keyup
 			break;
-		case ForwardToSystem:
-			res = ActionResult.ForwardToSystem;
-			break;
 		default:
-			res = ActionResult.NotHandled;
+			res = false; // let the OS handle the key
 			break;
 		}
 		return res;
 	}
 
-	private ActionResult performActionKeyUp(KeyAction act, KeyEvent event) {
-
-		ActionResult res = ActionResult.Handled;
+	private boolean performActionKeyUp(KeyAction act) {
+		boolean res = true; // handled the key
 
 		switch(act){
 		case AltKey:
@@ -372,107 +335,33 @@ public class KeyBuffer {
 		case ZoomIn:
 		case ZoomOut:
 		case None:
-		case EscKey:
-		case Space:
-		case Period:
-		case EnterKey:
+		case CharacterKey:
 			break;
 
-		case ForwardToSystem:
-			res = ActionResult.ForwardToSystem;
 		default:
-			res = ActionResult.NotHandled;
+			res = false;  // let the OS handle the key
 			break;
 		}
 		return res;
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		int key = 0;
-
 		//Log.d("Angband", "onKeyDown("+keyCode+","+event+")");
 
-		KeyAction act =  getKeyActionFromKeyCode(keyCode);
-
-		ActionResult res = performActionKeyDown(act, event);
-		if (res == ActionResult.Handled)  // custom mapped key
-			return true;
-		else if (res == ActionResult.ForwardToSystem)  // key to be handled by OS
+		KeyMap map = getKeyMapFromKeyCode(keyCode, event);
+		if (map == null)
 			return false;
-		else { 
-			// NotHandled from keymapper
-			// fall thru for more processing
-		}
-
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_DPAD_UP:
-			key = state.getKeyUp();
-			break;
-		case KeyEvent.KEYCODE_DPAD_DOWN:
-			key = state.getKeyDown();
-			break;
-		case KeyEvent.KEYCODE_DPAD_LEFT:
-			key = state.getKeyLeft();
-			break;
-		case KeyEvent.KEYCODE_DPAD_RIGHT:
-			key = state.getKeyRight();
-			break;
-		case KeyEvent.KEYCODE_ENTER:
-			key = '\r';
-			break;
-		case KeyEvent.KEYCODE_FOCUS:
-		case KeyEvent.KEYCODE_SPACE:
-			key = ' ';
-			break;
-		case KeyEvent.KEYCODE_DEL:
-			key = '\b';
-			break;
-		}
-
-		if (key == 0) {
-			int meta=0;
-			if(alt_mod) {
-				meta |= KeyEvent.META_ALT_ON;
-				meta |= KeyEvent.META_ALT_LEFT_ON;
-				alt_mod = alt_down; // if held down, mod is still active
-			}
-
-			// this is probably not needed, as shift mod is handled (for A-Z only) 
-			// in add() in order to include directionals from screen taps.  
-			// But I've left this code here to cover any possible hardware 
-			// shifting that is not between A-Z.
-			if(shift_mod) {
-				meta |= KeyEvent.META_SHIFT_ON;
-				meta |= KeyEvent.META_SHIFT_LEFT_ON;
-				shift_mod = shift_down; // if held down, mod is still active
-			}
-			key = event.getUnicodeChar(meta);
-		}
-
-		if (key <= 0) {
-			return false; //forward to system
-		}
-		else {
-			add(key);
-			return true; 
-		}
+		else 
+			return performActionKeyDown(map.getKeyAction(), map.getCharacter(), event);
 	}
 
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		//Log.d("Angband", "onKeyUp("+keyCode+","+event+")");
 
-		KeyAction act =  getKeyActionFromKeyCode(keyCode);
-		ActionResult res = performActionKeyUp(act, event);
-
-		if (res == ActionResult.Handled)  // custom mapped key
-			return true;
-		else if (res == ActionResult.ForwardToSystem)  // key to be handled by OS
+		KeyMap map =  getKeyMapFromKeyCode(keyCode, event);
+		if (map == null)
 			return false;
-		else { 
-			// NotHandled from keymapper
-			// fall thru for more processing
-		}
-
-		return false;
+		else 
+			return performActionKeyUp(map.getKeyAction());
 	}
 }
