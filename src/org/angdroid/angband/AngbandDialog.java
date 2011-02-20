@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
 import android.util.Log;
+import android.widget.Toast;
 
 public class AngbandDialog {
 	private AngbandActivity activity;
@@ -20,6 +21,7 @@ public class AngbandDialog {
 			,GameWarnAlert
 			,StartGame
 			,OnGameExit
+			,Toast
 			,ToggleKeyboard;
 
 		public static Action convert(int value)
@@ -63,6 +65,9 @@ public class AngbandDialog {
 			break;
 		case OnGameExit: // angband is exiting
 			state.gameThread.send(GameThread.Request.OnGameExit);
+			break;
+		case Toast: 
+			Toast.makeText(activity, (String)msg.obj, Toast.LENGTH_SHORT).show();			
 			break;
 		}
 	}

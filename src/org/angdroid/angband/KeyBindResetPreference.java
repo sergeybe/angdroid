@@ -29,7 +29,7 @@ public class KeyBindResetPreference
 
 	public void onClick(DialogInterface dialog, int which) {
 		if (which == -1) { //OK
-			//todo
+			Preferences.getKeyMapper().init(true);
 		}
 		else {
 		}

@@ -384,7 +384,6 @@ public class TermView extends View implements OnGestureListener {
 	public void onResume() {
 		//Log.d("Angband","Termview.onResume()");
 		vibrate = Preferences.getVibrate();
-		Preferences.initKeyBinding();
 	}
 
 	public void onPause() {

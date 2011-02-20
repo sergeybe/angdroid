@@ -40,8 +40,72 @@
 	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/control_category">
 		<PreferenceScreen
-			android:title="Hardware Key Binding (take 2)"
+			android:title="Hardware Key Mapping"
 			android:summary="Configure hardware buttons on your device to perform various functions">	  
+		<PreferenceScreen
+			android:title="Display Functions"
+			android:summary="Change display, font size, virtual keyboard">	  
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.virtkeykey" android:title="Toggle Virtual Keyboard"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.zoominkey" android:title="Zoom In"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.zoomoutkey" android:title="Zoom Out"/> 
+		</PreferenceScreen>
+		<PreferenceScreen
+			android:title="Letters and Numbers"
+			android:summary="A-Z, 0-9">
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.akey" android:title="A"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.bkey" android:title="B"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ckey" android:title="C"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.dkey" android:title="D"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ekey" android:title="E"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.fkey" android:title="F"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.gkey" android:title="G"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.hkey" android:title="H"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ikey" android:title="I"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.jkey" android:title="J"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.kkey" android:title="K"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.lkey" android:title="L"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.mkey" android:title="M"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.nkey" android:title="N"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.okey" android:title="O"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.pkey" android:title="P"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.qkey" android:title="Q"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.rkey" android:title="R"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.skey" android:title="S"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.tkey" android:title="T"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ukey" android:title="U"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.vkey" android:title="V"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.wkey" android:title="W"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.xkey" android:title="X"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ykey" android:title="Y"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.zkey" android:title="Z"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.0key" android:title="0"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.1key" android:title="1"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.2key" android:title="2"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.3key" android:title="3"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.4key" android:title="4"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.5key" android:title="5"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.6key" android:title="6"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.7key" android:title="7"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.8key" android:title="8"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.9key" android:title="9"/>
+		</PreferenceScreen>
+		<PreferenceScreen
+			android:title="Modifiers and Movers"
+			android:summary="Esc, Ctrl, Shift, Alt, Space, Enter, Directions">	  
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.downkey" android:title="Arrow Down"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.leftkey" android:title="Arrow Left"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.rightkey" android:title="Arrow Right"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.upkey" android:title="Arrow Up"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.bkspacekey" android:title="Backspace"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.ctrlkey" android:title="Control Key"/> 
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.enterkey" android:title="Enter Key"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.esckey" android:title="Esc Key"/> 
+		  <org.angdroid.angband.KeyBindModPreference android:key="angband.laltkey" android:title="Left Alt/Fn Key"/>
+		  <org.angdroid.angband.KeyBindModPreference android:key="angband.lshiftkey" android:title="Left Shift Key"/>
+		  <org.angdroid.angband.KeyBindModPreference android:key="angband.raltkey" android:title="Right Alt/Fn Key"/>
+		  <org.angdroid.angband.KeyBindModPreference android:key="angband.rshiftkey" android:title="Right Shift Key"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.spacekey" android:title="Space"/>
+		</PreferenceScreen>
 		<PreferenceScreen
 			android:title="Symbols"
 			android:summary="Punctuation and other non-alpha numeric keys">	  
@@ -66,136 +130,26 @@
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.pipekey" android:title="Pipe |"/>
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.pluskey" android:title="Plus +"/>
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.poundkey" android:title="Pound #"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.lbkey" android:title="Right Brace ["/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.rpkey" android:title="Right Paren )"/>	
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.questkey" android:title="Question ?"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.rbkey" android:title="Right Brace ]"/>
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.rckey" android:title="Right Curly }"/>
+		  <org.angdroid.angband.KeyBindPreference android:key="angband.rpkey" android:title="Right Paren )"/>	
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.scolonkey" android:title="Semicolon ;"/>
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.squotekey" android:title="Single Quote '"/>
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.tildekey" android:title="Tilde ~"/>
 		  <org.angdroid.angband.KeyBindPreference android:key="angband.underkey" android:title="Underscore _"/>
 		</PreferenceScreen>
-		<PreferenceScreen
-			android:title="Modifiers and Movers"
-			android:summary="Esc, Ctrl, Shift, Alt, Space, Enter, Directions">	  
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.altkey" android:title="Alt/Fn Key"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.downkey" android:title="Arrow Down"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.leftkey" android:title="Arrow Left"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.rightkey" android:title="Arrow Right"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.upkey" android:title="Arrow Up"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.bkspacekey" android:title="Backspace"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.ctrlkey" android:title="Control Key"/> 
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.enterkey" android:title="Enter Key"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.esckey" android:title="Esc Key"/> 
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.shiftkey" android:title="Shift Key"/>
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.spacekey" android:title="Space"/>
-		</PreferenceScreen>
-		<PreferenceScreen
-			android:title="Other Functions"
-			android:summary="Change display, font size, virtual keyboard">	  
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.virtkeykey" android:title="Toggle Virtual Keyboard"/> 
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.zoominkey" android:title="Zoom In"/> 
-		  <org.angdroid.angband.KeyBindPreference android:key="angband.zoomoutkey" android:title="Zoom Out"/> 
-		</PreferenceScreen>
-		  <org.angdroid.angband.KeyBindResetPreference 
-			 android:key="angband.resetallkeys" 
-			 android:title="Reset all keys"
-			 android:summary="Restores all key mappings back to the default configuration"/> 
-		</PreferenceScreen>
-		<PreferenceScreen
-			android:title="Hardware Key Binding"
-			android:summary="Configure hardware buttons on your device to perform various functions">
-			<ListPreference
-				android:title="Back Button"
-				android:summary="Select functionality for Back button"
-				android:key="angband.backbutton"
-				android:defaultValue="EscKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Camera Button"
-				android:summary="Select functionality for Camera button"
-				android:key="angband.camerabutton"
-				android:defaultValue="VirtualKeyboard"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Ctrl Key Double-Tap"
-				android:summary="Affects all hardware buttons mapped to the Ctrl Key function"
-				android:key="angband.ctrldoubletap"
-				android:defaultValue="EnterKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="DPAD/Trackball Button"
-				android:summary="Select functionality for DPAD/Trackball button"
-				android:key="angband.dpadbutton"
-				android:defaultValue="CtrlKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Emoticon Key"
-				android:summary="Select functionality for Emoticon Key (Samsung Epic 4G)"
-				android:key="angband.emoticonkey"
-				android:defaultValue="CtrlKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Menu Button"
-				android:summary="Select functionality for Menu button"
-				android:key="angband.menubutton"
-				android:defaultValue="ForwardToSystem"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Search Button"
-				android:summary="Select functionality for Search button"
-				android:key="angband.searchbutton"
-				android:defaultValue="CtrlKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Left Alt/Fn Key"
-				android:summary="Select functionality for Left Alt/Fn key"
-				android:key="angband.leftaltkey"
-				android:defaultValue="AltKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Right Alt/Fn Key"
-				android:summary="Select functionality for Right Alt/Fn key"
-				android:key="angband.rightaltkey"
-				android:defaultValue="AltKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Left Shift Key"
-				android:summary="Select functionality for Left Shift key"
-				android:key="angband.leftshiftkey"
-				android:defaultValue="ShiftKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Right Shift Key"
-				android:summary="Select functionality for Right Shift key"
-				android:key="angband.rightshiftkey"
-				android:defaultValue="ShiftKey"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Volume Up Button"
-				android:summary="Select functionality for Volume Up button"
-				android:key="angband.volumeupbutton"
-				android:defaultValue="ZoomIn"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-			<ListPreference
-				android:title="Volume Down Button"
-				android:summary="Select functionality for Volume Down button"
-				android:key="angband.volumedownbutton"
-				android:defaultValue="ZoomOut"
-				android:entries="@array/keyActionDescriptions"
-				android:entryValues="@array/keyActions"/>
-
+		<ListPreference
+		   android:title="Ctrl Key Double-Tap"
+		   android:summary="Double tap function for hardware button mapped to the Ctrl Key function"
+		   android:key="angband.ctrldoubletap"
+		   android:defaultValue="EnterKey"
+		   android:entries="@array/virtKeyActionDescriptions"
+		   android:entryValues="@array/virtKeyActions"/>
+		<org.angdroid.angband.KeyBindResetPreference 
+		   android:key="angband.resetallkeys" 
+		   android:title="Reset all hardware keys"
+		   android:summary="Restores all key mappings back to the default configuration"/> 
 		</PreferenceScreen>
 	  <CheckBoxPreference 
 		 android:key="angband.portraitkb"
@@ -219,13 +173,12 @@
 		 android:summary="@string/preferences_alwaysrun_summary" 
 		 android:dependency="angband.enabletouch" />
 	  <ListPreference
-		 android:title="Center Screen Tap"
+		 android:title="Center screen tap"
 		 android:summary="Select functionality for center screen tap"
 		 android:key="angband.centerscreentap"
 		 android:defaultValue="Space"
 		 android:dependency="angband.enabletouch"
-		 android:entries="@array/keyActionDescriptions"
-		 android:entryValues="@array/keyActions"/>
-
+		 android:entries="@array/virtKeyActionDescriptions"
+		 android:entryValues="@array/virtKeyActions"/>
 	</PreferenceCategory>
 </PreferenceScreen>
