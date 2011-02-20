@@ -71,8 +71,8 @@ public class PreferencesActivity
 	} 
 
 	public void setSummaryPref(Preference pref) {
-		if (pref instanceof KeyBindPreference) {                
-			KeyBindPreference kbPref = (KeyBindPreference) pref;     
+		if (pref instanceof KeyMapPreference) {                
+			KeyMapPreference kbPref = (KeyMapPreference) pref;     
 			String desc = kbPref.getDescription();
 			pref.setSummary(desc); 
 		}

@@ -14,7 +14,7 @@ import android.content.DialogInterface;
 import android.app.AlertDialog;
 import android.view.KeyEvent;
 
-public class KeyBindPreference
+public class KeyMapPreference
 	extends DialogPreference implements DialogInterface.OnClickListener {
 
 	protected Context context;
@@ -22,7 +22,7 @@ public class KeyBindPreference
 	protected boolean char_mod = false;
     protected int key_code = 0;
 
-	public KeyBindPreference(Context context, AttributeSet attrs) {
+	public KeyMapPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.context = context;
 		setDialogTitle("Press a hardware key...");
