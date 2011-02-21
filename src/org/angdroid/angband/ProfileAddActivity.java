@@ -23,9 +23,11 @@ public class ProfileAddActivity extends Activity {
 
 		Bundle extras = getIntent().getExtras(); 
 		if(extras !=null) {			
-			int id = extras.getInt("profile",0);
-			profile = Preferences.getProfiles().findById(id);
-			origSaveFile = profile.saveFile;
+			int id = extras.getInt("profile",-1);
+			if (id > -1) {
+				profile = Preferences.getProfiles().findById(id);
+				origSaveFile = profile.saveFile;
+			}
 		}
 		if (profile == null) {
 			profile = new Profile();

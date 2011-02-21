@@ -49,6 +49,7 @@ final public class Preferences {
 	private static SharedPreferences pref;
 	private static int[] gamePlugins;
 	private static String[] gamePluginNames;
+	private static String[] gamePluginDescriptions;
 	private static ProfileList profiles;
 	private static String version;
 	private static int fontSize = 17;
@@ -69,6 +70,7 @@ final public class Preferences {
 			gamePlugins[i] = Integer.parseInt(gamePluginsStr[i]);
 		
 		gamePluginNames = resources.getStringArray(R.array.gamePluginNames);
+		gamePluginDescriptions = resources.getStringArray(R.array.gamePluginDescriptions);
 		version = pversion;
 
 		keymapper = new KeyMapper(pref);
@@ -182,6 +184,12 @@ final public class Preferences {
 			return gamePluginNames[pluginId];
 		else 
 			return gamePluginNames[0];
+	}
+	public static String getPluginDescription(int pluginId) {
+		if (pluginId > -1 && pluginId < gamePluginDescriptions.length)
+			return gamePluginDescriptions[pluginId];
+		else 
+			return gamePluginDescriptions[0];
 	}
 
 	public static String getAngbandFilesDirectory(int pluginId) {

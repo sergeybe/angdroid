@@ -129,14 +129,10 @@ public class AngbandActivity extends Activity {
 			startActivity(intent);
 			break;
 		case '2':
-			intent = new Intent(this, ProfilesActivity.class);
-			startActivity(intent);
-			break;
-		case '3':
 			intent = new Intent(this, PreferencesActivity.class);
 			startActivity(intent);
 			break;
-		case '4':
+		case '3':
 			finish();
 			break;
 		}
