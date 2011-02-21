@@ -26,7 +26,7 @@
 		<activity android:name=".HelpActivity" android:label="@string/angband_help"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
+				<action android:name="android.intent.action.HELP" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -34,7 +34,7 @@
 		<activity android:name=".PreferencesActivity" android:label="@string/preferences"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
+				<action android:name="android.intent.action.PREF" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -42,7 +42,7 @@
 		<activity android:name=".ProfilesActivity" android:label="@string/profiles"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
+				<action android:name="android.intent.action.PROFILES" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -50,7 +50,7 @@
 		<activity android:name=".ProfileAddActivity" android:label="@string/profileadd"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
+				<action android:name="android.intent.action.PROFILEADD" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>

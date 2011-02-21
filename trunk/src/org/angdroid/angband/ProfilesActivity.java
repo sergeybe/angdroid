@@ -47,14 +47,9 @@ public class ProfilesActivity extends Activity{
 
 	private void refreshProListItems() {
 		profiles = Preferences.getProfiles();
-
-		proList.setAdapter (
-			new ProfileAdapter(
-				this, 
-				profiles, 
-				profiles.indexOf(Preferences.getActiveProfile())
-			)
-		);
+		ArrayList<String> names = new ArrayList<String>();
+		for(int i=0; i<profiles.size(); i++) names.add(profiles.get(i).toString());
+		proList.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, names));
 	}
 
 	private void initListView() {
@@ -76,7 +71,7 @@ public class ProfilesActivity extends Activity{
             public void onItemClick(AdapterView parent, 
             View v, int position, long id) 
             {                
-				Profile pro = (Profile) proList.getAdapter().getItem(position);
+				Profile pro = Preferences.getProfiles().get(position);
 				Preferences.setActiveProfile(pro);
 				finish();
             }
@@ -105,7 +100,7 @@ public class ProfilesActivity extends Activity{
 	@Override
 	public boolean onContextItemSelected(MenuItem aItem) {
 		AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) aItem.getMenuInfo();
-		Profile pro = (Profile) proList.getAdapter().getItem(menuInfo.position);
+		Profile pro = Preferences.getProfiles().get(menuInfo.position);
 
 		switch (aItem.getItemId()) {
 		case CONTEXTMENU_DELETEITEM:
@@ -130,34 +125,5 @@ public class ProfilesActivity extends Activity{
 	protected void onResume() {
 		super.onResume();
 		refreshProListItems();
-	}
-
-	public class ProfileAdapter extends ArrayAdapter<Profile> { 
-		Activity context; 
-		ProfileList profiles;
-		int activeIndex;
-
-		ProfileAdapter(Activity context, ProfileList profiles, int activeIndex) { 
-			super(context, R.layout.profilerow, profiles); 
- 
-			this.profiles = profiles;
-			this.activeIndex = activeIndex;
-			this.context=context; 
-		} 
-
-		public View getView(int position, View convertView, ViewGroup parent) { 
-
-			LayoutInflater inflater = LayoutInflater.from(context);
-            View row=inflater.inflate(R.layout.profilerow, parent, false); 
-
-            TextView label=(TextView)row.findViewById(R.id.label); 
-			label.setText(profiles.get(position).toString()); 
-
-			if (position == activeIndex) {
-				ImageView icon=(ImageView)row.findViewById(R.id.icon); 
-				icon.setImageResource(R.drawable.btn_radio_on); 
-			}
-			return row;
-		}    
 	}
 }

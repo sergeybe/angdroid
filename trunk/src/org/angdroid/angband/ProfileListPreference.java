@@ -34,6 +34,11 @@ public class ProfileListPreference extends ListPreference
     }
 	*/
 
+	public String getDescription() {
+		int pl = Preferences.getActiveProfile().getPlugin();
+		return Preferences.getPluginDescription(pl);
+	}
+
     @Override
     protected String getPersistedString(String defaultReturnValue) {
 		int pl = Preferences.getActiveProfile().getPlugin();
