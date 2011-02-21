@@ -36,6 +36,7 @@ final public class Preferences {
 	static final String KEY_ALWAYSRUN = "angband.alwaysrun";
 
 	static final String KEY_GAMEPLUGIN = "angband.gameplugin";
+	static final String KEY_GAMEPROFILE = "angband.gameprofile";
 	static final String KEY_SKIPWELCOME = "angband.skipwelcome";
 	static final String KEY_AUTOSTARTBORG = "angband.autostartborg";
 

@@ -71,6 +71,11 @@ public class PreferencesActivity
 	} 
 
 	public void setSummaryPref(Preference pref) {
+		if (pref == null) return;
+
+		String key = pref.getKey();
+		if (key == null) key = "";
+
 		if (pref instanceof KeyMapPreference) {                
 			KeyMapPreference kbPref = (KeyMapPreference) pref;     
 			String desc = kbPref.getDescription();
@@ -90,11 +95,11 @@ public class PreferencesActivity
 		} 
 		else if (pref instanceof ProfileCheckBoxPreference ) {
 			ProfileCheckBoxPreference pcPref = (ProfileCheckBoxPreference) pref;     
-			if (pref.getKey().compareTo(Preferences.KEY_SKIPWELCOME)==0) {
+			if (key.compareTo(Preferences.KEY_SKIPWELCOME)==0) {
 				Log.d("Angband","setchecked sw="+Preferences.getActiveProfile().getSkipWelcome());
 				pcPref.setChecked(Preferences.getActiveProfile().getSkipWelcome());
 			}
-			else if (pref.getKey().compareTo(Preferences.KEY_AUTOSTARTBORG)==0) {
+			else if (key.compareTo(Preferences.KEY_AUTOSTARTBORG)==0) {
 				Log.d("Angband","setchecked ab="+Preferences.getActiveProfile().getAutoStartBorg());
 				pcPref.setChecked(Preferences.getActiveProfile().getAutoStartBorg());
 			}
@@ -102,7 +107,7 @@ public class PreferencesActivity
 		else if (pref instanceof PreferenceScreen) {
 			setSummaryAll((PreferenceScreen) pref); 
 		} 
-		else if (pref.getTitle().toString().compareTo("Game Profile")==0) {
+		else if (key.compareTo(Preferences.KEY_GAMEPROFILE)==0) {
 			pref.setSummary(Preferences.getActiveProfile().getName());
 		} 
 	}
