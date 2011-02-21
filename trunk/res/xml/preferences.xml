@@ -2,7 +2,8 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
   <PreferenceCategory android:title="@string/game_category">
-	<Preference android:title="Game Profile" >
+	<Preference android:title="Game Profile" 
+				android:key="angband.gameprofile">
 	  <intent android:action="android.intent.action.PROFILES" />
 	</Preference>
 	<org.angdroid.angband.ProfileListPreference 
