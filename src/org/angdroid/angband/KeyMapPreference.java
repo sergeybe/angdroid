@@ -83,6 +83,26 @@ public class KeyMapPreference
 		char_mod = (ch > 32 && ch < 127);
 		key_code = char_mod ? ch : keyCode;
 
+		if (key_code == KeyEvent.KEYCODE_BACK){
+			new AlertDialog.Builder(context) 
+				.setTitle("Angband") 
+				.setMessage("Really assign the Back key?") 
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+						}
+					})
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+							saveMap();
+						}
+					})
+				.show();
+		} else {			
+			saveMap();
+		}
+	}
+
+	public void saveMap() {
 		KeyMap prevMap = Preferences.getKeyMapper()
 			.assignKeyMap(getKey(), key_code, alt_mod, char_mod);
 
@@ -91,7 +111,6 @@ public class KeyMapPreference
 		ed.putString(getKey(), getValue());
 
 		ed.commit();
-
 	}
 
 	public String getValue() {
