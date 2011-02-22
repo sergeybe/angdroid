@@ -17,7 +17,7 @@
  */
 
 #include "angband.h"
-
+#include <sys/time.h>
 
 /*
  * This file helps Angband work on non-existant computers.
@@ -81,7 +81,7 @@
 #if !defined(ANGDROID_TOME_PLUGIN) && !defined(ANGDROID_STEAM_PLUGIN)
 #include "main.h"
 #endif
-#ifdef ANGDROID_ANGBAND306_PLUGIN
+#if defined (ANGDROID_ANGBAND306_PLUGIN) || defined (ANGDROID_ANGBAND_PLUGIN)
 #include "borg1.h"
 #endif
 #ifndef BASIC_COLORS
@@ -91,6 +91,7 @@
 static char android_files_path[1024];
 static char android_savefile[50];
 static int turn_save = 0;
+static time_t savetime;
 
 static u32b color_data[BASIC_COLORS];
 
@@ -250,7 +251,17 @@ static errr Term_xtra_and(int n, int v)
 			if (key == -1) {
 				LOGD("TERM_XTRA_EVENT.saving game");
 
-				if (turn_save != turn 
+				int should_save = (turn_save != turn);
+
+#if defined (ANGDROID_ANGBAND306_PLUGIN) || defined(ANGDROID_ANGBAND_PLUGIN)
+				if (borg_active) {
+					time_t curtime;
+					time(&curtime);
+					should_save = (difftime(curtime,savetime) > 300); // 5 minutes
+				}
+#endif
+
+				if (should_save
 					&& turn > 1 
 					&& p_ptr != NULL 
 #ifdef ANGDROID_TOME_PLUGIN
@@ -260,7 +271,7 @@ static errr Term_xtra_and(int n, int v)
 #endif
 
 #ifdef ANGDROID_ANGBAND306_PLUGIN
-					if (!borg_active) do_cmd_save_game();
+					do_cmd_save_game();
 #endif
 #ifdef ANGDROID_STEAM_PLUGIN
 					do_cmd_save_game(TRUE);
@@ -275,6 +286,7 @@ static errr Term_xtra_and(int n, int v)
 					save_game();
 #endif
 
+					time(&savetime);
 					turn_save = turn;
 					LOGD("TERM_XTRA_EVENT.saved game success");
 				}
@@ -998,6 +1010,8 @@ void angdroid_main() {
 	LOGD("angdroid_main()");
 
 	initGame();
+
+	time(&savetime);
 
 	/*
 	angdroid_attrset(color_data[1]);
