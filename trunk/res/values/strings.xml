@@ -4,8 +4,8 @@
     <string name="app_name">Angband</string>
 
     <string-array name="gamePluginDescriptions">
-	  <item>Vanilla 3.2.0</item> 
-      <item>Vanilla 3.0.6 squelch+borg</item>
+	  <item>Vanilla 3.2.0 +borg</item> 
+      <item>Vanilla 3.0.6 +squelch,borg</item>
       <item>Vanilla 2.4.Frog-knows</item>
       <item>Umoria 5.5.2</item>
       <item>Rogue Clone IV</item>
