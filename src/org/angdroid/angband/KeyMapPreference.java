@@ -13,6 +13,7 @@ import android.preference.DialogPreference;
 import android.content.DialogInterface;
 import android.app.AlertDialog;
 import android.view.KeyEvent;
+import android.os.Parcelable;
 
 public class KeyMapPreference
 	extends DialogPreference implements DialogInterface.OnClickListener {
@@ -234,4 +235,13 @@ public class KeyMapPreference
 			//Toast.makeText(context, "Cancel was clicked", Toast.LENGTH_SHORT).show();
 		}
 	} 
+
+	@Override
+	protected Parcelable onSaveInstanceState() {
+
+		// be free little dialog
+		onActivityDestroy();
+
+		return super.onSaveInstanceState();
+	}
 }
