@@ -78,10 +78,16 @@ public class KeyMap {
 	public static String stringValue(int key_code, boolean alt_mod, boolean char_mod) {
 		if (key_code == 0) 
 			return "";
+
 		else if (char_mod) 
 			return "C"+(char)key_code;
-		else if (key_code == KeyEvent.KEYCODE_ALT_LEFT || key_code == KeyEvent.KEYCODE_ALT_RIGHT)
+
+		// ignore alt modifier for these...
+		else if (key_code == KeyEvent.KEYCODE_ALT_LEFT 
+				 || key_code == KeyEvent.KEYCODE_ALT_RIGHT
+				 || key_code == KeyEvent.KEYCODE_BACK)
 			return ""+key_code;
+
 		else
 			return (alt_mod?"0":"")+key_code;
 	}

@@ -222,7 +222,8 @@ public class KeyBuffer {
 		if(alt_mod) {
 			meta |= KeyEvent.META_ALT_ON;
 			meta |= KeyEvent.META_ALT_LEFT_ON;
-			alt_mod = alt_down; // if held down, mod is still active
+			if (event.getAction() == KeyEvent.ACTION_UP)
+				alt_mod = alt_down; // if held down, mod is still active
 		}
 		int ch = 0;
 		boolean char_mod = false;

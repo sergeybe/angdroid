@@ -96,11 +96,9 @@ public class PreferencesActivity
 		else if (pref instanceof ProfileCheckBoxPreference ) {
 			ProfileCheckBoxPreference pcPref = (ProfileCheckBoxPreference) pref;     
 			if (key.compareTo(Preferences.KEY_SKIPWELCOME)==0) {
-				Log.d("Angband","setchecked sw="+Preferences.getActiveProfile().getSkipWelcome());
 				pcPref.setChecked(Preferences.getActiveProfile().getSkipWelcome());
 			}
 			else if (key.compareTo(Preferences.KEY_AUTOSTARTBORG)==0) {
-				Log.d("Angband","setchecked ab="+Preferences.getActiveProfile().getAutoStartBorg());
 				pcPref.setChecked(Preferences.getActiveProfile().getAutoStartBorg());
 			}
 		} 
