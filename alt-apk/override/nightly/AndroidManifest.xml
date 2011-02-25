@@ -18,7 +18,7 @@
 				  android:launchMode="singleTask" 
 				  android:icon="@drawable/icon">
 			<intent-filter>
-				<action android:name="org.angdroid.nightly.MAIN" />
+				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>

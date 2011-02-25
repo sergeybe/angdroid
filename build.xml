@@ -21,6 +21,12 @@
     <target name="nightly-beta" depends="nightly-copy,nightly-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/nightly" antfile="build-nightly.xml" target="nightly-release" />
     </target>
+    <target name="nightly-debug" depends="nightly-copy,nightly-debug-override">
+	  <ant inheritAll="true" dir="./alt-apk/nightly" antfile="build-nightly.xml" target="nightly-debug" />
+    </target>
+    <target name="nightly-plugin-src" depends="nightly-copy,nightly-debug-override">
+	  <ant inheritAll="true" dir="./alt-apk/nightly" antfile="build-nightly.xml" target="plugin-src" />
+    </target>
 
     <target name="variants-debug" depends="variants-copy,variants-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-debug" />
@@ -31,8 +37,8 @@
     <target name="variants-release" depends="variants-copy,variants-release-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-release" />
     </target>
-    <target name="variants-plugin-src">
-	  <ant inheritAll="true" dir="." antfile="build-variants.xml" target="plugin-src" />
+    <target name="variants-plugin-src" depends="variants-copy,variants-debug-override">
+	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="plugin-src" />
     </target>
 
 	<target name="variants-copy">

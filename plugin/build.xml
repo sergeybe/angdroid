@@ -17,9 +17,9 @@
         <exec executable="sh" 
 	      failonerror="true"
 	      dir="plugin/${plugin.name}">
-	    <arg value="${ndk-location}/ndk-build"/>
-	</exec>
-	<copy file="plugin/${plugin.name}/libs/armeabi/lib${pluginlib.name}.so" 
+	      <arg value="${ndk-location}/ndk-build"/>
+		</exec>
+		<copy file="plugin/${plugin.name}/libs/armeabi/lib${pluginlib.name}.so" 
 	      tofile="libs/armeabi/lib${pluginlib.name}.so"
 	      overwrite="true"/>
     </target>
@@ -45,6 +45,23 @@
     </target>
 
 	<target name="get-patch-plugin-src" depends="get-src, patch-updates, copy-updates">
+	</target>
+
+	<target name="git-patch-plugin-src" depends="git-src, patch-updates, copy-updates">
+	</target>
+
+	<target name="git-src">
+	  <delete includeemptydirs="true">
+		<fileset dir="plugin/${plugin.name}/extsrc" includes="**/*" defaultexcludes="false"/>
+	  </delete>
+	  <echo>retrieving sources from ${git.url}</echo>
+	  <exec executable="git" 
+			failonerror="true"
+			dir="plugin/${plugin.name}/extsrc">
+	    <arg value="clone" />
+		<arg value="${git.url}"/>
+		<arg value="."/>
+	  </exec>
 	</target>
 
     <target name="get-src">
