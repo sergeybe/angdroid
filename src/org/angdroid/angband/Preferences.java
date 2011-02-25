@@ -235,6 +235,7 @@ final public class Preferences {
 			//Log.d("Angband", "loading profiles");
 			String s = pref.getString(Preferences.KEY_PROFILES, "");
 			if (s.length() == 0) {
+				Log.d("Angband","defaulting profile="+Plugins.DEFAULT_PROFILE);
 				profiles = ProfileList.deserialize(Plugins.DEFAULT_PROFILE);
 				saveProfiles();
 

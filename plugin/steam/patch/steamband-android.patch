@@ -122,22 +122,6 @@ diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/h-config.h Steamband-0.4.
  # define SET_UID
  #endif
  
-diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/h-define.h Steamband-0.4.1f-SRC-android/src/h-define.h
---- Steamband-0.4.1f-SRC/src/h-define.h	2003-08-18 18:09:42.000000000 -0700
-+++ Steamband-0.4.1f-SRC-android/src/h-define.h	2011-02-12 18:32:22.000000000 -0800
-@@ -125,8 +125,12 @@
- #  define D2I(X)	((X) - '0')
- #  define I2D(X)	((X) + '0')
- #  define KTRL(X)	((X) & 0x1F)
-+#ifdef ANDROID
-+#  define ESCAPE	'`'
-+#else
- #  define ESCAPE	'\033'
- #endif
-+#endif
- 
- 
- #endif
 diff -Nru --strip-trailing-cr Steamband-0.4.1f-SRC/src/spells1.c Steamband-0.4.1f-SRC-android/src/spells1.c
 --- Steamband-0.4.1f-SRC/src/spells1.c	2007-12-17 10:26:36.000000000 -0800
 +++ Steamband-0.4.1f-SRC-android/src/spells1.c	2011-02-12 18:45:10.000000000 -0800

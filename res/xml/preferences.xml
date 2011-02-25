@@ -4,7 +4,7 @@
   <PreferenceCategory android:title="@string/game_category">
 	<Preference android:title="Game Profile" 
 				android:key="angband.gameprofile">
-	  <intent android:action="android.intent.action.PROFILES" />
+	  <intent android:action="org.angdroid.angband.PROFILES" />
 	</Preference>
 	<org.angdroid.angband.ProfileListPreference 
 	   android:title="@string/preferences_gameplugin_title"

@@ -18,7 +18,7 @@
 				  android:launchMode="singleTask" 
 				  android:icon="@drawable/icon">
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
+				<action android:name="org.angdroid.angband.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
@@ -26,7 +26,7 @@
 		<activity android:name=".HelpActivity" android:label="@string/angband_help"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.HELP" />
+				<action android:name="org.angdroid.angband.HELP" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -34,7 +34,7 @@
 		<activity android:name=".PreferencesActivity" android:label="@string/preferences"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.PREF" />
+				<action android:name="org.angdroid.angband.PREF" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -42,7 +42,7 @@
 		<activity android:name=".ProfilesActivity" android:label="@string/profiles"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.PROFILES" />
+				<action android:name="org.angdroid.angband.PROFILES" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -50,7 +50,7 @@
 		<activity android:name=".ProfileAddActivity" android:label="@string/profileadd"
 			>
 			<intent-filter>
-				<action android:name="android.intent.action.PROFILEADD" />
+				<action android:name="org.angdroid.angband.PROFILEADD" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>

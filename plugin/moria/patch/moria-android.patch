@@ -245,22 +245,6 @@ diff -Nru --strip-trailing-cr mor552cs/src/config.h mor552cs-android/src/config.
 +#undef perror
 +#define perror angdroid_quit
 +#endif
-diff -Nru --strip-trailing-cr mor552cs/src/constant.h mor552cs-android/src/constant.h
---- mor552cs/src/constant.h	2002-08-13 12:27:00.000000000 -0700
-+++ mor552cs-android/src/constant.h	2011-02-12 14:44:31.000000000 -0800
-@@ -238,8 +238,12 @@
- #ifdef VMS
- #define ESCAPE        '\032'	/* Use CTRL-Z instead of ESCAPE.  */
- #else
-+#ifdef ANDROID
-+#define ESCAPE	      '`'	
-+#else
- #define ESCAPE	      '\033'	/* ESCAPE character -CJS-  */
- #endif
-+#endif
- 
- /* This used to be NULL, but that was technically incorrect.  CNIL is used
-    instead of null to help avoid lint errors.  */
 diff -Nru --strip-trailing-cr mor552cs/src/create.c mor552cs-android/src/create.c
 --- mor552cs/src/create.c	2002-08-13 12:27:00.000000000 -0700
 +++ mor552cs-android/src/create.c	2011-02-12 14:44:31.000000000 -0800
