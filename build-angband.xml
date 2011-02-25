@@ -150,7 +150,7 @@
     </target>
 
     <target name="clean" depends="clean-plugins">
-		<delete includeemptydirs="true">
+		<delete includeemptydirs="true" failonerror="false">
 		  <fileset dir="bin" includes="**/*"/>
 		</delete>
 		<delete includeemptydirs="true">

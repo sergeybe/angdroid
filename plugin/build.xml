@@ -35,10 +35,10 @@
     </target>
 
     <target name="clean">
-		<delete includeemptydirs="true">
+		<delete includeemptydirs="true" failonerror="false">
 		  <fileset dir="plugin/${plugin.name}/libs" includes="**/*"/>
 		</delete>
-		<delete includeemptydirs="true">
+		<delete includeemptydirs="true" failonerror="false">
 		  <fileset dir="plugin/${plugin.name}/obj" includes="**/*"/>
 		</delete>
         <delete file="${resource-folder}/raw/zip${pluginzip.name}"/>
