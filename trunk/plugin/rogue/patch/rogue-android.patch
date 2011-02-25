@@ -107,27 +107,6 @@ diff -Nru --strip-trailing-cr rogue210-source/src/main.c rogue210-source-android
          
  		play_level();		
  		free_stuff(&level_objects);
-diff -Nru --strip-trailing-cr rogue210-source/src/object.c rogue210-source-android/src/object.c
---- rogue210-source/src/object.c	2004-02-14 08:42:32.000000000 -0800
-+++ rogue210-source-android/src/object.c	2011-02-12 14:44:31.000000000 -0800
-@@ -729,12 +729,16 @@
- 	}
- 	message("type of object?", 0);
- 
-+#ifdef ANDROID
-+	while (r_index("!?:)]=/,`", (ch = rgetchar()), 0) == -1) {
-+#else
- 	while (r_index("!?:)]=/,\033", (ch = rgetchar()), 0) == -1) {
-+#endif
- 		sound_bell();
- 	}
- 	check_message();
- 
--	if (ch == '\033') {
-+	if (ch == CANCEL) {
- 		return;
- 	}
- 	obj = alloc_object();
 diff -Nru --strip-trailing-cr rogue210-source/src/pack.c rogue210-source-android/src/pack.c
 --- rogue210-source/src/pack.c	2004-02-18 20:40:00.000000000 -0800
 +++ rogue210-source-android/src/pack.c	2011-02-12 14:44:31.000000000 -0800
@@ -259,7 +238,7 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
  #define MOVE_FAILED -1
  #define STOPPED_ON_SOMETHING -2
 +#ifdef ANDROID
-+#define CANCEL '`'
++#define CANCEL '\033'
 +#else
  #define CANCEL '\033'
 +#endif

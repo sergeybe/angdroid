@@ -74,6 +74,7 @@ void gameStart
 
 	// load game plugin lib
 	const char *copy_pluginPath = (*env1)->GetStringUTFChars(env1, pluginPath, 0);
+	//LOGD("loader.dlopen %s", copy_pluginPath);
 	handle = dlopen(copy_pluginPath,RTLD_LOCAL | RTLD_LAZY);  
 	if (!handle) {
 		LOGE("dlopen failed on %s", copy_pluginPath);
@@ -117,7 +118,7 @@ void gameStart
 	pthread_mutex_unlock (&muQuery);
 	pthread_mutex_unlock (&muGame);
 
-	LOGD("loader.return");
+	//LOGD("loader.return");
 }
 
 JNIEXPORT void JNICALL Java_org_angdroid_angband_NativeWrapper_gameStart
@@ -132,12 +133,23 @@ JNIEXPORT void JNICALL Java_org_angdroid_variants_NativeWrapper_gameStart
 	gameStart(env1,obj1,pluginPath,argc,argv);
 }
 
+JNIEXPORT void JNICALL Java_org_angdroid_nightly_NativeWrapper_gameStart
+(JNIEnv *env1, jobject obj1, jstring pluginPath, jint argc, jobjectArray argv)
+{
+	gameStart(env1,obj1,pluginPath,argc,argv);
+}
+
 JNIEXPORT jstring JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryString
   (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	return (jstring)0; // null indicates error
 }
 JNIEXPORT jstring JNICALL Java_org_angdroid_variants_NativeWrapper_gameQueryString
+  (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
+{
+	return (jstring)0; // null indicates error
+}
+JNIEXPORT jstring JNICALL Java_org_angdroid_nightly_NativeWrapper_gameQueryString
   (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	return (jstring)0; // null indicates error
@@ -177,6 +189,11 @@ JNIEXPORT jint JNICALL Java_org_angdroid_angband_NativeWrapper_gameQueryInt
 	return gameQueryInt(env1,obj1,argc,argv);
 }
 JNIEXPORT jint JNICALL Java_org_angdroid_variants_NativeWrapper_gameQueryInt
+(JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
+{
+	return gameQueryInt(env1,obj1,argc,argv);
+}
+JNIEXPORT jint JNICALL Java_org_angdroid_nightly_NativeWrapper_gameQueryInt
 (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	return gameQueryInt(env1,obj1,argc,argv);

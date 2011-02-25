@@ -81,7 +81,7 @@
 #if !defined(ANGDROID_TOME_PLUGIN) && !defined(ANGDROID_STEAM_PLUGIN)
 #include "main.h"
 #endif
-#if defined (ANGDROID_ANGBAND306_PLUGIN) || defined (ANGDROID_ANGBAND_PLUGIN)
+#ifdef ALLOW_BORG
 #include "borg1.h"
 #endif
 #ifndef BASIC_COLORS
@@ -253,7 +253,7 @@ static errr Term_xtra_and(int n, int v)
 
 				int should_save = (turn_save != turn);
 
-#if defined (ANGDROID_ANGBAND306_PLUGIN) || defined(ANGDROID_ANGBAND_PLUGIN)
+#ifdef ALLOW_BORG
 				if (borg_active) {
 					time_t curtime;
 					time(&curtime);
@@ -297,12 +297,20 @@ static errr Term_xtra_and(int n, int v)
 			else if (v == 0) {
 				while (key != 0)
 				{
+#ifdef ANGDROID_NIGHTLY
+					Term_keypress(key,0);
+#else
 					Term_keypress(key);
+#endif
 					key = angdroid_getch(v);
 				}
 			}
 			else {
+#ifdef ANGDROID_NIGHTLY
+				Term_keypress(key,0);
+#else
 				Term_keypress(key);
+#endif
 			}
 			
 			return 0;
@@ -729,7 +737,9 @@ static void term_data_link(int i)
 	t->nuke_hook = Term_nuke_and;
 
 	/* Prepare the template hooks */
+#ifndef ANGDROID_NIGHTLY
 	t->user_hook = Term_user_and;
+#endif
 	t->xtra_hook = Term_xtra_and;
 	t->curs_hook = Term_curs_and;
 	t->wipe_hook = Term_wipe_and;
@@ -748,7 +758,7 @@ static void term_data_link(int i)
 	angband_term[i] = t;
 }
 
-static void hook_plog(cptr str)
+static void hook_plog(const char* str)
 {
 	angdroid_warn(str);
 }
@@ -757,7 +767,7 @@ static void hook_plog(cptr str)
 /*
  * Hook to tell the user something, and then quit 
  */
-static void hook_quit(cptr str)
+static void hook_quit(const char* str)
 {
 	LOGD("hook_quit()");
 	angdroid_quit(str);
@@ -921,7 +931,7 @@ static errr and_get_cmd(cmd_context context, bool wait)
 }
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 
-bool private_check_user_directory(cptr dirpath)
+bool private_check_user_directory(const char* dirpath)
 {
 	// todo: used in ToME figure out if we need it in android
 	//LOGD("private_check_user_directory %s",dirpath);
