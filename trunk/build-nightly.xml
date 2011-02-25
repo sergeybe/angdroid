@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="AngbandNightly" default="nightly-debug">
 
-    <target name="nightly-release" depends="plugin-resources, angband-javah, plugin-libs, release" />
-	<!-- clean, plugin-src, -->
-
+    <target name="nightly-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
     <target name="nightly-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
 
 <!--
@@ -48,7 +46,10 @@
 	</target>
 
     <target name="plugin-src">
-	  <!-- todo -->
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="git-patch-plugin-src">
+	    <property name="plugin.name" value="nightly"/>
+	    <property name="git.url" value="git://github.com/angband/angband.git"/>
+	  </ant>
     </target>
 <!--
     ************************************************************************
