@@ -44,6 +44,7 @@ public class StateManager {
 		}
     };
 	public static InstallState installState = InstallState.Unknown;
+	public static String installFailMessage = "";
 
 	StateManager() {
 		termwins = new HashMap<Integer,TermWindow>();
@@ -68,16 +69,20 @@ public class StateManager {
 			return null;
 	}
 
-	public String getInstallError() {
+	public String getInstallError() {		
 		String errMsg = "Error: an unknown error occurred, cannot continue.";
 		switch(installState) {
 		case MediaNotReady:
 			errMsg = "Error: external storage card not found, cannot continue.";
 			break;
 		case Failure:
-			errMsg = "Error: failed to write and verify files to external storage, cannot continue.";
+			if (installFailMessage.length() > 0) 
+				errMsg = installFailMessage;
+			else 
+				errMsg = "Error: failed to write and verify files to external storage, cannot continue.";
 			break;
 		}
+
 		return errMsg;
 	}
 

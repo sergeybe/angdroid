@@ -215,7 +215,8 @@ public class GameThread implements Runnable {
 		Installer.waitForInstall();
 
 		if (state.installState != StateManager.InstallState.Success) {
-			//Log.d("Angband","run.sending fatal message");
+			//Log.d("Angband","installState bad sending fatal message");
+			state.fatalError = true;
 			handler.sendEmptyMessage(AngbandDialog.Action.InstallFatalAlert.ordinal());
 			onGameExit();
 			return;

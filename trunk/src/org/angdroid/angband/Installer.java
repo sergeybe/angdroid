@@ -50,7 +50,7 @@ public class Installer {
 	public boolean needsInstall() {
 		// validate sdcard here
 		String check = Environment.getExternalStorageState();
-		Log.v("Angband", "media check:" + check);
+		//Log.v("Angband", "media check:" + check);
 		if (check.compareTo(Environment.MEDIA_MOUNTED) != 0) {
 			state.installState = StateManager.InstallState.MediaNotReady;
 			return true;
@@ -60,6 +60,7 @@ public class Installer {
 	}
 
 	public void install() {
+		state.installFailMessage = "";
 		boolean success = true;
 		int[] plugins = Preferences.getInstalledPlugins();
 		for(int i = 0; i < plugins.length; i++) {
@@ -87,13 +88,13 @@ public class Installer {
 			File f = new File(Preferences.getAngbandFilesDirectory(plugin));
 			f.mkdirs();
 			String abs_path = f.getAbsolutePath();
-			Log.v("Angband", "installing to " + abs_path);
+			//Log.v("Angband", "installing to " + abs_path);
 
 			ZipInputStream zis = Plugins.getPluginZip(plugin);
 			ZipEntry ze;
 			while ((ze = zis.getNextEntry()) != null) {
 				String ze_name = ze.getName();
-				Log.v("Angband", "extracting " + ze_name);
+				//Log.v("Angband", "extracting " + ze_name);
 
 				String filename = abs_path + "/" + ze_name;
 				File myfile = new File(filename);
@@ -122,7 +123,8 @@ public class Installer {
 				// perform a basic length validation
 				myfile = new File(filename);
 				if (myfile.length() != totalRead) {
-					Log.v("Angband", "Installer.length mismatch: " + filename);
+					//Log.v("Angband", "Installer.length mismatch: " + filename);
+					state.installFailMessage = "Error: failed to verify installed file on sdcard: "+filename;
 					throw new IllegalStateException();					
 				}
 				
@@ -131,7 +133,9 @@ public class Installer {
 			zis.close();
 		} catch (Exception e) {
 			result = false;
-			Log.v("Angband", "error extracting files: " + e);
+			if (state.installFailMessage.length() == 0)
+				state.installFailMessage = "Error: failed to install files to sdcard. "+e.getMessage();
+			//Log.v("Angband", "error extracting files: " + e);
 		}
 		return result;
 	}
@@ -154,27 +158,27 @@ public class Installer {
 		
 			String dstDir = Preferences.getAngbandFilesDirectory(plugin)+"/save";
 
-			Log.d("Angband","upgrade "+srcDir+" to "+dstDir);
+			//Log.d("Angband","upgrade "+srcDir+" to "+dstDir);
 
 			File fdstDir = new File(dstDir);
 			File[] saveFiles = fdstDir.listFiles();
 			if (saveFiles != null && saveFiles.length>0) return true; // save files found in dst (already upgraded)
 
-			Log.d("Angband","found no save files in dst");
+			//Log.d("Angband","found no save files in dst");
 
 			File fsrcDir = new File(srcDir);
 			saveFiles = fsrcDir.listFiles();
 
 			if (saveFiles == null || saveFiles.length==0) return true; // no save files found in src
 
-			Log.d("Angband","found "+saveFiles.length+" save files in src");
+			//Log.d("Angband","found "+saveFiles.length+" save files in src");
 
 			// upgrade!
 			for (int i=0; i<saveFiles.length; i++) {
 				String src = saveFiles[i].getAbsolutePath();
 				String dst = dstDir +"/"+saveFiles[i].getName();
 
-				Log.d("Angband","upgrade "+src+" to "+dst);
+				//Log.d("Angband","upgrade "+src+" to "+dst);
 				InputStream in = new FileInputStream(src);
 				OutputStream out = new FileOutputStream(dst);
 
@@ -188,7 +192,8 @@ public class Installer {
 			}
 			return true;
 		} catch (Exception e) {
-			Log.v("Angband", "error upgrading save files: " + e);
+			state.installFailMessage = "Error: failed to copy save file(s) from prior version. "+e.getMessage();
+			//Log.v("Angband", "error upgrading save files: " + e);
 			return false;
 		}
 	}
