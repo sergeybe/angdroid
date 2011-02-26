@@ -156,12 +156,10 @@ void user_name(buf)
 }
 
 int queryInt(const char* argv0) {
-	int result = -1;
+	int result = -1; //unknown command
 	if (strcmp(argv0,"rl")==0) {
-		result = 1;
-	}
-	else {
-		result = -1; //unknown command
+		result = 0;
+		if (rogue_like_commands) result=1;
 	}
 	return result;
 }
