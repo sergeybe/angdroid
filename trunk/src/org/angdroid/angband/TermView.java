@@ -87,7 +87,7 @@ public class TermView extends View implements OnGestureListener {
 		setForeColor(Color.WHITE);
 
 		back = new Paint();
-		back.setColor(Color.BLACK);
+		setBackColor(Color.BLACK);
 
 		cursor = new Paint();
 		cursor.setColor(Color.GREEN);
@@ -127,6 +127,9 @@ public class TermView extends View implements OnGestureListener {
 
 	protected void setForeColor(int a) {
 		fore.setColor(a);			
+	}
+	protected void setBackColor(int a) {
+		back.setColor(a);			
 	}
 
 	public void autoSizeFontByHeight(int maxHeight) {
@@ -337,7 +340,7 @@ public class TermView extends View implements OnGestureListener {
    		return true;
 	}
 
-	public void drawPoint(int r, int c, char ch, int color) {
+	public void drawPoint(int r, int c, char ch, int fcolor, int bcolor) {
 		float x = c * char_width;
 		float y = r * char_height;
 
@@ -346,6 +349,8 @@ public class TermView extends View implements OnGestureListener {
 			//Log.d("Angband","null canvas in drawPoint");
 			return;
 		}
+
+		setBackColor(bcolor);
 
 		canvas.drawRect(
 						x, 
@@ -358,7 +363,7 @@ public class TermView extends View implements OnGestureListener {
 		if (ch != ' ') {
 			String str = ch + "";
 
-			setForeColor(color);
+			setForeColor(fcolor);
 
 			canvas.drawText (
 							 str,

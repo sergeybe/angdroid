@@ -616,16 +616,9 @@ static errr Term_text_and(int x, int y, int n, byte a, const char *cp)
 {
 	term_data *td = (term_data*)(Term->data);
 
-	if (a>=0 && a<BASIC_COLORS) angdroid_attrset(color_data[a]);
 	move(y, x);
+	attrset(a);
 	addnstr(n, cp);
-	/*
-	while (n--) {
-		unsigned int c = (unsigned char) *(s++);
-		addch(c);
-	}
-	*/
-	angdroid_attrset(color_data[TERM_DARK]);
 
 	/* Success */
 	return 0;
@@ -957,6 +950,14 @@ void initGame ()
 #endif
 	}
 
+	initscr();
+	for (i = 0; i < BASIC_COLORS; i++) {
+		init_color(i, color_data[i]);
+	}
+	for (i = 0; i < BASIC_COLORS; i++) {
+		init_pair(i, i, 0);
+	}
+
 	plog_aux = hook_plog;
 	quit_aux = hook_quit;
 
@@ -1022,18 +1023,6 @@ void angdroid_main() {
 	initGame();
 
 	time(&savetime);
-
-	/*
-	angdroid_attrset(color_data[1]);
-	move(10,2);
-	addnstr(5,"Hello!!");
-	angdroid_attrset(color_data[5]);
-	addstr(" World");
-	angdroid_attrset(color_data[10]);
-	addstr("!!!");
-	refresh();
-	while(1) usleep(1000);
-	*/
 
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	LOGD("play_game()");

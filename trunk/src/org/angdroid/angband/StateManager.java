@@ -7,7 +7,9 @@ import java.util.HashMap;
 public class StateManager {
 	/* screen state */
 	public Map<Integer,TermWindow> termwins = null;
+	public TermWindow virtscr = null;
 	public TermWindow stdscr = null;
+	public int termWinNext = 0;
 
 	/* alert dialog state */
 	public boolean fatalError = false;
@@ -47,9 +49,7 @@ public class StateManager {
 	public static String installFailMessage = "";
 
 	StateManager() {
-		termwins = new HashMap<Integer,TermWindow>();
-		stdscr = new TermWindow(0,0,0,0);
-		termwins.put(0,stdscr);
+		endWin();
 
 		nativew = new NativeWrapper(this);
 		gameThread = new GameThread(this, nativew);
@@ -62,11 +62,27 @@ public class StateManager {
 			keyBuffer.link(h);
 	}
 
+	public void endWin() {
+		termWinNext = -1;
+		termwins = new HashMap<Integer,TermWindow>();
+
+		// initialize virtual screen (virtscr) and curses stdscr 
+		int h = newWin(0,0,0,0);
+		virtscr = getWin(h);
+		h = newWin(0,0,0,0);
+		stdscr = getWin(h);
+	}
 	public TermWindow getWin(int handle) {
-		if (termwins.containsKey(handle))
-			return termwins.get(handle);
-		else
-			return null;
+		return termwins.get(handle);
+	}
+	public void delWin(int handle) {
+		termwins.remove(handle);
+	}
+	public int newWin(int nlines, int ncols, int begin_y, int begin_x) {
+		int h = termWinNext;
+		termwins.put(h,new TermWindow(nlines,ncols,begin_y,begin_x));
+		termWinNext++;
+		return h;
 	}
 
 	public String getInstallError() {		

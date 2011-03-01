@@ -2,15 +2,26 @@ package org.angdroid.angband;
 
 import android.util.Log;
 import java.util.Formatter;
+import java.util.Map;
+import java.util.HashMap;
 
 public class TermWindow {
 
-	public int TERM_BLACK = 0xFF000000;
-	public int TERM_WHITE = 0xFFFFFFFF;
+
+	public static class ColorPair {
+		public int fColor;
+		public int bColor;
+		public ColorPair(int f,int b) {this.fColor = f; this.bColor = b;}
+	}
+	public static Map<Integer,ColorPair> pairs = new HashMap<Integer,ColorPair>(); 
+	public static Map<Integer,Integer> color_table = new HashMap<Integer, Integer>(); 
+	public static int TERM_BLACK = 0xFF000000;
+	public static int TERM_WHITE = 0xFFFFFFFF;
+	public static ColorPair defaultColor = new ColorPair(TERM_WHITE,TERM_BLACK);
 
 	public class TermPoint {
 		public char Char = ' ';
-		public int Color = TERM_WHITE;
+		public int Color = 0;
 		public boolean isDirty = false;
 	}
 	public TermPoint[][] buffer = null; 
@@ -19,7 +30,7 @@ public class TermWindow {
 	public boolean cursor_visible;
 	public int col = 0;
 	public int row = 0;
-	public int fcolor = TERM_WHITE;
+	public int cur_color = 0;
 
 	public int cols = 0;
 	public int rows = 0;
@@ -41,13 +52,24 @@ public class TermWindow {
 		}
 	}
 
+	public static void init_color(int c, int rgb) {
+		color_table.put(c, rgb);
+	}
+
+	public static void init_pair(int p, int f, int b) {
+		int fc = color_table.get(f);
+		int bc = color_table.get(b);
+
+		pairs.put(p, new ColorPair(fc,bc));
+	}
+
 	private TermPoint newPoint(TermPoint p) {
 		if (p == null) 
 			p = new TermPoint();
 		else {
-			p.isDirty = p.isDirty || p.Char != ' ' || p.Color != TERM_WHITE;
+			p.isDirty = p.isDirty || p.Char != ' ' || p.Color != 0;
 			p.Char = ' ';
-			p.Color = TERM_WHITE;
+			p.Color = 0;
 		}
 		return p;
 	}
@@ -64,7 +86,7 @@ public class TermWindow {
 	}
 
 	protected void attrset(int a) {
-		fcolor = a;
+		cur_color = a;
 	}
 
 	public void clear() {
@@ -136,18 +158,35 @@ public class TermWindow {
 		return col;
 	}
 
-	public void overwrite(TermWindow w) {
-		row = 0;
-		col = 0;
-		int max_rows = Math.min(rows,w.rows);
-		int max_cols = Math.min(cols,w.cols);
-		for(int r=0;r<max_rows;r++) {
-			for(int c=0;c<max_cols;c++) {
-				TermPoint p1 = w.buffer[r][c];
-				TermPoint p2 = buffer[r][c];
-				p2.Char = p1.Char;
-				p2.Color = p1.Color;
-				p2.isDirty = true;
+	public void overwrite(TermWindow wsrc) {
+
+		int sx0 = wsrc.begin_x;
+		int sx1 = wsrc.begin_x+wsrc.cols;
+		int sy0 = wsrc.begin_y;
+		int sy1 = wsrc.begin_y+wsrc.rows;;
+		int dx0 = begin_x;
+		int dx1 = begin_x+cols;
+		int dy0 = begin_y;
+		int dy1 = begin_y+rows;
+
+		// do wins intersect?
+		if (!(sx0 > dx1 || sx1 < dx0 || sy0 > dy1 || sy1 < dy0)) {
+
+			// calc intersect area
+			int ix0 = Math.max(sx0,dx0);
+			int iy0 = Math.max(sy0,dy0);
+			int ix1 = Math.min(sx1,dx1);
+			int iy1 = Math.min(sy1,dy1);
+
+			// blit the ascii
+			for(int r=iy0;r<iy1;r++) {
+				for(int c=ix0;c<ix1;c++) {
+					TermPoint p1 = wsrc.buffer[r-wsrc.begin_y][c-wsrc.begin_x];
+					TermPoint p2 = buffer[r-begin_y][c-begin_x];
+					p2.isDirty = p2.isDirty || p2.Char != p1.Char || p2.Color != p1.Color;
+					p2.Char = p1.Char;
+					p2.Color = p1.Color;
+				}
 			}
 		}
 	}
@@ -164,8 +203,10 @@ public class TermWindow {
 	public void addnstr(int n, byte[] cp) {
 		byte c;
 		
-		//String foo = new String(cp);
-		//Log.d("Angband","addnstr ("+row+","+col+") ["+foo+"]");
+		/*
+		String foo = new String(cp);
+		Log.d("Angband","addnstr ("+row+","+col+") ["+foo+"]");
+		*/
 
 		for (int i = 0; i < n; i++) {
 			c = cp[i];
@@ -174,9 +215,10 @@ public class TermWindow {
 	}
 
 	public void addch(char c) {
+		
 		/*
 		Formatter fmt = new Formatter();
-		fmt.format("color: %x", fcolor);
+		fmt.format("color: %x", cur_color);
 		Log.d("Angband","TermWindow.addch ("+row+","+col+") "+fmt+" '"+c+"'");
 		*/
 
@@ -184,9 +226,9 @@ public class TermWindow {
 			if (c > 19 && c < 128) {
 				TermPoint p = buffer[row][col];
 			
-				p.isDirty = p.isDirty || p.Char != c || p.Color != fcolor;
+				p.isDirty = p.isDirty || p.Char != c || p.Color != cur_color;
 				p.Char = c;
-				p.Color = fcolor;
+				p.Color = cur_color;
 				advance();
 			}
 			else if (c == 9) {  // recurse to expand that tab
@@ -221,4 +263,11 @@ public class TermWindow {
 		addch(c);
 	}
 
+	public void scroll() {
+		for(int r=1;r<rows;r++) {
+			for(int c=0;c<cols;c++) {
+				buffer[r-1][c] = buffer[r][c];
+			}
+		}
+	}
 }

@@ -180,8 +180,8 @@ public class GameThread implements Runnable {
 	}
 
 	public void setFullyInitialized() {
-		if (!game_fully_initialized) 
-			Log.d("Angband","game is fully initialized");
+		//if (!game_fully_initialized) 
+		//	Log.d("Angband","game is fully initialized");
 
 		game_fully_initialized = true;		
 	}

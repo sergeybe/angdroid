@@ -8,9 +8,6 @@
 
 extern boolean msg_cleared;
 
-#define FALSE 0
-#define TRUE -1
-
 static char android_files_path[1024];
 static char android_savefile[50];
 static int turn_save = 0;
@@ -18,25 +15,6 @@ static int turn_save = 0;
 char _PATH_SCOREFILE[1024]; //"rogue.sco"
 char _PATH_ERRORFILE[1024]; //"rogue.sav"
 char _PATH_SCREENFILE[1024]; //"screen.txt"
-
-int color_table[16] = {
-	0xFF000000, //BLACK
-	0xFF0040FF, //BLUE
-	0xFF008040, //GREEN
-	0xFF00A0A0, //CYAN
-	0xFFFF4040, //RED
-	0xFF9020FF, //MAGENTA
-	0xFFFFFF00, //YELLOW
-	0xFFC0C0C0, //WHITE
-	0xFF606060, //GRAY
-	0xFF00FFFF, //BRIGHT_BLUE
-	0xFF00FF00, //BRIGHT_GREEN
-	0xFF20FFDC, //BRIGHT_CYAN
-	0xFFFF5050, //BRIGHT_RED
-	0xFFB8A8FF, //BRIGHT_MAGENTA
-	0xFFFFFF90, //BRIGHT_YELLOW
-	0xFFFFFFFF //BRIGHT_WHITE
-};
 
 void mvaddcch(short row, short col, color_char cc) {
 	move(row, col);
@@ -46,9 +24,9 @@ void mvaddcch(short row, short col, color_char cc) {
 addcch(color_char cc)
 {
 	if (cc.b8.color >= 0 && cc.b8.color < 16)
-		angdroid_attrset(color_table[cc.b8.color]);
+		attrset(cc.b8.color);
 	addch(cc.b8.ch);
-	angdroid_attrset(color_table[7]); //white
+	attrset(WHITE);
 }
 
 addcstr(color_char *cstr)
@@ -120,12 +98,12 @@ draw_box(color_char cset[6], int ulrow, int ulcol, int height, int width)
 //bold (only used in scores)
 standout()
 {
-	angdroid_attrset(color_table[YELLOW]);
+	attrset(YELLOW);
 }
 //unbold
 standend()
 {
-	angdroid_attrset(color_table[WHITE]);
+	attrset(WHITE);
 }
 
 colorize(char *str, byte color, color_char *cstr)
@@ -145,10 +123,8 @@ color_char mvincch(short row, short col)
 	foo.b8.color = 7; //assume WHITE
 
 	int i;
-	int rgb = angdroid_attrget(row,col);
-	for(i=0; i<16; i++)
-		if (color_table[i] == rgb) foo.b8.color = i;
-
+	int c = attrget(row,col);
+	foo.b8.color = c;
 	foo.b8.ch = mvinch(row,col);
 	return foo; 
 }
@@ -368,6 +344,11 @@ void initGame(void) {
 
 	strcpy(_PATH_SCREENFILE,android_files_path);
 	strcat(_PATH_SCREENFILE,"/save/screen");
+
+	initscr();
+	start_color();
+	attrset(WHITE);
+	curs_set(1);
 }
 
 void angdroid_main() {
@@ -377,8 +358,6 @@ void angdroid_main() {
 	char *a = "rogue";
 	char *args[2] = {a,NULL}; 
 
-	angdroid_attrset(color_table[7]); //white
-	curs_set(1);
 	LOGD("main()");
 	main(1,args);
 
