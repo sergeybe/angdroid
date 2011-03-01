@@ -5,6 +5,7 @@ import java.util.Queue;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
+import java.util.Formatter;
 
 import android.util.Log;
 	
@@ -47,7 +48,7 @@ public class NativeWrapper {
 			}catch(Exception ex){}
 		}
 		else {
-			refresh();
+			wrefresh(0);
 		}
 		*/
 		return key;
@@ -100,24 +101,66 @@ public class NativeWrapper {
 
 	public void resize() {
 		synchronized (display_lock) {
-			term.onGameStart();
-			refresh(state.stdscr, true);
+			term.onGameStart(); // recalcs TermView canvas dimension
+			frosh(null);
 		}
 	}
 
-	public void refresh() {
+	public void wrefresh(int w) {
 		synchronized (display_lock) {
-			refresh(state.stdscr, false);
+			TermWindow t = state.getWin(w);
+			if (t != null) frosh(t);
 		}
 	}
 
-	private void refresh(TermWindow w, boolean resize) {
+	private void frosh(TermWindow w) {
+
+		final int A_NORMAL = 0;
+		final int A_REVERSE = 0x100;
+		final int A_STANDOUT = 0x200;
+		final int A_BOLD = 0x400;
+		final int A_UNDERLINE = 0x800;
+		//#define A_BLINK 0x1000
+		//#define A_DIM = 0x2000;
+		//#define A_ALTCHARSET 0x4000
+
 		synchronized(display_lock) {
-			for(int r = 0; r<w.rows; r++) {
-				for(int c = 0; c<w.cols; c++) {
-					TermWindow.TermPoint p = w.buffer[r][c];
-					if (p.isDirty || resize) {
-						term.drawPoint(r, c, p.Char, p.Color);
+			/* for forcing a redraw due to an Android event, w should be null */
+
+			TermWindow v = state.virtscr;
+			if (w != null) v.overwrite(w);
+			
+			for(int r = 0; r<v.rows; r++) {
+				for(int c = 0; c<v.cols; c++) {
+					TermWindow.TermPoint p = v.buffer[r][c];
+					if (p.isDirty || w == null) {
+						
+						int color = p.Color & 0xFF;
+
+						boolean standout = ((p.Color & A_STANDOUT) != 0) 
+							|| ((p.Color & A_BOLD) != 0)
+							|| ((p.Color & A_UNDERLINE) != 0);
+						
+						boolean reverse = ((p.Color & A_REVERSE) != 0);
+
+						if (standout) color += (color < 8 ? 8 : -8);
+						
+						TermWindow.ColorPair cp = TermWindow.pairs.get(color);
+						if (cp == null) cp = TermWindow.defaultColor;
+
+						/*
+						if (p.Char != ' ') {
+							Formatter fmt = new Formatter();
+							fmt.format("fcolor:%x bcolor:%x", cp.fColor, cp.bColor);
+							Log.d("Angband","frosh '"+p.Char+"' "+fmt);
+						}
+						*/
+
+						if (reverse) 
+							term.drawPoint(r, c, p.Char, cp.bColor, cp.fColor);
+						else
+							term.drawPoint(r, c, p.Char, cp.fColor, cp.bColor);
+							
 						p.isDirty = false;
 					}
 				}
@@ -125,56 +168,89 @@ public class NativeWrapper {
 
 			term.postInvalidate();
 		
-			if (resize)
+			if (w == null)
 				term.onScroll(null,null,0,0);  // sanitize scroll position
 		}
 	}
 
-	public void addnstr(final int n, final byte[] cp) {
+	public void waddnstr(final int w, final int n, final byte[] cp) {
 		synchronized (display_lock) {
-			state.stdscr.addnstr(n, cp);
+			TermWindow t = state.getWin(w);
+			if (t != null) t.addnstr(n, cp);
 		}
 	}
 
-	public int mvinch(final int r, final int c) {
+	public int mvwinch(final int w, final int r, final int c) {
 		synchronized (display_lock) {
-			return state.stdscr.mvinch(r, c);
+			TermWindow t = state.getWin(w);
+			if (t != null) 
+				return t.mvinch(r, c);
+			else
+				return 0;
 		}
 	}
 
-	public int attrget(final int r, final int c) {
+	public void init_pair(final int p, final int f, final int b) {
 		synchronized (display_lock) {
-			return state.stdscr.attrget(r, c);
+			TermWindow.init_pair(p,f,b);
 		}
 	}
 
-	public void attrset(final int a) {
+	public void init_color(final int c, final int rgb) {
 		synchronized (display_lock) {
-			state.stdscr.attrset(a);
+			TermWindow.init_color(c, rgb);
 		}
 	}
 
-	public void hline(final byte c, final int n) {
+	public void scroll(final int w) {
 		synchronized (display_lock) {
-			state.stdscr.hline((char)c, n);
+			TermWindow t = state.getWin(w);
+			if (t != null) t.scroll();
 		}
 	}
 
-	public void clear() {
+	public int wattrget(final int w, final int r, final int c) {
 		synchronized (display_lock) {
-			state.stdscr.clear();
+			TermWindow t = state.getWin(w);
+			if (t != null) 
+				return t.attrget(r, c);
+			else 
+				return 0;
 		}
 	}
 
-	public void clrtoeol() {
+	public void wattrset(final int w, final int a) {
 		synchronized (display_lock) {
-			state.stdscr.clrtoeol();
+			TermWindow t = state.getWin(w);
+			if (t != null) t.attrset(a);
 		}
 	}
 
-	public void clrtobot() {
+	public void whline(final int w, final byte c, final int n) {
 		synchronized (display_lock) {
-			state.stdscr.clrtobot();
+			TermWindow t = state.getWin(w);
+			if (t != null) t.hline((char)c, n);
+		}
+	}
+
+	public void wclear(final int w) {
+		synchronized (display_lock) {
+			TermWindow t = state.getWin(w);
+			if (t != null) t.clear();
+		}
+	}
+
+	public void wclrtoeol(final int w) {
+		synchronized (display_lock) {
+			TermWindow t = state.getWin(w);
+			if (t != null) t.clrtoeol();
+		}
+	}
+
+	public void wclrtobot(final int w) {
+		synchronized (display_lock) {
+			TermWindow t = state.getWin(w);
+			if (t != null) t.clrtobot();
 		}
 	}
 
@@ -184,9 +260,10 @@ public class NativeWrapper {
 		}
 	}
 
-	public void move(final int y, final int x) {
+	public void wmove(int w, final int y, final int x) {
 		synchronized (display_lock) {
-			state.stdscr.move(y,x);
+			TermWindow t = state.getWin(w);
+			if (t != null) t.move(y,x);
 		}		
 	}
 
@@ -200,35 +277,53 @@ public class NativeWrapper {
 
 	public void touchwin (final int w) {
 		synchronized (display_lock) {
-			state.getWin(w).touch();
+			TermWindow t = state.getWin(w);
+			if (t != null) t.touch();
 		}		
 	}
 
 	public int newwin (final int rows, final int cols, 
 						final int begin_y, final int begin_x) {
 		synchronized (display_lock) {
-			if (state.termwins.size()>1)
-				return 1; //hack!
-			else {
-				TermWindow w = new TermWindow(rows,cols,begin_y,begin_x);
-				int key = state.termwins.size();
-				state.termwins.put(key,w);
-				return key;
-			}
+			int w = state.newWin(rows,cols,begin_y,begin_x);
+			Log.d("Angband", "newwin "+w+" ("+begin_y+","+begin_x+")");
+			return w;
+		}		
+	}
+
+	public void delwin (final int w) {
+		synchronized (display_lock) {
+			state.delWin(w);
+		}		
+	}
+
+	public void initscr () {
+		synchronized (display_lock) {
+			state.endWin();
 		}		
 	}
 
 	public void overwrite (final int wsrc, final int wdst) {
 		synchronized (display_lock) {
-			state.getWin(wdst).overwrite(state.getWin(wsrc));
+			TermWindow td = state.getWin(wdst);
+			TermWindow ts = state.getWin(wsrc);
+			if (td != null && ts != null) td.overwrite(ts);
 		}		
 	}
 
-	int getcury() {
-		return state.stdscr.getcury();
+	int getcury(final int w) {
+		TermWindow t = state.getWin(w);
+		if (t != null) 
+			return t.getcury();
+		else
+			return 0;
 	}
 
-	int getcurx() {
-		return state.stdscr.getcurx();
+	int getcurx(final int w) {
+		TermWindow t = state.getWin(w);
+		if (t != null) 
+			return t.getcurx();
+		else
+			return 0;
 	}
 }

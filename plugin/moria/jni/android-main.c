@@ -117,9 +117,7 @@ void textbackground(int c){
 }
 
 void textcolor(int c){
-	int rgb = color_table[15]; //default to white
-	if (c >= 0 && c<15) rgb = color_table[c];
-	angdroid_attrset(rgb);
+	attrset(c);
 }
 
 /* Provides for a timeout on input. Does a non-blocking read, consuming the
@@ -203,6 +201,13 @@ void initGame(void) {
 	strcat(MORIA_OWIZ_HELP,"/files/owizcmds.hlp");
 	strcat(MORIA_WELCOME,"/files/welcome.hlp");
 	strcat(MORIA_VER,"/files/version.hlp");
+
+	int i;
+	initscr();
+	for(i=0; i<16; i++)
+		init_color(i, color_table[i]);
+	for(i=0; i<16; i++)
+		init_pair(i, i, 0);
 }
 
 void delay(int ms) {
@@ -216,7 +221,7 @@ void angdroid_main() {
 	char *a = "moria";
 	char *args[2] = {a,NULL}; 
 
-	angdroid_attrset(0xFFFFFFFF);
+	attrset(COLOR_WHITE);
 	curs_set(1);
 	LOGD("main()");
 

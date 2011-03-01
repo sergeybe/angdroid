@@ -125,9 +125,7 @@ void textbackground(int c){
 }
 
 void textcolor(int c){
-	int rgb = color_table[15]; //default to white
-	if (c >= 0 && c<15) rgb = color_table[c];
-	angdroid_attrset(rgb);
+	attrset(c);
 }
 
 /* Provides for a timeout on input. Does a non-blocking read, consuming the
@@ -232,6 +230,12 @@ void initGame(void) {
 	int i; for(i=0;i<99;i++) c_list[MAX_CREATURES - 1].name[i] = ' ';
 	if (c_list[MAX_CREATURES - 1].name[0] == 'A') 
 	c_list[MAX_CREATURES - 1].name[99]= '\0';
+
+	initscr();
+	for(i=0; i<16; i++)
+		init_color(i, color_table[i]);
+	for(i=0; i<16; i++)
+		init_pair(i, i, 0);
 }
 
 void angdroid_main() {
@@ -242,7 +246,7 @@ void angdroid_main() {
 	char *a = "angband";
 	char *args[2] = {a,NULL}; 
 
-	angdroid_attrset(0xFFFFFFFF);
+	attrset(COLOR_WHITE);
 	curs_set(1);
 	LOGD("main()");
 	main(1,args);
