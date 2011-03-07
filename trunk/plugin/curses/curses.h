@@ -61,6 +61,7 @@ int wattrset(WINDOW*, int);
 int attrget(int, int);
 int wattrget(WINDOW*, int, int);
 int addch(const char);
+int delch();
 int waddch(WINDOW*, const char);
 int addstr(const char *);
 int waddstr(WINDOW*, const char *);
@@ -75,7 +76,9 @@ int wclrtobot(WINDOW*);
 int clrtobot(void);
 int clrtoeol(void);
 int wclrtoeol(WINDOW*);
+#ifndef NO_CLEAR
 int clear(void);
+#endif
 int wclear(WINDOW*);
 int initscr(void);
 int curs_set(int);
@@ -95,6 +98,7 @@ int nl();
 int echo();
 int cbreak();
 int nocbreak();
+int notimeout(WINDOW *, int);
 int endwin();
 int has_colors();
 int start_color();

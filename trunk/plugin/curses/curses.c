@@ -8,6 +8,9 @@
 WINDOW _win[WIN_MAX];
 WINDOW* stdscr = &_win[0];
 
+#define LOGC(...) 
+//#define LOGC(...) __android_log_print(ANDROID_LOG_DEBUG  , "Angband", __VA_ARGS__)
+
 /* JVM enviroment */
 static JavaVM *jvm;
 static JNIEnv *env;
@@ -49,6 +52,7 @@ int attrset(int attrs) {
 	return wattrset(stdscr, attrs);
 }
 int wattrset(WINDOW* w, int attrs) {
+	LOGC("curses.wattrset %d %d",w->w,attrs);
 	JAVA_CALL(NativeWrapper_wattrset, w->w, attrs);
 	return 0;
 }
@@ -56,12 +60,20 @@ int attrget(int row, int col) {
 	return wattrget(stdscr,row,col);
 }
 int wattrget(WINDOW* w,int row, int col) {
+	LOGC("curses.wattrget %d %d %d",w->w,row,col);
 	int attrs = JAVA_CALL_INT(NativeWrapper_wattrget, w->w, row, col);
 	return attrs;
 }
 
 int addch(const char a){
 	addnstr(1,&a);
+	return 0;
+}
+int delch(){
+	int x,y;
+	getyx(stdscr, y, x);
+	mvaddch(y, x-1, ' ');
+	move(y, x-1);
 	return 0;
 }
 
@@ -87,17 +99,20 @@ int waddnstr(WINDOW* w, int n, const char *s) {
 	jbyteArray array = (*env)->NewByteArray(env, n);
 	if (array == NULL) angdroid_quit("Error: Out of memory");
 	(*env)->SetByteArrayRegion(env, array, 0, n, s);
+	LOGC("curses.waddnstr %d %d %c",w->w,n,s[0]);
 	JAVA_CALL(NativeWrapper_waddnstr, w->w, n, array);
 	(*env)->DeleteLocalRef(env, array);
 	return 0;
 }
 
 int move(int y, int x) {
+	LOGC("curses.move %d %d",y,x);
 	JAVA_CALL(NativeWrapper_wmove, 0, y, x);
 	return 0;
 }
 
 int wmove(WINDOW* w, int y, int x) {
+	LOGC("curses.wmove %d %d %d",y,x);
 	JAVA_CALL(NativeWrapper_wmove, w->w, y, x);
 	return 0;
 }
@@ -130,6 +145,7 @@ int hline(const char a, int n){
 	return 0;
 }
 int whline(WINDOW* w, const char a, int n){
+	LOGC("curses.whline %d %c %d",w-w,a,n);
 	JAVA_CALL(NativeWrapper_whline, w->w, a, n);
 	return 0;
 }
@@ -139,6 +155,7 @@ int clrtoeol(void){
 	return 0;
 }
 int wclrtoeol(WINDOW *w){
+	LOGC("curses.wclrtoeol %d",w->w);
 	JAVA_CALL(NativeWrapper_wclrtoeol, w->w);
 	return 0;
 }
@@ -148,11 +165,13 @@ int clear(void){
 	return 0;
 }
 int wclear(WINDOW* w){
+	LOGC("curses.wclear %d",w->w);
 	JAVA_CALL(NativeWrapper_wclear, w->w);
 	return 0;
 }
 
 int initscr() {
+	LOGC("curses.initscr");
 	JAVA_CALL(NativeWrapper_initscr);
 	stdscr->w = 0;
 	clear();
@@ -175,7 +194,11 @@ int nl() {
 int echo() {
 	return 0;
 }
+int notimeout(WINDOW *w, int bf) {
+	return 0;
+}
 int endwin() {
+	LOGC("curses.endwin");
 	JAVA_CALL(NativeWrapper_initscr);
 	return 0;
 }
@@ -189,6 +212,7 @@ int scrollok(WINDOW *w, int bf){
 	return 0;
 }
 int scroll(WINDOW *w) {
+	LOGC("curses.scroll %d",w->w);
 	JAVA_CALL(NativeWrapper_scroll, w->w);
 	return 0;
 }
@@ -234,10 +258,12 @@ int keypad(WINDOW* w, int bf) {
 	return 0;
 }
 int init_color(int c, int rgb) {
+	LOGC("curses.init_color %d %d",c,rgb);
 	JAVA_CALL(NativeWrapper_init_color, c, rgb);
 	return 0;
 } 
 int init_pair(int pair, int f, int b){
+	LOGC("curses.init_pair %d %d %d",pair,f,b);
 	JAVA_CALL(NativeWrapper_init_pair, pair, f, b);
 	return 0;
 } 
@@ -247,6 +273,7 @@ int clrtobot(void){
 	return 0;
 }
 int wclrtobot(WINDOW* w){
+	LOGC("curses.wclrtobot %d",w->w);
 	JAVA_CALL(NativeWrapper_wclrtobot, w->w);
 	return 0;
 }
@@ -257,19 +284,23 @@ int beep() {
 }
 
 int getcurx(WINDOW *w){
+	LOGC("curses.getcurx %d",w->w);
 	return JAVA_CALL_INT(NativeWrapper_getcurx, w->w);
 }
 
 int getcury(WINDOW *w){
+	LOGC("curses.getcury %d",w->w);
 	return JAVA_CALL_INT(NativeWrapper_getcury, w->w);
 }
 
 int curs_set(int v) {
+	LOGC("curses.curs_set %d",v);
 	JAVA_CALL(NativeWrapper_curs_set, v);
 }
 
 WINDOW* newwin(int rows, int cols, 
 			   int begin_y, int begin_x) {
+	LOGC("curses.newwin %d %d %d %d",rows,cols,begin_y,begin_x);
 	int k = JAVA_CALL_INT(NativeWrapper_newwin, rows, cols, begin_y, begin_x);
 
 	//hack
@@ -281,21 +312,25 @@ WINDOW* newwin(int rows, int cols,
 	return ret;
 }
 int delwin(WINDOW* w) {
+	LOGC("curses.delwin %d",w->w);
 	JAVA_CALL(NativeWrapper_delwin, w->w);
 	return 0;
 }
 
 int overwrite(const WINDOW *src, WINDOW *dst){
+	LOGC("curses.overwrite %d %d",src->w,dst->w);
 	JAVA_CALL(NativeWrapper_overwrite, src->w, dst->w);
 	return 0;
 }
 
 int touchwin(WINDOW *w){
+	LOGC("curses.touchwin %d",w->w);
 	JAVA_CALL(NativeWrapper_touchwin, w->w);
 	return 0;
 }
 
 int wrefresh(WINDOW *w){
+	LOGC("curses.wrefresh %d",w->w);
 	JAVA_CALL(NativeWrapper_wrefresh, w->w);
 	return 0;
 }
@@ -305,7 +340,8 @@ int refresh(void){
 	return 0;
 }
 
-int angdroid_getch(int v) {
+int angdroid_getch(int v) {	
+	LOGC("curses.getch %d",v);
 	int k = JAVA_CALL_INT(NativeWrapper_getch, v);
 	return k;
 }
@@ -315,16 +351,19 @@ int mvinch(int r, int c) {
 	return ch;
 }
 int mvwinch(WINDOW* w, int r, int c) {
+	LOGC("curses.mvwinch %d %d %d",w->w,r,c);
 	int ch = JAVA_CALL_INT(NativeWrapper_mvwinch, w->w, r, c);
 	return ch;
 }
 
 int flushinp() {
+	LOGC("curses.flushinp");
 	JAVA_CALL(NativeWrapper_flushinp);
 	return 0;
 }
 
 int noise() {
+	LOGC("curses.noise");
 	JAVA_CALL(NativeWrapper_noise);
 	return 0;
 }
