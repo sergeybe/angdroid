@@ -1,6 +1,9 @@
 package org.angdroid.angband;
 
 import android.os.Handler;
+
+import android.util.Log;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -73,7 +76,8 @@ public class StateManager {
 		stdscr = getWin(h);
 	}
 	public TermWindow getWin(int handle) {
-		return termwins.get(handle);
+		TermWindow w = termwins.get(handle);
+		return w;
 	}
 	public void delWin(int handle) {
 		termwins.remove(handle);

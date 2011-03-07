@@ -161,13 +161,13 @@ public class TermWindow {
 	public void overwrite(TermWindow wsrc) {
 
 		int sx0 = wsrc.begin_x;
-		int sx1 = wsrc.begin_x+wsrc.cols;
+		int sx1 = wsrc.begin_x+wsrc.cols-1;
 		int sy0 = wsrc.begin_y;
-		int sy1 = wsrc.begin_y+wsrc.rows;;
+		int sy1 = wsrc.begin_y+wsrc.rows-1;
 		int dx0 = begin_x;
-		int dx1 = begin_x+cols;
+		int dx1 = begin_x+cols-1;
 		int dy0 = begin_y;
-		int dy1 = begin_y+rows;
+		int dy1 = begin_y+rows-1;
 
 		// do wins intersect?
 		if (!(sx0 > dx1 || sx1 < dx0 || sy0 > dy1 || sy1 < dy0)) {
@@ -179,8 +179,8 @@ public class TermWindow {
 			int iy1 = Math.min(sy1,dy1);
 
 			// blit the ascii
-			for(int r=iy0;r<iy1;r++) {
-				for(int c=ix0;c<ix1;c++) {
+			for(int r=iy0;r<=iy1;r++) {
+				for(int c=ix0;c<=ix1;c++) {
 					TermPoint p1 = wsrc.buffer[r-wsrc.begin_y][c-wsrc.begin_x];
 					TermPoint p2 = buffer[r-begin_y][c-begin_x];
 					p2.isDirty = p2.isDirty || p2.Char != p1.Char || p2.Color != p1.Color;

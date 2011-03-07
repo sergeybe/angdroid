@@ -286,7 +286,6 @@ public class NativeWrapper {
 						final int begin_y, final int begin_x) {
 		synchronized (display_lock) {
 			int w = state.newWin(rows,cols,begin_y,begin_x);
-			Log.d("Angband", "newwin "+w+" ("+begin_y+","+begin_x+")");
 			return w;
 		}		
 	}
@@ -299,7 +298,6 @@ public class NativeWrapper {
 
 	public void initscr () {
 		synchronized (display_lock) {
-			state.endWin();
 		}		
 	}
 
