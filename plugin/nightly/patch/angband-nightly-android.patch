@@ -11,23 +11,6 @@ diff -Nru --strip-trailing-cr angband-nightly/lib/file/news.txt angband-nightly-
  
     For resources and links to places you can talk about the game, please see:
 diff -Nru --strip-trailing-cr angband-nightly/src/buildid.h angband-nightly-android/src/buildid.h
-diff -Nru --strip-trailing-cr angband-3.2.0/src/death.c angband-3.2.0-android/src/death.c
---- angband-nightly/src/death.c	2010-12-24 05:13:59.000000000 -0800
-+++ angband-nightly-android/src/death.c	2010-12-24 11:05:09.343486000 -0800
-@@ -437,5 +437,11 @@
-  	do
- 	{
- 		menu_select(death_menu, 0);
--	} while (!get_check("Do you want to quit? "));
-+
-+		// hack to allow KTRL('X') to exit the game here
-+		char opts[4] = {'y', 'n', KTRL('X'), '\0'};
-+		char gckey = get_char("Do you want to quit?", &opts[0], 2, 'n');
-+		if (gckey == KTRL('X') || gckey == 'y' || gckey == 'Y') break;
-+
-+	} while (TRUE);
- }
-diff -Nru --strip-trailing-cr angband-nightly/src/buildid.h angband-nightly-android/src/buildid.h
 --- angband-nightly/src/buildid.h	2011-02-25 12:12:23.000000000 -0800
 +++ angband-nightly-android/src/buildid.h	2011-02-25 11:35:44.000000000 -0800
 @@ -8,7 +8,7 @@
