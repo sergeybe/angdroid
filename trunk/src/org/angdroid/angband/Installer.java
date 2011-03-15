@@ -15,12 +15,10 @@ import android.os.Handler;
 public class Installer {
 
 	private StateManager state = null;
-	private Handler handler = null;
 	private static Thread installWorker = null;
 
-	public Installer(StateManager s, Handler h) {
+	public Installer(StateManager s) {
 		state = s;
-		handler = h;
 	}
 
 	public synchronized void checkInstall() {
@@ -28,12 +26,12 @@ public class Installer {
 			if (state.installState == StateManager.InstallState.Unknown) {
 				state.installState = StateManager.InstallState.InProgress;
 			
-				handler.sendEmptyMessage(AngbandDialog.Action.ShowProgress.ordinal());
+				state.handler.sendEmptyMessage(AngbandDialog.Action.ShowProgress.ordinal());
 
 				installWorker = new Thread() {  
 						public void run() {
 							install();
-							handler.sendEmptyMessage(AngbandDialog.Action.DismissProgress.ordinal());
+							state.handler.sendEmptyMessage(AngbandDialog.Action.DismissProgress.ordinal());
 						}
 					};
 				installWorker.start();

@@ -2,10 +2,7 @@ package org.angdroid.angband;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import android.os.Handler;
-import android.os.Message;
 import android.view.KeyEvent;
-
 import android.util.Log;
 import android.os.Handler;
 import android.os.Message;
@@ -35,8 +32,6 @@ public class KeyBuffer {
 	private boolean alt_key_pressed = false;
 	private boolean eat_shift = false;
 
-	private Handler handler = null;
-
 	public KeyBuffer(StateManager state) {
 		this.state = state;
 		nativew = state.nativew;
@@ -51,10 +46,6 @@ public class KeyBuffer {
 			add(32); //space
 		}
 		quit_key_seq = 0;
-	}
-
-	public void link(Handler h) {
-		handler = h;		
 	}
 
 	public void add(int key) {
@@ -329,7 +320,7 @@ public class KeyBuffer {
 			shift_mod = !shift_key_pressed; // turn off mod only if used at least once
 			break;
 		case VirtualKeyboard:
-			handler.sendEmptyMessage(AngbandDialog.Action.ToggleKeyboard.ordinal());
+			state.handler.sendEmptyMessage(AngbandDialog.Action.ToggleKeyboard.ordinal());
 			break;
 
 		// these are handled on keydown

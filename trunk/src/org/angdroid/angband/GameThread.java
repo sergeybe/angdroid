@@ -28,16 +28,11 @@ public class GameThread implements Runnable {
 	private String running_profile = null;
 	private boolean plugin_change = false;
 	private NativeWrapper nativew = null;
-	private Handler handler = null;
 	private StateManager state = null;
 	
 	public GameThread(StateManager s, NativeWrapper nw) {
 		nativew = nw;
 		state = s;
-	}
-
-	public void link(Handler h) {
-		handler = h;		
 	}
 
 	public synchronized void send(Request rq) {
@@ -95,7 +90,7 @@ public class GameThread implements Runnable {
 			/* time to start angband */
 
 			/* check install */
-			Installer installer = new Installer(state, handler);
+			Installer installer = new Installer(state);
 			installer.checkInstall();
 
 			/* notify wrapper game is about to start */
@@ -103,7 +98,6 @@ public class GameThread implements Runnable {
 			
  			/* initialize keyboard buffer */
 			state.keyBuffer = new KeyBuffer(state);
-			state.keyBuffer.link(handler);
 
 			game_thread_running = true;
 
@@ -176,7 +170,7 @@ public class GameThread implements Runnable {
 			   && !state.fatalError);
 
 		if	(local_restart) 
-			handler.sendEmptyMessage(AngbandDialog.Action.StartGame.ordinal());
+			state.handler.sendEmptyMessage(AngbandDialog.Action.StartGame.ordinal());
 	}
 
 	public void setFullyInitialized() {
@@ -217,7 +211,7 @@ public class GameThread implements Runnable {
 		if (state.installState != StateManager.InstallState.Success) {
 			//Log.d("Angband","installState bad sending fatal message");
 			state.fatalError = true;
-			handler.sendEmptyMessage(AngbandDialog.Action.InstallFatalAlert.ordinal());
+			state.handler.sendEmptyMessage(AngbandDialog.Action.InstallFatalAlert.ordinal());
 			onGameExit();
 			return;
 		}

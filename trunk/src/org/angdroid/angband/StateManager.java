@@ -33,6 +33,9 @@ public class StateManager {
 	/* game thread */
 	public GameThread gameThread = null;
 
+	/* game thread */
+	public Handler handler = null;
+
 	/* installer state */
 	public enum InstallState {
 		Unknown
@@ -59,10 +62,8 @@ public class StateManager {
 	}
 
 	public void link(TermView t, Handler h) {
-		nativew.link(t, h);
-		gameThread.link(h);
-		if (keyBuffer != null)
-			keyBuffer.link(h);
+		handler = h;
+		nativew.link(t);
 	}
 
 	public void endWin() {
