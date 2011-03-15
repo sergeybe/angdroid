@@ -85,14 +85,15 @@ public class AngbandDialog {
 
 	public void showProgress(String msg) {		
 		synchronized (state.progress_lock) {
-			//Log.d("Angband", "showProgress");		
+			Log.d("Angband", "showProgress");		
 			progressDialog = ProgressDialog.show(activity, "Angband", msg, true);
 		}
 	}
 	public void dismissProgress() {
 		synchronized (state.progress_lock) {
-			//Log.d("Angband", "dismissProgress");		
+			Log.d("Angband", "dismissProgress");		
 			if (progressDialog != null) {
+				Log.d("Angband", "really dismissProgress");		
 				progressDialog.dismiss();
 				progressDialog = null;
 			}

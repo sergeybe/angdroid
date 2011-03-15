@@ -16,7 +16,6 @@ public class NativeWrapper {
 	}
 
 	private TermView term = null;
-	private Handler	handler = null;
 	private StateManager state = null;
 
 	private String display_lock = "lock";
@@ -30,10 +29,9 @@ public class NativeWrapper {
 		state = s;
 	}
 
-	public void link(TermView t, Handler h) {
+	public void link(TermView t) {
 		synchronized (display_lock) {
 			term = t;
-			handler = h;
 		}
 	}
 
@@ -56,7 +54,7 @@ public class NativeWrapper {
 
 	//this is called from native thread just before exiting
 	public void onGameExit() {
-		handler.sendEmptyMessage(AngbandDialog.Action.OnGameExit.ordinal());
+		state.handler.sendEmptyMessage(AngbandDialog.Action.OnGameExit.ordinal());
 	}
 
 	public boolean onGameStart() {
@@ -87,7 +85,7 @@ public class NativeWrapper {
 		synchronized (display_lock) {
 			state.fatalMessage = msg;
 			state.fatalError = true;
-			handler.sendMessage(handler.obtainMessage(AngbandDialog.Action.GameFatalAlert.ordinal(),0,0,msg));
+			state.handler.sendMessage(state.handler.obtainMessage(AngbandDialog.Action.GameFatalAlert.ordinal(),0,0,msg));
 		}
 	}
 
@@ -95,7 +93,7 @@ public class NativeWrapper {
 		synchronized (display_lock) {
 			state.warnMessage = msg;
 			state.warnError = true;
-			handler.sendMessage(handler.obtainMessage(AngbandDialog.Action.GameWarnAlert.ordinal(),0,0,msg));
+			state.handler.sendMessage(state.handler.obtainMessage(AngbandDialog.Action.GameWarnAlert.ordinal(),0,0,msg));
 		}
 	}
 

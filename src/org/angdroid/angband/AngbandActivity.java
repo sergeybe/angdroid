@@ -88,8 +88,12 @@ public class AngbandActivity extends Activity {
 		if (state == null) {
 			state = new StateManager();
 		}
+	}
 
-		dialog = new AngbandDialog(this,state);
+	public void onStart() {
+		super.onStart();
+
+		if (dialog == null) dialog = new AngbandDialog(this,state);
 		final AngbandDialog ad = dialog;
 		handler = new Handler() {
 			@Override
@@ -97,10 +101,6 @@ public class AngbandActivity extends Activity {
 				ad.HandleMessage(msg);
 			}
 		};
-	}
-
-	public void onStart() {
-		super.onStart();
 
 		startFlurry();
 
