@@ -55,6 +55,7 @@ LOCAL_SRC_FILES := \
 ../extsrc/src/object/obj-power.c \
 ../extsrc/src/object/obj-ui.c \
 ../extsrc/src/object/obj-util.c \
+../extsrc/src/object/pval.c \
 ../extsrc/src/object/randart.c \
 ../extsrc/src/object/slays.c \
 ../extsrc/src/option.c \
