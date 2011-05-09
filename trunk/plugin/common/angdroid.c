@@ -902,8 +902,12 @@ static void init_stuff()
 static errr get_init_cmd()
 {
 	/* Wait for response */
+#ifdef ANGDROID_NIGHTLY
+	pause_line(Term);
+#else
 	pause_line(Term->hgt - 1);
-
+#endif
+	
 	if (new_game)
 		cmd_insert(CMD_NEWGAME);
 	else
