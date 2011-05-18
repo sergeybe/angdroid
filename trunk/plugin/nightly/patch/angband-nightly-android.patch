@@ -34,3 +34,25 @@ diff -Nru --strip-trailing-cr angband-nightly/src/h-basic.h angband-nightly-andr
  # define SET_UID
  
  /* Without autoconf, turn on some things */
+diff -Nru --strip-trailing-cr angband-nightly/src/cmd0.c angband-nightly-android/src/cmd0.c
+--- angband-nightly/src/cmd0.c	2011-02-25 12:12:23.000000000 -0800
++++ angband-nightly-android/src/cmd0.c	2011-02-24 23:07:59.000000000 -0800
+@@ -562,9 +562,17 @@
+ 		/* Apply keymap if not inside a keymap already */
+ 		if (ke.key.code && act && !inkey_next)
+ 		{
++			size_t n = 0;
++			while (act[n].type) {
++				n++;
++			}
++			
++			/* Make room for the terminator */
++			n += 1;
++
+ 			/* Install the keymap */
+ 			memcpy(request_command_buffer, act,
+-			          sizeof(request_command_buffer));
++			       n * sizeof(struct keypress));
+ 
+ 			/* Start using the buffer */
+ 			inkey_next = request_command_buffer;
