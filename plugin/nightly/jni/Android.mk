@@ -41,6 +41,7 @@ LOCAL_SRC_FILES := \
 ../extsrc/src/init2.c \
 ../extsrc/src/keymap.c \
 ../extsrc/src/load.c \
+../extsrc/src/monster/init.c \
 ../extsrc/src/monster/melee1.c \
 ../extsrc/src/monster/melee2.c \
 ../extsrc/src/monster/monster1.c \
