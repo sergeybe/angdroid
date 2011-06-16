@@ -70,15 +70,15 @@ public class TermView extends View implements OnGestureListener {
 	public TermView(Context context) {
 		super(context);
 		initTermView(context);
-		handler = ((AngbandActivity)context).getHandler();
-		state = ((AngbandActivity)context).getStateManager();
+		handler = ((GameActivity)context).getHandler();
+		state = ((GameActivity)context).getStateManager();
 	}
 
 	public TermView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initTermView(context);
-		handler = ((AngbandActivity)context).getHandler();
-		state = ((AngbandActivity)context).getStateManager();
+		handler = ((GameActivity)context).getHandler();
+		state = ((GameActivity)context).getStateManager();
 	}
 
 	protected void initTermView(Context context) {

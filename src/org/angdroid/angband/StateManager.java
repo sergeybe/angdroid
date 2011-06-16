@@ -36,24 +36,6 @@ public class StateManager {
 	/* game thread */
 	public Handler handler = null;
 
-	/* installer state */
-	public enum InstallState {
-		Unknown
-			,MediaNotReady
-			,InProgress
-			,Success
-			,Failure;
-		public static InstallState convert(int value)
-		{
-			return InstallState.class.getEnumConstants()[value];
-		}
-		public static boolean isError(InstallState s) {
-			return (s == MediaNotReady || s == Failure);
-		}
-    };
-	public static InstallState installState = InstallState.Unknown;
-	public static String installFailMessage = "";
-
 	StateManager() {
 		endWin();
 
@@ -88,23 +70,6 @@ public class StateManager {
 		termwins.put(h,new TermWindow(nlines,ncols,begin_y,begin_x));
 		termWinNext++;
 		return h;
-	}
-
-	public String getInstallError() {		
-		String errMsg = "Error: an unknown error occurred, cannot continue.";
-		switch(installState) {
-		case MediaNotReady:
-			errMsg = "Error: external storage card not found, cannot continue.";
-			break;
-		case Failure:
-			if (installFailMessage.length() > 0) 
-				errMsg = installFailMessage;
-			else 
-				errMsg = "Error: failed to write and verify files to external storage, cannot continue.";
-			break;
-		}
-
-		return errMsg;
 	}
 
 	public String getFatalError() {
