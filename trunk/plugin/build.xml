@@ -30,8 +30,13 @@
 
     <target name="plugin-resources">
         <delete file="${resource-folder}/raw/zip${pluginzip.name}"/>
+        <delete file="${resource-folder}/raw/crc${pluginzip.name}"/>
         <zip destfile="${resource-folder}/raw/zip${pluginzip.name}" basedir="plugin/${plugin.name}/extsrc/lib"
             excludes="**/Makefile **/Makefile.am **/Makefile.in **/delete.me **/*.glade **/*.bmp **/*.png **/*.wav xtra/font/*.* xtra/sound/*.* xtra/help/*.* xtra/graf/*.*" />
+	<exec dir="${resource-folder}" executable="${bash-location}">
+		<arg value="../calc-crc.sh"/>
+		<arg value="${pluginzip.name}"/>
+	</exec>
     </target>
 
     <target name="clean">
