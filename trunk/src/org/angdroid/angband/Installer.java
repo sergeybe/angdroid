@@ -14,35 +14,63 @@ import android.os.Handler;
 
 public class Installer {
 
-	private StateManager state = null;
-	private static Thread installWorker = null;
+	/* installer state */
+	public enum InstallState {
+		Unknown
+			,MediaNotReady
+			,InProgress
+			,Success
+			,Failure;
+		public static InstallState convert(int value)
+		{
+			return InstallState.class.getEnumConstants()[value];
+		}
+		public static boolean isError(InstallState s) {
+			return (s == MediaNotReady || s == Failure);
+		}
+    };
 
-	public Installer(StateManager s) {
-		state = s;
+	private static Thread installWorker = null;
+	public InstallState state;
+	public String message = "";
+
+	public Installer() {
+		state = InstallState.Unknown;
 	}
 
-	public synchronized void checkInstall() {
-		if (needsInstall()) {
-			if (state.installState == StateManager.InstallState.Unknown) {
-				state.installState = StateManager.InstallState.InProgress;
+	public synchronized void startInstall() {
+		if (state == InstallState.Unknown) {
+			state = InstallState.InProgress;
 			
-				state.handler.sendEmptyMessage(AngbandDialog.Action.ShowProgress.ordinal());
-
-				installWorker = new Thread() {  
-						public void run() {
-							install();
-							state.handler.sendEmptyMessage(AngbandDialog.Action.DismissProgress.ordinal());
-						}
-					};
-				installWorker.start();
-			}
-			else {
-				return; // install is in error or in progress, cancel
-			}
+			installWorker = new Thread() {  
+					public void run() {
+						install();
+					}
+				};
+			installWorker.start();
 		}
 		else {
-			state.installState = StateManager.InstallState.Success;
+			return; // install is in error or in progress, cancel
 		}
+	}
+
+	public boolean failed() {
+		return state != InstallState.Success;
+	}
+
+
+	public String errorMessage() {
+		String errorMsg = "Error: failed to write and verify files to external storage, cannot continue.";
+		switch(state) {
+		case MediaNotReady:
+			errorMsg = "Error: external storage card not found, cannot continue.";
+			break;
+		case Failure:
+			if (message.length() > 0) 
+				errorMsg = message;
+			break;
+		}
+		return errorMsg;
 	}
 
 	public boolean needsInstall() {
@@ -50,15 +78,19 @@ public class Installer {
 		String check = Environment.getExternalStorageState();
 		//Log.v("Angband", "media check:" + check);
 		if (check.compareTo(Environment.MEDIA_MOUNTED) != 0) {
-			state.installState = StateManager.InstallState.MediaNotReady;
+			state = InstallState.MediaNotReady;
 			return true;
 		}
 
-		return (Preferences.getInstalledVersion().compareTo(Preferences.getVersion()) != 0);
+		if (Preferences.getInstalledVersion().compareTo(Preferences.getVersion()) == 0) {
+			state = InstallState.Success;
+			return false;
+		}
+		return true;
 	}
 
 	public void install() {
-		state.installFailMessage = "";
+		message = "";
 		boolean success = true;
 		int[] plugins = Preferences.getInstalledPlugins();
 		for(int i = 0; i < plugins.length; i++) {
@@ -73,10 +105,10 @@ public class Installer {
 		}
 		if (success) {
 			Preferences.setInstalledVersion(Preferences.getVersion());
-			state.installState = StateManager.InstallState.Success;
+			state = InstallState.Success;
 		}
 		else
-			state.installState = StateManager.InstallState.Failure;
+			state = InstallState.Failure;
 	}
 
 	private boolean extractPluginResources(int plugin) {
@@ -122,7 +154,7 @@ public class Installer {
 				myfile = new File(filename);
 				if (myfile.length() != totalRead) {
 					//Log.v("Angband", "Installer.length mismatch: " + filename);
-					state.installFailMessage = "Error: failed to verify installed file on sdcard: "+filename;
+					message = "Error: failed to verify installed file on sdcard: "+filename;
 					throw new IllegalStateException();					
 				}
 				
@@ -131,14 +163,14 @@ public class Installer {
 			zis.close();
 		} catch (Exception e) {
 			result = false;
-			if (state.installFailMessage.length() == 0)
-				state.installFailMessage = "Error: failed to install files to sdcard. "+e.getMessage();
+			if (message.length() == 0)
+				message = "Error: failed to install files to sdcard. "+e.getMessage();
 			//Log.v("Angband", "error extracting files: " + e);
 		}
 		return result;
 	}
 
-	public static void waitForInstall() {
+	public void waitForInstall() {
 		if (installWorker != null) {
 			try {
 				installWorker.join();
@@ -190,7 +222,7 @@ public class Installer {
 			}
 			return true;
 		} catch (Exception e) {
-			state.installFailMessage = "Error: failed to copy save file(s) from prior version. "+e.getMessage();
+			message = "Error: failed to copy save file(s) from prior version. "+e.getMessage();
 			//Log.v("Angband", "error upgrading save files: " + e);
 			return false;
 		}

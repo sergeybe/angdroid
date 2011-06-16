@@ -89,10 +89,6 @@ public class GameThread implements Runnable {
 			
 			/* time to start angband */
 
-			/* check install */
-			Installer installer = new Installer(state);
-			installer.checkInstall();
-
 			/* notify wrapper game is about to start */
 			nativew.onGameStart();
 			
@@ -147,10 +143,6 @@ public class GameThread implements Runnable {
 			Log.d("Angband","save().no thread");
 			return;
 		}
-		if (state.installState != StateManager.InstallState.Success) {
-			Log.d("Angband","save().install not finished or not successful");
-			return;
-		}
 	 
 		state.keyBuffer.signalSave();
 	}
@@ -166,7 +158,6 @@ public class GameThread implements Runnable {
 		local_restart 
 			= game_restart 
 			= ((!state.keyBuffer.getSignalGameExit() || plugin_change) 
-			   && state.installState == StateManager.InstallState.Success 
 			   && !state.fatalError);
 
 		if	(local_restart) 
@@ -203,18 +194,6 @@ public class GameThread implements Runnable {
 
 	    String pluginPath = Preferences.getActivityFilesDirectory()
 			+"/../lib/lib"+running_plugin+".so";
-
-		// wait for and validate install processing (if any);
-		//Log.d("Angband","run.waiting for install");
-		Installer.waitForInstall();
-
-		if (state.installState != StateManager.InstallState.Success) {
-			//Log.d("Angband","installState bad sending fatal message");
-			state.fatalError = true;
-			state.handler.sendEmptyMessage(AngbandDialog.Action.InstallFatalAlert.ordinal());
-			onGameExit();
-			return;
-		}
 
 		/* game is not running, so start it up */
 		nativew.gameStart(

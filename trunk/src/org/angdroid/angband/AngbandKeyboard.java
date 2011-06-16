@@ -18,7 +18,7 @@ public class AngbandKeyboard implements OnKeyboardActionListener
 
 	AngbandKeyboard(Context ctx)
 	{
-		state = ((AngbandActivity)ctx).getStateManager();
+		state = ((GameActivity)ctx).getStateManager();
 
 		virtualKeyboardQwerty = new Keyboard(ctx, R.xml.keyboard_qwerty);
 		virtualKeyboardSymbols = new Keyboard(ctx, R.xml.keyboard_sym);
