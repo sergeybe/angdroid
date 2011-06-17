@@ -28,7 +28,7 @@
 				  android:launchMode="singleTask" 
 				  android:windowSoftInputMode="stateHidden">
 			<intent-filter>
-				<action android:name="android.intent.action.GAME" />
+				<action android:name="org.angdroid.angband.GAME" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
