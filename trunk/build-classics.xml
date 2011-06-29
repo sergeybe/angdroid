@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Angband" default="angband-debug">
+<project name="Classics" default="classics-debug">
 
-    <target name="angband-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
+    <target name="classics-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
 
-    <target name="angband-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
+    <target name="classics-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
 
 <!--
     ************************************************************************
@@ -14,17 +14,13 @@
 -->
 
     <target name="plugin-resources">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
-	    <property name="plugin.name" value="angband"/>
-	    <property name="pluginzip.name" value="angband320"/>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="moria"/>
+	    <property name="pluginlib.name" value="moria"/>
 	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
-	    <property name="plugin.name" value="angband306"/>
-	    <property name="pluginzip.name" value="angband306"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
-	    <property name="plugin.name" value="frogknows"/>
-	    <property name="pluginzip.name" value="frogknows"/>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="rogue"/>
+	    <property name="pluginlib.name" value="rogue"/>
 	</ant>
     </target>
 
@@ -39,22 +35,18 @@
 	    <property name="pluginlib.name" value="loader-angband"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
-	    <property name="plugin.name" value="angband"/>
-	    <property name="pluginlib.name" value="angband"/>
+	    <property name="plugin.name" value="moria"/>
+	    <property name="pluginlib.name" value="moria"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
-	    <property name="plugin.name" value="angband306"/>
-	    <property name="pluginlib.name" value="angband306"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
-	    <property name="plugin.name" value="frogknows"/>
-	    <property name="pluginlib.name" value="frogknows"/>
+	    <property name="plugin.name" value="rogue"/>
+	    <property name="pluginlib.name" value="rogue"/>
 	</ant>
     </target>
 
     <condition property="is.exist.libs">
 	  	<and>
-        	<available file="plugin/angband/extsrc/lib" type="dir" />
+        	<available file="plugin/rogue/extsrc/lib" type="dir" />
 		</and>
     </condition>
 	<target name="check-plugin-src" unless="is.exist.libs">
@@ -64,25 +56,17 @@
 
     <target name="plugin-src">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
-	    <property name="plugin.name" value="angband"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/3.2"/>
-	    <property name="src.url.file" value="angband-3.2.0.tar.gz"/>
-		<property name="extract.command" value="tar" />
-		<property name="extract.arg1" value="--strip-components=1" />
-		<property name="extract.arg2" value="-xzf" />
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
-	    <property name="plugin.name" value="angband306"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/3.0"/>
-	    <property name="src.url.file" value="angband-3.0.6-src.tar.gz"/>
-		<property name="extract.command" value="tar" />
-		<property name="extract.arg1" value="--strip-components=1" />
-		<property name="extract.arg2" value="-xzf" />
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
-	    <property name="plugin.name" value="frogknows"/>
+	    <property name="plugin.name" value="moria"/>
 	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
-	    <property name="src.url.file" value="pcangband-1.4-src.tar.gz"/>
+	    <property name="src.url.file" value="mor552cs.tar.gz"/>
+		<property name="extract.command" value="tar" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
+	</ant>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="rogue"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="rogue210-source.tar.gz"/>
 		<property name="extract.command" value="tar" />
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
@@ -101,13 +85,10 @@
 	    <property name="plugin.name" value="loader"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
-	    <property name="plugin.name" value="angband"/>
+	    <property name="plugin.name" value="moria"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
-	    <property name="plugin.name" value="angband306"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
-	    <property name="plugin.name" value="frogknows"/>
+	    <property name="plugin.name" value="rogue"/>
 	</ant>
     </target>
 
