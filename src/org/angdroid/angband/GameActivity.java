@@ -73,6 +73,7 @@ public class GameActivity extends Activity {
 		}
 	}
 
+	@Override
 	public void onStart() {
 		super.onStart();
 
@@ -90,6 +91,7 @@ public class GameActivity extends Activity {
 		rebuildViews();
 	}
 
+	@Override
 	public void onStop() {
 		super.onStop();
 
