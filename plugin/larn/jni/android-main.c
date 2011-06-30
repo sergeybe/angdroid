@@ -10,6 +10,8 @@
 #include "larndata.h"
 //#include "larnfunc.h"
 
+#include "curses.h"
+
 WINDOW* message;
 int msg_cleared = 1;
 

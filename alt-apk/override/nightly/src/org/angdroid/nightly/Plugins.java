@@ -55,7 +55,7 @@ final public class Plugins {
 	public static String getPluginCrc(int plugin) {
 		InputStream is = null;
 		if (plugin == Plugin.Nightly.getId())
-			is = Preferences.getResources().openRawResource(R.raw.zipnightly);
+			is = Preferences.getResources().openRawResource(R.raw.crcnightly);
 		return new Scanner(is).useDelimiter("\\A").next().trim();
 	}
 
