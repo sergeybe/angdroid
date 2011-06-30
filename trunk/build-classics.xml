@@ -41,10 +41,12 @@
 	    <property name="plugin.name" value="moria"/>
 	    <property name="pluginlib.name" value="moria"/>
 	</ant>
+<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="larn"/>
 	    <property name="pluginlib.name" value="larn"/>
 	</ant>
+-->
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="rogue"/>
 	    <property name="pluginlib.name" value="rogue"/>
