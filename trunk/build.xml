@@ -54,6 +54,7 @@
 		  <exclude name="**/plugin/frogknows/**" />
 		  <exclude name="**/plugin/moria/**" />
 		  <exclude name="**/plugin/rogue/**" />
+		  <exclude name="**/plugin/larn/**" />
 		  <exclude name="**/plugin/nightly/**" />
 		  <exclude name="**/plugin/include/*.h" />
 		  <exclude name="**/plugin/loader/libs/**" />
@@ -92,6 +93,7 @@
 		  <exclude name="**/plugin/frogknows/**" />
 		  <exclude name="**/plugin/moria/**" />
 		  <exclude name="**/plugin/rogue/**" />
+		  <exclude name="**/plugin/larn/**" />
 		  <exclude name="**/plugin/include/*.h" />
 		  <exclude name="**/plugin/loader/libs/**" />
 		  <exclude name="**/plugin/loader/obj/**" />
@@ -108,6 +110,41 @@
 	  </delete>
 	  <copy todir="./alt-apk/nightly" overwrite="true">
 		<fileset dir="./alt-apk/override/nightly" />
+	  </copy>
+    </target>
+
+	<target name="classics-copy">
+	  <copy todir="./alt-apk/classics">
+		<fileset dir=".">
+		  <exclude name="**/alt-apk/**" />
+		  <exclude name="**/bin/**" />
+		  <exclude name="**/gen/**" />
+		  <exclude name="**/libs/armeabi/**" />
+		  <exclude name="**/override/**" />
+		  <exclude name="**/plugin/tome/**" />
+		  <exclude name="**/plugin/steam/**" />
+		  <exclude name="**/plugin/sang/**" />
+		  <exclude name="**/plugin/npp/**" />
+		  <exclude name="**/plugin/angband/**" />
+		  <exclude name="**/plugin/angband306/**" />
+		  <exclude name="**/plugin/frogknows/**" />
+		  <exclude name="**/plugin/nightly/**" />
+		  <exclude name="**/plugin/include/*.h" />
+		  <exclude name="**/plugin/loader/libs/**" />
+		  <exclude name="**/plugin/loader/obj/**" />
+		  <exclude name="**/res/raw/**" />
+		</fileset>
+	  </copy>
+	  <exec dir="./alt-apk/classics" executable="${bash-location}">
+		<arg value="fix-classics.sh"/>
+	  </exec>
+	  <delete> 
+		<fileset dir="./alt-apk/classics" defaultexcludes="false">
+		  <include name="**/*~"/>		  
+		</fileset>
+	  </delete>
+	  <copy todir="./alt-apk/classics" overwrite="true">
+		<fileset dir="./alt-apk/override/classics" />
 	  </copy>
     </target>
 
@@ -129,6 +166,16 @@
 	<target name="variants-release-override">
 	  <copy todir="./alt-apk/variants" overwrite="true">
 		<fileset dir="./alt-apk/override/variants-release" />
+	  </copy>
+    </target>
+	<target name="classics-debug-override">
+	  <copy todir="./alt-apk/classics" overwrite="true">
+		<fileset dir="./alt-apk/override/classics-debug" />
+	  </copy>
+    </target>
+	<target name="classics-release-override">
+	  <copy todir="./alt-apk/classics" overwrite="true">
+		<fileset dir="./alt-apk/override/classics-release" />
 	  </copy>
     </target>
 	<target name="nightly-debug-override">
