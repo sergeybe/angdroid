@@ -2,7 +2,6 @@
 <project name="Classics" default="classics-debug">
 
     <target name="classics-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
-
     <target name="classics-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
 
 <!--
@@ -14,13 +13,13 @@
 -->
 
     <target name="plugin-resources">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="pluginzip.name" value="moria"/>
 	    <property name="plugin.name" value="moria"/>
-	    <property name="pluginlib.name" value="moria"/>
 	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="pluginzip.name" value="rogue"/>
 	    <property name="plugin.name" value="rogue"/>
-	    <property name="pluginlib.name" value="rogue"/>
 	</ant>
     </target>
 
@@ -96,10 +95,10 @@
 		<delete includeemptydirs="true" failonerror="false">
 		  <fileset dir="bin" includes="**/*"/>
 		</delete>
-		<delete includeemptydirs="true">
+		<delete includeemptydirs="true" failonerror="false">
 		  <fileset dir="gen" includes="**/*"/>
 		</delete>
-		<delete includeemptydirs="true">
+		<delete includeemptydirs="true" failonerror="false">
 		  <fileset dir="libs/armeabi" includes="**/*"/>
 		</delete>
 		<delete file="plugin/include/angdroid.h"/>

@@ -1,5 +1,5 @@
-package org.angdroid.angband;
+package org.angdroid.classics;
 final public class ActivityKeys {
-	// debug key
-	public static String FlurryKey = "382WWKEB1V2HZN1UJYBP";
+	// release key for classics
+	public static String FlurryKey = "VERENK7SBZ3WPGI17XDI";
 }
