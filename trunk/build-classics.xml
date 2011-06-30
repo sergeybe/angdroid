@@ -32,7 +32,7 @@
     <target name="plugin-libs" depends="angband-javah">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="loader"/>
-	    <property name="pluginlib.name" value="loader-angband"/>
+	    <property name="pluginlib.name" value="loader-classics"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="moria"/>
@@ -114,7 +114,7 @@
     ************************************************************************
 -->
 
-    <target name="obfuscate" depends="angband-release">
+    <target name="obfuscate" depends="classics-release">
 	<proguard>
 	    -libraryjars ${android.jar}: ${external-libs-folder}
 	    -injars      ${out-classes-location}

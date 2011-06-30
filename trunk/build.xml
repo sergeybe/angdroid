@@ -28,6 +28,16 @@
 	  <ant inheritAll="true" dir="./alt-apk/nightly" antfile="build-nightly.xml" target="plugin-src" />
     </target>
 
+    <target name="classics-beta" depends="classics-copy,classics-debug-override">
+	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="classics-release" />
+    </target>
+    <target name="classics-debug" depends="classics-copy,classics-debug-override">
+	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="classics-debug" />
+    </target>
+    <target name="classics-plugin-src" depends="classics-copy,classics-debug-override">
+	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="plugin-src" />
+    </target>
+
     <target name="variants-debug" depends="variants-copy,variants-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-debug" />
     </target>
