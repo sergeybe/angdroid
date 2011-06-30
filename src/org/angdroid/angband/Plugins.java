@@ -1,6 +1,7 @@
 package org.angdroid.angband;
 
 import java.util.zip.ZipInputStream;
+import java.util.Scanner;
 import java.io.InputStream;
 import android.os.Environment;
 
@@ -68,6 +69,16 @@ final public class Plugins {
 		else if (plugin == Plugin.FrogKnows.getId())
 			is = Preferences.getResources().openRawResource(R.raw.zipfrogknows);
 		return new ZipInputStream(is);
+	}
+	public static String getPluginCrc(int plugin) {
+		InputStream is = null;
+		if (plugin == Plugin.Angband.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crcangband320);
+		else if (plugin == Plugin.Angband306.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crcangband306);
+		else if (plugin == Plugin.FrogKnows.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crcfrogknows);
+		return new Scanner(is).useDelimiter("\\A").next().trim();
 	}
 
 	public static String getUpgradePath(Plugin p) {

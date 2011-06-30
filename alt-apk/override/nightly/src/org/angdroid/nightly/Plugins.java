@@ -1,6 +1,7 @@
 package org.angdroid.nightly;
 
 import java.util.zip.ZipInputStream;
+import java.util.Scanner;
 import java.io.InputStream;
 
 final public class Plugins {
@@ -50,6 +51,12 @@ final public class Plugins {
 			is = Preferences.getResources().openRawResource(R.raw.zipnightly);
 
 		return new ZipInputStream(is);
+	}
+	public static String getPluginCrc(int plugin) {
+		InputStream is = null;
+		if (plugin == Plugin.Nightly.getId())
+			is = Preferences.getResources().openRawResource(R.raw.zipnightly);
+		return new Scanner(is).useDelimiter("\\A").next().trim();
 	}
 
 	public static String getUpgradePath(Plugin p) {

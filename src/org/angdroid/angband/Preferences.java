@@ -89,6 +89,7 @@ final public class Preferences {
 		return pref.getString(key, "");
 	}
 
+	/* no longer needed, replaced with crc logic
 	public static String getInstalledVersion() {
 		return pref.getString(Preferences.KEY_INSTALLEDVERSION, "");
 	}
@@ -97,6 +98,7 @@ final public class Preferences {
 		ed.putString(Preferences.KEY_INSTALLEDVERSION, value);
 		ed.commit();			
 	}
+	*/
 
 	public static boolean getFullScreen() {
 		return pref.getBoolean(Preferences.KEY_FULLSCREEN, true);
