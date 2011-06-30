@@ -153,14 +153,6 @@ public class Installer {
 			String abs_path = f.getAbsolutePath();
 			//Log.v("Angband", "installing to " + abs_path);
 
-			// update crc file
-			File myfile_crc = new File(abs_path + "/crc" + Plugins.getFilesDir(Plugins.Plugin.convert(plugin)));
-			if (myfile_crc.exists()) myfile_crc.delete();
-			Writer crc_out = new OutputStreamWriter(new FileOutputStream(myfile_crc));			
-			String crc_val = Plugins.getPluginCrc(plugin);
-			crc_out.write(crc_val);
-			crc_out.close();
-
 			// copy game files
 			ZipInputStream zis = Plugins.getPluginZip(plugin);
 			ZipEntry ze;
@@ -203,6 +195,15 @@ public class Installer {
 				zis.closeEntry();
 			}
 			zis.close();
+
+			// update crc file
+			File myfile_crc = new File(abs_path + "/crc" + Plugins.getFilesDir(Plugins.Plugin.convert(plugin)));
+			if (myfile_crc.exists()) myfile_crc.delete();
+			Writer crc_out = new OutputStreamWriter(new FileOutputStream(myfile_crc));			
+			String crc_val = Plugins.getPluginCrc(plugin);
+			crc_out.write(crc_val);
+			crc_out.close();
+
 		} catch (Exception e) {
 			result = false;
 			if (message.length() == 0)
