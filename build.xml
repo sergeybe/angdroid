@@ -34,6 +34,9 @@
     <target name="classics-debug" depends="classics-copy,classics-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="classics-debug" />
     </target>
+    <target name="classics-release" depends="classics-copy,classics-release-override">
+	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="classics-release" />
+    </target>
     <target name="classics-plugin-src" depends="classics-copy,classics-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="plugin-src" />
     </target>
