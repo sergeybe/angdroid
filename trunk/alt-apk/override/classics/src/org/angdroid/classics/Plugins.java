@@ -1,4 +1,4 @@
-package org.angdroid.variants;
+package org.angdroid.classics;
 
 import java.util.zip.ZipInputStream;
 import java.util.Scanner;
