@@ -1,6 +1,7 @@
 package org.angdroid.variants;
 
 import java.util.zip.ZipInputStream;
+import java.util.Scanner;
 import java.io.InputStream;
 
 final public class Plugins {
@@ -69,6 +70,18 @@ final public class Plugins {
 		//	is = Preferences.getResources().openRawResource(R.raw.zipnpp);
 
 		return new ZipInputStream(is);
+	}
+	public static String getPluginCrc(int plugin) {
+		InputStream is = null;
+		if (plugin == Plugin.ToME.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crctome);
+		else if (plugin == Plugin.Sangband.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crcsang);
+		else if (plugin == Plugin.Steamband.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crcsteam);
+		//else if (plugin == Plugin.NPP.getId())
+		//	is = Preferences.getResources().openRawResource(R.raw.crcnpp);
+		return new Scanner(is).useDelimiter("\\A").next().trim();
 	}
 
 	public static String getUpgradePath(Plugin p) {

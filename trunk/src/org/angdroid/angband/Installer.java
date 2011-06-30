@@ -5,8 +5,11 @@ import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.Scanner;
 
 import android.util.Log;
 import android.os.Environment;
@@ -82,11 +85,21 @@ public class Installer {
 			return true;
 		}
 
+		/* old verification method
 		if (Preferences.getInstalledVersion().compareTo(Preferences.getVersion()) == 0) {
 			state = InstallState.Success;
 			return false;
 		}
-		return true;
+		*/
+
+		/* new verification method compares plugin files crc value */
+		int[] plugins = Preferences.getInstalledPlugins();
+		for(int i = 0; i < plugins.length; i++) {
+			if (!doesCrcMatch(plugins[i])) return true;
+		}
+
+		state = InstallState.Success;
+		return false;
 	}
 
 	public void install() {
@@ -104,11 +117,31 @@ public class Installer {
 			if (!success) break;
 		}
 		if (success) {
-			Preferences.setInstalledVersion(Preferences.getVersion());
+			// replaced with crc logic
+			//Preferences.setInstalledVersion(Preferences.getVersion());
 			state = InstallState.Success;
 		}
 		else
 			state = InstallState.Failure;
+	}
+
+	private boolean doesCrcMatch(int plugin) {
+		//Log.d("Angband","doesCrcMatch "+plugin);
+		boolean result = false;
+		try {
+			File f = new File(Preferences.getAngbandFilesDirectory(plugin));
+			f.mkdirs();
+			String filename = f.getAbsolutePath() + "/crc" + Plugins.getFilesDir(Plugins.Plugin.convert(plugin));
+			File myfile = new File(filename);
+			FileInputStream fis = new FileInputStream(myfile);
+			String currentCrc = new Scanner(fis).useDelimiter("\\A").next().trim();
+			//Log.d("Angband","doesCrcMatch.currentcrc="+currentCrc);
+			//Log.d("Angband","doesCrcMatch.plugincrc="+Plugins.getPluginCrc(plugin));
+			result = (Plugins.getPluginCrc(plugin).compareTo(currentCrc) == 0);
+		} catch (Exception e) {
+			Log.v("Angband", "doesCrcMatch.error reading crc: " + e);
+		}
+		return result;
 	}
 
 	private boolean extractPluginResources(int plugin) {
@@ -120,6 +153,15 @@ public class Installer {
 			String abs_path = f.getAbsolutePath();
 			//Log.v("Angband", "installing to " + abs_path);
 
+			// update crc file
+			File myfile_crc = new File(abs_path + "/crc" + Plugins.getFilesDir(Plugins.Plugin.convert(plugin)));
+			if (myfile_crc.exists()) myfile_crc.delete();
+			Writer crc_out = new OutputStreamWriter(new FileOutputStream(myfile_crc));			
+			String crc_val = Plugins.getPluginCrc(plugin);
+			crc_out.write(crc_val);
+			crc_out.close();
+
+			// copy game files
 			ZipInputStream zis = Plugins.getPluginZip(plugin);
 			ZipEntry ze;
 			while ((ze = zis.getNextEntry()) != null) {
