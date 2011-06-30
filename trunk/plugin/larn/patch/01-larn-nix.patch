@@ -1,0 +1,368 @@
+diff -Nru --strip-trailing-cr larn-12.4.4/src/ansiterm.c larn-12.4.4.nix/src/ansiterm.c
+--- larn-12.4.4/src/ansiterm.c	2010-02-15 17:03:24 -0800
++++ larn-12.4.4.nix/src/ansiterm.c	2011-03-17 05:11:49 -0700
+@@ -128,7 +128,9 @@
+ 	cbreak();
+ 	nonl();
+ 	keypad(stdscr, 1);
++#ifdef WINDOWS
+ 	PDC_save_key_modifiers(1);
++#endif
+ }
+ 
+ 
+@@ -175,6 +177,7 @@
+ 
+ 	key = getch();
+ 
++#ifdef WINDOWS
+ 	if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_SHIFT) {
+ 		switch (key) {
+ 			case '1': return 'B';
+@@ -188,17 +191,20 @@
+ 			case '9': return 'U';
+ 		}
+ 	}
++#endif
+ 
+ 	switch (key) {
+ 	case KEY_UP: return 'k';
+ 	case KEY_DOWN: return 'j';
+ 	case KEY_LEFT: return 'h';
+ 	case KEY_RIGHT: return 'l';
++#ifdef WINDOWS
+ 	case KEY_A2: return 'k';
+ 	case KEY_B1: return 'h';
+ 	case KEY_B3: return 'l';
+ 	case KEY_C2: return 'j';
+ 	case PADENTER: return 13;
++#endif
+ 	case KEY_A1: return 'y';
+ 	case KEY_A3: return 'u';
+ 	case KEY_C1: return 'b';
+diff -Nru --strip-trailing-cr larn-12.4.4/src/io.c larn-12.4.4.nix/src/io.c
+--- larn-12.4.4/src/io.c	2010-02-18 21:53:12 -0800
++++ larn-12.4.4.nix/src/io.c	2011-03-17 05:11:49 -0700
+@@ -57,12 +57,20 @@
+ #include <time.h>
+ #include <ctype.h>
+ 
++#ifdef WINDOWS
+ #include <io.h>
++#else
++#include <unistd.h>
++#endif
+ #include <sys/stat.h>
+ 
+ #include <setjmp.h>
+ #include <fcntl.h>     /* For O_BINARY */
++#ifdef WINDOWS
+ #include <conio.h>
++#else
++#include "kbhit.h"
++#endif
+ 
+ #include "larncons.h"
+ #include "larndata.h"
+@@ -988,7 +996,7 @@
+ static void warn(char *msg)
+ {
+ 
+-	fprintf(stderr, msg);
++	fprintf(stderr, "%s", msg);
+ }
+ 
+ 
+diff -Nru --strip-trailing-cr larn-12.4.4/src/kbhit.c larn-12.4.4.nix/src/kbhit.c
+--- larn-12.4.4/src/kbhit.c	1969-12-31 16:00:00 -0800
++++ larn-12.4.4.nix/src/kbhit.c	2011-03-17 05:11:49 -0700
+@@ -0,0 +1,57 @@
++#include "kbhit.h"
++#include <termios.h>
++/* for read() */
++#include <unistd.h>   
++
++static struct termios initial_settings, new_settings;
++static int peek_character = -1;
++
++void init_keyboard(void)
++{
++    tcgetattr(0,&initial_settings);
++    new_settings = initial_settings;
++    new_settings.c_lflag &= ~ICANON;
++    new_settings.c_lflag &= ~ECHO;
++    new_settings.c_lflag &= ~ISIG;
++    new_settings.c_cc[VMIN] = 1;
++    new_settings.c_cc[VTIME] = 0;
++    tcsetattr(0, TCSANOW, &new_settings);
++}
++
++void close_keyboard(void)
++{
++    tcsetattr(0, TCSANOW, &initial_settings);
++}
++
++int kbhit(void)
++{
++unsigned char ch;
++int nread;
++
++    if (peek_character != -1) return 1;
++    new_settings.c_cc[VMIN]=0;
++    tcsetattr(0, TCSANOW, &new_settings);
++    nread = read(0,&ch,1);
++    new_settings.c_cc[VMIN]=1;
++    tcsetattr(0, TCSANOW, &new_settings);
++    if(nread == 1) 
++    {
++        peek_character = ch;
++        return 1;
++    }
++    return 0;
++}
++
++int readch(void)
++{
++char ch;
++
++    if(peek_character != -1) 
++    {
++        ch = peek_character;
++        peek_character = -1;
++        return ch;
++    }
++    read(0,&ch,1);
++    return ch;
++}
+diff -Nru --strip-trailing-cr larn-12.4.4/src/kbhit.h larn-12.4.4.nix/src/kbhit.h
+--- larn-12.4.4/src/kbhit.h	1969-12-31 16:00:00 -0800
++++ larn-12.4.4.nix/src/kbhit.h	2011-03-17 05:11:49 -0700
+@@ -0,0 +1,9 @@
++#ifndef KBHITh
++#define KBHITh
++
++void   init_keyboard(void);
++void   close_keyboard(void);
++int      kbhit(void);
++int     readch(void); 
++
++#endif 
+diff -Nru --strip-trailing-cr larn-12.4.4/src/larnfunc.h larn-12.4.4.nix/src/larnfunc.h
+--- larn-12.4.4/src/larnfunc.h	2010-02-15 18:16:12 -0800
++++ larn-12.4.4.nix/src/larnfunc.h	2011-03-17 05:11:49 -0700
+@@ -562,5 +562,16 @@
+ void		sethard(int);
+ 
+ 
+-
+-
++#ifndef WINDOWS
++#define _read read
++#define _creat creat
++#define _open open
++#define _lseek lseek
++#define _close close
++#define _write write
++#define _chmod chmod
++#define _kbhit kbhit
++#define _getch ansiterm_getch
++#define _S_IWRITE 0666
++#define	_setmode(x, y)
++#endif
+diff -Nru --strip-trailing-cr larn-12.4.4/src/makefile larn-12.4.4.nix/src/makefile
+--- larn-12.4.4/src/makefile	2010-02-19 00:40:38 -0800
++++ larn-12.4.4.nix/src/makefile	2011-03-14 12:36:50 -0700
+@@ -45,7 +45,7 @@
+ -Wstrict-prototypes -Wmissing-prototypes -Wdeclaration-after-statement \
+ -Wshadow -Wmissing-declarations -Wold-style-definition -Wredundant-decls \
+ -g -D_FORTIFY_SOURCE=2 -DDEBUG -DWINDOWS 
+-LDFLAGS=-lpdcurses
++LDFLAGS=-lpdcurses 
+ 
+ STRIP_BINARY=no
+ 
+@@ -56,7 +56,8 @@
+ else ifeq ($(MAKECMDGOALS),release)
+ 
+ CFLAGS=-Os -Wall -fomit-frame-pointer -DWINDOWS
+-LDFLAGS=-Wl,-O1 -lpdcurses
++LDFLAGS=-lpdcurses 
++
+ 
+ STRIP_BINARY=yes
+ 
+diff -Nru --strip-trailing-cr larn-12.4.4/src/makefile.nix larn-12.4.4.nix/src/makefile.nix
+--- larn-12.4.4/src/makefile.nix	1969-12-31 16:00:00 -0800
++++ larn-12.4.4.nix/src/makefile.nix	2011-03-17 05:11:49 -0700
+@@ -0,0 +1,112 @@
++#
++# *nix Larn
++#
++# This version of Larn uses ncurses specific routines.
++
++#
++# Source files
++#
++SRC=\
++  action.c \
++  ansiterm.c \
++  bill.c \
++  config.c \
++  create.c \
++  data.c   \
++  diag.c   \
++  display.c \
++  fortune.c \
++  global.c  \
++  help.c    \
++  iventory.c\
++  io.c      \
++  kbhit.c   \
++  main.c    \
++  monster.c \
++  moreobj.c \
++  movem.c   \
++  object.c  \
++  regen.c   \
++  savelev.c \
++  scores.c  \
++  spheres.c \
++  spells.c  \
++  store.c   \
++  sysdep.c  \
++  tgoto.c   \
++  tok.c
++
++
++#
++# goal: debug
++#
++ifeq ($(MAKECMDGOALS),debug)
++
++CFLAGS=-Wall -Wextra -ansi -pedantic -Wpointer-arith \
++-Wstrict-prototypes -Wmissing-prototypes -Wdeclaration-after-statement \
++-Wshadow -Wmissing-declarations -Wold-style-definition -Wredundant-decls \
++-g -DDEBUG 
++LDFLAGS=-lncurses
++
++STRIP_BINARY=no
++
++
++#
++# goal: release 
++#
++else ifeq ($(MAKECMDGOALS),release)
++
++CFLAGS=-Os -Wall -fomit-frame-pointer 
++LDFLAGS=-Wl,-O1 -lncurses
++
++STRIP_BINARY=yes
++
++endif
++
++
++OBJ=$(SRC:.c=.o)
++EXE=larn
++
++CC=gcc
++RM=rm
++CP=cp
++
++
++.PHONY : build
++build: $(EXE)
++	@echo Build complete!
++
++ifeq ($(STRIP_BINARY),yes)
++	@echo Stripping binary..
++	@strip $(EXE)
++endif
++
++
++
++.PHONY: debug
++debug: build
++
++.PHONY: release
++release: build
++
++.PHONY : clean
++clean:
++	-$(RM) *.o
++	-$(RM) $(EXE)
++
++.PHONY : distro
++distro:
++	@echo Making distributable
++	@$(CP) *.c ..\\distro\\src\\
++	@$(CP) *.h ..\\distro\\src\\
++	@$(CP) makefile ..\\distro\\src\\
++	@$(CP) readme.txt ..\\distro\\
++	@$(CP) history.txt ..\\distro\\
++	@$(CP) larn.* ..\\distro\\bin
++
++%.o: %.c
++	@echo Building $<
++	@$(CC) $(CFLAGS) -o $@ -c $<
++
++$(EXE): $(OBJ)
++	@$(CC) $(OBJ) $(LDFLAGS) -o $@
+diff -Nru --strip-trailing-cr larn-12.4.4/src/scores.c larn-12.4.4.nix/src/scores.c
+--- larn-12.4.4/src/scores.c	2010-02-18 20:32:48 -0800
++++ larn-12.4.4.nix/src/scores.c	2011-03-17 05:11:49 -0700
+@@ -21,7 +21,12 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <stdio.h>
++#ifdef WINDOWS
+ #include <io.h>
++#else
++#include <unistd.h>
++#include <fcntl.h>
++#endif
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
+diff -Nru --strip-trailing-cr larn-12.4.4/src/sysdep.c larn-12.4.4.nix/src/sysdep.c
+--- larn-12.4.4/src/sysdep.c	2010-02-06 23:15:12 -0800
++++ larn-12.4.4.nix/src/sysdep.c	2011-03-17 05:20:36 -0700
+@@ -4,10 +4,11 @@
+ /********************************************
+  *                 WINDOWS                  *
+  ********************************************/
+-
++#ifdef WINDOWS
+ #include <windows.h>
+ #include "larnfunc.h"
+ 
++
+ /*
+  *  routine to take a nap for n milliseconds
+  */
+@@ -24,15 +25,14 @@
+ 	
+ 	Sleep(x);
+ }
+-
+-
+-#if defined(UNIX)
++#else
+ 
+ /********************************************
+  *                 UNIX                     *
+  ********************************************/
+ 
+ #include <unistd.h>
++#include "larnfunc.h"
+ 
+ 
+ /*
+@@ -49,7 +49,7 @@
+ 	
+ 	lflush();
+ 	
+-	usleep(x);
++	usleep(x*1000);
+ }
+ 
+ 

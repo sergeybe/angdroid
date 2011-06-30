@@ -1,0 +1,1123 @@
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/bin/mcolor.txt larn-12.4.4-color/bin/mcolor.txt
+--- larn-12.4.4-nix/bin/mcolor.txt	1969-12-31 16:00:00 -0800
++++ larn-12.4.4-color/bin/mcolor.txt	2011-03-07 12:53:00 -0800
+@@ -0,0 +1,70 @@
++# curses colors: black, blue, green, cyan, red, magenta, yellow, white
++#                colors in all uppercase indicate a lighter hue                                      1         1         1
++#           1         2         3         4         5         6         7         8         9         0         1         2         
++# .1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567
++O .BGHJKOScjtAELNQRZabhiCTYdegmvzFWflorXV.pqsyUkMwDDPxnDDuD........,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++C BLUE     # FLOOR 0
++C BLACK    # BAT 1
++C WHITE    # GNOME 2
++C green    # HOBGOBLIN 3
++C white    # JACKAL 4
++C magenta  # KOBOLD 5
++C green    # ORC 6
++C WHITE    # SNAKE 7
++C blue     # CENTIPEDE 8
++C WHITE    # JACULI 9
++C WHITE    # TROGLODYTE 10
++C red      # ANT 11
++C RED      # EYE 12 
++C GREEN    # LEPRECHAUN 13
++C YELLOW   # NYMPH 14
++C BLACK    # QUASIT 15 
++C RED      # RUSTMONSTER 16 
++C green    # ZOMBIE 17 
++C WHITE    # ASSASSINBUG 18 
++C WHITE    # BUGBEAR 19 
++C red      # HELLHOUND 20 
++C WHITE    # ICELIZARD 21 
++C magenta  # CENTAUR 22 
++C GREEN    # TROLL 23 
++C WHITE    # YETI 24 
++C WHITE    # WHITEDRAGON 25
++C MAGENTA  # ELF 26
++C GREEN    # CUBE 27 
++C cyan     # METAMORPH 28 
++C CYAN     # VORTEX 29 
++C WHITE    # ZILLER 30 
++C magenta  # VIOLETFUNGI 31 
++C WHITE    # WRAITH 32 
++C green    # FORVALAKA 33 
++C YELLOW   # LAMANOBE 34 
++C WHITE    # OSEQUIP 35 
++C RED      # ROTHE 36
++C BLACK    # XORN 37
++C WHITE    # VAMPIRE 38
++C BLACK    # INVISIBLESTALKER 39
++C WHITE    # POLTERGEIST 40
++C BLUE     # DISENCHANTRESS 41
++C green    # SHAMBLINGMOUND 42
++C YELLOW   # YELLOWMOLD 43
++C yellow   # UMBERHULK 44
++C red      # GNOMEKING 45
++C WHITE    # MIMIC 46
++C BLUE     # WATERLORD 47
++C yellow   # BRONZEDRAGON 48
++C green    # GREENDRAGON 49
++C magenta  # PURPLEWORM 50
++C cyan     # XVART 51
++C WHITE    # SPIRITNAGA 52
++C white    # SILVERDRAGON 53
++C WHITE    # PLATINUMDRAGON 54
++C GREEN    # GREENURCHIN 55
++C red      # REDDRAGON 56
++C BLACK    # DEMONLORD 57
++C BLACK    # DEMONLORD2 58
++C BLACK    # DEMONLORD3 59
++C BLACK    # DEMONLORD4 60
++C BLACK    # DEMONLORD5 61
++C BLACK    # DEMONLORD6 62
++C BLACK    # DEMONLORD7 63
++C BLACK    # DEMONPRINCE 64
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/bin/ocolor.txt larn-12.4.4-color/bin/ocolor.txt
+--- larn-12.4.4-nix/bin/ocolor.txt	1969-12-31 16:00:00 -0800
++++ larn-12.4.4-color/bin/ocolor.txt	2011-03-10 18:05:46 -0800
+@@ -0,0 +1,98 @@
++# curses colors: black, blue, green, cyan, red, magenta, yellow, white
++#                colors in all uppercase indicate a lighter hue
++#           1         2         3         4         5         6         7         8         9  
++# 012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
++O .:\_^<_{%^6|2>_55}$'+#~[[[))))))========-?!?&~~~~~****899)))[[[[[)^.[1$$$.^^.3./0\4,_________
++C BLACK    # FLOOR 0
++C MAGENTA  # ALTAR 1
++C GREEN    # THRONE 2
++C RED      # ORB 3
++C BLACK    # PIT 4
++C WHITE    # STAIRSUP 5
++C WHITE    # ELEVATORUP 6
++C BLUE     # FOUNTAIN 7
++C BLACK    # STATUE 8
++C blue     # TELEPORTER 9
++C magenta  # SCHOOL 10
++C CYAN     # MIRROR 11
++C green    # DNDSTORE 12
++C WHITE    # STAIRSDOWN 13
++C WHITE    # ELEVATORDOWN 14
++C yellow   # BANK2 15
++C yellow   # BANK 16
++C BLACK    # DEADFOUNTAIN 17
++C yellow   # GOLDPILE 18
++C WHITE    # OPENDOOR 19
++C white    # CLOSEDDOOR 20
++C white    # WALL 21
++C RED      # LARNEYE 22
++C CYAN     # PLATE 23
++C cyan     # CHAIN 24
++C cyan     # LEATHER 25
++C CYAN     # SWORDofSLASHING 26
++C cyan     # HAMMER 27
++C CYAN     # SWORD 28
++C CYAN     # 2SWORD 29
++C cyan     # SPEAR 30
++C CYAN     # DAGGER 31
++C WHITE    # RINGOFEXTRA 32
++C green    # REGENRING 33
++C cyan     # PROTRING 34
++C yellow   # ENERGYRING 35
++C blue     # DEXRING 36
++C RED      # STRRING 37
++C MAGENTA  # CLEVERRING 38
++C red      # DAMRING 39
++C cyan     # BELT 40
++C WHITE    # SCROLL 41
++C CYAN     # POTION 42
++C RED      # BOOK 43
++C yellow   # CHEST 44             
++C YELLOW   # AMULET 45
++C green    # ORBOFDRAGON 46
++C WHITE    # SPIRITSCARAB 47
++C magenta  # CUBEofUNDEAD 48
++C BLACK    # NOTHEFT 49
++C WHITE    # DIAMOND 50
++C red      # RUBY 51
++C GREEN    # EMERALD 52
++C blue     # SAPPHIRE 53
++C WHITE    # ENTRANCE 54
++C red      # VOLDOWN 55
++C red      # VOLUP 56
++C cyan     # BATTLEAXE 57
++C CYAN     # LONGSWORD 58
++C cyan     # FLAIL 59
++C MAGENTA  # RING 60
++C cyan     # STUDLEATHER 61
++C cyan     # SPLINT 62
++C CYAN     # PLATEARMOR 63
++C CYAN     # SSPLATE 64
++C yellow   # LANCE 65
++C green    # TRAPARROW 66
++C BLACK    # TRAPARROWIV 67
++C CYAN     # SHIELD 68
++C cyan     # HOME 69
++C yellow   # MAXGOLD 70
++C yellow   # KGOLD 71
++C yellow   # DGOLD 72
++C BLACK    # IVDARTRAP 73
++C red      # DARTRAP 74
++C BLACK    # TRAPDOOR 75
++C BLACK    # IVTRAPDOOR 76
++C BLUE     # TRADEPOST 77
++C BLACK    # IVTELETRAP 78
++C BLACK    # DEADTHRONE 79
++C blue     # ANNIHILATION 80        /* sphere of annihilation */
++C WHITE    # THRONE2 81
++C GREEN    # LRS 82             /* Larn Revenue Service */
++C yellow   # COOKIE 83
++C WHITE    # URN 84
++C YELLOW   # BRASSLAMP 85
++C yellow   # HANDofFEAR 86      /* hand of fear */
++C magenta  # SPHTAILSMAN 87     /* tailsman of the sphere */
++C MAGENTA  # WWAND 88           /* wand of wonder */
++C RED      # PSTAFF 89          /* staff of power */
++C magenta  # VORPAL 90
++C red      # SLAYER 91
++C cyan     # ELVENCHAIN 92   /* used up to 92 */
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/ansiterm.c larn-12.4.4-color/src/ansiterm.c
+--- larn-12.4.4-nix/src/ansiterm.c	2011-03-17 07:14:54 -0700
++++ larn-12.4.4-color/src/ansiterm.c	2011-03-17 06:23:01 -0700
+@@ -117,6 +117,10 @@
+ 
+ #include "curses.h"
+ 
++#ifdef USE_COLOR
++int last_attr = COLOR_WHITE;
++#endif
++
+ static int llgetch(void);
+ 
+ void ansiterm_init(void)
+@@ -131,6 +135,9 @@
+ #ifdef WINDOWS
+ 	PDC_save_key_modifiers(1);
+ #endif
++#ifdef USE_COLOR
++	start_color();
++#endif
+ }
+ 
+ 
+@@ -291,6 +298,18 @@
+ 			attribute = atoi(param1);
+ 		}
+ 
++#ifdef USE_COLOR
++		int color;
++		if (*param2 == '\0') {
++			color = COLOR_WHITE;
++		} else {			
++			color = atoi(param2);
++		}
++		attribute = attribute?A_REVERSE:A_NORMAL;
++		attribute |= color;
++		attrset(attribute);
++		last_attr = attribute;
++#else
+ 		if (attribute == 0) {
+ 
+ 			attrset(A_NORMAL);
+@@ -299,6 +318,7 @@
+ 
+ 			attrset(A_REVERSE);
+ 		}
++#endif
+ 
+ 	} else {
+ 
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/data.c larn-12.4.4-color/src/data.c
+--- larn-12.4.4-nix/src/data.c	2010-02-18 21:38:28 -0800
++++ larn-12.4.4-color/src/data.c	2011-03-17 06:32:42 -0700
+@@ -125,9 +125,11 @@
+ char *levelname[]=
+ { " H"," 1"," 2"," 3"," 4"," 5"," 6"," 7"," 8"," 9","10","V1","V2","V3" };
+ 
++int objcolorlist[MAXOBJECT+2];
+ char objnamelist[MAXOBJECT+2] = ".:\\_^<_{%^6|2>_55}$'+#~[[[))))))========-?!"
+ 	"?&~~~~~****899)))[[[[[)^.[1$$$.^^.3./0\\4,_________";
+ 
++int monstcolorlist[DEMONPRINCE+2];
+ char monstnamelist[]=".BGHJKOScjtAELNQRZabhiCTYdegmvzFWflorXV.pqsyUkMwDDPxnDDuD........,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+ char floorc = '.';
+ char wallc  = '#';
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/display.c larn-12.4.4-color/src/display.c
+--- larn-12.4.4-nix/src/display.c	2010-02-15 17:55:14 -0800
++++ larn-12.4.4-color/src/display.c	2011-03-17 06:35:46 -0700
+@@ -4,13 +4,24 @@
+ #include "larndata.h"
+ #include "larnfunc.h"
+ 
++#define botsub( _idx, _x, _y, _str )			\
++	if ( cdesc[(_idx)] != cbak[(_idx)] )        \
++	{										\
++		cbak[(_idx)] = cdesc[(_idx)];			\
++		cursor( (_x), (_y) );					\
++		lprcat(lcolor_light_white());				\
++		lprintf( (_str), (int)cdesc[(_idx)] );		\
++		lprcolor_end();								\
++	}
+ 
+-#define botsub( _idx, _x, _y, _str )        \
++#define botsub_color( _idx, _x, _y, _str, _color_str )	\
+ 	if ( cdesc[(_idx)] != cbak[(_idx)] )        \
+ 	{                                   \
+ 	cbak[(_idx)] = cdesc[(_idx)];           \
+ 	cursor( (_x), (_y) );               \
++		lprcat(_color_str);							\
+ 	lprintf( (_str), (int)cdesc[(_idx)] ); \
++		lprcolor_end();								\
+ 	}
+ 
+ #define nlprc(_ch) lprc(_ch)
+@@ -67,29 +78,43 @@
+ 	if (bot3f) { bot3f=0; bot_spellx(); }
+ }
+ 
++char* stat_color(int cur, int max)
++{
++	if ((cur*100)/max < 40) return lcolor_red();
++	else if (cur < max) return lcolor_yellow();
++	else return lcolor_light_green();
++}
+ 
+ void bot_linex(void)
+ {
+ 	int i;
++	char* statc = "";
+ 	/*int debugtmp; */
+ 
++	char* ws = lcolor_light_white();
++	char* bs = lcolor_light_blue();
++	char* gs = lcolor_light_green();
++
+ 	if ( regen_bottom || (always))
+ 	{
+ 		regen_bottom = FALSE ;
+ 		cursor( 1,18);
++		statc = stat_color((int)cdesc[SPELLS],(int)cdesc[SPELLMAX]);
+ 		if (cdesc[SPELLMAX]>99) 
+-			lprintf("Spells:%3d(%3d)",(int)cdesc[SPELLS],(int)cdesc[SPELLMAX]);
++			lprintf("%sSpells:%s%3d%s(%s%3d%s)",bs,statc,(int)cdesc[SPELLS],bs,gs,(int)cdesc[SPELLMAX],bs);
+ 		else 
+-			lprintf("Spells:%3d(%2d) ",(int)cdesc[SPELLS],(int)cdesc[SPELLMAX]);
+-		lprintf(" AC: %-3d  WC: %-3d  Level",(int)cdesc[AC],(int)cdesc[WCLASS]);
++			lprintf("%sSpells:%s%3d%s(%s%2d%s) ",bs,statc,(int)cdesc[SPELLS],bs,gs,(int)cdesc[SPELLMAX],bs);
++		lprintf(" %sAC: %s%-3d  %sWC: %s%-3d  %sLevel",bs,ws,(int)cdesc[AC],bs,ws,(int)cdesc[WCLASS],bs);
+ 		if (cdesc[LEVEL]>99)
+-			lprintf("%3d",(int)cdesc[LEVEL]);
++			lprintf("%s%3d",ws,(int)cdesc[LEVEL]);
+ 		else 
+-			lprintf(" %-2d",(int)cdesc[LEVEL]);
++			lprintf(" %s%-2d",ws,(int)cdesc[LEVEL]);
+ 		/*debugtmp = cdesc[LEVEL];*/
+-		lprintf(" Exp: %-9d %s\n",(int)cdesc[EXPERIENCE],classname[cdesc[LEVEL]-1]);
+-		lprintf("HP: %3d(%3d) STR=%-2d INT=%-2d ", (int)cdesc[HP],(int)cdesc[HPMAX],(int)(cdesc[STRENGTH]+cdesc[STREXTRA]),(int)cdesc[INTELLIGENCE]);
+-		lprintf("WIS=%-2d CON=%-2d DEX=%-2d CHA=%-2d LV:", (int)cdesc[WISDOM],(int)cdesc[CONSTITUTION],(int)cdesc[DEXTERITY],(int)cdesc[CHARISMA]);
++		lprintf(" %sExp: %s%-9d %s%s\n",bs,ws,(int)cdesc[EXPERIENCE],gs,classname[cdesc[LEVEL]-1]);
++
++		statc = stat_color((int)cdesc[HP],(int)cdesc[HPMAX]);
++		lprintf("%sHP: %s%3d%s(%s%3d%s) STR=%s%-2d %sINT=%s%-2d ",bs,statc,(int)cdesc[HP],bs,gs,(int)cdesc[HPMAX],bs,ws,(int)(cdesc[STRENGTH]+cdesc[STREXTRA]),bs,ws,(int)cdesc[INTELLIGENCE]);
++		lprintf("%sWIS=%s%-2d %sCON=%s%-2d %sDEX=%s%-2d %sCHA=%s%-2d %sLV:%s", bs,ws,(int)cdesc[WISDOM],bs,ws,(int)cdesc[CONSTITUTION],bs,ws,(int)cdesc[DEXTERITY],bs,ws,(int)cdesc[CHARISMA],bs,ws);
+ 
+ 		if ((level==0) || (wizard))  
+ 			cdesc[TELEFLAG]=0;
+@@ -97,7 +122,7 @@
+ 			lprcat(" ?");  
+ 		else  
+ 			lprcat(levelname[level]);
+-		lprintf("  Gold: %-6d",(int)cdesc[GOLD]);
++		lprintf("  %sGold: %s%-6d%s",bs,ws,(int)cdesc[GOLD],lcolor_end());
+ 		always=1; 
+ 		botside();
+ 		cdesc[TMP] = cdesc[STRENGTH]+cdesc[STREXTRA];
+@@ -105,22 +130,38 @@
+ 		return;
+ 	}
+ 
+-	botsub(SPELLS,8,18,"%3d");
++	statc = stat_color((int)cdesc[SPELLS],(int)cdesc[SPELLMAX]);
++	botsub_color(SPELLS,8,18,"%3d",statc);
+ 	if (cdesc[SPELLMAX]>99)
+ 	{
+-		botsub(SPELLMAX,12,18,"%3d)");
++		botsub_color(SPELLMAX,12,18,"%3d",gs);
++		if (cdesc[SPELLMAX] != cbak[SPELLMAX]) 
++		{
++			lprcat(bs);
++			lprcat(")");
++		}
+ 	}
+ 	else
+-		botsub(SPELLMAX,12,18,"%2d) ");
+-	botsub(HP,5,19,"%3d");
+-	botsub(HPMAX,9,19,"%3d");
++	{
++		botsub_color(SPELLMAX,12,18,"%2d",gs);
++		if (cdesc[SPELLMAX] != cbak[SPELLMAX]) 
++		{
++			lprcat(bs);
++			lprcat(") ");
++		}
++	}   
++	statc = stat_color((int)cdesc[HP],(int)cdesc[HPMAX]);
++	botsub_color(HP,5,19,"%3d",statc);
++	botsub_color(HPMAX,9,19,"%3d",gs);
+ 	botsub(AC,21,18,"%-3d");
+ 	botsub(WCLASS,30,18,"%-3d");
+ 	botsub(EXPERIENCE,49,18,"%-9d");
+ 	if (cdesc[LEVEL] != cbak[LEVEL])
+ 	{
+ 		cursor(59,18);
++		lprcat(gs);
+ 		lprcat(classname[cdesc[LEVEL]-1]);
++		lprcolor_end();
+ 	}
+ 	if (cdesc[LEVEL]>99)
+ 	{
+@@ -142,6 +183,7 @@
+ 		cbak[TELEFLAG] = cdesc[TELEFLAG];
+ 		cbak[CAVELEVEL] = level;
+ 		cursor(59,19);
++		lprcat(ws);
+ 		if (cdesc[TELEFLAG])
+ 			lprcat(" ?");
+ 		else
+@@ -177,7 +219,10 @@
+ 		bot_linex();
+ 	}
+ 	else
+-		botsub(HP,5,19,"%3d");
++	{
++		char *statc = stat_color((int)cdesc[HP],(int)cdesc[HPMAX]);
++		botsub_color(HP,5,19,"%3d",statc);
++	}
+ }
+ 
+ 
+@@ -187,8 +232,8 @@
+ */
+ static void bot_spellx(void)
+ {
+-
+-	botsub(SPELLS,9,18,"%2d");
++	char* statc = stat_color((int)cdesc[SPELLS],(int)cdesc[SPELLMAX]);
++	botsub_color(SPELLS,8,18,"%3d",statc);
+ }
+ 
+ 
+@@ -237,7 +282,8 @@
+ 		if ((always) || (cdesc[idx] != cbak[idx]))
+ 		{
+ 			if ((always) || (cbak[idx] == 0))
+-			{ if (cdesc[idx]) { cursor(70,i+1); lprcat(bot_data[i].string); } }  else
++				{ if (cdesc[idx]) { cursor(70,i+1); lprcat(lcolor_light_magenta());
++						lprcat(bot_data[i].string); lprcolor_end();} }  else
+ 			if (cdesc[idx]==0)     { cursor(70,i+1); lprcat("          "); }
+ 			cbak[idx]=cdesc[idx];
+ 		}
+@@ -273,7 +319,7 @@
+ 			idx = bot_data[i].typ;
+ 			if (cdesc[idx])
+ 			{
+-				cursor(70,i+1); lprcat(bot_data[i].string);
++				cursor(70,i+1); lprcat(lcolor_light_magenta()); lprcat(bot_data[i].string); lprcolor_end();
+ 			}
+ 			cbak[idx]=cdesc[idx];
+ 		}
+@@ -388,6 +434,7 @@
+ 
+ 				if (i == playerx && j == playery) {
+ 
++					lprcat(lcolor_light_red());
+ 					nlprc('@');
+ 
+ 					continue;
+@@ -397,10 +444,12 @@
+ 
+ 				if (k && know[i][j] & KNOWHERE) {
+ 
++					lprcolor_monst(k);
+ 					nlprc(monstnamelist[k]);
+ 
+ 				} else {
+ 
++					lprcolor_obj(item[i][j]);
+ 					nlprc(objnamelist[item[i][j]]);
+ 				}
+ 
+@@ -418,6 +467,7 @@
+ 		}
+ 	}
+ 
++	lprcolor_end();
+ 	resetbold();
+ 
+ 	if (d_flag) {
+@@ -464,14 +514,19 @@
+ 					--x;
+ 				for (i=m; i<=x; i++)
+ 				{
+-					if ((k=mitem[i][j]) != 0)  lprc(monstnamelist[k]);
++					if ((k=mitem[i][j]) != 0)  {
++						lprcolor_monst(k);
++						lprc(monstnamelist[k]);
++					}
+ 					else switch(k=item[i][j])
+ 					{
+ case OWALL:  case 0: case OIVTELETRAP:  case OTRAPARROWIV:
+ case OIVDARTRAP: case OIVTRAPDOOR:
++	lprcolor_obj(k);
+ 	lprc(objnamelist[k]);   
+ 	break;
+ default:
++	lprcolor_obj(k);
+ 	lprc(objnamelist[k]);
+ 	break;
+ 					};
+@@ -480,6 +535,7 @@
+ 				m = maxx;
+ 
+ 			}
++	lprcolor_end();
+ }
+ 
+ 
+@@ -508,6 +564,7 @@
+ 
+ 	if (k) {
+ 
++		lprcolor_monst(k);
+ 		lprc(monstnamelist[k]);
+ 
+ 	} else {
+@@ -522,9 +579,11 @@
+ case OTRAPARROWIV:
+ case OIVDARTRAP:
+ case OIVTRAPDOOR:
++	lprcolor_obj(k);
+ 	lprc(objnamelist[k]);
+ 	break;
+ default:
++	lprcolor_obj(k);
+ 	lprc(objnamelist[k]);
+ 		}		
+ 	}
+@@ -532,6 +591,7 @@
+ 
+ 	/* we end up knowing about it */
+ 	know[x][y] = KNOWALL;  
++	lprcolor_end();
+ }
+ 
+ 
+@@ -547,7 +607,9 @@
+ {
+ 	show1cell( oldx, oldy );
+ 	cursor(playerx+1,playery+1);
++	lprcat(lcolor_light_red());
+ 	lprc('@');
++	lprcolor_end();
+ 	cursor(playerx+1,playery+1);
+ 	oldx=playerx;  oldy=playery;
+ }
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/help.c larn-12.4.4-color/src/help.c
+--- larn-12.4.4-nix/src/help.c	2010-02-05 21:15:24 -0800
++++ larn-12.4.4-color/src/help.c	2011-03-17 06:36:13 -0700
+@@ -107,7 +107,8 @@
+ 	
+ 	lprcat(" to continue: ");
+ 	
+-	while (ttgetch() != '\n');
++	char c = ' ';
++	while (c != '\n' && c != '\33') {c = ttgetch();}
+ 
+ 	setscroll();
+ }
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/io.c larn-12.4.4-color/src/io.c
+--- larn-12.4.4-nix/src/io.c	2011-03-17 07:14:54 -0700
++++ larn-12.4.4-color/src/io.c	2011-03-17 07:05:27 -0700
+@@ -78,8 +78,44 @@
+ 
+ #include "ansiterm.h"
+ 
++#ifdef USE_COLOR
++#include <string.h>
+ 
++#ifdef clear
++#undef clear
++#endif
++#include "curses.h"
++
++/* hack for now */
++
++#define COLOR_LIGHT_MAGENTA COLOR_MAGENTA
++#define COLOR_LIGHT_RED COLOR_RED
++#define COLOR_LIGHT_GREEN COLOR_GREEN
++#define COLOR_LIGHT_BLACK COLOR_WHITE
++#define COLOR_LIGHT_CYAN COLOR_CYAN
++#define COLOR_LIGHT_WHITE COLOR_WHITE
++#define COLOR_LIGHT_BLUE COLOR_BLUE
++#define COLOR_LIGHT_YELLOW COLOR_YELLOW
++
++#define ST_LIGHT_MAGENTA 	((unsigned char)(0x80 | COLOR_LIGHT_MAGENTA))
++#define ST_LIGHT_BLUE    	((unsigned char)(0x80 | COLOR_LIGHT_BLUE))
++#define ST_LIGHT_GREEN    	((unsigned char)(0x80 | COLOR_LIGHT_GREEN))
++#define ST_LIGHT_RED    	((unsigned char)(0x80 | COLOR_LIGHT_RED))
++#define ST_RED    			((unsigned char)(0x80 | COLOR_RED))
++#define ST_LIGHT_YELLOW    	((unsigned char)(0x80 | COLOR_LIGHT_YELLOW))
++#define ST_YELLOW 		   	((unsigned char)(0x80 | COLOR_YELLOW))
++#define ST_LIGHT_WHITE    	((unsigned char)(0x80 | COLOR_LIGHT_WHITE))
++#define ST_INVERSE    	    ((unsigned char)0x10)
++
++#define LINBUFSIZE 256      /* size of the lgetw() and lgetl() buffer       */
++
++unsigned char lcolor_byte(int color, int inverse);
++int curses_color(char* name);
++void init_color_file(char* filename, int* colorlist, int count);
++
++#else
+ #define LINBUFSIZE 128      /* size of the lgetw() and lgetl() buffer       */
++#endif
+ int lfd;            /*  output file numbers     */
+ int fd;             /*  input file numbers      */
+ 
+@@ -107,7 +143,7 @@
+ void setupvt100(void)
+ {
+ 
+-	clear();
++	wclear(stdscr);
+ 
+ 	setscroll();
+ 
+@@ -758,8 +794,11 @@
+ */
+ void lstandout(char *str)
+ {
+-
++#ifdef USE_COLOR
++	*lpnt++ = (ST_RED); /* | ST_INVERSE); */
++#else
+ 	*lpnt++ = ST_START;
++#endif
+ 
+ 	while (*str) {
+ 
+@@ -769,7 +808,82 @@
+ 	*lpnt++ = ST_END;
+ }
+ 
++unsigned char lcolor_byte(int color, int inverse)
++{
++#ifdef USE_COLOR
++	unsigned char b = 0x80;
++	b |= (inverse?ST_INVERSE:0x00);
++	b |= (color&0x0F);
++	return b;
++#else
++	return 0;
++#endif
++}
+ 
++void lprcolor_monst(int m)
++{
++#ifdef USE_COLOR
++	if (m>-1 && m<=DEMONPRINCE)
++		*lpnt++ = lcolor_byte(monstcolorlist[m],0);
++#endif
++}
++void lprcolor_obj(int o)
++{
++#ifdef USE_COLOR
++	if (o>-1 && o<=MAXOBJECT)
++		*lpnt++ = lcolor_byte(objcolorlist[o],0);
++#endif
++}
++/*
++* lprcolor_end()    Ansi escape end color (i.e normal attribute).
++*/
++void lprcolor_end(void)
++{
++#ifdef USE_COLOR
++	*lpnt++ = ST_END;
++#endif
++}
++
++char* lcolor_light_magenta(void)
++{
++	static char ms[2] = {ST_LIGHT_MAGENTA,0};
++	return ms;
++}
++char* lcolor_light_blue(void)
++{
++	static char ms[2] = {ST_LIGHT_BLUE,0};
++	return ms;
++}
++char* lcolor_light_white(void)
++{
++	static char ms[2] = {ST_LIGHT_WHITE,0};
++	return ms;
++}
++char* lcolor_red(void)
++{
++	static char ms[2] = {ST_RED,0};
++	return ms;
++}
++char* lcolor_yellow(void)
++{
++	static char ms[2] = {ST_YELLOW,0};
++	return ms;
++}
++char* lcolor_light_green(void)
++{
++	static char ms[2] = {ST_LIGHT_GREEN,0};
++	return ms;
++}
++char* lcolor_light_red(void)
++{
++	static char ms[2] = {ST_LIGHT_RED,0};
++	return ms;
++}
++char* lcolor_end(void)
++{
++	static char ms[2] = {ST_END,0};
++	return ms;
++}
+ 
+ 
+ /*
+@@ -799,6 +913,8 @@
+ 	char *str;
+ 	static int curx = 0;
+ 	static int cury = 0;
++	char y_color_start[10];
++	y_color_start[0]='\0';
+ 
+ 	if ((lpoint = lpnt - lpbuf) > 0)
+ 	{
+@@ -820,6 +936,17 @@
+ 		}
+ 		for (str = lpbuf; str < lpnt; str++)
+ 		{
++#ifdef USE_COLOR
++			unsigned char test = (unsigned char)*str;
++			if (test>0x80) {
++				int p1 = (test & 0x10)?1:0;
++				int p2 = (test & 0x0F);
++				char color_start[10];
++				sprintf(color_start,"%c[%d;%dm",27,p1,p2);
++				tputs(color_start);
++			}
++			else {
++#endif
+ 			if (*str>=32)   { ttputch (*str); curx++; }
+ 			else switch (*str) {
+ 				case CLEAR:     tputs (CL);     curx = cury = 0;
+@@ -874,6 +1001,9 @@
+ 					ttputch (*str);
+ 					curx++;
+ 			}
++#ifdef USE_COLOR
++		}
++#endif
+ 		}
+ 	}
+ 	lpnt = lpbuf;
+@@ -882,7 +1012,7 @@
+ 
+ 
+ 
+-static int index=0;
++static int ch_index=0;
+ 
+ /*
+ * ttputch(ch)      Print one character in decoded output buffer.
+@@ -890,9 +1020,9 @@
+ static void ttputch(int c)
+ {
+ 
+-	outbuf[index++] = (char)c;
++	outbuf[ch_index++] = (char)c;
+ 
+-	if (index >= BUFBIG) {
++	if (ch_index >= BUFBIG) {
+ 
+ 		flush_buf();
+ 	}
+@@ -924,19 +1054,19 @@
+ */
+ static void flush_buf(void)
+ {
+-	if (index) {
++	if (ch_index) {
+ 
+ 		if (lfd == 1) {
+ 
+-			ansiterm_out(outbuf, index);
++			ansiterm_out(outbuf, ch_index);
+ 
+ 		} else {
+ 
+-			_write(lfd, outbuf, index);
++			_write(lfd, outbuf, ch_index);
+ 		}
+ 	}
+ 
+-	index = 0;
++	ch_index = 0;
+ }
+ 
+ 
+@@ -995,7 +1125,6 @@
+ 
+ static void warn(char *msg)
+ {
+-
+ 	fprintf(stderr, "%s", msg);
+ }
+ 
+@@ -1058,3 +1187,63 @@
+ 	scbr();
+ }
+ 
++
++/*
++*  color initialization 
++*/
++#ifdef USE_COLOR
++int curses_color(char* name) {
++	if (strncmp(name,"black",5)==0) return COLOR_BLACK;
++	if (strncmp(name,"blue",4)==0) return COLOR_BLUE;
++	if (strncmp(name,"green",5)==0) return COLOR_GREEN;
++	if (strncmp(name,"cyan",4)==0) return COLOR_CYAN;
++	if (strncmp(name,"red",3)==0) return COLOR_RED;
++	if (strncmp(name,"magenta",7)==0) return COLOR_MAGENTA;
++	if (strncmp(name,"yellow",6)==0) return COLOR_YELLOW;
++	if (strncmp(name,"white",5)==0) return COLOR_WHITE;
++	if (strncmp(name,"BLACK",5)==0) return COLOR_LIGHT_BLACK;	
++	if (strncmp(name,"BLUE",4)==0) return COLOR_LIGHT_BLUE;	
++	if (strncmp(name,"GREEN",5)==0) return COLOR_LIGHT_GREEN;	
++	if (strncmp(name,"CYAN",4)==0) return COLOR_LIGHT_CYAN;	
++	if (strncmp(name,"RED",3)==0) return COLOR_LIGHT_RED;	
++	if (strncmp(name,"MAGENTA",7)==0) return COLOR_LIGHT_MAGENTA;	
++	if (strncmp(name,"YELLOW",6)==0) return COLOR_LIGHT_YELLOW;	
++	if (strncmp(name,"WHITE",5)==0) return COLOR_LIGHT_WHITE;	
++	else return COLOR_WHITE;
++}
++
++void init_color_file(char* filename, int* colorlist, int count)
++{
++	int color,i = 0;
++	char* ln = NULL;
++
++	if (lopen(filename) < 0) return;
++
++	while((ln = lgetl())) {
++		if (ln[0] == '#') continue;
++		switch(ln[0]) {
++		case 'O':
++			/*
++			p = strchr(&ln[2],'\n');
++			if (p) *p = '\0';
++			if (strlen(&ln[2])==count) {
++				strcpy(list,&ln[2]);
++			}
++			*/
++			break;
++		case 'C':
++			color = COLOR_WHITE;
++			if (strlen(ln)>3) {
++				color = curses_color(&(ln[2]));
++			}
++			colorlist[i++] = color;
++			break;
++		}
++		if (i>=count) break; /* max item/monster reached */
++	}
++	while (i<count) colorlist[i++] = COLOR_WHITE;
++
++	lrclose();
++}
++
++#endif
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/iventory.c larn-12.4.4-color/src/iventory.c
+--- larn-12.4.4-nix/src/iventory.c	2010-02-10 21:12:56 -0800
++++ larn-12.4.4-color/src/iventory.c	2011-03-17 06:38:37 -0700
+@@ -99,7 +99,7 @@
+ 
+ 	if (cdesc[GOLD])
+ 	{
+-		lprintf(".)   %d gold pieces",(int)cdesc[GOLD]);
++		lprintf("%s.)%s   %d gold pieces",lcolor_light_magenta(),lcolor_end(),(int)cdesc[GOLD]);
+ 		srcount++;
+ 	}
+ 	for (k=(MAXINVEN-1); k>=0; k--)
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/larncons.h larn-12.4.4-color/src/larncons.h
+--- larn-12.4.4-nix/src/larncons.h	2010-03-28 03:10:52 -0700
++++ larn-12.4.4-color/src/larncons.h	2011-03-17 06:40:06 -0700
+@@ -47,7 +47,12 @@
+ #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
+ #define TAXRATE 1/20    /* tax rate for the LRS */
+ 
++#ifdef USE_COLOR
++#define BUFBIG  4096*12          /* size of the output buffer */
++#else
+ #define BUFBIG  4096            /* size of the output buffer */
++#endif
++
+ #define MAXIBUF 4096            /* size of the input buffer */
+ #define LOGNAMESIZE 20          /* max size of the player's name */
+ 
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/larndata.h larn-12.4.4-color/src/larndata.h
+--- larn-12.4.4-nix/src/larndata.h	2010-02-09 23:00:42 -0800
++++ larn-12.4.4-color/src/larndata.h	2011-03-17 06:40:18 -0700
+@@ -86,6 +86,9 @@
+ extern int potprob[];
+ 
+ 
++extern int in_map;
++extern int objcolorlist[];
++extern int monstcolorlist[];
+ 
+ extern char monstnamelist[];
+ 
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/larnfunc.h larn-12.4.4-color/src/larnfunc.h
+--- larn-12.4.4-nix/src/larnfunc.h	2011-03-17 07:14:54 -0700
++++ larn-12.4.4-color/src/larnfunc.h	2011-03-17 06:45:37 -0700
+@@ -334,6 +334,25 @@
+ 
+ void		lstandout(char *);
+ 
++/* color io */
++void 		lprcolor_monst(int);
++void 		lprcolor_obj(int);
++void 		lprcolor_end(void);
++
++/* color escape strings */
++char* 		lcolor_light_red(void);
++char* 		lcolor_red(void);
++char* 		lcolor_light_blue(void);
++char* 		lcolor_light_white(void);
++char* 		lcolor_light_magenta(void);
++char* 		lcolor_light_green(void);
++char* 		lcolor_light_yellow(void);
++char* 		lcolor_yellow(void);
++char* 		lcolor_end(void);
++
++/* color initialization */
++void init_colors(void);
++
+ void		set_score_output(void);
+ 
+ void		lflush(void);
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/main.c larn-12.4.4-color/src/main.c
+--- larn-12.4.4-nix/src/main.c	2010-02-18 22:00:20 -0800
++++ larn-12.4.4-color/src/main.c	2011-03-17 07:06:01 -0700
+@@ -22,6 +22,8 @@
+ #define PLAYERIDS	"larn.pid"
+ #define DIAGFILE	"diagfile"
+ #define SAVEFILE	"larn.sav"
++#define OCOLORNAME  "ocolor.txt"
++#define MCOLORNAME  "mcolor.txt"
+ 
+ static void		parse(void);
+ 
+@@ -110,7 +112,9 @@
+ 	strcpy(diagfile, DIAGFILE);
+ #endif
+ 
+-
++#ifdef USE_COLOR
++	init_colors(); 	
++#endif
+ 
+ 	/*
+ 	*  now make scoreboard if it is not there (don't clear) 
+@@ -1125,4 +1129,10 @@
+ }
+ 
+ 
+-
++#ifdef USE_COLOR
++void init_colors(void) 
++{
++	init_color_file(OCOLORNAME, &(objcolorlist[0]), MAXOBJECT+1);
++	init_color_file(MCOLORNAME, &(monstcolorlist[0]), DEMONPRINCE+1);
++}
++#endif
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/makefile larn-12.4.4-color/src/makefile
+--- larn-12.4.4-nix/src/makefile	2011-03-17 07:14:54 -0700
++++ larn-12.4.4-color/src/makefile	2011-03-17 06:21:59 -0700
+@@ -44,7 +44,7 @@
+ CFLAGS=-Wall -Wextra -ansi -pedantic -Wpointer-arith \
+ -Wstrict-prototypes -Wmissing-prototypes -Wdeclaration-after-statement \
+ -Wshadow -Wmissing-declarations -Wold-style-definition -Wredundant-decls \
+--g -D_FORTIFY_SOURCE=2 -DDEBUG -DWINDOWS 
++-g -D_FORTIFY_SOURCE=2 -DDEBUG -DWINDOWS -DUSE_COLOR
+ LDFLAGS=-lpdcurses 
+ 
+ STRIP_BINARY=no
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/moreobj.c larn-12.4.4-color/src/moreobj.c
+--- larn-12.4.4-nix/src/moreobj.c	2010-02-10 23:25:12 -0800
++++ larn-12.4.4-color/src/moreobj.c	2011-03-17 06:42:08 -0700
+@@ -501,7 +501,8 @@
+ 	/* get direction of object to open.  test 'openability' of object
+ 	indicated, call common command/prompt mode routines to actually open.
+ 	*/
+-	dirsub( &x, &y );
++    int i = dirsub( &x, &y );
++	if (!i) { lprcat(" aborted"); return; }
+ 	switch( item[x][y] )
+ 	{
+ 	case OOPENDOOR:
+@@ -544,7 +545,9 @@
+ 	/* get direction of object to close.  test 'closeability' of object
+ 	indicated.
+ 	*/
+-	dirsub( &x, &y );
++    int i = dirsub( &x, &y );
++	if (!i) { lprcat(" aborted"); return; }
++
+ 	switch( item[x][y] )
+ 	{
+ 	case OCLOSEDDOOR:
+@@ -647,7 +650,7 @@
+ 	case '\n':
+ 		return;
+ 	case '@':
+-		lprintf("\n@: %s", logname );
++		lprintf("\n%s@%s: %s", lcolor_light_red(), lcolor_end(), logname);
+ 		return;
+ 	case ' ':
+ 		lprintf("\n : An as-yet-unseen place in the dungeon" );
+@@ -664,7 +667,11 @@
+ 		for (j=0; j < MAXMONST+8 ; j++)
+ 			if (i==monstnamelist[j])
+ 			{
+-				lprintf("\n%c: %s", i, monster[j].name);
++				lprc('\n');
++				lprcolor_monst(j);
++				lprc(i);
++				lprcolor_end();
++				lprintf(": %s", monster[j].name);
+ 				flag = TRUE;
+ 			}
+ 			/* check for spurious object character
+@@ -674,7 +681,9 @@
+ 					if (i==objnamelist[j])
+ 					{
+ 						lprc('\n');
++						lprcolor_obj(j);
+ 						lprc(i);
++						lprcolor_end();
+ 						lprintf(": %s", objectname[j]);
+ 						flag = TRUE;
+ 					}
+@@ -726,7 +735,7 @@
+ 			if ((objx == playerx) &&
+ 				(objy == playery))
+ 			{
+-				lprintf("\n@: %s", logname );
++				lprintf("\n%s@%s: %s", lcolor_light_red(), lcolor_end(), logname );
+ 				return;
+ 			}
+ 
+@@ -737,7 +746,11 @@
+ 				*/
+ 				if ( monstnamelist[i] != floorc )
+ 				{
+-					lprintf("\n%c: %s", monstnamelist[i], monster[i].name);
++					lprc('\n');
++					lprcolor_monst(i);
++					lprc(monstnamelist[i]);
++					lprcolor_end();
++					lprintf(": %s", monster[i].name);
+ 					return;
+ 				}
+ 
+@@ -755,7 +768,9 @@
+ 				if ( know[objx][objy] & HAVESEEN )
+ 				{
+ 					lprc('\n');
++					lprcolor_obj(i);
+ 					lprc(objnamelist[i]);
++					lprcolor_end();
+ 					lprintf(": %s", objectname[i]);
+ 					return;
+ 				}
+diff -Nru --strip-trailing-cr larn-12.4.4-nix/src/spells.c larn-12.4.4-color/src/spells.c
+--- larn-12.4.4-nix/src/spells.c	2010-02-10 23:13:26 -0800
++++ larn-12.4.4-color/src/spells.c	2011-03-17 06:42:58 -0700
+@@ -298,6 +298,7 @@
+ 				xl=playerx; yl=playery;
+ 				loseint();
+ 				i = dirsub(&xl,&yl); /* get direction of sphere */
++				if (!i) { lprcat(" aborted"); return; }
+ 				newsphere(xl,yl,i,rnd(20)+11);  /* make a sphere */
+ 				return;
+ 
+@@ -508,7 +509,8 @@
+ 		return;
+ 	}
+ 
+-	dirsub(&x,&y);
++	int i = dirsub(&x,&y);
++	if (!i) { lprcat(" aborted"); return; }
+ 
+ 	m = mitem[x][y];
+ 
+@@ -572,7 +574,8 @@
+ 		return;
+ 	}
+ 
+-	dirsub(&dx,&dy);
++	int i = dirsub(&dx,&dy);
++	if (!i) { lprcat(" aborted"); return; }
+ 
+ 	x = dx;
+ 	y = dy;
+@@ -830,7 +833,8 @@
+ 		return;
+ 	}
+ 
+-	dirsub(&x, &y);
++	int i = dirsub(&x, &y);
++	if (!i) { lprcat(" aborted"); return; }
+ 
+ 	m = mitem[x][y];
+ 
+@@ -935,6 +939,7 @@
+ case 'k':   i++;
+ case 'l':   i++;
+ case 'j':   i++; goto out;
++		case '\33': goto ret;
+ 		};		
+ 	}
+ 
+@@ -943,7 +948,7 @@
+ 	*y = playery+diroffy[i];
+ 
+ 	vxy(x,y);
+-
++ret:
+ 	return i;
+ }
+ 
+@@ -973,7 +978,8 @@
+ 		return;
+ 	}
+ 
+-	dirsub(&x, &y);
++	int i = dirsub(&x, &y);
++	if (!i) { lprcat(" aborted"); return; }
+ 
+ 	if (mitem[x][y] == 0) {
+ 
+@@ -1078,6 +1084,7 @@
+ 	lprcat("\nGenocide what monster? ");
+ 
+ 	for (i = 0; !isalpha(i) && i != ' '; i = ttgetch()) {
++		if (i=='\33') { lprcat(" aborted"); return; }
+ 		;
+ 	}
+ 
