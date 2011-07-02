@@ -104,6 +104,18 @@ diff -Nru --strip-trailing-cr larn-12.4.4/src/display.c larn-12.4.4-android/src/
  	count = lincount = 0;
  
  	/* count and sort the known spell codes
+diff -Nru --strip-trailing-cr larn-12.4.4/src/global.c larn-12.4.4-android/src/global.c
+--- larn-12.4.4/src/global.c	2011-07-02 11:58:09.394465565 -0700
++++ larn-12.4.4-android/src/global.c	2011-07-02 11:58:49.690665384 -0700
+@@ -415,7 +415,7 @@
+ 
+ 	for (;;)
+ 	{
+-		if ((i=ttgetch()) == ' ' || i == '\n')
++		if ((i=ttgetch()) == ' ' || i == '\n' || i == '\33')
+ 			return 0 ;
+ 		if (i== '\x1B')
+ 			return 1 ;
 diff -Nru --strip-trailing-cr larn-12.4.4/src/help.c larn-12.4.4-android/src/help.c
 --- larn-12.4.4/src/help.c	2011-06-30 11:45:27.000000000 -0700
 +++ larn-12.4.4-android/src/help.c	2011-06-30 14:03:51.000000000 -0700
@@ -144,6 +156,15 @@ diff -Nru --strip-trailing-cr larn-12.4.4/src/io.c larn-12.4.4-android/src/io.c
  	if (ipoint != iepoint)  return(inbuffer[ipoint++]);
  	if (iepoint!=MAXIBUF)   return(0);
  	if ((i=_read(fd,inbuffer,MAXIBUF))<=0) {
+@@ -1145,7 +1133,7 @@
+ 
+ 		c = ttgetch();
+ 
+-		if (c == '\n') 
++		if (c == '\n' || c == '\33')  
+ 			break;
+ 		if (c == 8) {
+ 			if (i > 0) {
 diff -Nru --strip-trailing-cr larn-12.4.4/src/iventory.c larn-12.4.4-android/src/iventory.c
 --- larn-12.4.4/src/iventory.c	2011-06-30 11:45:27.000000000 -0700
 +++ larn-12.4.4-android/src/iventory.c	2011-06-30 14:07:03.000000000 -0700
