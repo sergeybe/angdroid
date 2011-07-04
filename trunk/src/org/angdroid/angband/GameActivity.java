@@ -261,7 +261,8 @@ public class GameActivity extends Activity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (!state.keyBuffer.onKeyDown(keyCode,event)) {
+		if (state != null && state.keyBuffer != null
+			&& !state.keyBuffer.onKeyDown(keyCode,event)) {
 			return super.onKeyDown(keyCode,event);
 		}
 		else {
@@ -271,7 +272,8 @@ public class GameActivity extends Activity {
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		if (!state.keyBuffer.onKeyUp(keyCode,event)) {
+		if (state != null && state.keyBuffer != null
+			&& !state.keyBuffer.onKeyUp(keyCode,event)) {
 			return super.onKeyUp(keyCode,event);
 		}
 		else {
