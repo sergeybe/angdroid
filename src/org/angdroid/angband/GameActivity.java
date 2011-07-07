@@ -38,6 +38,9 @@ import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.content.pm.ActivityInfo;
+import android.content.ComponentName;
+import android.content.pm.ComponentInfo;
+import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.Message;
 
@@ -65,6 +68,20 @@ public class GameActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		String version = "unknown";
+		try {
+			ComponentName comp = new ComponentName(this, AngbandActivity.class);
+			PackageInfo pinfo = this.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
+			version = pinfo.versionName;
+		} catch (Exception e) {}
+
+	    Preferences.init ( 
+			getFilesDir(),
+			getResources(), 
+			getSharedPreferences(Preferences.NAME, MODE_PRIVATE),
+			version
+		);
 
 		//Log.d("Angband", "onCreate");		
 
