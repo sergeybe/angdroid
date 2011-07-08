@@ -4,7 +4,7 @@
     <string name="app_name">Angband Variants</string>
 
     <string-array name="gamePluginDescriptions">
-      <item>ToME 2.5.3</item>
+      <item>ToME 2.3.5</item>
       <item>Sangband 1.0.0 lf3</item>
       <item>Steamband 0.4.1f</item>
 <!--
