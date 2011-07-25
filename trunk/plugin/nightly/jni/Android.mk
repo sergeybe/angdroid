@@ -44,10 +44,12 @@ LOCAL_SRC_FILES := \
 ../extsrc/src/monster/init.c \
 ../extsrc/src/monster/melee1.c \
 ../extsrc/src/monster/melee2.c \
-../extsrc/src/monster/monster1.c \
-../extsrc/src/monster/monster2.c \
+../extsrc/src/monster/mon-lore.c \
+../extsrc/src/monster/mon-make.c \
+../extsrc/src/monster/mon-msg.c \
 ../extsrc/src/monster/mon-power.c \
 ../extsrc/src/monster/mon-spell.c \
+../extsrc/src/monster/mon-util.c \
 ../extsrc/src/object/identify.c \
 ../extsrc/src/object/obj-desc.c \
 ../extsrc/src/object/obj-flag.c \
