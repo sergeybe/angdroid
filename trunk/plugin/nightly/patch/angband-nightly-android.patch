@@ -17,8 +17,8 @@ diff -Nru --strip-trailing-cr angband-nightly/src/buildid.h angband-nightly-andr
  # define XSTR(x) STR(x)
  # define VERSION_STRING XSTR(BUILD_ID)
  #else
--# define VERSION_STRING "3.2.0"
-+# define VERSION_STRING "3.2.X built " __DATE__ " " __TIME__
+-# define VERSION_STRING "3.3.0"
++# define VERSION_STRING "3.3.0 built " __DATE__ " " __TIME__
  #endif
  
  extern const char *buildid;
