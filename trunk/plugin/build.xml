@@ -49,11 +49,9 @@
         <delete file="${resource-folder}/raw/zip${pluginzip.name}"/>
     </target>
 
-	<target name="get-patch-plugin-src" depends="get-src, patch-updates, copy-updates">
-	</target>
+	<target name="patch-plugin-src" depends="patch-updates, copy-updates" />
 
-	<target name="git-patch-plugin-src" depends="git-src, patch-updates, copy-updates">
-	</target>
+	<target name="git-patch-plugin-src" depends="git-src, patch-plugin-src" />
 
 	<target name="git-src">
 	  <delete includeemptydirs="true">

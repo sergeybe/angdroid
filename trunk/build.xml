@@ -89,8 +89,26 @@
     </target>
 
 
-	<target name="nightly-copy">
-	  <copy todir="./alt-apk/nightly">
+    <condition property="is.exist.nightly-libs">
+	<available file="plugin/nightly/extsrc/lib" type="dir" />
+    </condition>
+
+    <target name="nightly-checkout" unless="is.exist.nightly-libs">
+      <ant inheritAll="true" antfile="plugin/build.xml"
+	   target="git-src">
+	<property name="plugin.name" value="nightly"/>
+	<property name="git.url"
+		  value="git://github.com/angband/angband.git"/>
+      </ant>
+    </target>      
+
+	<target name="nightly-copy" depends="nightly-checkout">
+	  <exec executable="git" 
+			failonerror="true"
+			dir="plugin/nightly/extsrc">
+	    <arg value="pull" />
+	  </exec>
+	  <copy todir="./alt-apk/nightly" overwrite="true">
 		<fileset dir=".">
 		  <exclude name="**/alt-apk/**" />
 		  <exclude name="**/bin/**" />
