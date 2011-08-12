@@ -2,7 +2,7 @@
 <project name="AngbandNightly" default="nightly-debug">
 
     <target name="nightly-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
-    <target name="nightly-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
+    <target name="nightly-debug"   depends="plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
 
 <!--
     ************************************************************************
@@ -40,16 +40,18 @@
         	<available file="plugin/nightly/extsrc/lib" type="dir" />
 		</and>
     </condition>
-	<target name="check-plugin-src" unless="is.exist.libs">
-		<antcall target="plugin-src">
-		</antcall>
-	</target>
 
     <target name="plugin-src">
-	  <ant inheritAll="true" antfile="plugin/build.xml" target="git-patch-plugin-src">
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="patch-plugin-src">
 	    <property name="plugin.name" value="nightly"/>
-	    <property name="git.url" value="git://github.com/angband/angband.git"/>
 	  </ant>
+	  <exec dir="." executable="${bash-location}">
+	    <arg value="-c" />
+	    <arg value="pwd" />
+	  </exec>
+	  <exec dir="." executable="${bash-location}">
+	    <arg value="../../find-nightly-src.sh" />
+	  </exec>
     </target>
 <!--
     ************************************************************************
