@@ -2,6 +2,7 @@
 #include <jni.h>
 #include <android/log.h>
 #include <pthread.h>
+#include <setjmp.h>
 
 #define COLOR_BLACK 0
 #define COLOR_BLUE 1
