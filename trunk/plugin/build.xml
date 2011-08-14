@@ -51,6 +51,8 @@
 
 	<target name="patch-plugin-src" depends="patch-updates, copy-updates" />
 
+	<target name="get-patch-plugin-src" depends="get-src, patch-plugin-src" />
+
 	<target name="git-patch-plugin-src" depends="git-src, patch-plugin-src" />
 
 	<target name="git-src">

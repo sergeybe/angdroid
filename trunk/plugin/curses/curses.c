@@ -11,6 +11,8 @@ WINDOW* stdscr = &_win[0];
 #define LOGC(...) 
 //#define LOGC(...) __android_log_print(ANDROID_LOG_DEBUG  , "Angband", __VA_ARGS__)
 
+static jmp_buf jbuf;
+
 /* JVM enviroment */
 static JavaVM *jvm;
 static JNIEnv *env;
@@ -378,8 +380,7 @@ void angdroid_quit(const char* msg) {
 		(*angdroid_quit_hook)();
 	}
 
-	(*jvm)->DetachCurrentThread(jvm);
-	pthread_exit(NULL);
+	longjmp(jbuf,1);
 }
 
 void angdroid_warn(const char* msg) {
@@ -393,11 +394,6 @@ JNIEXPORT void JNICALL angdroid_gameStart
 (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
 	env = env1;
-
-	if ((*env)->GetJavaVM(env, &jvm) < 0)
-		angdroid_quit("Error: Can't get JavaVM!");
-
-	(*jvm)->AttachCurrentThread(jvm, &env, NULL);
 
 	/* Save objects */
 	NativeWrapperObj = obj1;
@@ -437,16 +433,19 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	jstring argv0 = NULL;
 	int i;
 	for(i = 0; i < argc; i++) {
-		argv0 = (*env1)->GetObjectArrayElement(env1, argv, i);
-		const char *copy_argv0 = (*env1)->GetStringUTFChars(env1, argv0, 0);
+		argv0 = (*env)->GetObjectArrayElement(env, argv, i);
+		const char *copy_argv0 = (*env)->GetStringUTFChars(env, argv0, 0);
 
 		LOGD("argv%d = %s",i,copy_argv0);
 		angdroid_process_argv(i,copy_argv0);
 
-		(*env1)->ReleaseStringUTFChars(env1, argv0, copy_argv0);
+		(*env)->ReleaseStringUTFChars(env, argv0, copy_argv0);
 	}
 
-	angdroid_main();
+	if (!setjmp(jbuf))
+		angdroid_main();
+	else
+		; //longjmp to here
 }
 
 JNIEXPORT jint JNICALL angdroid_gameQueryInt

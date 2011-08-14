@@ -20,11 +20,6 @@ jint( * angdroid_gameQueryRedraw ) (JNIEnv*, jobject, jint, jint, jint, jint) = 
 jint( * angdroid_gameQueryInt ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
 jstring( * angdroid_gameQueryString ) (JNIEnv*, jobject, jint, jobjectArray) = NULL;
 
-JNIEnv* pass_env1; 
-jobject pass_obj1;
-jint    pass_argc;
-jobject pass_argv;
-
 static JavaVM *jvm;
 static void* handle = NULL;
 pthread_mutex_t muQuery = PTHREAD_MUTEX_INITIALIZER;
@@ -34,17 +29,9 @@ static jclass NativeWrapperClass;
 static jobject NativeWrapperObj;
 static jmethodID NativeWrapper_onGameExit;
 
-void* run_angband(void* foo)
-{
-	angdroid_gameStart(pass_env1, pass_obj1, pass_argc, pass_argv);   
-	return foo;
-}
-
 void gameStart
 (JNIEnv *env1, jobject obj1, jstring pluginPath, jint argc, jobjectArray argv)
 {
-	pthread_t game_thread;
-
 	//LOGD("loader.startGame.syncwait");
 
 	// begin synchronize
@@ -61,11 +48,6 @@ void gameStart
 	pthread_mutex_lock (&muQuery);
 
 	//LOGD("loader.startGame.initializing");
-
-	pass_env1 = env1;
-	pass_obj1 = obj1;
-	pass_argc = argc;
-	pass_argv = argv;
 
 	/* Init exit game callback */
 	NativeWrapperObj = obj1;
@@ -89,15 +71,11 @@ void gameStart
 		return;
 	}	
 
-	//LOGD("loader.create_thread");
-	// start thread to call entry point
-	pthread_create(&game_thread, NULL, run_angband, (void*) NULL);	
-
 	// end synchronize
 	pthread_mutex_unlock (&muQuery);
 
-	LOGD("loader.waiting on game_thread");
-	pthread_join(game_thread, NULL); // wait for thread to exit
+	// start the game
+	angdroid_gameStart(env1, obj1, argc, argv);   
 
 	// begin synchronize
 	pthread_mutex_lock (&muQuery);
