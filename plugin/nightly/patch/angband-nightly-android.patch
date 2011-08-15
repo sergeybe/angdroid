@@ -34,21 +34,3 @@ diff -Nru --strip-trailing-cr angband-nightly/src/h-basic.h angband-nightly-andr
  # define SET_UID
  
  /* Without autoconf, turn on some things */
-diff -Nru --strip-trailing-cr angband-nightly/src/z-file.c angband-nightly-android/src/z-file.c
---- angband-nightly/src/z-file.c   2011-08-11 16:33:41.766050100 -0700
-+++ angband-nightly-android/src/z-file.c    2011-08-11 16:55:59.362556300 -0700
-@@ -347,7 +347,14 @@
- }
- 
- 
-+/* We should talk to someone upstream about this. I think S_IRUSR is preferred.*/
- 
-+#ifndef S_IREAD
-+#define S_IREAD S_IRUSR
-+#endif
- 
-+#ifndef S_IWRITE
-+#define S_IWRITE S_IWUSR
-+#endif
- 
- /** File-handle functions **/
