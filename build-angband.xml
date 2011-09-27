@@ -16,7 +16,7 @@
     <target name="plugin-resources">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="angband"/>
-	    <property name="pluginzip.name" value="angband320"/>
+	    <property name="pluginzip.name" value="angband"/>
 	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="angband306"/>
@@ -65,12 +65,16 @@
     <target name="plugin-src">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="angband"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/3.2"/>
-	    <property name="src.url.file" value="angband-3.2.0.tar.gz"/>
+	    <property name="src.url.base" value="http://rephial.org/downloads/3.3"/>
+	    <property name="src.url.file" value="angband-v3.3.1.tar.gz"/>
 		<property name="extract.command" value="tar" />
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
+	<exec dir="." executable="${bash-location}">
+	  <arg value="./find-src.sh" />
+	  <arg value="angband" />
+	</exec>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="angband306"/>
 	    <property name="src.url.base" value="http://rephial.org/downloads/3.0"/>
