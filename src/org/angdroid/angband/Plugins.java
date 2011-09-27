@@ -85,8 +85,7 @@ final public class Plugins {
 		switch (p) {
 		case Angband: 
 			return Environment.getExternalStorageDirectory()
-				+ "/"
-				+ "Android/data/org.angdroid.angband/files/lib/save";
+				+ "/Android/data/org.angdroid.angband/files/libangband320/save";
 		default: return "";
 		}		
 	}
