@@ -26,7 +26,7 @@ final public class Plugins {
 
 	public static String getFilesDir(Plugin p) {
 		switch (p) {
-		case Angband: return "angband320";
+		case Angband: return "angband";
 		case Angband306: return "306";
 		default: return p.toString().toLowerCase();
 		}
@@ -63,7 +63,7 @@ final public class Plugins {
 	public static ZipInputStream getPluginZip(int plugin) {
 		InputStream is = null;
 		if (plugin == Plugin.Angband.getId())
-			is = Preferences.getResources().openRawResource(R.raw.zipangband320);
+			is = Preferences.getResources().openRawResource(R.raw.zipangband);
 		else if (plugin == Plugin.Angband306.getId())
 			is = Preferences.getResources().openRawResource(R.raw.zipangband306);
 		else if (plugin == Plugin.FrogKnows.getId())
@@ -73,7 +73,7 @@ final public class Plugins {
 	public static String getPluginCrc(int plugin) {
 		InputStream is = null;
 		if (plugin == Plugin.Angband.getId())
-			is = Preferences.getResources().openRawResource(R.raw.crcangband320);
+			is = Preferences.getResources().openRawResource(R.raw.crcangband);
 		else if (plugin == Plugin.Angband306.getId())
 			is = Preferences.getResources().openRawResource(R.raw.crcangband306);
 		else if (plugin == Plugin.FrogKnows.getId())

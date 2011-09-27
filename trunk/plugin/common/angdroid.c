@@ -297,7 +297,7 @@ static errr Term_xtra_and(int n, int v)
 			else if (v == 0) {
 				while (key != 0)
 				{
-#ifdef ANGDROID_NIGHTLY
+#if defined(ANGDROID_NIGHTLY) || defined(ANGDROID_ANGBAND_PLUGIN)
 					Term_keypress(key,0);
 #else
 					Term_keypress(key);
@@ -306,7 +306,7 @@ static errr Term_xtra_and(int n, int v)
 				}
 			}
 			else {
-#ifdef ANGDROID_NIGHTLY
+#if defined(ANGDROID_NIGHTLY) || defined(ANGDROID_ANGBAND_PLUGIN)
 				Term_keypress(key,0);
 #else
 				Term_keypress(key);
@@ -730,7 +730,7 @@ static void term_data_link(int i)
 	t->nuke_hook = Term_nuke_and;
 
 	/* Prepare the template hooks */
-#ifndef ANGDROID_NIGHTLY
+#if !defined(ANGDROID_NIGHTLY) && !defined(ANGDROID_ANGBAND_PLUGIN)
 	t->user_hook = Term_user_and;
 #endif
 	t->xtra_hook = Term_xtra_and;
@@ -902,7 +902,7 @@ static void init_stuff()
 static errr get_init_cmd()
 {
 	/* Wait for response */
-#ifdef ANGDROID_NIGHTLY
+#if defined(ANGDROID_NIGHTLY) || defined(ANGDROID_ANGBAND_PLUGIN)
 	pause_line(Term);
 #else
 	pause_line(Term->hgt - 1);
