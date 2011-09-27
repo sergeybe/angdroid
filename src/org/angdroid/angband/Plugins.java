@@ -34,28 +34,28 @@ final public class Plugins {
 
 	public static int getKeyDown(Plugin p) {
 		switch (p) {
-		case Angband: return 0x8A;
+		case Angband: return 0x80;
 		default: return '2';
 		}
 	}
 
 	public static int getKeyUp(Plugin p) {
 		switch (p) {
-		case Angband: return 0x8D;
+		case Angband: return 0x83;
 		default: return '8';
 		}
 	}
 
 	public static int getKeyLeft(Plugin p) {
 		switch (p) {
-		case Angband: return 0x8B;
+		case Angband: return 0x81;
 		default: return '4';
 		}
 	}
 
 	public static int getKeyRight(Plugin p) {
 		switch (p) {
-		case Angband: return 0x8C;
+		case Angband: return 0x82;
 		default: return '6';
 		}
 	}
@@ -93,7 +93,7 @@ final public class Plugins {
 	public static String getStartBorgSequence() {
 		Plugin p = Preferences.getActivePlugin();
 		switch(p) {
-		case Angband: return "```=g22222y``\r\r`\r\r`\r2\r\r*\r\r```\032  y`\032z";
+		// tbd: case Angband: return "```=g22222y``\r\r`\r\r`\r2\r\r*\r\r```\032  y`\032z";
 		case Angband306: return "```=722222y``\r\r\r\rX\r\r\032  y`\032z";
 		default: return "";
 		}

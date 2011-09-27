@@ -17,6 +17,9 @@
     <target name="angband-plugin-src">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="plugin-src" />
     </target>
+    <target name="angband-clean">
+	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="clean" />
+    </target>
 
     <target name="nightly-beta" depends="nightly-copy,nightly-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/nightly" antfile="build-nightly.xml" target="nightly-release" />
