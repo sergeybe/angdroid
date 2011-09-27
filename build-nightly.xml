@@ -46,7 +46,8 @@
 	    <property name="plugin.name" value="nightly"/>
 	  </ant>
 	  <exec dir="." executable="${bash-location}">
-	    <arg value="../../find-nightly-src.sh" />
+	    <arg value="../../find-src.sh" />
+	    <arg value="nightly" />
 	  </exec>
     </target>
 <!--
