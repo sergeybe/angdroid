@@ -100,6 +100,9 @@ public class StateManager {
 		if (this.keyBuffer != null)
 			this.keyBuffer.clear();
 	}
+	public void resetKeyBuffer() {
+		this.keyBuffer = new KeyBuffer(this);
+	}
 	public void addKey(int k) {
 		if (this.keyBuffer != null)
 			this.keyBuffer.add(k);
