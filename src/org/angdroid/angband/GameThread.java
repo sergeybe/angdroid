@@ -93,7 +93,7 @@ public class GameThread implements Runnable {
 			nativew.onGameStart();
 			
  			/* initialize keyboard buffer */
-			state.clearKeys();
+			state.resetKeyBuffer();
 
 			game_thread_running = true;
 
