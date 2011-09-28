@@ -308,7 +308,7 @@ public class TermView extends View implements OnGestureListener {
 
 		int key = (2 - r) * 3 + c + '1';
 
-		state.keyBuffer.addDirection(key);
+		state.addDirectionKey(key);
 			
 		return true;
 	}

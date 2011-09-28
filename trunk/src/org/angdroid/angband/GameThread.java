@@ -93,7 +93,7 @@ public class GameThread implements Runnable {
 			nativew.onGameStart();
 			
  			/* initialize keyboard buffer */
-			state.keyBuffer = new KeyBuffer(state);
+			state.clearKeys();
 
 			game_thread_running = true;
 
@@ -119,7 +119,7 @@ public class GameThread implements Runnable {
 			return;
 		}
 
-		state.keyBuffer.signalGameExit();
+		state.signalGameExit();
 
 		//Log.d("Angband","signalGameExit.waiting on thread.join()");
 
@@ -139,12 +139,12 @@ public class GameThread implements Runnable {
 			Log.d("Angband","save().no game running");
 			return;
 		}
-		if (thread == null || state.keyBuffer == null)  {
+		if (thread == null) {
 			Log.d("Angband","save().no thread");
 			return;
 		}
 	 
-		state.keyBuffer.signalSave();
+		state.signalSave();
 	}
 
 	private void onGameExit() {
@@ -157,7 +157,7 @@ public class GameThread implements Runnable {
 		// if game exited normally, restart!
 		local_restart 
 			= game_restart 
-			= ((!state.keyBuffer.getSignalGameExit() || plugin_change) 
+			= ((!state.getSignalGameExit() || plugin_change) 
 			   && !state.fatalError);
 
 		if	(local_restart) 

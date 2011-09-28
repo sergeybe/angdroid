@@ -37,7 +37,7 @@ public class NativeWrapper {
 
 	int getch(final int v) {
 		state.gameThread.setFullyInitialized();
-		int key = state.keyBuffer.get(v);
+		int key = state.getKey(v);
 
 		/* useful when debugging borg autostart
 		if (key != 0) {
@@ -78,7 +78,7 @@ public class NativeWrapper {
 	}
 
 	public void flushinp() {
-		state.keyBuffer.clear();
+		state.clearKeys();
 	}
 
 	public void fatal(String msg) {
