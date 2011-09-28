@@ -2,6 +2,7 @@ package org.angdroid.angband;
 
 import android.os.Handler;
 
+import android.view.KeyEvent;
 import android.util.Log;
 
 import java.util.Map;
@@ -25,7 +26,7 @@ public class StateManager {
 	public static String progress_lock = "lock";
 
 	/* keybuffer */
-	public KeyBuffer keyBuffer = null;
+	private KeyBuffer keyBuffer = null;
 
 	/* native angband library interface */
 	public NativeWrapper nativew = null;
@@ -41,6 +42,8 @@ public class StateManager {
 
 		nativew = new NativeWrapper(this);
 		gameThread = new GameThread(this, nativew);
+
+		keyBuffer = new KeyBuffer(this);
 	}
 
 	public void link(TermView t, Handler h) {
@@ -91,5 +94,50 @@ public class StateManager {
 	}
 	public int getKeyRight() {
 		return Plugins.getKeyRight(currentPlugin);
+	}
+
+	public void clearKeys() {
+		if (this.keyBuffer != null)
+			this.keyBuffer.clear();
+	}
+	public void addKey(int k) {
+		if (this.keyBuffer != null)
+			this.keyBuffer.add(k);
+	}
+	public int getKey(int v) {
+		if (this.keyBuffer != null)
+			return keyBuffer.get(v);
+		else
+			return 0;
+	}
+	public void addDirectionKey(int k) {
+		if (this.keyBuffer != null)
+			this.keyBuffer.addDirection(k);
+	}
+	public void signalGameExit() {
+		if (this.keyBuffer != null)
+			this.keyBuffer.signalGameExit();
+	}
+	public boolean getSignalGameExit() {
+		if (this.keyBuffer != null)
+			return this.keyBuffer.getSignalGameExit();
+		else
+			return false;
+	}
+	public void signalSave() {
+		if (this.keyBuffer != null)
+			this.keyBuffer.signalSave();
+	}
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (this.keyBuffer != null)
+			return this.keyBuffer.onKeyDown(keyCode, event);
+		else
+			return false;
+	}
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (this.keyBuffer != null)
+			return this.keyBuffer.onKeyUp(keyCode, event);
+		else
+			return false;
 	}
 }
