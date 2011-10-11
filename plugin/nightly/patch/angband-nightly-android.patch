@@ -34,3 +34,16 @@ diff -Nru --strip-trailing-cr angband-nightly/src/h-basic.h angband-nightly-andr
  # define SET_UID
  
  /* Without autoconf, turn on some things */
+Files extsrc.orig/.git/index and extsrc/.git/index differ
+diff -Nru --strip-trailing-cr extsrc.orig/src/spells1.c extsrc/src/spells1.c
+--- extsrc.orig/src/spells1.c	2011-10-11 12:01:03.361884400 -0700
++++ extsrc/src/spells1.c	2011-10-11 12:03:58.785192500 -0700
+@@ -536,7 +536,7 @@
+ 	/* Decide on output char */
+ 	if (use_graphics == GRAPHICS_NONE) {
+ 		/* ASCII is simple */
+-		wchar_t chars[] = L"*|/-\\";
++		wchar_t *chars = L"*|/-\\";
+ 
+ 		*c = chars[motion];
+ 		*a = spell_color(typ);
