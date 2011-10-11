@@ -201,16 +201,25 @@ public class TermWindow {
 	}
 
 	public void addnstr(int n, byte[] cp) {
-		byte c;
-		
 		/*
 		String foo = new String(cp);
 		Log.d("Angband","addnstr ("+row+","+col+") ["+foo+"]");
 		*/
 
+		String str;
+		try {
+			str = new String(cp, "UTF-8");
+		} catch(java.io.UnsupportedEncodingException e) {
+			str = "";
+		}
+		
 		for (int i = 0; i < n; i++) {
-			c = cp[i];
-			addch((char)c);
+			if(i<str.length()) {
+				addch(str.charAt(i));
+			} else {
+				//really ugly hack to deal with UTF-8
+				addch(' ');
+			}
 		}
 	}
 
@@ -223,7 +232,7 @@ public class TermWindow {
 		*/
 
 		if (col>-1 && col<cols && row>-1 && row<rows) {
-			if (c > 19 && c < 128) {
+			if (c > 19) {
 				TermPoint p = buffer[row][col];
 			
 				p.isDirty = p.isDirty || p.Char != c || p.Color != cur_color;
