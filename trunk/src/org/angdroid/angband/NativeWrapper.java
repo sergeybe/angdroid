@@ -322,4 +322,47 @@ public class NativeWrapper {
 		else
 			return 0;
 	}
+
+    public int wctomb(byte[] pmb, byte character) {
+	synchronized (display_lock) {
+	    byte[] ba = new byte[1];
+	    ba[0] = character;
+	    byte[] wc;
+	    int wclen = 0;
+	    //Log.d("Angband","wctomb("+pmb+","+character+")");
+	    try {
+		String str = new String(ba, "ISO-8859-1");
+		wc = str.getBytes("UTF-8");
+		for(int i=0; i<wc.length; i++) {
+		    pmb[i] = wc[i];
+		    wclen++;
+		}
+	    } catch(java.io.UnsupportedEncodingException e) {
+		Log.d("Angband","wctomb: " + e);
+	    }
+	    return wclen;
+	}
+    }
+
+    public int mbstowcs(final byte[] wcstr, final byte[] mbstr, final int max) {
+	synchronized (display_lock) {
+	    //Log.d("Angband","mbstowcs("+wcstr+","+mbstr+","+max+")");
+	    try {
+		String str = new String(mbstr, "UTF-8");
+		//Log.d("Angband", "str = |" + str + "|");
+		byte[] wc = str.getBytes("ISO-8859-1");
+		//Log.d("Angband", "wc.length = " + wc.length);
+		//Log.d("Angband", "wcstr.length = " + wcstr.length);
+		int i;
+		for(i=0; i<wc.length && i<max; i++) {
+		    //Log.d("Angband", "i = " + i);
+		    wcstr[i] = wc[i];
+		}
+		return i;
+	    } catch(java.io.UnsupportedEncodingException e) {
+		Log.d("Angband","mbstowcs: " + e);
+	    }
+	    return 0;
+	}
+    }
 }

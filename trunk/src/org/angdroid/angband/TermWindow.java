@@ -208,7 +208,7 @@ public class TermWindow {
 
 		String str;
 		try {
-			str = new String(cp, "UTF-8");
+			str = new String(cp, "ISO-8859-1");
 		} catch(java.io.UnsupportedEncodingException e) {
 			str = "";
 		}
@@ -216,9 +216,6 @@ public class TermWindow {
 		for (int i = 0; i < n; i++) {
 			if(i<str.length()) {
 				addch(str.charAt(i));
-			} else {
-				//really ugly hack to deal with UTF-8
-				addch(' ');
 			}
 		}
 	}

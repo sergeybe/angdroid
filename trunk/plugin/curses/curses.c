@@ -47,6 +47,8 @@ static jmethodID NativeWrapper_curs_set;
 static jmethodID NativeWrapper_flushinp;
 static jmethodID NativeWrapper_getcury;
 static jmethodID NativeWrapper_getcurx;
+static jmethodID NativeWrapper_wctomb;
+static jmethodID NativeWrapper_mbstowcs;
 
 void (*angdroid_quit_hook)(void) = NULL;
 
@@ -390,6 +392,41 @@ void angdroid_warn(const char* msg) {
 	}
 }
 
+
+#if defined(ANGDROID_NIGHTLY)
+
+int wctomb(char *pmb, wchar_t character) {
+	// LOGD("begin wctomb (c)");
+	jbyteArray pmb_a = (*env)->NewByteArray(pmb, 4);
+	if (pmb_a == NULL) angdroid_quit("wctomb: Out of memory");
+	int res = JAVA_CALL_INT(NativeWrapper_wctomb, pmb_a, character);
+	(*env)->GetByteArrayRegion(env, pmb_a, 0, res, pmb);
+	pmb[res] = 0;
+	(*env)->DeleteLocalRef(env, pmb_a);
+	// LOGD("end wctomb (c)");
+	return res;
+}
+
+size_t mbstowcs(wchar_t *wcstr, const char *mbstr, size_t max) {
+	//  LOGD("begin mbstowcs (%s,%d)", mbstr, max);
+	jbyteArray wcstr_a = (*env)->NewByteArray(env, max);
+	if (wcstr_a == NULL) angdroid_quit("mbstowcs: Out of memory");
+	int mblen = strlen(mbstr);
+	jbyteArray mbstr_a = (*env)->NewByteArray(env, mblen);
+	if (mbstr_a == NULL) angdroid_quit("mbstowcs: Out of memory");
+	(*env)->SetByteArrayRegion(env, mbstr_a, 0, mblen, mbstr);
+	//  LOGD("mbs = |%s|", mbstr);
+	int res = JAVA_CALL_INT(NativeWrapper_mbstowcs, wcstr_a, mbstr_a, max);
+	(*env)->GetByteArrayRegion(env, wcstr_a, 0, res, wcstr);
+	wcstr[res] = 0;
+	(*env)->DeleteLocalRef(env, wcstr_a);
+	(*env)->DeleteLocalRef(env, mbstr_a);
+	//  LOGD("end mbstowcs (c)");
+	return res;
+}
+
+#endif
+
 JNIEXPORT void JNICALL angdroid_gameStart
 (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
@@ -428,6 +465,8 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	NativeWrapper_mvwinch = JAVA_METHOD("mvwinch", "(III)I");
 	NativeWrapper_curs_set = JAVA_METHOD("curs_set", "(I)V");
 	NativeWrapper_flushinp = JAVA_METHOD("flushinp", "()V");
+	NativeWrapper_wctomb = JAVA_METHOD("wctomb", "([BB)I");
+	NativeWrapper_mbstowcs = JAVA_METHOD("mbstowcs", "([B[BI)I");
 
 	// process argc/argv 
 	jstring argv0 = NULL;

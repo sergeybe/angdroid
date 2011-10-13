@@ -1055,17 +1055,3 @@ void angdroid_main() {
 	LOGD("angdroid_main exit normally");
 	quit(NULL);
 }
-
-#if defined(ANGDROID_NIGHTLY)
-
-int wctomb(char *pmb, wchar_t character) {
-	*pmb = character;
-	return 1;
-}
-
-size_t mbstowcs(wchar_t *wcstr, const char *mbstr, size_t max) {
-	strcpy(wcstr, mbstr);
-	return strlen(mbstr);
-}
-
-#endif
