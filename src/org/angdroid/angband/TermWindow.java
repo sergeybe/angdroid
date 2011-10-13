@@ -214,9 +214,7 @@ public class TermWindow {
 		}
 		
 		for (int i = 0; i < n; i++) {
-			if(i<str.length()) {
-				addch(str.charAt(i));
-			}
+		    addch(str.charAt(i));
 		}
 	}
 
