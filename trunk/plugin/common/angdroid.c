@@ -177,6 +177,13 @@ static void Term_nuke_and(term *t)
 
 
 /*
+ * Android supports the Latin-1 character set.
+ */
+ static byte Term_xchar_and(byte c) {
+	return c;
+}
+
+/*
  * Do a "user action" on the current "term"
  *
  * This function allows the visual module to do implementation defined
@@ -737,6 +744,9 @@ static void term_data_link(int i)
 	t->curs_hook = Term_curs_and;
 	t->wipe_hook = Term_wipe_and;
 	t->text_hook = Term_text_and;
+#ifdef ANGDROID_ANGBAND_PLUGIN
+	t->xchar_hook = Term_xchar_and;
+#endif
 #if !defined(ANGDROID_TOME_PLUGIN) && !defined(ANGDROID_STEAM_PLUGIN)
 	t->pict_hook = Term_pict_and;
 #endif
