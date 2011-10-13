@@ -354,6 +354,10 @@ public class NativeWrapper {
 		//Log.d("Angband", "wc.length = " + wc.length);
 		//Log.d("Angband", "wcstr.length = " + wcstr.length);
 		int i;
+		if(max == 0) {
+		    // someone just wants to check the length
+		    return wc.length;
+		}
 		for(i=0; i<wc.length && i<max; i++) {
 		    //Log.d("Angband", "i = " + i);
 		    wcstr[i] = wc[i];
