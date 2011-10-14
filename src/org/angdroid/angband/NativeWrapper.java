@@ -324,7 +324,6 @@ public class NativeWrapper {
 	}
 
     public int wctomb(byte[] pmb, byte character) {
-	synchronized (display_lock) {
 	    byte[] ba = new byte[1];
 	    ba[0] = character;
 	    byte[] wc;
@@ -341,11 +340,9 @@ public class NativeWrapper {
 		Log.d("Angband","wctomb: " + e);
 	    }
 	    return wclen;
-	}
     }
 
     public int mbstowcs(final byte[] wcstr, final byte[] mbstr, final int max) {
-	synchronized (display_lock) {
 	    //Log.d("Angband","mbstowcs("+wcstr+","+mbstr+","+max+")");
 	    try {
 		String str = new String(mbstr, "UTF-8");
@@ -367,6 +364,5 @@ public class NativeWrapper {
 		Log.d("Angband","mbstowcs: " + e);
 	    }
 	    return 0;
-	}
     }
 }

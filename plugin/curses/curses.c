@@ -397,7 +397,7 @@ void angdroid_warn(const char* msg) {
 
 int wctomb(char *pmb, wchar_t character) {
 	// LOGD("begin wctomb (c)");
-	jbyteArray pmb_a = (*env)->NewByteArray(pmb, 4);
+	jbyteArray pmb_a = (*env)->NewByteArray(env, 4);
 	if (pmb_a == NULL) angdroid_quit("wctomb: Out of memory");
 	int res = JAVA_CALL_INT(NativeWrapper_wctomb, pmb_a, character);
 	(*env)->GetByteArrayRegion(env, pmb_a, 0, res, pmb);
