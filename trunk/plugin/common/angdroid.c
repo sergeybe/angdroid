@@ -744,7 +744,7 @@ static void term_data_link(int i)
 	t->curs_hook = Term_curs_and;
 	t->wipe_hook = Term_wipe_and;
 	t->text_hook = Term_text_and;
-#ifdef ANGDROID_ANGBAND_PLUGIN
+#if defined(ANGDROID_ANGBAND_PLUGIN) && !defined(ANGDROID_NIGHTLY)
 	t->xchar_hook = Term_xchar_and;
 #endif
 #if !defined(ANGDROID_TOME_PLUGIN) && !defined(ANGDROID_STEAM_PLUGIN)
