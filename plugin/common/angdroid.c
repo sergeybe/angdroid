@@ -228,6 +228,10 @@ static errr Term_xtra_and(int n, int v)
 	jint ret;
 	int key;
 
+	/* flag to prevent re-entrant saving due to Term_xtra 
+	   being called in display functions during save */
+	static int save_in_progress = 0; 
+
 	/* Analyze */
 	switch (n)
 	{
@@ -258,7 +262,7 @@ static errr Term_xtra_and(int n, int v)
 			if (key == -1) {
 				LOGD("TERM_XTRA_EVENT.saving game");
 
-				int should_save = (turn_save != turn);
+				int should_save = (turn_save != turn && turn > 1);
 
 #ifdef ALLOW_BORG
 				if (borg_active) {
@@ -268,15 +272,15 @@ static errr Term_xtra_and(int n, int v)
 				}
 #endif
 
-				if (should_save
-					&& turn > 1 
+				if (!save_in_progress
+					&& should_save
 					&& p_ptr != NULL 
 #ifdef ANGDROID_TOME_PLUGIN
 					&& p_ptr->chp >= 0) {
 #else
 					&& !p_ptr->is_dead) {
 #endif
-
+					save_in_progress = 1;
 #ifdef ANGDROID_ANGBAND306_PLUGIN
 					do_cmd_save_game();
 #endif
@@ -295,6 +299,8 @@ static errr Term_xtra_and(int n, int v)
 
 					time(&savetime);
 					turn_save = turn;
+					save_in_progress = 0;
+
 					LOGD("TERM_XTRA_EVENT.saved game success");
 				}
 				else {
