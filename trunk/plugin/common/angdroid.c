@@ -18,6 +18,7 @@
 
 #include "angband.h"
 #include <sys/time.h>
+#include <unistd.h>
 
 /*
  * This file helps Angband work on non-existant computers.
@@ -294,6 +295,7 @@ static errr Term_xtra_and(int n, int v)
 					do_cmd_save_game(TRUE);
 #endif
 #ifdef ANGDROID_ANGBAND_PLUGIN
+					extern void save_game(void);
 					save_game();
 #endif
 
@@ -887,6 +889,7 @@ static void init_stuff()
 
 	/* Prepare the filepaths */
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
+	extern void init_file_paths(const char *config, const char *lib, const char *data);
 	init_file_paths(android_files_path, android_files_path, android_files_path);
 	if (!file_exists(android_files_path))
 	{
@@ -902,6 +905,7 @@ static void init_stuff()
 	strnfmt(temp, sizeof(temp), "%s", android_savefile);
 	path_build(savefile, sizeof(savefile), ANGBAND_DIR_SAVE, temp);
 
+	extern void process_player_name(bool sf);
 	process_player_name(FALSE);
 
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
@@ -1047,6 +1051,8 @@ void angdroid_main() {
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	LOGD("play_game()");
 	play_game();
+	
+	extern void cleanup_angband(void);
 	cleanup_angband();
 #endif
 
