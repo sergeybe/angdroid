@@ -37,6 +37,7 @@ extern bool borg_think_dungeon(void);
  */
 extern void borg_init_8(void);
 
+extern bool borg_flow_kill_direct(bool viewable);
 
 #endif
 

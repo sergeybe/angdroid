@@ -4126,7 +4126,7 @@ bool borg_think_dungeon(void)
     if (borg_flow_spastic(TRUE)) return (TRUE);
 
 	/* Flow directly to a monster if not able to be spastic */
-	if (borg_flow_kill_direct()) return (TRUE);
+	if (borg_flow_kill_direct(TRUE)) return (TRUE);
 
 
     /*** Wait for recall ***/

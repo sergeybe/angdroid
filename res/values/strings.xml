@@ -4,7 +4,7 @@
     <string name="app_name">Angband</string>
 
     <string-array name="gamePluginDescriptions">
-      <item>Vanilla 3.3.1</item> 
+      <item>Vanilla 3.3.2</item> 
       <item>Vanilla 3.0.6 +squelch,borg</item>
       <item>Vanilla 2.4.Frog-knows</item>
     </string-array>
