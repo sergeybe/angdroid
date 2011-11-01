@@ -30,6 +30,7 @@ public class KeyMapper {
 	String KEY_LEFTKEY = "angband.leftkey";
 	String KEY_RIGHTKEY = "angband.rightkey";
 
+	String KEY_AMPKEY = "angband.ampkey";
 	String KEY_ASTKEY = "angband.astkey";
 	String KEY_ATKEY = "angband.atkey";
 	String KEY_BSLASHKEY = "angband.bslashkey";
@@ -211,6 +212,7 @@ public class KeyMapper {
 			initKeyMap(KEY_RSHIFTKEY, KeyAction.ShiftKey);
 			initKeyMap(KEY_SPACEKEY, KeyAction.Space);
 
+			initKeyMap(KEY_AMPKEY, '&');
 			initKeyMap(KEY_ASTKEY, '*');
 			initKeyMap(KEY_ATKEY, '@');
 			initKeyMap(KEY_BSLASHKEY, '\\');
@@ -311,6 +313,7 @@ public class KeyMapper {
 			assignKeyMap(KEY_RIGHTKEY, KeyEvent.KEYCODE_DPAD_RIGHT);
 			assignKeyMap(KEY_UPKEY, KeyEvent.KEYCODE_DPAD_UP);
 
+			assignKeyMap(KEY_AMPKEY, '&');
 			assignKeyMap(KEY_ASTKEY, '*');
 			assignKeyMap(KEY_ATKEY, '@');
 			assignKeyMap(KEY_BSLASHKEY, '\\');
