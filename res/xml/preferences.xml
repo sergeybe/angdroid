@@ -113,6 +113,7 @@
 	  <PreferenceScreen
 		 android:title="Symbols"
 		 android:summary="Punctuation and other non-alpha numeric keys">	  
+		<org.angdroid.angband.KeyMapPreference android:key="angband.ampkey" android:title="Ampersand &amp;"/>
 		<org.angdroid.angband.KeyMapPreference android:key="angband.astkey" android:title="Asterisk *"/>
 		<org.angdroid.angband.KeyMapPreference android:key="angband.atkey" android:title="At @"/>
 		<org.angdroid.angband.KeyMapPreference android:key="angband.bslashkey" android:title="Back Slash \\"/>

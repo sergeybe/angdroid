@@ -134,7 +134,7 @@ public class TermView extends View implements OnGestureListener {
 
 	public void autoSizeFontByHeight(int maxHeight) {
 		if (maxHeight == 0) maxHeight = getMeasuredHeight();
-		setFontFace(0, maxHeight);
+		setFontFace(0, maxHeight, 0);
 
 		// HACK -- keep 480x320 fullscreen as-is
 		if (maxHeight==320) {
@@ -155,7 +155,7 @@ public class TermView extends View implements OnGestureListener {
 
 	public void autoSizeFontByWidth(int maxWidth) {
 		if (maxWidth == 0) maxWidth = getMeasuredWidth();
-		setFontFace(maxWidth, 0);
+		setFontFace(maxWidth, 0, 0);
 
 		// HACK -- keep 480x320 fullscreen as-is
 		if (maxWidth==480) {
@@ -181,13 +181,14 @@ public class TermView extends View implements OnGestureListener {
 		setFontSize(font_text_size);
 	}
 
-	private void setFontFace(int maxWidth, int maxHeight) {
-		if ( (maxWidth >0 && maxWidth<=480) || (maxHeight>0 && maxHeight<=320) ) {
+	private void setFontFace(int maxWidth, int maxHeight, int fontsize) {
+		if ( (maxWidth >0 && maxWidth<=480) || (maxHeight>0 && maxHeight<=320) || fontsize <= 12 ) {
 			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
 			fore.setTypeface(tfTiny);
 		}
 		else {
 			tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
+			//tfStd = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD);
 			fore.setTypeface(tfStd);
 		}		
 	}
@@ -204,18 +205,8 @@ public class TermView extends View implements OnGestureListener {
 		setFontSize(size,true);
 	}
 	private void setFontSize(int size, boolean persist) {
-		if (size>12) {
-			if (tfStd == null) {
-				tfStd = Typeface.createFromAsset(getResources().getAssets(), "VeraMoBd.ttf"); 
-			}
-			fore.setTypeface(tfStd);
-		}
-		else {	
-			if (tfTiny == null) {
-				tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf"); 
-			}
-			fore.setTypeface(tfTiny);
-		}
+		
+		setFontFace(0, 0, size);
 
 		if (size < 6) size = 6;
 		else if (size > 48) size = 48;
