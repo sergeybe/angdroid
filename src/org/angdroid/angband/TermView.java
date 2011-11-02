@@ -75,7 +75,6 @@ public class TermView extends View implements OnGestureListener {
 		initTermView(context);
 		handler = ((GameActivity)context).getHandler();
 		state = ((GameActivity)context).getStateManager();
-		_context = context;
 	}
 
 	public TermView(Context context, AttributeSet attrs) {
@@ -83,13 +82,13 @@ public class TermView extends View implements OnGestureListener {
 		initTermView(context);
 		handler = ((GameActivity)context).getHandler();
 		state = ((GameActivity)context).getStateManager();
-		_context = context;
 	}
 
 	protected void initTermView(Context context) {
+		_context = context;
 		fore = new Paint();
 		fore.setTextAlign(Paint.Align.LEFT);
-		fore.setAntiAlias(true);
+		if ( isHighRes() ) fore.setAntiAlias(true);
 		setForeColor(Color.WHITE);
 
 		back = new Paint();
@@ -362,7 +361,7 @@ public class TermView extends View implements OnGestureListener {
 						x, 
 						y, 
 						x + char_width + 1, 
-						y + char_height,
+						y + char_height + 1,
 						back
 						);					
 
