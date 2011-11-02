@@ -30,12 +30,14 @@ import android.os.Vibrator;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.GestureDetector.OnGestureListener;
@@ -64,6 +66,7 @@ public class TermView extends View implements OnGestureListener {
 	private boolean vibrate;
 	private Handler handler = null;
 	private StateManager state = null;
+	private Context _context;
 
 	private GestureDetector gesture;
 
@@ -72,6 +75,7 @@ public class TermView extends View implements OnGestureListener {
 		initTermView(context);
 		handler = ((GameActivity)context).getHandler();
 		state = ((GameActivity)context).getStateManager();
+		_context = context;
 	}
 
 	public TermView(Context context, AttributeSet attrs) {
@@ -79,11 +83,13 @@ public class TermView extends View implements OnGestureListener {
 		initTermView(context);
 		handler = ((GameActivity)context).getHandler();
 		state = ((GameActivity)context).getStateManager();
+		_context = context;
 	}
 
 	protected void initTermView(Context context) {
 		fore = new Paint();
 		fore.setTextAlign(Paint.Align.LEFT);
+		fore.setAntiAlias(true);
 		setForeColor(Color.WHITE);
 
 		back = new Paint();
@@ -134,10 +140,10 @@ public class TermView extends View implements OnGestureListener {
 
 	public void autoSizeFontByHeight(int maxHeight) {
 		if (maxHeight == 0) maxHeight = getMeasuredHeight();
-		setFontFace(0, maxHeight, 0);
+		setFontFace();
 
 		// HACK -- keep 480x320 fullscreen as-is
-		if (maxHeight==320) {
+		if (!isHighRes()) {
 			setFontSizeLegacy();
 		}
 		else {
@@ -155,10 +161,10 @@ public class TermView extends View implements OnGestureListener {
 
 	public void autoSizeFontByWidth(int maxWidth) {
 		if (maxWidth == 0) maxWidth = getMeasuredWidth();
-		setFontFace(maxWidth, 0, 0);
+		setFontFace();
 
 		// HACK -- keep 480x320 fullscreen as-is
-		if (maxWidth==480) {
+		if (!isHighRes()) {
 			setFontSizeLegacy();
 		}
 		else {
@@ -174,6 +180,15 @@ public class TermView extends View implements OnGestureListener {
 		//Log.d("Angband","autoSizeFontWidth "+font_text_size+","+maxWidth);
 	}
 
+	public boolean isHighRes() {
+		Display display = ((WindowManager) _context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		int maxWidth = display.getWidth();
+		int maxHeight = display.getHeight();
+
+		//Log.d("Angband","isHighRes "+maxHeight+","+maxWidth +","+ (Math.max(maxWidth,maxHeight)>480));		
+		return Math.max(maxWidth,maxHeight)>480;
+	}
+
 	private void setFontSizeLegacy() {
 		font_text_size = 12;
 		char_height = 12;
@@ -181,8 +196,8 @@ public class TermView extends View implements OnGestureListener {
 		setFontSize(font_text_size);
 	}
 
-	private void setFontFace(int maxWidth, int maxHeight, int fontsize) {
-		if ( (maxWidth >0 && maxWidth<=480) || (maxHeight>0 && maxHeight<=320) || fontsize <= 12 ) {
+	private void setFontFace() {
+		if ( !isHighRes() ) {
 			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
 			fore.setTypeface(tfTiny);
 		}
@@ -206,7 +221,7 @@ public class TermView extends View implements OnGestureListener {
 	}
 	private void setFontSize(int size, boolean persist) {
 		
-		setFontFace(0, 0, size);
+		setFontFace();
 
 		if (size < 6) size = 6;
 		else if (size > 48) size = 48;
@@ -224,7 +239,7 @@ public class TermView extends View implements OnGestureListener {
  
 		char_height = (int)Math.ceil(fore.getFontSpacing()); 
 		char_width = (int)fore.measureText("X", 0, 1);	
-		//Log.d("Angband","setSizeFont "+font_text_size);
+		//Log.d("Angband","setSizeFont "+fore.measureText("X", 0, 1));
 	}
 
 	@Override
@@ -238,7 +253,7 @@ public class TermView extends View implements OnGestureListener {
 		else
 			fs = Preferences.getLandscapeFontSize();
 
-		if(fs == 0) 
+		if (fs == 0) 
 			autoSizeFontByWidth(width);
 		else
 			setFontSize(fs, false);  
@@ -346,7 +361,7 @@ public class TermView extends View implements OnGestureListener {
 		canvas.drawRect(
 						x, 
 						y, 
-						x + char_width, 
+						x + char_width + 1, 
 						y + char_height,
 						back
 						);					
