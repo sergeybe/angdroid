@@ -113,53 +113,34 @@ public class NativeWrapper {
 
 	private void frosh(TermWindow w) {
 
-		final int A_NORMAL = 0;
-		final int A_REVERSE = 0x100;
-		final int A_STANDOUT = 0x200;
-		final int A_BOLD = 0x400;
-		final int A_UNDERLINE = 0x800;
-		//#define A_BLINK 0x1000
-		//#define A_DIM = 0x2000;
-		//#define A_ALTCHARSET 0x4000
-
 		synchronized(display_lock) {
 			/* for forcing a redraw due to an Android event, w should be null */
 
 			TermWindow v = state.virtscr;
 			if (w != null) v.overwrite(w);
-			
+
+			/* mark ugly points, i.e. those clobbered by anti-alias overflow */
+			for(int c = 0; c<v.cols; c++) {
+				for(int r = 0; r<v.rows; r++) {
+					TermWindow.TermPoint p = v.buffer[r][c];
+					if (p.isDirty || w == null) {
+						if (r<v.rows-1) {
+							TermWindow.TermPoint u = v.buffer[r+1][c];
+							u.isUgly = !u.isDirty;
+						}
+						if (c<v.cols-1) {
+							TermWindow.TermPoint u = v.buffer[r][c+1];
+							u.isUgly = !u.isDirty;
+						}
+					}
+				}
+			}
+
 			for(int r = 0; r<v.rows; r++) {
 				for(int c = 0; c<v.cols; c++) {
 					TermWindow.TermPoint p = v.buffer[r][c];
-					if (p.isDirty || w == null) {
-						
-						int color = p.Color & 0xFF;
-
-						boolean standout = ((p.Color & A_STANDOUT) != 0) 
-							|| ((p.Color & A_BOLD) != 0)
-							|| ((p.Color & A_UNDERLINE) != 0);
-						
-						boolean reverse = ((p.Color & A_REVERSE) != 0);
-
-						if (standout) color += (color < 8 ? 8 : -8);
-						
-						TermWindow.ColorPair cp = TermWindow.pairs.get(color);
-						if (cp == null) cp = TermWindow.defaultColor;
-
-						/*
-						if (p.Char != ' ') {
-							Formatter fmt = new Formatter();
-							fmt.format("fcolor:%x bcolor:%x", cp.fColor, cp.bColor);
-							Log.d("Angband","frosh '"+p.Char+"' "+fmt);
-						}
-						*/
-
-						if (reverse) 
-							term.drawPoint(r, c, p.Char, cp.bColor, cp.fColor);
-						else
-							term.drawPoint(r, c, p.Char, cp.fColor, cp.bColor);
-							
-						p.isDirty = false;
+					if (p.isDirty || p.isUgly || w == null) {
+						drawPoint(r, c, p, p.isDirty || w == null);
 					}
 				}
 			}
@@ -169,6 +150,47 @@ public class NativeWrapper {
 			if (w == null)
 				term.onScroll(null,null,0,0);  // sanitize scroll position
 		}
+	}
+
+	private void drawPoint(int r, int c, TermWindow.TermPoint p, boolean extendErase)
+	{
+		final int A_NORMAL = 0;
+		final int A_REVERSE = 0x100;
+		final int A_STANDOUT = 0x200;
+		final int A_BOLD = 0x400;
+		final int A_UNDERLINE = 0x800;
+		//#define A_BLINK 0x1000
+		//#define A_DIM = 0x2000;
+		//#define A_ALTCHARSET 0x4000
+
+		int color = p.Color & 0xFF;
+
+		boolean standout = ((p.Color & A_STANDOUT) != 0) 
+			|| ((p.Color & A_BOLD) != 0)
+			|| ((p.Color & A_UNDERLINE) != 0);
+						
+		boolean reverse = ((p.Color & A_REVERSE) != 0);
+
+		if (standout) color += (color < 8 ? 8 : -8);
+						
+		TermWindow.ColorPair cp = TermWindow.pairs.get(color);
+		if (cp == null) cp = TermWindow.defaultColor;
+
+		/*
+		  if (p.Char != ' ') {
+		  Formatter fmt = new Formatter();
+		  fmt.format("fcolor:%x bcolor:%x", cp.fColor, cp.bColor);
+		  Log.d("Angband","frosh '"+p.Char+"' "+fmt);
+		  }
+		*/
+
+		if (reverse) 
+			term.drawPoint(r, c, p.Char, cp.bColor, cp.fColor, extendErase);
+		else
+			term.drawPoint(r, c, p.Char, cp.fColor, cp.bColor, extendErase);
+							
+		p.isDirty = false;
+		p.isUgly = false;
 	}
 
 	public void waddnstr(final int w, final int n, final byte[] cp) {

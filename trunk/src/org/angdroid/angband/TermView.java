@@ -345,7 +345,7 @@ public class TermView extends View implements OnGestureListener {
    		return true;
 	}
 
-	public void drawPoint(int r, int c, char ch, int fcolor, int bcolor) {
+	public void drawPoint(int r, int c, char ch, int fcolor, int bcolor, boolean extendedErase) {
 		float x = c * char_width;
 		float y = r * char_height;
 
@@ -360,8 +360,8 @@ public class TermView extends View implements OnGestureListener {
 		canvas.drawRect(
 						x, 
 						y, 
-						x + char_width + 1, 
-						y + char_height + 1,
+						x + char_width + (extendedErase ? 1 : 0), 
+						y + char_height + (extendedErase ? 1 : 0), 
 						back
 						);					
 

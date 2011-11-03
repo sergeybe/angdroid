@@ -23,6 +23,7 @@ public class TermWindow {
 		public char Char = ' ';
 		public int Color = 0;
 		public boolean isDirty = false;
+		public boolean isUgly = false;
 	}
 	public TermPoint[][] buffer = null; 
 
