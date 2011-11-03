@@ -132,6 +132,10 @@ public class NativeWrapper {
 							TermWindow.TermPoint u = v.buffer[r][c+1];
 							u.isUgly = !u.isDirty;
 						}
+						if (c<v.cols-1 && r<v.rows-1) {
+							TermWindow.TermPoint u = v.buffer[r+1][c+1];
+							u.isUgly = !u.isDirty;
+						}
 					}
 				}
 			}
