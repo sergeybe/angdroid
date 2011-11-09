@@ -389,6 +389,6 @@ public class NativeWrapper {
 	    } catch(java.io.UnsupportedEncodingException e) {
 		Log.d("Angband","mbstowcs: " + e);
 	    }
-	    return 0;
+	    return -1;
     }
 }

@@ -419,7 +419,9 @@ size_t mbstowcs(wchar_t *wcstr, const char *mbstr, size_t max) {
 	int res = JAVA_CALL_INT(NativeWrapper_mbstowcs, wcstr_a, mbstr_a, max);
 	if(wcstr) {
 	  (*env)->GetByteArrayRegion(env, wcstr_a, 0, res, wcstr);
-	  wcstr[res] = 0;
+	  if(res < max) {
+	    wcstr[res] = 0;
+	  }
 	}
 	(*env)->DeleteLocalRef(env, wcstr_a);
 	(*env)->DeleteLocalRef(env, mbstr_a);
