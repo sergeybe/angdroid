@@ -17,7 +17,7 @@
         <exec executable="sh" 
 	      failonerror="true"
 	      dir="plugin/${plugin.name}">
-	      <arg value="${ndk-location}/ndk-build"/>
+	      <arg value="${ndk.dir}/ndk-build"/>
 		</exec>
 		<copy file="plugin/${plugin.name}/libs/armeabi/lib${pluginlib.name}.so" 
 	      tofile="libs/armeabi/lib${pluginlib.name}.so"

@@ -28,7 +28,7 @@
 	</ant>
     </target>
 
-    <target name="angband-javah" depends="compile">
+    <target name="angband-javah" depends="-post-compile">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
 	</ant>
 	</target>
@@ -147,18 +147,7 @@
        </proguard>
     </target>
     
-    <path id="android.antlibs">
-        <pathelement path="${sdk-location}/tools/lib/anttasks.jar" />
-        <pathelement path="${sdk-location}/tools/lib/sdklib.jar" />
-        <pathelement path="${sdk-location}/tools/lib/androidprefs.jar" />
-        <pathelement path="${sdk-location}/tools/lib/apkbuilder.jar" />
-        <pathelement path="${sdk-location}/tools/lib/jarutils.jar" />
-    </path>
-
-    <taskdef name="setup"
-        classname="com.android.ant.SetupTask"
-        classpathref="android.antlibs"/>
-
-    <setup/>
+    <!-- version-tag: 1 -->
+    <import file="${sdk.dir}/tools/ant/build.xml" />
 
 </project>

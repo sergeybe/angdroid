@@ -3,7 +3,6 @@ build.properties
 .project
 bin
 gen
-plugin/include/*.h
 res/raw/zip*
 plugin/angband/extsrc/*
 plugin/angband306/extsrc/*
