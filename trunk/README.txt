@@ -2,14 +2,14 @@ How to compile the Angband Native port for Android.
 
 To build, you should use Ant 1.8.1. See here http://ant.apache.org/.
 
-1. Edit build.properties file and set ndk-location and sdk-location properties:
+1. Edit ant.properties file and set ndk.dir and sdk.dir properties:
 
 ...
-ndk-location=/home/user/Java/android-ndk-r5b
-sdk-location=/home/user/Java/android-sdk-linux
+ndk.dir=/home/user/Java/android-ndk-r5b
+sdk.dir=/home/user/Java/android-sdk-linux
 ...
 
-The ndk-location and sdk-location properties should point to Android NDK and Android SDK.
+The ndk.dir and sdk.dir properties should point to Android NDK and Android SDK.
 
 
 2. To build the Angband debug apk file, execute:

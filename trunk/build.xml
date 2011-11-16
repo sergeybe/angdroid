@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Angband" default="angband-debug">
 
-    <property file="local.properties"/>
-    <property file="build.properties"/>
-    <property file="default.properties"/>
+  <property file="local.properties" />
+  <loadproperties srcFile="project.properties" />
+  <property file="ant.properties" />
+  <!--  
+	   <property file="local.properties"/> 
+	   <property file="build.properties"/>
+	   <property file="default.properties"/>
+  -->
 
     <target name="angband-debug" depends="angband-debug-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-debug" />
