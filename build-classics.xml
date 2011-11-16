@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Classics" default="classics-debug">
 
-    <target name="classics-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
-    <target name="classics-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
+    <target name="classics-release" depends="clean, plugin-src, plugin-resources, release" />
+    <target name="classics-debug"   depends="check-plugin-src, plugin-resources, debug" />
 
 <!--
     ************************************************************************
@@ -27,28 +27,26 @@
 	</ant>
     </target>
 
-    <target name="angband-javah" depends="compile">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
-	</ant>
-	</target>
+    <target name="-post-compile">
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
+	  </ant>
 
-    <target name="plugin-libs" depends="angband-javah">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="loader"/>
 	    <property name="pluginlib.name" value="loader-classics"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="moria"/>
 	    <property name="pluginlib.name" value="moria"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="larn"/>
 	    <property name="pluginlib.name" value="larn"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="rogue"/>
 	    <property name="pluginlib.name" value="rogue"/>
-	</ant>
+	  </ant>
     </target>
 
     <condition property="is.exist.libs">
@@ -142,18 +140,7 @@
        </proguard>
     </target>
     
-    <path id="android.antlibs">
-        <pathelement path="${sdk-location}/tools/lib/anttasks.jar" />
-        <pathelement path="${sdk-location}/tools/lib/sdklib.jar" />
-        <pathelement path="${sdk-location}/tools/lib/androidprefs.jar" />
-        <pathelement path="${sdk-location}/tools/lib/apkbuilder.jar" />
-        <pathelement path="${sdk-location}/tools/lib/jarutils.jar" />
-    </path>
-
-    <taskdef name="setup"
-        classname="com.android.ant.SetupTask"
-        classpathref="android.antlibs"/>
-
-    <setup/>
+	<!-- version-tag: 1 -->
+	<import file="${sdk.dir}/tools/ant/build.xml" />
 
 </project>
