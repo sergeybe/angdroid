@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Angband" default="angband-debug">
 
-    <target name="angband-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
-
-    <target name="angband-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
+    <target name="angband-release" depends="clean, plugin-src, plugin-resources, release" />
+    <target name="angband-debug"   depends="check-plugin-src, plugin-resources, debug" />
 
 <!--
     ************************************************************************
@@ -28,28 +27,26 @@
 	</ant>
     </target>
 
-    <target name="angband-javah" depends="-post-compile">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
-	</ant>
-	</target>
+    <target name="-post-compile">
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
+	  </ant>
 
-    <target name="plugin-libs" depends="angband-javah">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="loader"/>
 	    <property name="pluginlib.name" value="loader-angband"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="angband"/>
 	    <property name="pluginlib.name" value="angband"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="angband306"/>
 	    <property name="pluginlib.name" value="angband306"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="frogknows"/>
 	    <property name="pluginlib.name" value="frogknows"/>
-	</ant>
+	  </ant>
     </target>
 
     <condition property="is.exist.libs">

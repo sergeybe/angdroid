@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="AngbandVariants" default="angband-debug">
 
-    <target name="variants-release" depends="clean, plugin-src, plugin-resources, angband-javah, plugin-libs, release" />
-
-    <target name="variants-debug"   depends="check-plugin-src, plugin-resources, angband-javah, plugin-libs, debug" />
+    <target name="variants-release" depends="clean, plugin-src, plugin-resources, release" />
+    <target name="variants-debug"   depends="check-plugin-src, plugin-resources, debug" />
 
 <!--
     ************************************************************************
@@ -33,28 +32,26 @@
 -->
     </target>
 
-    <target name="angband-javah" depends="-post-compile">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
-	</ant>
-	</target>
+    <target name="-post-compile">
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="angband-javah">
+	  </ant>
 
-    <target name="plugin-libs" depends="angband-javah">
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="loader"/>
 	    <property name="pluginlib.name" value="loader-variants"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="tome"/>
 	    <property name="pluginlib.name" value="tome"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="sang"/>
 	    <property name="pluginlib.name" value="sang"/>
-	</ant>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	  </ant>
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="steam"/>
 	    <property name="pluginlib.name" value="steam"/>
-	</ant>
+	  </ant>
 <!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="npp"/>
@@ -171,8 +168,6 @@
 	    -optimizations !code/simplification/cast
        </proguard>
     </target>
-
--->
 
 	<!-- version-tag: 1 -->
 	<import file="${sdk.dir}/tools/ant/build.xml" />
