@@ -56,6 +56,7 @@
 	<target name="git-patch-plugin-src" depends="git-src, patch-plugin-src" />
 
 	<target name="git-src">
+	  <mkdir dir="plugin/${plugin.name}/extsrc"/>
 	  <delete includeemptydirs="true">
 		<fileset dir="plugin/${plugin.name}/extsrc" includes="**/*" defaultexcludes="false"/>
 	  </delete>
