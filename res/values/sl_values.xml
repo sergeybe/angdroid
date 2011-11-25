@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<dimen name="sl_header_image_size">48dp</dimen>
+	<dimen name="sl_margin_default">7dp</dimen>
+	<dimen name="sl_margin_small">5dp</dimen>
+	<dimen name="sl_clickable_height">40dp</dimen>
+	<dimen name="sl_margin_shortcut">2dp</dimen>
+</resources>

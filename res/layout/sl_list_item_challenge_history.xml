@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/sl_selector_list_item">
+
+	<com.scoreloop.client.android.ui.component.base.RoundCornerImageView android:layout_width="36dp"
+		android:layout_height="36dp"
+		android:layout_margin="@dimen/sl_margin_default"
+		android:layout_gravity="center_vertical"
+		android:id="@+id/sl_icon"/>
+	
+	<LinearLayout android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:layout_margin="@dimen/sl_margin_default"
+		android:layout_weight="1"
+		android:orientation="vertical">
+	
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/sl_contender_name"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			style="@style/sl_text_normal_bold"/>
+			
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/sl_contestant_name"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			style="@style/sl_text_normal_bold"/>
+			
+	</LinearLayout>
+	
+	<LinearLayout android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:layout_margin="@dimen/sl_margin_default"
+		android:orientation="vertical"
+		android:id="@+id/sl_scores">
+	
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="right"
+			android:id="@+id/sl_contender_score"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			style="@style/sl_text_normal_normal"/>
+			
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="right"
+			android:id="@+id/sl_contestant_score"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			style="@style/sl_text_normal_normal"/>
+			
+	</LinearLayout>
+	
+	<TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:layout_margin="@dimen/sl_margin_default"
+		android:singleLine="true"
+		android:ellipsize="marquee"
+		style="@style/sl_text_normal_normal"
+		android:id="@+id/sl_prize"/>
+	
+</LinearLayout>

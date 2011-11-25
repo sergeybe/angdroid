@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="org.angdroid.angband" android:versionCode="27"
+	package="org.angdroid.nightly" android:versionCode="27"
 	android:versionName="3.3.2.2"
 	android:installLocation="auto">
 
 	<application android:icon="@drawable/icon" 
 				 android:label="@string/app_name"
-				 android:allowClearUserData="true" 
+				 android:allowClearUserData="true"
+				 android:name=".AngbandApp"
 				 android:description="@string/description">
 
 		<activity android:name=".AngbandActivity" 
@@ -28,7 +29,7 @@
 				  android:launchMode="singleTask" 
 				  android:windowSoftInputMode="stateHidden">
 			<intent-filter>
-				<action android:name="org.angdroid.angband.GAME" />
+				<action android:name="org.angdroid.nightly.GAME" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -36,7 +37,7 @@
 		<activity android:name=".HelpActivity" android:label="@string/angband_help"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.angband.HELP" />
+				<action android:name="org.angdroid.nightly.HELP" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -44,7 +45,7 @@
 		<activity android:name=".PreferencesActivity" android:label="@string/preferences"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.angband.PREF" />
+				<action android:name="org.angdroid.nightly.PREF" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -52,7 +53,7 @@
 		<activity android:name=".ProfilesActivity" android:label="@string/profiles"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.angband.PROFILES" />
+				<action android:name="org.angdroid.nightly.PROFILES" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -60,10 +61,36 @@
 		<activity android:name=".ProfileAddActivity" android:label="@string/profileadd"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.angband.PROFILEADD" />
+				<action android:name="org.angdroid.nightly.PROFILEADD" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
+
+		<!-- Defining the ScoreloopUI activities -->
+
+		<activity android:name="com.scoreloop.client.android.ui.EntryScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		<activity android:name="com.scoreloop.client.android.ui.ShowResultOverlayActivity" android:theme="@style/sl_dialog"/>
+
+		<activity android:name="com.scoreloop.client.android.ui.component.market.MarketHeaderActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.market.MarketListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.entry.EntryListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.post.PostOverlayActivity" android:theme="@style/sl_dialog"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.score.ScoreHeaderActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.score.ScoreListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.user.UserAddBuddyListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.user.UserHeaderActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.user.UserDetailListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.user.UserListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.game.GameDetailHeaderActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.game.GameDetailListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.game.GameListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.profile.ProfileSettingsListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.component.profile.ProfileSettingsPictureListActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.LeaderboardsScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		
+		<activity android:name="com.scoreloop.client.android.ui.framework.ScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		<activity android:name="com.scoreloop.client.android.ui.framework.TabsActivity"/>
+
 	</application>
 	<uses-sdk android:minSdkVersion="3" android:targetSdkVersion="10" />
 
@@ -71,4 +98,5 @@
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 </manifest>

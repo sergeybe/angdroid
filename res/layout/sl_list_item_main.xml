@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_gravity="center"
+	android:background="@drawable/sl_selector_list_item"
+	android:stretchColumns="1"
+	android:shrinkColumns="1">
+
+	<TableRow>
+		<ImageView android:id="@+id/sl_list_item_main_icon"
+			android:layout_gravity="center_vertical"
+			android:layout_width="36dp"
+			android:layout_height="36dp"
+			android:layout_margin="@dimen/sl_margin_default"/>
+
+		<TextView android:id="@+id/sl_list_item_main_title"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			android:layout_marginLeft="@dimen/sl_margin_default"
+			style="@style/sl_text_large_bold"/>
+
+		<TextView android:id="@+id/sl_list_item_main_subtitle"
+			style="@style/sl_text_normal_normal"
+			android:layout_gravity="center_vertical"
+			android:layout_marginRight="@dimen/sl_margin_default"/>
+
+	</TableRow>
+</TableLayout>

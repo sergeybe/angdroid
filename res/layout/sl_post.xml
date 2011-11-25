@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="220dp"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:background="@color/sl_color_background">
+	
+	<FrameLayout android:layout_width="fill_parent"
+		android:layout_height="25dp"
+		android:background="@drawable/sl_status_background">
+
+		<ImageView android:layout_width="wrap_content"
+			android:layout_height="18dp"
+			android:layout_marginLeft="@dimen/sl_margin_default"
+			android:layout_gravity="center|left"
+			android:src="@drawable/sl_logo"/>
+			
+	</FrameLayout>
+
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_margin="@dimen/sl_margin_default"
+		android:orientation="vertical">
+		
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/sl_post_text"
+			style="@style/sl_text_normal_bold"/>
+	
+		<CheckBox android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/facebook_checkbox"
+			android:text="@string/sl_facebook"
+			style="@style/sl_text_normal_normal"
+			android:button="@drawable/sl_checkbox_selector"/>
+			
+		<CheckBox android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/myspace_checkbox"
+			android:text="@string/sl_myspace"
+			style="@style/sl_text_normal_normal"
+			android:button="@drawable/sl_checkbox_selector"/>
+			
+		<CheckBox android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/twitter_checkbox"
+			android:text="@string/sl_twitter"
+			style="@style/sl_text_normal_normal"
+			android:layout_marginBottom="@dimen/sl_margin_default"
+			android:button="@drawable/sl_checkbox_selector"/>
+	
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Optional message:"
+			style="@style/sl_text_normal_normal"/>
+			
+		<EditText android:layout_width="fill_parent"
+			android:layout_height="@dimen/sl_clickable_height"
+			android:id="@+id/message_edittext"
+			android:background="@drawable/sl_dialog_input_background"/>
+			
+	</LinearLayout>
+	
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="@dimen/sl_margin_default">
+			
+		<Button android:layout_width="wrap_content"
+			android:layout_height="@dimen/sl_clickable_height"
+			android:id="@+id/cancel_button"
+			android:text="@string/sl_no_thanks"
+			android:background="@drawable/sl_dialog_button_background_selector"
+			style="@style/sl_text_normal_bold_inverted"
+			android:layout_marginRight="@dimen/sl_margin_default"/>
+
+		<Button android:layout_width="wrap_content"
+			android:layout_height="@dimen/sl_clickable_height"
+			android:layout_weight="1"
+			android:id="@+id/ok_button"
+			android:text="@string/sl_post"
+			android:background="@drawable/sl_dialog_button_background_selector"
+			style="@style/sl_text_normal_bold_inverted"
+			android:layout_marginLeft="@dimen/sl_margin_default"/>
+	</LinearLayout>
+
+</LinearLayout>

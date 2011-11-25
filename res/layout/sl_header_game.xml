@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	
+	<FrameLayout android:id="@+id/sl_caption_container"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"/>
+
+	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/sl_header_layout"
+		android:layout_width="fill_parent"
+		android:layout_height="70dp"
+		android:background="@drawable/sl_header_background"
+		android:stretchColumns="1"
+		android:shrinkColumns="1">
+
+		<TableRow>
+
+			<ImageView android:id="@+id/sl_header_image"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_margin="@dimen/sl_margin_default"/>
+
+			<LinearLayout android:layout_marginTop="@dimen/sl_margin_default"
+				android:orientation="vertical"
+				android:layout_gravity="center_vertical"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent">
+
+				<TextView android:id="@+id/sl_header_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:singleLine="true"
+						android:ellipsize="marquee"
+						style="@style/sl_text_huge_bold"/>
+				<TextView android:id="@+id/sl_header_subtitle"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:singleLine="true"
+						android:ellipsize="marquee"
+						style="@style/sl_text_normal_normal"/>
+
+			</LinearLayout>
+
+			<FrameLayout android:id="@+id/sl_control_header"
+				android:layout_marginTop="3dp"
+				android:layout_marginRight="@dimen/sl_margin_default"
+				android:layout_width="wrap_content"
+				android:layout_height="36dp"
+				android:gravity="right"
+				android:layout_gravity="center_vertical">
+
+                <Button android:id="@+id/sl_control_button"
+                    android:background="@drawable/sl_header_button_background_selector"
+                    android:minWidth="50dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    style="@style/sl_text_normal_bold_inverted"/>
+            </FrameLayout>
+
+		</TableRow>
+
+	</TableLayout>
+</LinearLayout>

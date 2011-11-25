@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sl_item_account_settings"
+          android:title="@string/sl_account_settings"
+          android:icon="@drawable/sl_icon_menu_account_settings"
+          android:alphabeticShortcut="@string/sl_account_settings_shortcut"/>
+</menu>

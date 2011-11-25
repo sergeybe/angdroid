@@ -10,13 +10,13 @@
 	   <property file="default.properties"/>
   -->
 
-    <target name="angband-debug" depends="angband-debug-override">
+    <target name="angband-debug" depends="angband-copy,angband-debug-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-debug" />
     </target>
-    <target name="angband-beta" depends="angband-debug-override">
+    <target name="angband-beta" depends="angband-copy,angband-debug-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-release" />
     </target>
-    <target name="angband-release" depends="angband-release-override">
+    <target name="angband-release" depends="angband-copy,angband-release-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-release" />
     </target>
     <target name="angband-plugin-src">
@@ -62,6 +62,16 @@
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="plugin-src" />
     </target>
 
+	<target name="angband-copy">
+	  <copy todir="src">
+	    <fileset dir="pre-src">
+	    </fileset>
+	  </copy>
+	  <exec dir="." executable="${bash-location}">
+	    <arg value="fix-angband.sh"/>
+	  </exec>
+	</target>
+
 	<target name="variants-copy">
 	  <copy todir="./alt-apk/variants">
 		<fileset dir=".">
@@ -81,6 +91,12 @@
 		  <exclude name="**/plugin/loader/libs/**" />
 		  <exclude name="**/plugin/loader/obj/**" />
 		  <exclude name="**/res/raw/**" />
+		  <exclude name="**/pre-src/**" />
+		  <exclude name="**/src/org/angdroid/**" />
+		</fileset>
+	  </copy>
+	  <copy todir="./alt-apk/variants/src">
+		<fileset dir="pre-src">
 		</fileset>
 	  </copy>
 	  <exec dir="./alt-apk/variants" executable="${bash-location}">
@@ -137,6 +153,12 @@
 		  <exclude name="**/plugin/loader/libs/**" />
 		  <exclude name="**/plugin/loader/obj/**" />
 		  <exclude name="**/res/raw/**" />
+		  <exclude name="**/pre-src/**" />
+		  <exclude name="**/src/org/angdroid/**" />
+		</fileset>
+	  </copy>
+	  <copy todir="./alt-apk/nightly/src" overwrite="true">
+		<fileset dir="pre-src">
 		</fileset>
 	  </copy>
 	  <exec dir="./alt-apk/nightly" executable="${bash-location}">
@@ -172,6 +194,12 @@
 		  <exclude name="**/plugin/loader/libs/**" />
 		  <exclude name="**/plugin/loader/obj/**" />
 		  <exclude name="**/res/raw/**" />
+		  <exclude name="**/pre-src/**" />
+		  <exclude name="**/src/org/angdroid/**" />
+		</fileset>
+	  </copy>
+	  <copy todir="./alt-apk/classics/src">
+		<fileset dir="pre-src">
 		</fileset>
 	  </copy>
 	  <exec dir="./alt-apk/classics" executable="${bash-location}">

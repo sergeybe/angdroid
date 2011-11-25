@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sl_header_caption"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:paddingLeft="5dp"
+	android:paddingTop="1dp"
+	android:paddingBottom="1dp"
+	android:layout_weight="1"
+	android:background="@drawable/sl_header_caption_background"
+	style="@style/sl_text_big_bold_inverted"/>

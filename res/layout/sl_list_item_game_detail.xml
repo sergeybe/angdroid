@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sl_list_item_game_detail_text"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:padding="@dimen/sl_margin_default"
+	android:background="@drawable/sl_selector_list_item"
+	style="@style/sl_text_normal_normal"/>

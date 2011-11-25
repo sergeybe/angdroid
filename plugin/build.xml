@@ -9,7 +9,7 @@
             classpath="${out-classes-location}"
             bootclasspath="${android-jar}"
             verbose="true">
-            <class name="org.angdroid.angband.NativeWrapper" />
+            <class name="org.angdroid.nightly.NativeWrapper" />
         </javah>
     </target>
 

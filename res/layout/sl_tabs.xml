@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical">
+
+	<com.scoreloop.client.android.ui.framework.TabView 
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/sl_tabs_segments"
+		android:orientation="horizontal"
+		android_layout_gravity="center"/>
+
+	<FrameLayout android:id="@+id/sl_tabs_body"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:padding="0px"
+			android:background="@drawable/sl_screen_background"/>
+
+</LinearLayout>

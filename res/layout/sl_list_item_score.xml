@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_gravity="center"
+	android:background="@drawable/sl_selector_list_item"
+	android:stretchColumns="1"
+	android:shrinkColumns="1">
+
+	<TableRow>
+		<com.scoreloop.client.android.ui.component.base.RoundCornerImageView android:id="@+id/sl_icon"
+			android:layout_width="36dp"
+			android:layout_height="36dp"
+			android:layout_margin="@dimen/sl_margin_default"
+			android:gravity="center_vertical"
+			android:src="@drawable/sl_icon_user"/>
+
+		<TextView android:id="@+id/sl_list_item_score_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:layout_margin="5dp"
+				android:layout_gravity="center_vertical"
+				style="@style/sl_text_large_bold"/>
+
+		<TextView android:id="@+id/sl_list_item_score_result"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="@dimen/sl_margin_default"
+			android:layout_gravity="center_vertical"
+			android:singleLine="false"
+			android:ellipsize="marquee"
+			style="@style/sl_text_large_normal"/>
+
+	</TableRow>
+</TableLayout>
