@@ -6,6 +6,8 @@ import android.app.ProgressDialog;
 import android.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
+import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
+import com.scoreloop.client.android.core.model.Score;
 
 public class AngbandDialog {
 	private GameActivity activity;
@@ -19,7 +21,8 @@ public class AngbandDialog {
 			,StartGame
 			,OnGameExit
 			,Toast
-			,ToggleKeyboard;
+			,ToggleKeyboard,
+			Score;
 
 		public static Action convert(int value)
 		{
@@ -56,6 +59,9 @@ public class AngbandDialog {
 			break;
 		case Toast: 
 			Toast.makeText(activity, (String)msg.obj, Toast.LENGTH_SHORT).show();			
+			break;
+		case Score:
+			ScoreloopManagerSingleton.get().onGamePlayEnded((Score)msg.obj, null);
 			break;
 		}
 	}
