@@ -1,4 +1,4 @@
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import java.lang.reflect.Array;
 import java.io.File;
@@ -199,7 +199,7 @@ final public class Preferences {
 		return 
 			Environment.getExternalStorageDirectory()
 			+ "/"
-			+ "Android/data/org.angdroid.nightly/files/lib"
+			+ "Android/data/org.angdroid.angband/files/lib"
 			+ Plugins.getFilesDir(Plugins.Plugin.convert(pluginId));
 	}
 
@@ -208,7 +208,7 @@ final public class Preferences {
 		return 
 			Environment.getExternalStorageDirectory()
 			+ "/"
-			+ "Android/data/org.angdroid.nightly/files/lib"
+			+ "Android/data/org.angdroid.angband/files/lib"
 			+ dir;
 	}
 

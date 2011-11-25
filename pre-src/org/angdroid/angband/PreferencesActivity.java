@@ -16,7 +16,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  */
 
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

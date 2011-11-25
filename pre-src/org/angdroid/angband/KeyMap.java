@@ -1,9 +1,9 @@
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import android.util.Log;
 import android.view.KeyEvent;
 
-import org.angdroid.nightly.KeyMapper.KeyAction;
+import org.angdroid.angband.KeyMapper.KeyAction;
 
 public class KeyMap {
 

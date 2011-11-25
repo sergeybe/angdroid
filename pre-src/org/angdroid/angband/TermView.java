@@ -16,7 +16,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  */
 
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import android.content.Context;
 import android.graphics.Bitmap;

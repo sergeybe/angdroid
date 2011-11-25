@@ -1,4 +1,4 @@
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import java.util.zip.ZipInputStream;
 import java.util.Scanner;
@@ -85,7 +85,7 @@ final public class Plugins {
 		switch (p) {
 		case Angband: 
 			return Environment.getExternalStorageDirectory()
-				+ "/Android/data/org.angdroid.nightly/files/libangband320/save";
+				+ "/Android/data/org.angdroid.angband/files/libangband320/save";
 		default: return "";
 		}		
 	}
