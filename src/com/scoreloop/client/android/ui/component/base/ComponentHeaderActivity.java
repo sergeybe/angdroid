@@ -30,7 +30,7 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public abstract class ComponentHeaderActivity extends ComponentActivity implements OnClickListener {
 

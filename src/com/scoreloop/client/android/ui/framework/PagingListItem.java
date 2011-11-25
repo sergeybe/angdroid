@@ -29,7 +29,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public class PagingListItem extends BaseListItem {
 

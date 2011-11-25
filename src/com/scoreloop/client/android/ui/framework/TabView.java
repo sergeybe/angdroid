@@ -24,7 +24,7 @@ package com.scoreloop.client.android.ui.framework;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public class TabView extends SegmentedView {
 

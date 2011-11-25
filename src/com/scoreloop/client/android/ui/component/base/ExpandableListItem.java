@@ -21,7 +21,7 @@
 
 package com.scoreloop.client.android.ui.component.base;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public class ExpandableListItem extends StandardListItem<Void> {
 

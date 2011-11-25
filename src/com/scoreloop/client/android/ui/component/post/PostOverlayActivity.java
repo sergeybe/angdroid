@@ -50,7 +50,7 @@ import com.scoreloop.client.android.core.controller.SocialProviderControllerObse
 import com.scoreloop.client.android.core.model.Entity;
 import com.scoreloop.client.android.core.model.Session;
 import com.scoreloop.client.android.core.model.SocialProvider;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.framework.BaseActivity;
 
 public class PostOverlayActivity extends Activity implements RequestControllerObserver, OnCheckedChangeListener,

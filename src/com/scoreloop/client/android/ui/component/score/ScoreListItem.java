@@ -26,7 +26,7 @@ import android.graphics.drawable.Drawable;
 import com.scoreloop.client.android.core.model.Score;
 import com.scoreloop.client.android.core.model.Session;
 import com.scoreloop.client.android.core.model.User;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.ComponentActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StandardListItem;

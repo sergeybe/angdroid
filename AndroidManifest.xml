@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="org.angdroid.nightly" android:versionCode="27"
+	package="org.angdroid.angband" android:versionCode="27"
 	android:versionName="3.3.2.2"
 	android:installLocation="auto">
 
@@ -29,7 +29,7 @@
 				  android:launchMode="singleTask" 
 				  android:windowSoftInputMode="stateHidden">
 			<intent-filter>
-				<action android:name="org.angdroid.nightly.GAME" />
+				<action android:name="org.angdroid.angband.GAME" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -37,7 +37,7 @@
 		<activity android:name=".HelpActivity" android:label="@string/angband_help"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.nightly.HELP" />
+				<action android:name="org.angdroid.angband.HELP" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -45,7 +45,7 @@
 		<activity android:name=".PreferencesActivity" android:label="@string/preferences"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.nightly.PREF" />
+				<action android:name="org.angdroid.angband.PREF" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -53,7 +53,7 @@
 		<activity android:name=".ProfilesActivity" android:label="@string/profiles"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.nightly.PROFILES" />
+				<action android:name="org.angdroid.angband.PROFILES" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -61,7 +61,7 @@
 		<activity android:name=".ProfileAddActivity" android:label="@string/profileadd"
 			>
 			<intent-filter>
-				<action android:name="org.angdroid.nightly.PROFILEADD" />
+				<action android:name="org.angdroid.angband.PROFILEADD" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>

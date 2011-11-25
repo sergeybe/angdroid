@@ -28,7 +28,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.scoreloop.client.android.core.addon.RSSItem;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.EmptyListItem;

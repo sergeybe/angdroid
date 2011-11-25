@@ -38,7 +38,7 @@ import com.scoreloop.client.android.core.controller.SocialProviderControllerObse
 import com.scoreloop.client.android.core.controller.UsersController;
 import com.scoreloop.client.android.core.model.SocialProvider;
 import com.scoreloop.client.android.core.model.User;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask;
 import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask.ManageBuddiesContinuation;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;

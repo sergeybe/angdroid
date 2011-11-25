@@ -28,7 +28,7 @@ import com.scoreloop.client.android.core.controller.MessageController;
 import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.model.Game;
 import com.scoreloop.client.android.core.model.User;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Configuration;

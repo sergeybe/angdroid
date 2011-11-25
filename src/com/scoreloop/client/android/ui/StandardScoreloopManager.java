@@ -67,7 +67,7 @@ import com.scoreloop.client.android.ui.framework.ValueStore.ValueSource;
 import com.scoreloop.client.android.ui.framework.ValueStore.ValueSourceFactory;
 import com.scoreloop.client.android.ui.util.LocalImageStorage;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 class StandardScoreloopManager implements ScoreloopManager, Manager, Factory, ShortcutObserver, Delegate, ValueSourceFactory, Tracker {
 

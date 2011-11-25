@@ -26,7 +26,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public class TextButtonDialog extends BaseDialog {
 

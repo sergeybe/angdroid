@@ -27,7 +27,7 @@ import com.scoreloop.client.android.core.controller.ChallengeController;
 import com.scoreloop.client.android.core.controller.ChallengeControllerObserver;
 import com.scoreloop.client.android.core.model.Money;
 import com.scoreloop.client.android.core.model.User;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.agent.UserDetailsAgent;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.Constant;

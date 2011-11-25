@@ -33,7 +33,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.framework.BaseListAdapter;
 import com.scoreloop.client.android.ui.framework.BaseListAdapter.OnListItemClickListener;
 import com.scoreloop.client.android.ui.framework.BaseListItem;

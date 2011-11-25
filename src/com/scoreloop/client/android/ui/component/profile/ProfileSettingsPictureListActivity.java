@@ -33,7 +33,7 @@ import android.os.Bundle;
 import com.scoreloop.client.android.core.addon.AndroidImage;
 import com.scoreloop.client.android.core.controller.*;
 import com.scoreloop.client.android.core.model.*;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;

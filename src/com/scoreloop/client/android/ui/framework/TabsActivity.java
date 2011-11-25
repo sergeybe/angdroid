@@ -34,7 +34,7 @@ import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public class TabsActivity extends ActivityGroup implements TabsActivityProtocol, OnClickListener, OptionsMenuForActivityGroup {
 

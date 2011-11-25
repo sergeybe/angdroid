@@ -25,7 +25,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.*;
 import com.scoreloop.client.android.ui.framework.BaseListAdapter;
 import com.scoreloop.client.android.ui.framework.BaseListItem;
