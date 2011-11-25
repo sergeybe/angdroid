@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/sl_dialog_background"
+	android:orientation="vertical"
+	android:padding="@dimen/sl_margin_default"
+	android:minWidth="200dp">
+
+	<TextView android:id="@+id/sl_title"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_horizontal"
+		android:padding="5dp"
+		android:text="@string/sl_scoreloop_username"
+		android:singleLine="true"
+		style="@style/sl_text_large_bold_inverted"/>
+
+	<EditText android:layout_width="fill_parent"
+		android:layout_height="30dp"
+		android:layout_margin="5dp"
+		style="@style/sl_text_normal_normal"
+		android:id="@+id/edit_login"
+		android:background="@drawable/sl_dialog_input_background"/>
+
+	<Button android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:text="@string/sl_find"
+		android:background="@drawable/sl_dialog_button_background_selector"
+		style="@style/sl_text_big_bold_inverted"
+		android:id="@+id/button_ok"/>
+
+</LinearLayout>

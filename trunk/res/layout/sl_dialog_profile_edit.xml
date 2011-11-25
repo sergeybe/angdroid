@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sl_dialog_profile_edit_layout"
+	android:background="@drawable/sl_dialog_background"
+	android:orientation="vertical"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:layout_margin="10dp">
+
+	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/sl_user_profile_edit_layout"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_margin="10dp"
+		android:stretchColumns="1"
+		android:shrinkColumns="0, 1">
+
+		<TextView android:id="@+id/sl_title"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			android:padding="5dp"
+			style="@style/sl_text_large_bold_inverted"/>
+
+        <TextView android:id="@+id/sl_description"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:padding="5dp"
+            style="@style/sl_text_normal_bold_inverted"/>
+
+		<TableRow>
+
+			<TextView android:id="@+id/sl_user_profile_edit_current_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:padding="5dp"
+				style="@style/sl_text_normal_bold_inverted"/>
+		
+			<TextView android:id="@+id/sl_user_profile_edit_current_text"
+				android:padding="5dp"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				style="@style/sl_text_normal_normal_inverted"/>
+
+		</TableRow>
+	
+		<TableRow>
+
+			<TextView android:id="@+id/sl_user_profile_edit_new_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:padding="5dp"
+				style="@style/sl_text_normal_bold_inverted"/>
+		
+			<EditText android:id="@+id/sl_user_profile_edit_new_text"
+					android:background="@drawable/sl_dialog_input_background"
+					android:padding="5dp"
+					android:singleLine="true"
+					android:layout_width="fill_parent"
+					android:layout_height="30dp"
+					style="@style/sl_text_normal_normal"/>
+
+		</TableRow>
+
+		<TextView android:id="@+id/sl_dialog_hint"
+			android:layout_marginTop="10dp"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			android:padding="5dp"
+			style="@style/sl_text_normal_bold_inverted"/>
+
+	</TableLayout>
+
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:padding="10dp">
+	
+			<Button android:id="@+id/sl_button_ok"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:layout_marginRight="5dp"
+					android:background="@drawable/sl_dialog_button_background_selector"
+					style="@style/sl_text_big_bold_inverted"
+					android:text="@string/sl_ok"/>
+	
+			<Button android:id="@+id/sl_button_cancel"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:layout_marginLeft="5dp"
+					android:background="@drawable/sl_dialog_button_background_selector"
+					style="@style/sl_text_big_bold_inverted"
+					android:text="@string/sl_cancel"/>
+	
+	</LinearLayout>
+</LinearLayout>

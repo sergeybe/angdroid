@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:background="@drawable/sl_dialog_background"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+    <TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		style="@style/sl_text_normal_normal_inverted"
+		android:text="[message]"
+		android:padding="@dimen/sl_margin_default"
+		android:gravity="center"
+		android:id="@+id/message"/>
+</FrameLayout>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/sl_challenge_participants_background">
+	
+	<LinearLayout android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_weight="1"
+		android:orientation="vertical">
+
+		<LinearLayout android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+	
+			<com.scoreloop.client.android.ui.component.base.RoundCornerImageView android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:layout_margin="@dimen/sl_margin_default"
+				android:layout_gravity="center_vertical"
+                android:id="@+id/contender_icon"
+				android:src="@drawable/sl_icon_user"/>
+	
+			<LinearLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:orientation="vertical">
+				
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:id="@+id/contender_name"
+					android:singleLine="true"
+					android:ellipsize="marquee"
+					style="@style/sl_text_large_bold"/>
+					
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:id="@+id/contender_stats"
+					android:singleLine="true"
+					android:ellipsize="marquee"
+					style="@style/sl_text_normal_normal"/>
+				
+			</LinearLayout>
+		
+		</LinearLayout>
+	
+		<LinearLayout android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+	
+			<com.scoreloop.client.android.ui.component.base.RoundCornerImageView android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:layout_margin="@dimen/sl_margin_default"
+				android:layout_gravity="center_vertical"
+                android:id="@+id/contestant_icon"
+				android:src="@drawable/sl_icon_user"/>
+	
+			<LinearLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:orientation="vertical">
+				
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:id="@+id/contestant_name"
+					android:singleLine="true"
+					android:ellipsize="marquee"
+					style="@style/sl_text_large_bold"/>
+					
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:id="@+id/contestant_stats"
+					android:singleLine="true"
+					android:ellipsize="marquee"
+					style="@style/sl_text_normal_normal"/>
+				
+			</LinearLayout>
+		
+		</LinearLayout>
+		
+	</LinearLayout>
+	
+	<TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:background="@drawable/sl_challenge_vs_background"
+		android:layout_gravity="center_vertical"
+		android:gravity="center"
+		android:layout_margin="8dp"
+		android:text="@string/sl_against"
+		style="@style/sl_text_large_bold_inverted"/>
+
+</LinearLayout>

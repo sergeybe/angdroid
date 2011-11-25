@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<color name="sl_color_background">#ffffffff</color>
+	<color name="sl_color_background_caption">#888888</color>
+	<color name="sl_color_background_header">#cccccc</color>
+	<color name="sl_color_background_footer">#cccccc</color>
+	<color name="sl_color_background_status">#000000</color>
+	<color name="sl_color_foreground">#454e56</color>
+	<color name="sl_color_scoreloop">#ff379fd0</color>
+	<color name="sl_color_foreground_inverted">#ffffff</color>
+	<color name="sl_color_divider">#939393</color>
+</resources>

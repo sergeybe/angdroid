@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/sl_challenge_settings_background">
+
+	<LinearLayout android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:orientation="vertical">
+	
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:id="@+id/stake"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			style="@style/sl_text_large_bold_inverted"/>
+			
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:id="@+id/mode"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			style="@style/sl_text_normal_normal_inverted"/>	
+	
+	</LinearLayout>
+
+</FrameLayout>

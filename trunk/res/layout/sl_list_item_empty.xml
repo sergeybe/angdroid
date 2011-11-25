@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="36dp"
+	android:background="@drawable/sl_selector_list_item"
+	android:gravity="center_vertical"
+	android:id="@+id/sl_title"
+	android:padding="@dimen/sl_margin_default"
+	android:singleLine="true"
+	android:ellipsize="marquee"
+	style="@style/sl_text_large_normal"/>
+

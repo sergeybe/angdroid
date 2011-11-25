@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="horizontal"
+	android:background="@drawable/sl_screen_background">
+
+	<com.scoreloop.client.android.ui.framework.ShortcutView 
+			android:background="@drawable/sl_shortcut_background"
+			android:layout_width="48dp"
+			android:layout_height="fill_parent"
+			android:orientation="vertical"
+			android:id="@+id/sl_shortcuts"/>
+	
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="wrap_content"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:orientation="vertical"
+		android:background="@drawable/sl_screen_background">
+
+		<RelativeLayout android:id="@+id/sl_status"
+			android:layout_width="fill_parent"
+			android:layout_height="25dp"
+			android:background="@drawable/sl_status_background"
+			android:foreground="@color/sl_color_foreground_inverted">
+	
+			<ImageView android:id="@+id/sl_status_logo"
+				android:layout_width="wrap_content"
+				android:layout_height="18dp"
+				android:layout_alignParentLeft="true"
+				android:layout_centerVertical="true"
+				android:layout_marginLeft="5dp"
+				android:src="@drawable/sl_logo"/>
+	
+			<ImageView android:id="@+id/sl_status_close_button"
+				android:layout_width="100dp"
+				android:layout_height="fill_parent"
+				android:layout_alignParentRight="true"
+				android:layout_centerVertical="true"
+				android:paddingLeft="80dp"
+				android:paddingRight="5dp"
+				android:cropToPadding="true"
+				android:scaleType="centerInside"
+				android:src="@drawable/sl_button_close"/>
+	
+		</RelativeLayout>
+
+		<FrameLayout android:id="@+id/sl_header"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"/>
+	
+		<FrameLayout
+			android:layout_width="fill_parent"
+			android:layout_height="2dp"
+			android:background="@drawable/sl_border_gradient"/>
+	
+		<ViewSwitcher android:id="@+id/sl_body"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:layout_weight="1"
+			android:background="@drawable/sl_screen_background"/>
+
+	</LinearLayout>
+
+
+</LinearLayout>

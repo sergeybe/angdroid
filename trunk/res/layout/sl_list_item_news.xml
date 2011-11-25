@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="wrap_content"
+	android:layout_gravity="center" android:background="@drawable/sl_selector_list_item"
+	android:stretchColumns="1" android:shrinkColumns="1">
+
+	<TableRow>
+
+		<ImageView android:id="@+id/sl_list_item_news_icon"
+			android:layout_width="36dp" android:layout_height="36dp"
+			android:layout_margin="10dp" android:gravity="center_vertical"
+			android:src="@drawable/sl_icon_user" />
+
+		<LinearLayout android:layout_gravity="center_vertical"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:orientation="vertical">
+
+			<TextView android:id="@+id/sl_list_item_news_title"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:singleLine="false" android:layout_marginLeft="5dp"
+				style="@style/sl_text_large_bold" />
+
+			<TextView android:id="@+id/sl_list_item_news_description"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:layout_marginLeft="5dp" android:layout_marginBottom="5dp"
+				android:singleLine="false" 
+				style="@style/sl_text_normal_normal" />
+		</LinearLayout>
+
+		<ImageView android:id="@+id/sl_list_item_news_accessory"
+			android:layout_width="36dp" android:layout_height="36dp"
+			android:layout_margin="10dp" android:gravity="center_vertical"
+			android:src="@drawable/sl_icon_plus_content" />
+
+	</TableRow>
+
+</TableLayout>

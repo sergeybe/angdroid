@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="sl_abuse_report_sent">Report sent!</string>
+	<string name="sl_abuse_report_title">Flag as inappropriate</string>
+	<string name="sl_accept_challenge">Accept</string>
+	<string name="sl_accept_start_challenge">Accept and Start Challenge Game</string>
+	<string name="sl_account_settings">Account Settings</string>
+	<string name="sl_account_settings_shortcut">a</string>
+	<string name="sl_achievements">Achievements</string>
+	<string name="sl_achievements_capitalized">ACHIEVEMENTS</string>
+	<string name="sl_achievements_no_awards">No Awards defined for this Game</string>
+	<string name="sl_actions">Actions</string>
+	<string name="sl_add_coins">Add Coins</string>
+	<string name="sl_add_friend">Add Friend</string>
+	<string name="sl_add_friends">Add Friends</string>
+	<string name="sl_addressbook">Address Book</string>
+	<string name="sl_against">VS</string>
+	<string name="sl_against_anyone">Against Anyone</string>
+	<string name="sl_anyone">Anyone</string>
+	<string name="sl_balance_too_low">Balance too low</string>
+	<string name="sl_cancel">Cancel</string>
+	<string name="sl_challenge_this_friend">Challenge this player</string>
+	<string name="sl_challenges">Challenges</string>
+	<string name="sl_challenges_history">History</string>
+	<string name="sl_change_email">Change Email</string>
+	<string name="sl_change_picture">Change Picture</string>
+	<string name="sl_change_picture_details">Choose from device or social network</string>
+	<string name="sl_change_username">Change Username</string>
+	<string name="sl_choose_photo">Choose Photo</string>
+	<string name="sl_community">Community</string>
+	<string name="sl_create_challenge">Start Challenge Game</string>
+	<string name="sl_current">Current</string>
+	<string name="sl_details">Details</string>
+	<string name="sl_device_library">Device Library</string>
+	<string name="sl_email">Email</string>
+	<string name="sl_error_message_challenge_accept">Sorry, something went wrong while accepting this challenge.\nMaybe someone else was quicker.\nTry a different challenge!</string>
+	<string name="sl_error_message_challenge_balance">Your balance is too low to accept this challenge.\nTry a different challenge, or buy more coins!</string>
+	<string name="sl_error_message_challenge_game_not_ready">Sorry, your game tells Scoreloop that it\'s not ready for a challenge.</string>
+	<string name="sl_error_message_challenge_reject">Sorry, something went wrong during rejecting this challenge.</string>
+	<string name="sl_error_message_challenge_ongoing">Sorry, a challenge already appears to be ongoing.</string>
+	<string name="sl_error_message_email_already_taken_title">Email already in use</string>
+	<string name="sl_error_message_email_already_taken">If this is your email address please check your inbox to merge your Scoreloop accounts.</string>
+	<string name="sl_error_message_username_already_taken">The username is already in use.\nPlease try another.</string>
+	<string name="sl_error_message_invalid_email">Invalid email format.\nPlease enter a valid email address.</string>
+	<string name="sl_error_message_network">It\'s a bit quiet in here...\nPlease check your connection.</string>
+	<string name="sl_error_message_connect_failed">Can\'t connect to the social network. Did you enter the correct credentials?</string>
+	<string name="sl_facebook">Facebook</string>
+	<string name="sl_featured_game_capitalized">FEATURED GAME</string>
+	<string name="sl_find">Find!</string>
+	<string name="sl_find_match">Find Match</string>	
+	<string name="sl_format_achievement_increment" formatted="false">% 2d %%</string>
+	<string name="sl_format_achievements" formatted="false">%d of %d</string>
+	<string name="sl_format_achievements_extended" formatted="false">%d of %d unlocked</string>
+	<string name="sl_format_added_as_friend" formatted="false">%s added as friend</string>
+	<string name="sl_format_balance" formatted="false">Balance: %s</string>
+	<string name="sl_format_challenge_stats" formatted="false">%s wins of %s</string>
+	<string name="sl_format_challenges_title" formatted="false">Start New Challenge</string>
+	<string name="sl_format_challenges_subtitle" formatted="false">against %s!</string>
+	<string name="sl_format_found_many_users" formatted="false">Found %d users.\nTry to refine the search!</string>
+	<string name="sl_format_friends_added" formatted="false">%d friends added.</string>
+	<string name="sl_format_friend_already_added" formatted="false">%s already added</string>
+	<string name="sl_format_friend_already_removed" formatted="false">%s already removed</string>
+	<string name="sl_format_friends_playing" formatted="false">Friends Playing %s</string>
+	<string name="sl_format_leaderboards_percent" formatted="false">(Top %d %%)</string>
+	<string name="sl_format_new_news_items" formatted="false">%d unread</string>
+	<string name="sl_format_number_friends" formatted="false">%d</string>
+	<string name="sl_format_number_games" formatted="false">%d</string>
+	<string name="sl_format_one_friend_added">1 friend added.</string>
+	<string name="sl_format_playing" formatted="false">Playing %s</string>
+	<string name="sl_format_post" formatted="false">Share this %s</string>
+	<string name="sl_format_posted" formatted="false">%s successfully posted!</string>
+	<string name="sl_format_recommend_title" formatted="false">Recommend %s</string>
+	<string name="sl_format_recommend_subtitle" formatted="false">to %s!</string>
+	<string name="sl_format_removed_as_friend" formatted="false">%s removed as friend</string>
+	<string name="sl_format_score_title" formatted="false">%d. %s</string>
+	<string name="sl_format_stake" formatted="false">Playing for %s</string>
+	<string name="sl_format_unlocked" formatted="false">Unlocked %s</string>
+	<string name="sl_format_welcome_back" formatted="false">Welcome back, %s!</string>
+	<string name="sl_format_connect_failed" formatted="false">Connection to %s failed! Try again.</string>
+	<string name="sl_found_no_user">No new friends found.\nTry to adjust the search!</string>
+	<string name="sl_found_too_many_users">Too many user matches.\nTry to refine the search!</string>
+	<string name="sl_friends">Friends</string>
+	<string name="sl_friends_capitalized">FRIENDS</string>
+	<string name="sl_friends_games">Friends\' Games</string>
+	<string name="sl_friends_games_subtitle">Discover what your friends are playing</string>
+	<string name="sl_games">Games</string>
+	<string name="sl_games_capitalized">GAMES</string>
+	<string name="sl_games_subtitle">Launch your games</string>
+	<string name="sl_get">Get</string>
+	<string name="sl_global">Global</string>
+	<string name="sl_home">Home</string>
+	<string name="sl_images">Images</string>
+	<string name="sl_launch">Launch</string>
+	<string name="sl_leaderboards">Leaderboards</string>
+	<string name="sl_leave_accept_challenge">You are in the process of accepting a challenge.\nDo you really want to leave and drop that challenge?</string>
+	<string name="sl_leave_accept_game_recommendation">You\'re about to recommend \"%1$s\" to %2$s.</string>
+	<string name="sl_leave_accept_game_recommendation_ok">Recommend!</string>
+	<string name="sl_leave_accept_match_buddies">We\'re about to search similar players to match you a friend...</string>
+	<string name="sl_leave_accept_match_buddies_ok">Match!</string>
+	<string name="sl_leave_payment">Leave Payment?</string>
+	<string name="sl_local_leaderboard">Local Leaderboard</string>
+	<string name="sl_market">Social Market</string>
+	<string name="sl_market_description">Discover connected games</string>
+	<string name="sl_merge_account_title">Merge or Transfer Device</string>
+	<string name="sl_merge_account_subtitle">Already have an account?</string>
+	<string name="sl_merge_account_description">Please enter the email address associated with your account:</string>
+	<string name="sl_merge_account_success_title">Confirmation Email</string>
+	<string name="sl_merge_account_success">Please check your inbox to complete the merge or transfer process.</string>
+	<string name="sl_merge_account_not_found">Email not found.\nPlease try another.</string>
+	<string name="sl_merge_account_email_current">This is your current email.\nPlease try another.</string>
+	<string name="sl_myspace">MySpace</string>
+	<string name="sl_my_games">My Games</string>
+	<string name="sl_new">New</string>	
+	<string name="sl_new_challenge">Start New</string>
+	<string name="sl_new_games">New Games</string>
+	<string name="sl_new_games_subtitle">Recently released</string>
+	<string name="sl_news">News</string>
+	<string name="sl_next">Next</string>
+	<string name="sl_no_friends">No friends</string>
+	<string name="sl_no_friends_playing">No friends are playing</string>
+	<string name="sl_no_games">No Games</string>
+	<string name="sl_no_history_challenges">No challenge history so far</string>
+	<string name="sl_no_news">No news</string>	
+	<string name="sl_no_news_items">No new items</string>
+	<string name="sl_no_open_challenges">No open challenges at the moment</string>
+	<string name="sl_no_scores">No scores</string>
+	<string name="sl_no_thanks">No thanks</string>
+    <string name="sl_not_on_highscore_list">You\'re not yet part of this leaderboard.\nImprove your score!</string>
+	<string name="sl_ok">OK</string>
+	<string name="sl_one_news_item">1 new Item</string>
+	<string name="sl_open_challenges">Inbox</string>
+	<string name="sl_pending">Pending</string>
+	<string name="sl_playing">Playing</string>
+	<string name="sl_please_email_address">Please provide an email address to register this username.</string>
+	<string name="sl_please_email_valid">Please provide a valid email address.</string>
+	<string name="sl_popular_games">Popular Games</string>
+	<string name="sl_popular_games_subtitle">Most played</string>
+	<string name="sl_post">Post!</string>
+	<string name="sl_previous">Previous</string>
+	<string name="sl_recommend_sent">Recommendation sent!</string>
+	<string name="sl_register_username">Register Username</string>
+	<string name="sl_reject_challenge">Reject Challenge</string>
+	<string name="sl_rejected">Rejected</string>
+	<string name="sl_remove_friend">Remove Friend</string>
+	<string name="sl_scoreloop_username">Scoreloop Username</string>
+	<string name="sl_see_more">See More</string>
+	<string name="sl_select_stake">Select Your Stake</string>
+	<string name="sl_set_default">Set to Default</string>
+	<string name="sl_slapp_title">Love Scoreloop?</string>
+	<string name="sl_slapp_subtitle">Get the community app!</string>
+	<string name="sl_submit_local_scores">Submit Scores to Scoreloop</string>
+	<string name="sl_try_again">Try Again</string>
+	<string name="sl_status_success_score">Your score has been uploaded.\nCheck out the leaderboards!</string>
+	<string name="sl_status_success_local_score">Your score has been stored locally.\nCheck out the local leaderboard!</string>
+	<string name="sl_status_success_challenge_created">Your challenge has been uploaded.\nFollow the progress in the challenge history!</string>
+	<string name="sl_status_success_challenge_won">You won the challenge.\nCheck out the details in the challenge history!</string>
+	<string name="sl_status_success_challenge_lost">You lost the challenge.\nCheck out the details in the challenge history!</string>
+	<string name="sl_status_error_network">We\'re having trouble connecting.</string>
+	<string name="sl_status_error_balance">Your balance is too low to finish this challenge</string>
+	<string name="sl_top">Top</string>
+	<string name="sl_twentyfour">24 h</string>
+	<string name="sl_twitter">Twitter</string>
+	<string name="sl_update">Update</string>
+	<string name="sl_username">Username</string>
+</resources>

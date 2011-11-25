@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sl_header_layout"
+	android:layout_width="fill_parent"
+	android:layout_height="70dp"
+	android:background="@drawable/sl_header_background"
+	android:stretchColumns="1"
+	android:shrinkColumns="1">
+
+	<TableRow>
+
+		<ImageView android:id="@+id/sl_header_image"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:layout_margin="@dimen/sl_margin_default"/>
+
+		<LinearLayout android:layout_marginTop="@dimen/sl_margin_default"
+			android:orientation="vertical"
+			android:layout_gravity="center_vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent">
+
+			<LinearLayout android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+
+				<TextView android:id="@+id/sl_header_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:singleLine="true"
+						android:ellipsize="marquee"
+						style="@style/sl_text_huge_bold"/>
+
+				<TextView android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginRight="@dimen/sl_margin_default"
+						android:layout_marginLeft="@dimen/sl_margin_default"
+						android:singleLine="true"
+						android:ellipsize="marquee"
+						style="@style/sl_text_huge_bold"
+						android:text="-"/>
+
+				<TextView android:id="@+id/sl_header_caption_land"
+						android:layout_height="wrap_content"
+						android:layout_width="wrap_content"
+						android:singleLine="true"
+						android:ellipsize="marquee"
+						style="@style/sl_text_huge_bold"/>
+
+			</LinearLayout>
+
+			<TextView android:id="@+id/sl_header_subtitle"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="marquee"
+					style="@style/sl_text_normal_normal"/>
+
+		</LinearLayout>
+
+		<ImageView android:id="@+id/sl_control_icon"
+			android:layout_marginTop="@dimen/sl_margin_default"
+			android:layout_marginRight="@dimen/sl_margin_default"
+			android:layout_width="wrap_content"
+			android:layout_height="36dp"
+			android:gravity="right"
+			android:layout_gravity="center_vertical"/>
+
+	</TableRow>
+
+</TableLayout>

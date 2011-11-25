@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_gravity="center"
+	android:background="@drawable/sl_selector_list_item">
+
+	<ImageView android:id="@+id/sl_icon"
+		android:gravity="center_vertical"
+		android:layout_width="36dp"
+		android:layout_height="36dp"
+		android:layout_margin="@dimen/sl_margin_default"/>
+
+	<LinearLayout android:layout_gravity="center_vertical"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:layout_margin="5dp"
+		android:orientation="vertical">
+
+		<TextView android:id="@+id/sl_title"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:layout_marginLeft="5dp"
+				style="@style/sl_text_large_bold"/>
+
+		<TextView android:id="@+id/sl_subtitle"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:singleLine="true"
+			android:ellipsize="marquee"
+			android:layout_marginLeft="5dp"
+			style="@style/sl_text_normal_normal"/>
+
+	</LinearLayout>"
+
+	<TextView android:id="@+id/sl_number"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:singleLine="true"
+		android:ellipsize="marquee"
+		android:layout_marginRight="5dp"
+		android:layout_gravity="right|center_vertical"
+		style="@style/sl_text_normal_normal"/>
+
+</LinearLayout>

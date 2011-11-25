@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:gravity="center_horizontal"
+	android:layout_margin="@dimen/sl_margin_default"
+	android:orientation="vertical"
+	android:background="@drawable/sl_dialog_background">
+
+	<TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="center_horizontal"
+		android:layout_margin="@dimen/sl_margin_default"
+		android:id="@+id/sl_text"
+		style="@style/sl_text_normal_bold_inverted"/>
+	
+	<Button android:layout_width="fill_parent"
+		android:layout_height="@dimen/sl_clickable_height"
+		android:gravity="center"
+		android:layout_margin="@dimen/sl_margin_default"
+		android:id="@+id/sl_button_ok"
+		android:background="@drawable/sl_dialog_button_background_selector"
+		style="@style/sl_text_big_bold_inverted"
+		android:text="@string/sl_ok"/>
+		
+</LinearLayout>

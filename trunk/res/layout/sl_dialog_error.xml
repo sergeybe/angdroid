@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/sl_dialog_error_layout"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center_horizontal"
+              android:layout_margin="@dimen/sl_margin_default"
+              android:orientation="vertical"
+              android:background="@drawable/sl_dialog_background">
+
+    <TextView android:id="@+id/sl_title"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center_horizontal"
+              android:padding="5dp"
+              android:singleLine="true"
+              style="@style/sl_text_large_bold_inverted"/>
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              style="@style/sl_text_normal_normal_inverted"
+              android:text="[message]"
+              android:padding="@dimen/sl_margin_default"
+              android:layout_gravity="center_vertical"
+              android:id="@+id/sl_error_message"/>
+
+    <Button android:layout_width="fill_parent"
+            android:layout_height="@dimen/sl_clickable_height"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="@dimen/sl_margin_default"
+            android:text="@string/sl_ok"
+            android:background="@drawable/sl_dialog_button_background_selector"
+            style="@style/sl_text_big_bold_inverted"
+            android:id="@+id/sl_button_ok"/>
+
+</LinearLayout>

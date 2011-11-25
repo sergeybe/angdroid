@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- cascading definitions -->
+	<style name="sl_font_size_small">
+		<item name="android:textSize">11sp</item>
+	</style>
+
+	<style name="sl_font_size_normal">
+		<item name="android:textSize">13sp</item>
+	</style>
+
+	<style name="sl_font_size_big">
+		<item name="android:textSize">14sp</item>
+	</style>
+
+	<style name="sl_font_size_large">
+		<item name="android:textSize">16sp</item>
+	</style>
+
+	<style name="sl_font_size_huge">
+		<item name="android:textSize">18sp</item>
+	</style>
+
+	<style name="sl_font_size_giant">
+		<item name="android:textSize">26sp</item>
+	</style>
+
+	<!--  small font, normal -->
+	<style name="sl_text_small_normal" parent="@style/sl_font_size_small">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_small_normal_inverted" parent="@style/sl_font_size_small">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textColor">@color/sl_color_foreground_inverted</item>
+		<item name="android:shadowColor">#000000</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<!--  small font, bold -->
+	<style name="sl_text_small_bold" parent="@style/sl_font_size_small">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+		
+	</style>
+
+	<style name="sl_text_small_bold_inverted" parent="@style/sl_font_size_small">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground_inverted</item>
+		<item name="android:shadowColor">#000000</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<!--  medium font, normal -->
+	<style name="sl_text_normal_normal" parent="@style/sl_font_size_normal">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_normal_normal_inverted" parent="@style/sl_font_size_normal">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textColor">@color/sl_color_foreground_inverted</item>
+		<item name="android:shadowColor">#000000</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<!--  medium font, bold -->
+	<style name="sl_text_normal_bold" parent="@style/sl_font_size_normal">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_normal_bold_inverted" parent="@style/sl_font_size_normal">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground_inverted</item>
+		<item name="android:shadowColor">#000000</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<!--  big font, bold -->
+	<style name="sl_text_big_bold" parent="@style/sl_font_size_big">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_big_bold_blue" parent="@style/sl_font_size_big">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_scoreloop</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_big_bold_inverted" parent="@style/sl_font_size_big">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground_inverted</item>
+		<item name="android:shadowColor">#000000</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<!--  large font, normal -->
+	<style name="sl_text_large_normal" parent="@style/sl_font_size_large">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_large_normal_inverted" parent="@style/sl_font_size_large">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textColor">@color/sl_color_foreground_inverted</item>
+		<item name="android:shadowColor">#000000</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<!--  large font, bold -->
+	<style name="sl_text_large_bold" parent="@style/sl_font_size_large">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_large_bold_inverted" parent="@style/sl_font_size_large">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground_inverted</item>
+		<item name="android:shadowColor">#000000</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<!--  huge font, bold -->
+	<style name="sl_text_huge_bold" parent="@style/sl_font_size_huge">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_text_giant_bold" parent="@style/sl_font_size_giant">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/sl_color_foreground</item>
+		<item name="android:shadowColor">#ffffff</item>
+		<item name="android:shadowDx">0</item>
+		<item name="android:shadowDy">0.5</item>
+		<item name="android:shadowRadius">0.3</item>
+	</style>
+
+	<style name="sl_list_view">
+		<item name="android:fadingEdge">none</item>
+		<item name="android:divider">@color/sl_color_divider</item>
+		<item name="android:dividerHeight">1px</item> <!--  use px here in order to avoid artefacts -->
+		<item name="android:headerDividersEnabled">false</item>
+		<item name="android:footerDividersEnabled">true</item>
+	</style>
+
+	<style name="sl_dialog" parent="@android:style/Theme.Dialog">
+		<item name="android:windowNoTitle">true</item>
+		<item name="android:windowBackground">@android:color/transparent</item>
+		<item name="android:windowFrame">@null</item>
+		<item name="android:windowContentOverlay">@null</item>
+	</style>
+
+</resources>

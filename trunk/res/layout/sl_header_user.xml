@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sl_header_layout"
+	android:layout_width="fill_parent"
+	android:layout_height="110dp"
+	android:background="@drawable/sl_header_background"
+	android:orientation="vertical">
+
+	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:stretchColumns="1"
+		android:shrinkColumns="1">
+
+		<TableRow>
+			<com.scoreloop.client.android.ui.component.base.RoundCornerImageView android:id="@+id/sl_header_image"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_marginTop="@dimen/sl_margin_default"
+				android:layout_marginLeft="@dimen/sl_margin_default"
+				android:layout_marginRight="@dimen/sl_margin_default"/>
+
+			<TextView android:id="@+id/sl_header_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="15dp"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				style="@style/sl_text_huge_bold"/>
+
+			<ImageView android:id="@+id/sl_control_icon"
+				android:layout_marginTop="@dimen/sl_margin_default"
+				android:layout_marginRight="@dimen/sl_margin_default"
+				android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:gravity="right"/>
+		</TableRow>
+
+	</TableLayout>
+	
+	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginBottom="@dimen/sl_margin_default"
+		android:stretchColumns="0,6"
+		android:shrinkColumns="0,6">
+
+		<TableRow>
+			<FrameLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+			<TextView android:id="@+id/sl_header_friends"
+				android:layout_width="90dp"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				style="@style/sl_text_small_normal"
+				android:text="@string/sl_friends_capitalized"/>
+			<FrameLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+			<TextView android:id="@+id/sl_header_games"
+				android:layout_width="60dp"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				style="@style/sl_text_small_normal"
+				android:text="@string/sl_games_capitalized"/>
+			<FrameLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+			<TextView android:id="@+id/sl_header_achievements"
+				android:layout_width="90dp"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				style="@style/sl_text_small_normal"
+				android:text="@string/sl_achievements_capitalized"/>
+			<FrameLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+		</TableRow>
+
+		<TableRow>
+			<FrameLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+			<TextView android:id="@+id/sl_header_number_friends"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				style="@style/sl_text_giant_bold"/>
+			<ImageView android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="15dp"
+				android:gravity="center_horizontal"
+				android:src="@drawable/sl_score_divider"/>
+			<TextView android:id="@+id/sl_header_number_games"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				style="@style/sl_text_giant_bold"/>
+			<ImageView android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="15dp"
+				android:gravity="center_horizontal"
+				android:src="@drawable/sl_score_divider"/>
+			<TextView android:id="@+id/sl_header_number_achievements"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				style="@style/sl_text_giant_bold"/>
+			<FrameLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+		</TableRow>
+	
+	
+	</TableLayout>
+</LinearLayout>
