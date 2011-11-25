@@ -47,8 +47,13 @@ static jmethodID NativeWrapper_curs_set;
 static jmethodID NativeWrapper_flushinp;
 static jmethodID NativeWrapper_getcury;
 static jmethodID NativeWrapper_getcurx;
+#ifdef ANGDROID_NIGHTLY
 static jmethodID NativeWrapper_wctomb;
 static jmethodID NativeWrapper_mbstowcs;
+#endif
+static jmethodID NativeWrapper_score_start;
+static jmethodID NativeWrapper_score_detail;
+static jmethodID NativeWrapper_score_submit;
 
 void (*angdroid_quit_hook)(void) = NULL;
 
@@ -431,6 +436,37 @@ size_t mbstowcs(wchar_t *wcstr, const char *mbstr, size_t max) {
 
 #endif
 
+void android_score_start() {
+  JAVA_CALL(NativeWrapper_score_start);
+}
+
+void android_score_detail(char *name, char *value) {
+  LOGD("score detail '%s' = '%s'", name, value);
+  jbyteArray name_a = (*env)->NewByteArray(env, strlen(name));
+  if (name_a == NULL) angdroid_quit("score: Out of memory");
+  (*env)->SetByteArrayRegion(env, name_a, 0, strlen(name), name);
+  jbyteArray value_a = (*env)->NewByteArray(env, strlen(value));
+  if (value_a == NULL) angdroid_quit("score: Out of memory");
+  (*env)->SetByteArrayRegion(env, value_a, 0, strlen(value), value);
+  JAVA_CALL(NativeWrapper_score_detail, name_a, value_a);
+  (*env)->DeleteLocalRef(env, name_a);
+  (*env)->DeleteLocalRef(env, value_a);
+}
+
+void android_score_submit(char *score, char *level) {
+  LOGD("register score as '%s'", score);
+  LOGD("register level as '%s'", level);
+  jbyteArray score_a = (*env)->NewByteArray(env, strlen(score));
+  if (score_a == NULL) angdroid_quit("score: Out of memory");
+  (*env)->SetByteArrayRegion(env, score_a, 0, strlen(score), score);
+  jbyteArray level_a = (*env)->NewByteArray(env, strlen(level));
+  if (level_a == NULL) angdroid_quit("score: Out of memory");
+  (*env)->SetByteArrayRegion(env, level_a, 0, strlen(level), level);
+  JAVA_CALL(NativeWrapper_score_submit, score_a, level_a);
+  (*env)->DeleteLocalRef(env, score_a);
+  (*env)->DeleteLocalRef(env, level_a);
+}
+
 JNIEXPORT void JNICALL angdroid_gameStart
 (JNIEnv *env1, jobject obj1, jint argc, jobjectArray argv)
 {
@@ -469,8 +505,13 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	NativeWrapper_mvwinch = JAVA_METHOD("mvwinch", "(III)I");
 	NativeWrapper_curs_set = JAVA_METHOD("curs_set", "(I)V");
 	NativeWrapper_flushinp = JAVA_METHOD("flushinp", "()V");
+#ifdef ANGDROID_NIGHTLY
 	NativeWrapper_wctomb = JAVA_METHOD("wctomb", "([BB)I");
 	NativeWrapper_mbstowcs = JAVA_METHOD("mbstowcs", "([B[BI)I");
+#endif
+	NativeWrapper_score_start = JAVA_METHOD("score_start", "()V");
+	NativeWrapper_score_detail = JAVA_METHOD("score_detail", "([B[B)V");
+	NativeWrapper_score_submit = JAVA_METHOD("score_submit", "([B[B)V");
 
 	// process argc/argv 
 	jstring argv0 = NULL;

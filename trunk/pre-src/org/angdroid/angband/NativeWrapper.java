@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 import java.util.Formatter;
+import java.util.HashMap;
 import com.scoreloop.client.android.core.model.Score;
 
 import android.util.Log;
@@ -394,7 +395,10 @@ public class NativeWrapper {
     }
 
 
-    public void score(final byte[] score, final byte[] level) {
+    Score myComplexScore;
+    HashMap scoreMap = null;
+
+    public void score_submit(final byte[] score, final byte[] level) {
 	Double myscore=0.0;
 	int mylevel=0;
 	try {
@@ -405,10 +409,28 @@ public class NativeWrapper {
 	    mylevel = Integer.parseInt(strLevel.trim());
 	} catch(java.io.UnsupportedEncodingException e) {
 	    Log.d("Angband","score: " + e);
-}
-	Score myComplexScore = new Score(new Double(myscore), null);
+	}
+	if(scoreMap != null && scoreMap.size() == 0) {
+	    scoreMap = null;
+	}
+	myComplexScore = new Score(new Double(myscore), scoreMap);
 	myComplexScore.setLevel(mylevel);
-	state.handler.sendMessage(state.handler.obtainMessage(AngbandDialog.Action.Score.ordinal(),
-							      0,0,myComplexScore));
+	state.handler.sendMessage(state.handler.obtainMessage(AngbandDialog.Action.Score.ordinal(), 0,0,myComplexScore));
+    }
+
+    public void score_start() {
+	scoreMap = new HashMap();
+    }
+
+    public void score_detail(final byte[] name, final byte[] value) {
+	try {
+	    String strName = new String(name, "UTF-8");
+	    String strValue = new String(value, "UTF-8");
+	    Log.d("Angband","score detail: \"" + strName + "\" = \"" +
+		  strValue + "\"");
+	    scoreMap.put(strName, strValue);
+	} catch(java.io.UnsupportedEncodingException e) {
+	    Log.d("Angband","score: " + e);
+	}
     }
 }
