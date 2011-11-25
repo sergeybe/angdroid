@@ -24,6 +24,7 @@
     <string name="menu_preferences">Preferences</string>
     <string name="menu_profiles">Profiles</string>
     <string name="menu_help">Help</string>
+    <string name="menu_scoreloop">Scoreloop</string>
     <string name="menu_quit">Quit</string>
 
     <string name="menu_profile_add">New Profile</string>
