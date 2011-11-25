@@ -16,7 +16,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  */
 
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -44,7 +44,7 @@ import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.Message;
 
-import org.angdroid.nightly.ActivityKeys;
+import org.angdroid.angband.ActivityKeys;
 import com.flurry.android.FlurryAgent;
 import com.scoreloop.client.android.ui.EntryScreenActivity;
 import com.scoreloop.client.android.ui.ShowResultOverlayActivity;

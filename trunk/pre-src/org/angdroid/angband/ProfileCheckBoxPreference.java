@@ -1,4 +1,4 @@
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import android.content.SharedPreferences;
 import android.preference.CheckBoxPreference;

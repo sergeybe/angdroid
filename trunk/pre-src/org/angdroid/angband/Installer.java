@@ -1,4 +1,4 @@
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import java.io.File;
 import java.io.FileOutputStream;

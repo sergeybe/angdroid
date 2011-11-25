@@ -1,4 +1,4 @@
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -7,7 +7,7 @@ import android.util.Log;
 import android.os.Handler;
 import android.os.Message;
 
-import org.angdroid.nightly.KeyMapper.KeyAction;
+import org.angdroid.angband.KeyMapper.KeyAction;
 	
 public class KeyBuffer {
 

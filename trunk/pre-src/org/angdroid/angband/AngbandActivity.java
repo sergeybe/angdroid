@@ -16,7 +16,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  */
 
-package org.angdroid.nightly;
+package org.angdroid.angband;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -35,7 +35,7 @@ import android.app.AlertDialog;
 import android.os.Message;
 import android.os.Handler;
 
-import org.angdroid.nightly.ActivityKeys;
+import org.angdroid.angband.ActivityKeys;
 import com.flurry.android.FlurryAgent;
 
 public class AngbandActivity extends Activity {
