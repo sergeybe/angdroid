@@ -35,7 +35,7 @@ import android.widget.TextView;
 import com.scoreloop.client.android.core.controller.MessageController;
 import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.model.User;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask;
 import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask.ManageBuddiesContinuation;
 import com.scoreloop.client.android.ui.component.base.ComponentHeaderActivity;

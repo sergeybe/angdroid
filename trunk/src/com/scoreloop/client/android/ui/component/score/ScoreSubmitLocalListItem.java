@@ -27,7 +27,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.framework.BaseListItem;
 

@@ -35,7 +35,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public class ShortcutView extends SegmentedView {
 

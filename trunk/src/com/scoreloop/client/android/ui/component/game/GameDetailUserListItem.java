@@ -22,7 +22,7 @@
 package com.scoreloop.client.android.ui.component.game;
 
 import com.scoreloop.client.android.core.model.User;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.ComponentActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StandardListItem;

@@ -28,7 +28,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.scoreloop.client.android.core.addon.RSSItem;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.framework.BaseListItem;
 import com.scoreloop.client.android.ui.util.ImageDownloader;

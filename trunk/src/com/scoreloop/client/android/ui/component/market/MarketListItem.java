@@ -25,7 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.TextView;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.ComponentActivity;
 import com.scoreloop.client.android.ui.component.base.StandardListItem;
 

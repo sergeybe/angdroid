@@ -24,7 +24,7 @@ package com.scoreloop.client.android.ui.component.challenge;
 import android.app.Dialog;
 import android.os.Bundle;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;

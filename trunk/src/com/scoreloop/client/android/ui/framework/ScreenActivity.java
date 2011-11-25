@@ -34,7 +34,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public class ScreenActivity extends ActivityGroup implements ScreenActivityProtocol, OnClickListener {
 

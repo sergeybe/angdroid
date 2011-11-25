@@ -23,7 +23,7 @@ package com.scoreloop.client.android.ui.component.achievement;
 
 import android.os.Bundle;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.ComponentHeaderActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StringFormatter;

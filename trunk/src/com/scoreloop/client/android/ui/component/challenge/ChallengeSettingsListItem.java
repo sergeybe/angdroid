@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.scoreloop.client.android.core.model.Challenge;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.ComponentActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StringFormatter;

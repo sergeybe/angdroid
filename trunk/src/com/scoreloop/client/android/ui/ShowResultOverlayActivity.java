@@ -31,7 +31,7 @@ import android.widget.TextView;
 import com.scoreloop.client.android.core.model.Challenge;
 import com.scoreloop.client.android.core.model.Session;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 /**
  * You can use this activity to show the result of a game play to the player. Start this activity after receiving an @link com.scoreloop.client.android.ui.OnScoreSubmitObserver.onScoreSubmit() onScoreSubmit() @endlink callback.

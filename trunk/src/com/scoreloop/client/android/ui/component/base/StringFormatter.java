@@ -30,7 +30,7 @@ import android.graphics.drawable.Drawable;
 import com.scoreloop.client.android.core.addon.RSSItem;
 import com.scoreloop.client.android.core.model.*;
 import com.scoreloop.client.android.core.model.ScoreFormatter.ScoreFormatKey;
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.framework.ValueStore;
 
 public class StringFormatter {

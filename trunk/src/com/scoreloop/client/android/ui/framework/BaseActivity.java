@@ -44,7 +44,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.framework.ValueStore.Observer;
 
 public abstract class BaseActivity extends Activity implements Observer, Runnable, DialogInterface.OnDismissListener,

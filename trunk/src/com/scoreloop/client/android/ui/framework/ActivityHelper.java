@@ -29,7 +29,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ViewSwitcher;
 
-import org.angdroid.nightly.R;
+import org.angdroid.angband.R;
 
 public abstract class ActivityHelper {
 
