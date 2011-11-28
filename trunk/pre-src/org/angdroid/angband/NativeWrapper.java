@@ -404,14 +404,11 @@ public class NativeWrapper {
 	try {
 	    String strScore = new String(score, "UTF-8");
 	    String strLevel = new String(level, "UTF-8");
-	    Log.d("Angband","score = \"" + strScore + "\"");
+	    // Log.d("Angband","score = \"" + strScore + "\"");
 	    myscore = Double.parseDouble(strScore.trim());
 	    mylevel = Integer.parseInt(strLevel.trim());
 	} catch(java.io.UnsupportedEncodingException e) {
 	    Log.d("Angband","score: " + e);
-	}
-	if(scoreMap != null && scoreMap.size() == 0) {
-	    scoreMap = null;
 	}
 	myComplexScore = new Score(new Double(myscore), scoreMap);
 	myComplexScore.setLevel(mylevel);
@@ -426,9 +423,9 @@ public class NativeWrapper {
 	try {
 	    String strName = new String(name, "UTF-8");
 	    String strValue = new String(value, "UTF-8");
-	    Log.d("Angband","score detail: \"" + strName + "\" = \"" +
-		  strValue + "\"");
-	    scoreMap.put(strName, strValue);
+	    // Log.d("Angband","score detail: \"" + strName + "\" = \"" +
+	    // 	  strValue + "\"");
+	    scoreMap.put(strName, strValue.trim());
 	} catch(java.io.UnsupportedEncodingException e) {
 	    Log.d("Angband","score: " + e);
 	}

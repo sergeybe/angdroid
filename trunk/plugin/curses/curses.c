@@ -441,7 +441,7 @@ void android_score_start() {
 }
 
 void android_score_detail(char *name, char *value) {
-  LOGD("score detail '%s' = '%s'", name, value);
+  /* LOGD("score detail '%s' = '%s'", name, value); */
   jbyteArray name_a = (*env)->NewByteArray(env, strlen(name));
   if (name_a == NULL) angdroid_quit("score: Out of memory");
   (*env)->SetByteArrayRegion(env, name_a, 0, strlen(name), name);
@@ -454,8 +454,8 @@ void android_score_detail(char *name, char *value) {
 }
 
 void android_score_submit(char *score, char *level) {
-  LOGD("register score as '%s'", score);
-  LOGD("register level as '%s'", level);
+  /* LOGD("register score as '%s'", score); */
+  /* LOGD("register level as '%s'", level); */
   jbyteArray score_a = (*env)->NewByteArray(env, strlen(score));
   if (score_a == NULL) angdroid_quit("score: Out of memory");
   (*env)->SetByteArrayRegion(env, score_a, 0, strlen(score), score);

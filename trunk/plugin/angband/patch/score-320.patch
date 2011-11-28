@@ -1,6 +1,6 @@
 --- extsrc/src/score.c.orig	2011-11-25 11:23:08.316843145 -0800
 +++ extsrc/src/score.c	2011-11-25 11:22:01.428641100 -0800
-@@ -467,6 +467,14 @@
+@@ -467,6 +467,17 @@
  		highscore_read(scores, N_ELEMENTS(scores));
  		highscore_add(&entry, scores, N_ELEMENTS(scores));
  		highscore_write(scores, N_ELEMENTS(scores));
@@ -11,6 +11,9 @@
 +		android_score_detail("how_died", entry.how);
 +		android_score_detail("gold", entry.gold);
 +		android_score_detail("turns", entry.turns);
++		android_score_detail("cur_dun", entry.cur_dun);
++		android_score_detail("cur_lev", entry.cur_lev);
++		android_score_detail("max_dun", entry.max_dun);
 +		android_score_submit(entry.pts, entry.max_lev);
  	}
  
