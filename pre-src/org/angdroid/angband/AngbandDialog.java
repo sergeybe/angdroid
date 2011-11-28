@@ -6,6 +6,9 @@ import android.app.ProgressDialog;
 import android.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
+import android.content.pm.PackageManager;
+import java.util.HashMap;
+import java.util.Iterator;
 import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
 import com.scoreloop.client.android.core.model.Score;
 
@@ -61,6 +64,24 @@ public class AngbandDialog {
 			Toast.makeText(activity, (String)msg.obj, Toast.LENGTH_SHORT).show();			
 			break;
 		case Score:
+			String versionName = "unknown";
+			try {
+				versionName = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0 ).versionName;
+			} catch(PackageManager.NameNotFoundException e) {
+				Log.d("Angband","error getting version" + e);
+			}
+			Score sc = (Score)msg.obj;
+			HashMap ctx = (HashMap)sc.getContext();
+			ctx.put("version", versionName);
+
+			// Iterator itr = ctx.keySet().iterator();
+			// while(itr.hasNext()) {
+			//     String key = (String)itr.next();
+			//     Log.d("Angband", key + " = \"" + ctx.get(key) +
+			// 	  "\"");
+			// }
+			
+			sc.setContext(ctx);
 			ScoreloopManagerSingleton.get().onGamePlayEnded((Score)msg.obj, null);
 			break;
 		}
