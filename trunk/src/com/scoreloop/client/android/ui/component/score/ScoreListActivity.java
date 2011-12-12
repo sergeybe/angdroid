@@ -159,6 +159,16 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 						return;
 					}
 				}).show();
+
+
+		final Factory factory = getFactory();
+                final User user = item.getTarget().getUser();
+
+                if (getSession().isOwnedByUser(user)) {
+                        display(factory.createProfileSettingsScreenDescription(user));
+                } else {
+                        display(factory.createUserDetailScreenDescription(user, true));
+                }
 	}
 
 	public void onPagingListItemClick(final PagingDirection pagingDirection) {
