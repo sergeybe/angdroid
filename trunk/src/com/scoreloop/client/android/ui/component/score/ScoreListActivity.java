@@ -22,10 +22,15 @@
 package com.scoreloop.client.android.ui.component.score;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.util.Log;
 
 import com.scoreloop.client.android.core.controller.RankingController;
 import com.scoreloop.client.android.core.controller.RequestController;
@@ -130,14 +135,30 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 
 	@Override
 	public void onListItemClick(final ScoreListItem item) {
-		final Factory factory = getFactory();
-		final User user = item.getTarget().getUser();
+		Score score = item.getTarget();
+		Double result = score.getResult();
+		HashMap context = (HashMap)score.getContext();
+		
+		// Log.d("Angband", "result = " + score.getResult());
+		// Log.d("Angband", "level = " + score.getLevel());
+		
+		String msg = "";
+		msg += context.get("name") + ", a level ";
+		msg += context.get("cur_lev") + " ";
+		msg += context.get("race") + " ";
+		msg += context.get("class") + " with ";
+		msg += context.get("gold") + " gold, was killed on dungeon level ";
+		msg += context.get("cur_dun") + " by ";
+		msg += context.get("how_died") + ".";
 
-		if (getSession().isOwnedByUser(user)) {
-			display(factory.createProfileSettingsScreenDescription(user));
-		} else {
-			display(factory.createUserDetailScreenDescription(user, true));
-		}
+		new AlertDialog.Builder(getParent())
+			.setTitle("Result") 
+			.setMessage(msg) 
+			.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						return;
+					}
+				}).show();
 	}
 
 	public void onPagingListItemClick(final PagingDirection pagingDirection) {
