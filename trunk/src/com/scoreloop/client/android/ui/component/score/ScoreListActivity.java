@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.app.AlertDialog;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.util.Log;
 
@@ -151,24 +152,25 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 		msg += context.get("cur_dun") + " by ";
 		msg += context.get("how_died") + ".";
 
-		new AlertDialog.Builder(getParent())
+		Activity a = this;
+		while (a.getParent() != null)
+			a = a.getParent();
+
+		new AlertDialog.Builder(a)
 			.setTitle("Result") 
 			.setMessage(msg) 
 			.setNegativeButton("OK", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						return;
+						final Factory factory = getFactory();
+						final User user = item.getTarget().getUser();
+
+						if (getSession().isOwnedByUser(user)) {
+							display(factory.createProfileSettingsScreenDescription(user));
+						} else {
+							display(factory.createUserDetailScreenDescription(user, true));
+						}
 					}
 				}).show();
-
-
-		final Factory factory = getFactory();
-                final User user = item.getTarget().getUser();
-
-                if (getSession().isOwnedByUser(user)) {
-                        display(factory.createProfileSettingsScreenDescription(user));
-                } else {
-                        display(factory.createUserDetailScreenDescription(user, true));
-                }
 	}
 
 	public void onPagingListItemClick(final PagingDirection pagingDirection) {
