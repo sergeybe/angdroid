@@ -82,7 +82,7 @@ public class AngbandDialog {
 			// }
 			
 			sc.setContext(ctx);
-			ScoreloopManagerSingleton.get().onGamePlayEnded((Score)msg.obj, null);
+			ScoreloopManagerSingleton.get().onGamePlayEnded((Score)msg.obj, false);
 			break;
 		}
 	}

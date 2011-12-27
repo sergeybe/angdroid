@@ -47,8 +47,10 @@ import android.os.Message;
 import org.angdroid.angband.ActivityKeys;
 import com.flurry.android.FlurryAgent;
 import com.scoreloop.client.android.ui.EntryScreenActivity;
+import com.scoreloop.client.android.ui.LeaderboardsScreenActivity;
 import com.scoreloop.client.android.ui.ShowResultOverlayActivity;
 import com.scoreloop.client.android.ui.OnScoreSubmitObserver;
+import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
 
 public class GameActivity extends Activity implements OnScoreSubmitObserver {
 
@@ -91,6 +93,8 @@ public class GameActivity extends Activity implements OnScoreSubmitObserver {
 		if (state == null) {
 			state = new StateManager();
 		}
+
+		ScoreloopManagerSingleton.get().setOnScoreSubmitObserver(this);
 	}
 
 	@Override
@@ -142,6 +146,12 @@ public class GameActivity extends Activity implements OnScoreSubmitObserver {
 			startActivity(intent);
 			break;
 		case '4':
+			intent = new Intent(this, LeaderboardsScreenActivity.class);
+			intent.putExtra(LeaderboardsScreenActivity.LEADERBOARD,
+					LeaderboardsScreenActivity.LEADERBOARD_LOCAL);
+			startActivity(intent);
+			break;
+		case '5':
 			finish();
 			break;
 		}
