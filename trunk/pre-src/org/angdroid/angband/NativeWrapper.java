@@ -394,6 +394,29 @@ public class NativeWrapper {
 	    return -1;
     }
 
+    public int wcstombs(final byte[] mbstr, final byte[] wcstr, final int max) {
+	    //Log.d("Angband","mcstombs("+mbstr+","+wcstr+","+max+")");
+	    try {
+		String str = new String(wcstr, "ISO-8859-1");
+		//Log.d("Angband", "str = |" + str + "|");
+		byte[] mb = str.getBytes("UTF-8");
+		//Log.d("Angband", "mb.length = " + mb.length);
+		//Log.d("Angband", "mbstr.length = " + mbstr.length);
+		int i;
+		if(max == 0) {
+		    // someone just wants to check the length
+		    return mb.length;
+		}
+		for(i=0; i<mb.length && i<max; i++) {
+		    //Log.d("Angband", "i = " + i);
+		    mbstr[i] = mb[i];
+		}
+		return i;
+	    } catch(java.io.UnsupportedEncodingException e) {
+		Log.d("Angband","wcstombs: " + e);
+	    }
+	    return -1;
+    }
 
     Score myComplexScore;
     HashMap scoreMap = null;

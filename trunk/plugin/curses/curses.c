@@ -50,6 +50,7 @@ static jmethodID NativeWrapper_getcurx;
 #ifdef ANGDROID_NIGHTLY
 static jmethodID NativeWrapper_wctomb;
 static jmethodID NativeWrapper_mbstowcs;
+static jmethodID NativeWrapper_wcstombs;
 #endif
 static jmethodID NativeWrapper_score_start;
 static jmethodID NativeWrapper_score_detail;
@@ -434,6 +435,28 @@ size_t mbstowcs(wchar_t *wcstr, const char *mbstr, size_t max) {
 	return res;
 }
 
+size_t wcstombs(wchar_t *mbstr, const char *wcstr, size_t max) {
+	//  LOGD("begin wcstombs (%s,%d)", wcstr, max);
+	jbyteArray mbstr_a = (*env)->NewByteArray(env, max);
+	if (mbstr_a == NULL) angdroid_quit("wcstombs: Out of memory");
+	int wclen = strlen(wcstr);
+	jbyteArray wcstr_a = (*env)->NewByteArray(env, wclen);
+	if (wcstr_a == NULL) angdroid_quit("wcstombs: Out of memory");
+	(*env)->SetByteArrayRegion(env, wcstr_a, 0, wclen, wcstr);
+	//  LOGD("wcs = |%s|", wcstr);
+	int res = JAVA_CALL_INT(NativeWrapper_wcstombs, mbstr_a, wcstr_a, max);
+	if(mbstr) {
+	  (*env)->GetByteArrayRegion(env, mbstr_a, 0, res, mbstr);
+	  if(res < max) {
+	    mbstr[res] = 0;
+	  }
+	}
+	(*env)->DeleteLocalRef(env, mbstr_a);
+	(*env)->DeleteLocalRef(env, wcstr_a);
+	//  LOGD("end wcstombs (c)");
+	return res;
+}
+
 #endif
 
 void android_score_start() {
@@ -508,6 +531,7 @@ JNIEXPORT void JNICALL angdroid_gameStart
 #ifdef ANGDROID_NIGHTLY
 	NativeWrapper_wctomb = JAVA_METHOD("wctomb", "([BB)I");
 	NativeWrapper_mbstowcs = JAVA_METHOD("mbstowcs", "([B[BI)I");
+	NativeWrapper_wcstombs = JAVA_METHOD("wcstombs", "([B[BI)I");
 #endif
 	NativeWrapper_score_start = JAVA_METHOD("score_start", "()V");
 	NativeWrapper_score_detail = JAVA_METHOD("score_detail", "([B[B)V");

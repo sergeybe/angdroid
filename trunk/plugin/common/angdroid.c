@@ -83,7 +83,11 @@
 #include "main.h"
 #endif
 #ifdef ALLOW_BORG
+#ifdef ANGDROID_ANGBAND306_PLUGIN
 #include "borg1.h"
+#else
+#include "borg/borg1.h"
+#endif
 #endif
 #ifndef BASIC_COLORS
 #define BASIC_COLORS 16
