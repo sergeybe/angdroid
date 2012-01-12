@@ -47,3 +47,14 @@ diff -Nru --strip-trailing-cr extsrc.orig/src/spells1.c extsrc/src/spells1.c
  
  		*c = chars[motion];
  		*a = spell_color(typ);
+diff -Nru --strip-trailing-cr angband-nightly/src/borg/borg1.c angband-nightly-android/src/borg/borg1.c
+--- angband-nightly/src/borg/borg1.c	2011-10-11 12:01:03.361884400 -0700
++++ angband-nightly-android/src/borg/borg1.c	2011-10-11 12:03:58.785192500 -0700
+@@ -1502,6 +1502,6 @@
+     (*a) = d_a;
+ 
+     /* Convert back to a char string */
+-    wcstombs(s, screen_str, n+1);
++    wcstombs(s, screen_str, ABS(n)+1);
+     /* Too short */
+     if ((n > 0) && (i != n)) return (1);
