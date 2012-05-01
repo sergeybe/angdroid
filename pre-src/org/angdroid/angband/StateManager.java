@@ -95,6 +95,21 @@ public class StateManager {
 	public int getKeyRight() {
 		return Plugins.getKeyRight(currentPlugin);
 	}
+	public int getKeyEnter() {
+		return Plugins.getKeyEnter(currentPlugin);
+	}
+	public int getKeyEsc() {
+		return Plugins.getKeyEsc(currentPlugin);
+	}
+	public int getKeyTab() {
+		return Plugins.getKeyTab(currentPlugin);
+	}
+	public int getKeyBackspace() {
+		return Plugins.getKeyBackspace(currentPlugin);
+	}
+	public int getKeyDelete() {
+		return Plugins.getKeyDelete(currentPlugin);
+	}
 
 	public void clearKeys() {
 		if (this.keyBuffer != null)

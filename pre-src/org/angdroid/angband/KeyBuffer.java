@@ -248,7 +248,13 @@ public class KeyBuffer {
 			add(character);
 			break;
 		case EscKey:
-			add('\033');
+			add(state.getKeyEsc());
+			break;
+		case BackspaceKey:
+			add(state.getKeyBackspace());
+			break;
+		case DeleteKey:
+			add(state.getKeyDelete());
 			break;
 		case Space:
 			add(' ');
@@ -257,7 +263,7 @@ public class KeyBuffer {
 			add('.');
 			break;
 		case EnterKey:
-			add('\r');
+			add(state.getKeyEnter());
 			break;
 		case ArrowDownKey:
 			add(state.getKeyDown());

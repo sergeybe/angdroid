@@ -711,6 +711,8 @@ static void term_data_link(int i)
 	/* Initialize the term */
 	term_init(t, 80, 24, 256);
 
+	t->complex_input = TRUE;
+
 	/* Choose "soft" or "hard" cursor XXX XXX XXX */
 	/* A "soft" cursor must be explicitly "drawn" by the program */
 	/* while a "hard" cursor has some "physical" existance and is */
