@@ -120,7 +120,9 @@ public class KeyMapper {
 			Space,
 			VirtualKeyboard,
 			ZoomIn,
-			ZoomOut;
+			ZoomOut,
+			BackspaceKey,
+			DeleteKey;
 
 		public static KeyAction convert(int value)
 		{
@@ -197,8 +199,7 @@ public class KeyMapper {
 			initKeyMap(KEY_VIRTKEYKEY, KeyAction.VirtualKeyboard);
 			initKeyMap(KEY_ZOOMINKEY, KeyAction.ZoomIn);
 			initKeyMap(KEY_ZOOMOUTKEY, KeyAction.ZoomOut);
-
-			initKeyMap(KEY_BKSPACEKEY, '\b');
+			initKeyMap(KEY_BKSPACEKEY, KeyAction.BackspaceKey);
 			initKeyMap(KEY_CTRLKEY, KeyAction.CtrlKey);
 			initKeyMap(KEY_ENTERKEY, KeyAction.EnterKey);
 			initKeyMap(KEY_ESCKEY, KeyAction.EscKey);

@@ -28,6 +28,8 @@ final public class Plugins {
 		return p.toString().toLowerCase();
 	}
 
+	// these codes have to match the codes in extsrc/src/ui-event.h
+
 	public static int getKeyDown(Plugin p) {
 		return 0x80;
 	}
@@ -42,6 +44,26 @@ final public class Plugins {
 
 	public static int getKeyRight(Plugin p) {
 		return 0x82;
+	}
+
+	public static int getKeyEnter(Plugin p) {
+		return 0x9C;
+	}
+
+	public static int getKeyTab(Plugin p) {
+		return 0x9D;
+	}
+
+	public static int getKeyDelete(Plugin p) {
+		return 0x9E;
+	}
+
+	public static int getKeyBackspace(Plugin p) {
+		return 0x9F;
+	}
+
+	public static int getKeyEsc(Plugin p) {
+		return 0xE000;
 	}
 
 	public static ZipInputStream getPluginZip(int plugin) {
