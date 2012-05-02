@@ -25,8 +25,9 @@ import android.app.Dialog;
 import android.os.Bundle;
 
 import com.scoreloop.client.android.core.controller.ChallengeController;
-import com.scoreloop.client.android.core.controller.ChallengeControllerObserver;
 import com.scoreloop.client.android.core.controller.RequestController;
+import com.scoreloop.client.android.core.controller.RequestControllerException;
+import com.scoreloop.client.android.core.controller.RequestControllerObserver;
 import com.scoreloop.client.android.core.model.Challenge;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.agent.UserDetailsAgent;
@@ -41,7 +42,7 @@ import com.scoreloop.client.android.ui.framework.OkCancelDialog;
 import com.scoreloop.client.android.ui.framework.TextButtonDialog;
 import com.scoreloop.client.android.ui.framework.ValueStore;
 
-public class ChallengeAcceptListActivity extends ChallengeActionListActivity implements ChallengeControllerObserver, OnActionListener,
+public class ChallengeAcceptListActivity extends ChallengeActionListActivity implements RequestControllerObserver, OnActionListener,
 		OnControlObserver {
 
 	private Challenge						_challenge;
@@ -53,7 +54,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 	private ValueStore						_opponentValueStore;
 
 	@Override
-	protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(final int id) {
 		switch (id) {
 		case Constant.DIALOG_CHALLENGE_ERROR_ACCEPT:
 			final TextButtonDialog dialogAccept = new TextButtonDialog(this);
@@ -74,7 +75,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 			dialogBalance.setOnDismissListener(this);
 			return dialogBalance;
 		case Constant.DIALOG_CHALLENGE_LEAVE_ACCEPT:
-			OkCancelDialog navigationDialog = new OkCancelDialog(this);
+			final OkCancelDialog navigationDialog = new OkCancelDialog(this);
 			navigationDialog.setText(getResources().getString(R.string.sl_leave_accept_challenge));
 			navigationDialog.setOnActionListener(this);
 			navigationDialog.setOnDismissListener(this);
@@ -84,19 +85,44 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 		}
 	}
 
-	public void challengeControllerDidFailOnInsufficientBalance(final ChallengeController challengeController) {
+	@Override
+	protected void requestControllerDidFailSafe(final RequestController aRequestController, final Exception anException) {
 		_isNavigationAllowed = true;
-		showDialogSafe(Constant.DIALOG_CHALLENGE_ERROR_BALANCE, true);
+		if (anException instanceof RequestControllerException) {
+			final RequestControllerException exception = (RequestControllerException) anException;
+			switch (exception.getErrorCode()) {
+			case RequestControllerException.CHALLENGE_INSUFFICIENT_BALANCE:
+				showDialogSafe(Constant.DIALOG_CHALLENGE_ERROR_BALANCE, true);
+				return;
+			case RequestControllerException.CHALLENGE_ALREADY_ASSIGNED_TO_SOMEONE:
+			case RequestControllerException.CHALLENGE_ALREADY_ASSIGNED_TO_YOU:
+			case RequestControllerException.CHALLENGE_CANNOT_ACCEPT_CHALLENGE:
+				showDialogSafe(Constant.DIALOG_CHALLENGE_ERROR_ACCEPT, true);
+				return;
+			case RequestControllerException.CHALLENGE_CANNOT_REJECT_CHALLENGE:
+				showDialogSafe(Constant.DIALOG_CHALLENGE_ERROR_REJECT, true);
+				return;
+			}
+		}
+		showDialogForExceptionSafe(anException);
 	}
 
-	public void challengeControllerDidFailToAcceptChallenge(final ChallengeController challengeController) {
+	@Override
+	public void requestControllerDidReceiveResponseSafe(final RequestController aRequestController) {
 		_isNavigationAllowed = true;
-		showDialogSafe(Constant.DIALOG_CHALLENGE_ERROR_ACCEPT, true);
-	}
-
-	public void challengeControllerDidFailToRejectChallenge(final ChallengeController challengeController) {
-		_isNavigationAllowed = true;
-		showDialogSafe(Constant.DIALOG_CHALLENGE_ERROR_REJECT, true);
+		final Challenge challenge = ((ChallengeController) aRequestController).getChallenge();
+		if (challenge.isAccepted()) {
+			doAfterNavigationDialog(new Runnable() {
+				@Override
+				public void run() {
+					startChallenge();
+				}
+			});
+		} else if (challenge.isRejected()) {
+			displayPrevious();
+		} else {
+			throw new IllegalStateException("this should not happen - illegal state of the accepted/rejected challenge");
+		}
 	}
 
 	private void doAfterNavigationDialog(final Runnable continuation) {
@@ -131,7 +157,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 	}
 
 	@Override
-	protected void onPrepareDialog(int id, Dialog dialog) {
+	protected void onPrepareDialog(final int id, final Dialog dialog) {
 		switch (id) {
 		case Constant.DIALOG_CHALLENGE_LEAVE_ACCEPT:
 			final OkCancelDialog okCancelDialog = (OkCancelDialog) dialog;
@@ -153,6 +179,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 		return true;
 	}
 
+	@Override
 	public void onAction(final BaseDialog dialog, final int action) {
 		if (dialog == _navigationDialog) {
 			_navigationDialog = null;
@@ -166,6 +193,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 		} else {
 			dialog.dismiss();
 			doAfterNavigationDialog(new Runnable() {
+				@Override
 				public void run() {
 					displayPrevious();
 				}
@@ -173,6 +201,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 		}
 	}
 
+	@Override
 	public void onControl1() {
 		if (challengeGamePlayAllowed()) {
 			_isNavigationAllowed = false;
@@ -184,6 +213,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 		}
 	}
 
+	@Override
 	public void onControl2() {
 		_challenge.setContestant(getUser());
 		final ChallengeController challengeController = new ChallengeController(this);
@@ -197,7 +227,7 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 		// used in prepare dialog (must be restored before super.onCreate()
 		_navigationIntent = getActivityArguments().<NavigationIntent> getValue(Constant.NAVIGATION_INTENT, _navigationIntent);
 		_navigationDialogContinuation = getActivityArguments().<Runnable> getValue(Constant.NAVIGATION_DIALOG_CONTINUATION);
-		Boolean navigationAllowed = getActivityArguments().<Boolean> getValue(Constant.NAVIGATION_ALLOWED, Boolean.TRUE);
+		final Boolean navigationAllowed = getActivityArguments().<Boolean> getValue(Constant.NAVIGATION_ALLOWED, Boolean.TRUE);
 		if (navigationAllowed != null) {
 			_isNavigationAllowed = navigationAllowed;
 		}
@@ -211,14 +241,14 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 		_opponentValueStore = new ValueStore();
 		_opponentValueStore.putValue(Constant.USER, _challenge.getContender());
 		_opponentValueStore.addObserver(Constant.NUMBER_CHALLENGES_WON, this);
-		_opponentValueStore.addValueSources(new UserDetailsAgent());
+		_opponentValueStore.addValueSources(new UserDetailsAgent(this));
 		setNeedsRefresh();
 
 		initAdapter();
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
+	protected void onSaveInstanceState(final Bundle outState) {
 		super.onSaveInstanceState(outState);
 		getActivityArguments().putValue(Constant.NAVIGATION_INTENT, _navigationIntent);
 		getActivityArguments().putValue(Constant.NAVIGATION_DIALOG_CONTINUATION, _navigationDialogContinuation);
@@ -267,29 +297,6 @@ public class ChallengeAcceptListActivity extends ChallengeActionListActivity imp
 			_opponentValueStore.retrieveValue(Constant.NUMBER_CHALLENGES_WON, ValueStore.RetrievalMode.NOT_DIRTY, null);
 		} else if (Constant.NUMBER_CHALLENGES_WON.equals(key)) {
 			getUserValues().retrieveValue(key, ValueStore.RetrievalMode.NOT_DIRTY, null);
-		}
-	}
-
-	@Override
-	protected void requestControllerDidFailSafe(final RequestController aRequestController, final Exception anException) {
-		_isNavigationAllowed = true;
-		showDialogForExceptionSafe(anException);
-	}
-
-	@Override
-	public void requestControllerDidReceiveResponseSafe(final RequestController aRequestController) {
-		_isNavigationAllowed = true;
-		final Challenge challenge = ((ChallengeController) aRequestController).getChallenge();
-		if (challenge.isAccepted()) {
-			doAfterNavigationDialog(new Runnable() {
-				public void run() {
-					startChallenge();
-				}
-			});
-		} else if (challenge.isRejected()) {
-			displayPrevious();
-		} else {
-			throw new IllegalStateException("this should not happen - illegal state of the accepted/rejected challenge");
 		}
 	}
 

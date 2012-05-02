@@ -21,6 +21,8 @@
 
 package com.scoreloop.client.android.ui.component.news;
 
+import java.util.Date;
+
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +32,7 @@ import android.widget.TextView;
 import com.scoreloop.client.android.core.addon.RSSItem;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.Constant;
+import com.scoreloop.client.android.ui.component.base.StringFormatter;
 import com.scoreloop.client.android.ui.framework.BaseListItem;
 import com.scoreloop.client.android.ui.util.ImageDownloader;
 
@@ -69,7 +72,14 @@ public class NewsListItem extends BaseListItem {
 		title.setText(getTitle());
 
 		final TextView descripiton = (TextView) view.findViewById(R.id.sl_list_item_news_description);
-		descripiton.setText(_item.getDescription());
+		final StringBuilder builder = new StringBuilder();
+		final Date pubDate = _item.getPubDate();
+		if (pubDate != null) {
+			builder.append(StringFormatter.formatDate(pubDate));
+			builder.append("\n");
+		}
+		builder.append(_item.getDescription());
+		descripiton.setText(builder.toString());
 
 		final View accessory = view.findViewById(R.id.sl_list_item_news_accessory);
 		accessory.setVisibility(isEnabled() ? View.VISIBLE : View.INVISIBLE);

@@ -23,7 +23,16 @@ package com.scoreloop.client.android.ui.framework;
 
 public abstract class ScreenManagerSingleton {
 
-	private static ScreenManager	_singleton;	;
+	private static ScreenManager	_singleton;
+
+	/**
+	 * Destroys the ScreenManagerSingleton.<br>
+	 * This method should be called from {@link android.app.Application#onTerminate()}
+	 * @see android.app.Application#onTerminate()
+	 */
+	public static void destroy() {
+		_singleton = null;
+	}
 
 	public static ScreenManager get() {
 		if (_singleton == null) {
@@ -38,14 +47,5 @@ public abstract class ScreenManagerSingleton {
 		}
 		_singleton = manager;
 	}
-
-    /**
-     * Destroys the ScreenManagerSingleton.<br>
-     * This method should be called from {@link android.app.Application#onTerminate()}
-     * @see android.app.Application#onTerminate()
-     */
-    public static void destroy() {
-        _singleton = null;
-    }
 
 }

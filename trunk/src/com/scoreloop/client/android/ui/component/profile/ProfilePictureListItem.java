@@ -30,8 +30,12 @@ import com.scoreloop.client.android.ui.component.base.StandardListItem;
 
 public class ProfilePictureListItem extends StandardListItem<Void> {
 
-	public ProfilePictureListItem(final ComponentActivity context, final Drawable drawable, final String title) {
+	private final String	_socialProviderIdentifier;
+
+	public ProfilePictureListItem(final ComponentActivity context, final Drawable drawable, final String title,
+			final String socialProviderIdentifier) {
 		super(context, drawable, title, null, null);
+		_socialProviderIdentifier = socialProviderIdentifier;
 	}
 
 	@Override
@@ -42,6 +46,10 @@ public class ProfilePictureListItem extends StandardListItem<Void> {
 	@Override
 	protected int getLayoutId() {
 		return R.layout.sl_list_item_main;
+	}
+
+	public String getSocialProviderIdentifier() {
+		return _socialProviderIdentifier;
 	}
 
 	@Override

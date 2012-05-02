@@ -39,6 +39,7 @@ public class TextButtonDialog extends BaseDialog {
 		return R.layout.sl_dialog_text_button;
 	}
 
+	@Override
 	public void onClick(final View v) {
 		if ((_listener != null) && (v.getId() == R.id.sl_button_ok)) {
 			_listener.onAction(this, 0);

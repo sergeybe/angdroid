@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -24,21 +24,21 @@ package com.scoreloop.client.android.ui.component.score;
 import android.graphics.drawable.Drawable;
 
 import com.scoreloop.client.android.core.model.Score;
-import com.scoreloop.client.android.core.model.Session;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
+import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
 import com.scoreloop.client.android.ui.component.base.ComponentActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StandardListItem;
 import com.scoreloop.client.android.ui.component.base.StringFormatter;
 
 public class ScoreListItem extends StandardListItem<Score> {
-	
-	private boolean _isEnabled;
+
+	private final boolean	_isEnabled;
 
 	public ScoreListItem(final ComponentActivity activity, final Score score, final boolean isEnabled) {
-		super(activity, null, StringFormatter.getScoreTitle(activity, score), StringFormatter.formatLeaderboardsScore(score, activity
-				.getConfiguration()), score);
+		super(activity, null, StringFormatter.getScoreTitle(activity, score), StringFormatter.formatLeaderboardsScore(score,
+				activity.getConfiguration()), score);
 		_isEnabled = isEnabled;
 	}
 
@@ -47,7 +47,7 @@ public class ScoreListItem extends StandardListItem<Score> {
 		User user = getTarget().getUser();
 		if (user == null) {
 			// if the score comes from the rank, it will not have a user object, so use the session user
-			user = Session.getCurrentSession().getUser();
+			user = ScoreloopManagerSingleton.get().getSession().getUser();
 		}
 		return user.getImageUrl();
 	}
@@ -76,7 +76,7 @@ public class ScoreListItem extends StandardListItem<Score> {
 	public Drawable getDrawable() {
 		return getContext().getResources().getDrawable(R.drawable.sl_icon_user);
 	}
-	
+
 	@Override
 	public boolean isEnabled() {
 		return _isEnabled;

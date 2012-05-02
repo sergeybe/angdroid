@@ -24,6 +24,7 @@ package com.scoreloop.client.android.ui;
 import android.os.Bundle;
 
 import com.scoreloop.client.android.ui.component.base.Configuration;
+import com.scoreloop.client.android.ui.component.base.Factory;
 import com.scoreloop.client.android.ui.framework.ScreenActivity;
 
 /**
@@ -56,11 +57,12 @@ public class ChallengesScreenActivity extends ScreenActivity {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		final StandardScoreloopManager manager = StandardScoreloopManager.getFactory(ScoreloopManagerSingleton.get());
-		if (!manager.getConfiguration().isFeatureEnabled(Configuration.Feature.CHALLENGE)) {
+		final Configuration configuration = ScoreloopManagerSingleton.getImpl().getConfiguration();
+		if (!configuration.isFeatureEnabled(Configuration.Feature.CHALLENGE)) {
 			finish();
 			return;
 		}
-		display(manager.createChallengeScreenDescription(null), savedInstanceState);
+		final Factory factory = ScoreloopManagerSingleton.getImpl().getFactory();
+		display(factory.createChallengeScreenDescription(null), savedInstanceState);
 	}
 }

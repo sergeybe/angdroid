@@ -45,7 +45,7 @@ public interface ScreenManager {
 
 	void displayInScreen(ScreenDescription description, ScreenActivityProtocol screenActivity, boolean wantsEmptyStack);
 
-	void displayPreviousDescription();
+	void displayPreviousDescription(boolean force);
 
 	void displayReferencedStackEntryInScreen(int stackEntryReference, ScreenActivityProtocol newScreenActivity);
 

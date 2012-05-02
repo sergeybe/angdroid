@@ -23,8 +23,8 @@ package com.scoreloop.client.android.ui.component.score;
 
 import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 
 import org.angdroid.angband.R;
@@ -57,9 +57,10 @@ public class ScoreSubmitLocalListItem extends BaseListItem {
 	}
 
 	private void prepareView(final View view) {
-		view.setEnabled(false);		
+		view.setEnabled(false);
 		final Button button = (Button) view.findViewById(R.id.sl_submit_local_score_button);
 		button.setOnClickListener(new OnClickListener() {
+			@Override
 			public void onClick(final View v) {
 				view.performClick();
 			}

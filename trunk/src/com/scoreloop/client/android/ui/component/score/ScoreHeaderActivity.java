@@ -36,6 +36,7 @@ import com.scoreloop.client.android.ui.framework.ValueStore;
 
 public class ScoreHeaderActivity extends ComponentHeaderActivity implements OnClickListener {
 
+	@Override
 	public void onClick(final DialogInterface dialog, final int position) {
 		final int mode = getModeForPosition(position);
 		getScreenValues().putValue(Constant.MODE, mode);
@@ -67,8 +68,8 @@ public class ScoreHeaderActivity extends ComponentHeaderActivity implements OnCl
 		}
 	}
 
-	private void showControlIcon(int resId) {
-		ImageView icon = (ImageView) findViewById(R.id.sl_control_icon);
+	private void showControlIcon(final int resId) {
+		final ImageView icon = (ImageView) findViewById(R.id.sl_control_icon);
 		icon.setImageResource(resId);
 		icon.setEnabled(true);
 		icon.setOnClickListener(this);
@@ -78,13 +79,7 @@ public class ScoreHeaderActivity extends ComponentHeaderActivity implements OnCl
 	protected Dialog onCreateDialog(final int id) {
 		switch (id) {
 		case Constant.DIALOG_GAME_MODE:
-			final AlertDialog dialog;
-			// left for backward compatibility
-			if (getConfiguration().getModesResId() != 0) {
-				dialog = new AlertDialog.Builder(this).setItems(getConfiguration().getModesResId(), this).create();
-			} else {
-				dialog = new AlertDialog.Builder(this).setItems(getConfiguration().getModesNames(), this).create();
-			}
+			final AlertDialog dialog = new AlertDialog.Builder(this).setItems(getConfiguration().getModesNames(), this).create();
 			dialog.setOnDismissListener(this); // reset instance state
 			return dialog;
 		default:

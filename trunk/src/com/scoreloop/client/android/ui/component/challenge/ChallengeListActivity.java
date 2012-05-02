@@ -152,7 +152,7 @@ public class ChallengeListActivity extends ComponentListActivity<BaseListItem> {
 				adapter.add(new ChallengeOpenListItem(this, challenge));
 			}
 		} else {
-            adapter.add(new EmptyListItem(this, getResources().getString(R.string.sl_no_open_challenges)));
+			adapter.add(new EmptyListItem(this, getResources().getString(R.string.sl_no_open_challenges)));
 		}
 
 		adapter.add(new CaptionListItem(ChallengeListActivity.this, null, getString(R.string.sl_challenges_history)));

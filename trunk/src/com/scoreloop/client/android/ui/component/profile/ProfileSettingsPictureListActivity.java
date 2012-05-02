@@ -27,12 +27,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.scoreloop.client.android.core.addon.AndroidImage;
-import com.scoreloop.client.android.core.controller.*;
-import com.scoreloop.client.android.core.model.*;
+import com.scoreloop.client.android.core.controller.RequestController;
+import com.scoreloop.client.android.core.controller.RequestControllerObserver;
+import com.scoreloop.client.android.core.controller.SocialProviderController;
+import com.scoreloop.client.android.core.controller.SocialProviderControllerObserver;
+import com.scoreloop.client.android.core.controller.UserController;
+import com.scoreloop.client.android.core.model.Continuation;
+import com.scoreloop.client.android.core.model.Image;
+import com.scoreloop.client.android.core.model.ImageSource;
+import com.scoreloop.client.android.core.model.SocialProvider;
+import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
@@ -51,7 +58,6 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 			add(_deviceLibraryItem);
 			add(_facebookItem);
 			add(_twitterItem);
-			add(_myspaceItem);
 			add(_setDefaultItem);
 		}
 	}
@@ -61,7 +67,6 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 	private Runnable				_continuation;
 	private ProfilePictureListItem	_deviceLibraryItem;
 	private ProfilePictureListItem	_facebookItem;
-	private ProfilePictureListItem	_myspaceItem;
 	private ProfilePictureListItem	_setDefaultItem;
 	private ProfilePictureListItem	_twitterItem;
 	private User					_user;
@@ -69,8 +74,9 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 
 	@Override
 	protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-		if (data != null && data.getData() != null && !data.getData().toString().trim().equals("")) {
+		if ((data != null) && (data.getData() != null) && !data.getData().toString().trim().equals("")) {
 			getHandler().post(new Runnable() {
+				@Override
 				public void run() {
 					final Uri localImageUri = data.getData();
 
@@ -85,11 +91,13 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 		super.onCreate(savedInstanceState);
 		final Resources res = getResources();
 		_deviceLibraryItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_device),
-				getString(R.string.sl_device_library));
-		_facebookItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_facebook), getString(R.string.sl_facebook));
-		_twitterItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_twitter), getString(R.string.sl_twitter));
-		_myspaceItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_myspace), getString(R.string.sl_myspace));
-		_setDefaultItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_user), getString(R.string.sl_set_default));
+				getString(R.string.sl_device_library), null);
+		_facebookItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_facebook), getString(R.string.sl_facebook),
+				SocialProvider.FACEBOOK_IDENTIFIER);
+		_twitterItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_twitter), getString(R.string.sl_twitter),
+				SocialProvider.TWITTER_IDENTIFIER);
+		_setDefaultItem = new ProfilePictureListItem(this, res.getDrawable(R.drawable.sl_icon_user), getString(R.string.sl_set_default),
+				null);
 		setListAdapter(new PictureListAdapter(this));
 		_user = getSessionUser();
 		_userController = new UserController(this);
@@ -100,33 +108,21 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 	public void onListItemClick(final BaseListItem item) {
 		if (item == _deviceLibraryItem) {
 			pickDeviceLibraryPicture();
-		} else if (item == _facebookItem) {
-			withConnectedProvider(SocialProvider.FACEBOOK_IDENTIFIER, new Runnable() {
-				public void run() {
-					pickFacebookPicture();
-				}
-			});
-		} else if (item == _twitterItem) {
-			withConnectedProvider(SocialProvider.TWITTER_IDENTIFIER, new Runnable() {
-				public void run() {
-					pickTwitterPicture();
-				}
-			});
-		} else if (item == _myspaceItem) {
-			withConnectedProvider(SocialProvider.MYSPACE_IDENTIFIER, new Runnable() {
-				public void run() {
-					pickMyspacePicture();
-				}
-			});
 		} else if (item == _setDefaultItem) {
 			pickDefaultPicture();
+		} else if (item instanceof ProfilePictureListItem) {
+			final String socialProviderIdentifier = ((ProfilePictureListItem) item).getSocialProviderIdentifier();
+			withConnectedProvider(socialProviderIdentifier, new Runnable() {
+				@Override
+				public void run() {
+					pickSocialPicture(socialProviderIdentifier);
+				}
+			});
 		}
 	}
 
 	private void pickDefaultPicture() {
 		_user.setImageSource(ImageSource.IMAGE_SOURCE_DEFAULT);
-		_user.setImageMimeType(null);
-		_user.setImageData(null);
 		showSpinnerFor(_userController);
 		_userController.submitUser();
 	}
@@ -142,32 +138,14 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 		}
 	}
 
-	private void pickFacebookPicture() {
-		_user.setImageSource(SocialProvider.getSocialProviderForIdentifier(SocialProvider.FACEBOOK_IDENTIFIER));
-		_user.setImageMimeType(null);
-		_user.setImageData(null);
-		showSpinnerFor(_userController);
-		_userController.submitUser();
-	}
-
-	private void pickMyspacePicture() {
-		_user.setImageSource(SocialProvider.getSocialProviderForIdentifier(SocialProvider.MYSPACE_IDENTIFIER));
-		_user.setImageMimeType(null);
-		_user.setImageData(null);
-		showSpinnerFor(_userController);
-		_userController.submitUser();
-	}
-
-	private void pickTwitterPicture() {
-		_user.setImageSource(SocialProvider.getSocialProviderForIdentifier(SocialProvider.TWITTER_IDENTIFIER));
-		_user.setImageMimeType(null);
-		_user.setImageData(null);
+	private void pickSocialPicture(final String socialProviderIdentifier) {
+		_user.setImageSource(SocialProvider.getSocialProviderForIdentifier(socialProviderIdentifier));
 		showSpinnerFor(_userController);
 		_userController.submitUser();
 	}
 
 	@Override
-	protected void requestControllerDidFailSafe(RequestController aRequestController, Exception anException) {
+	protected void requestControllerDidFailSafe(final RequestController aRequestController, final Exception anException) {
 		super.requestControllerDidFailSafe(aRequestController, anException);
 		getUserValues().putValue(Constant.USER_IMAGE_URL, _user.getImageUrl());
 	}
@@ -178,19 +156,23 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 		hideSpinnerFor(controller);
 	}
 
+	@Override
 	public void socialProviderControllerDidCancel(final SocialProviderController controller) {
 		hideSpinnerFor(controller);
 	}
 
+	@Override
 	public void socialProviderControllerDidEnterInvalidCredentials(final SocialProviderController controller) {
 		socialProviderControllerDidFail(controller, new RuntimeException("Invalid Credentials"));
 	}
 
+	@Override
 	public void socialProviderControllerDidFail(final SocialProviderController controller, final Throwable error) {
 		hideSpinnerFor(controller);
 		showToast(String.format(getString(R.string.sl_format_connect_failed), controller.getSocialProvider().getName()));
 	}
 
+	@Override
 	public void socialProviderControllerDidSucceed(final SocialProviderController controller) {
 		hideSpinnerFor(controller);
 		if (!isPaused() && (_continuation != null)) {
@@ -201,36 +183,22 @@ public class ProfileSettingsPictureListActivity extends ComponentListActivity<Ba
 	private void startSubmitPicture(final Uri localImageUri) {
 		showSpinnerFor(_userController);
 
-		final AsyncTask<Void, Void, Image> loadImageTask = new AsyncTask<Void, Void, Image>() {
-			@Override
-			protected Image doInBackground(Void... params) {
-				try {
-					return new AndroidImage(localImageUri, getContentResolver());
-				} catch (final FileNotFoundException e1) {
-					return null;
+		try {
+			final Image image = new AndroidImage(localImageUri, getContentResolver());
+			_user.assignImage(image, new Continuation<Boolean>() {
+				@Override
+				public void withValue(final Boolean result, final Exception error) {
+					if (!result) {
+						hideSpinnerFor(_userController);
+						return;
+					}
+					_userController.submitUser();
 				}
-			}
+			});
+		} catch (final FileNotFoundException e1) {
+			hideSpinnerFor(_userController);
+		}
 
-			@Override
-			protected void onPostExecute(Image image) {
-				if (image == null) {
-					hideSpinnerFor(_userController);
-				} else {
-					_user.assignImage(image, new Continuation<Boolean>() {
-						@Override
-						public void withValue(final Boolean result, final Exception error) {
-							if (!result) {
-								hideSpinnerFor(_userController);
-								return;
-							}
-							_userController.submitUser();
-						}
-					});
-				}
-			}
-		};
-		// noinspection unchecked
-		loadImageTask.execute();
 	}
 
 	private void withConnectedProvider(final String socialProviderIdentifier, final Runnable runnable) {

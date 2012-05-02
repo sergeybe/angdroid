@@ -31,14 +31,21 @@ import com.scoreloop.client.android.ui.framework.ValueStore.ValueSource;
 
 public abstract class BaseAgent implements ValueSource, RequestControllerObserver {
 
+	public static interface Delegate {
+		void onAgentDidFail(BaseAgent agent, RequestController controller, Exception error);
+	}
+
+	private final Delegate	_delegate;
 	private boolean			_isRetrieving;
 	private final String[]	_keys;
 	private ValueStore		_valueStore;
 
-	protected BaseAgent(final String... keys) {
+	protected BaseAgent(final Delegate delegate, final String... keys) {
+		_delegate = delegate;
 		_keys = keys;
 	}
 
+	@Override
 	public boolean isRetrieving() {
 		return _isRetrieving;
 	}
@@ -51,21 +58,26 @@ public abstract class BaseAgent implements ValueSource, RequestControllerObserve
 		_valueStore.putValue(key, value);
 	}
 
+	@Override
 	public void requestControllerDidFail(final RequestController aRequestController, final Exception anException) {
 		_isRetrieving = false;
+		_delegate.onAgentDidFail(this, aRequestController, anException);
 	}
 
+	@Override
 	public void requestControllerDidReceiveResponse(final RequestController aRequestController) {
 		_isRetrieving = false;
 		onFinishRetrieve(aRequestController, _valueStore);
 	}
 
+	@Override
 	public void retrieve(final ValueStore valueStore) {
 		_isRetrieving = true;
 		_valueStore = valueStore;
 		onStartRetrieve(valueStore);
 	}
 
+	@Override
 	public void supportedKeys(final Set<String> keys) {
 		Collections.addAll(keys, _keys);
 	}

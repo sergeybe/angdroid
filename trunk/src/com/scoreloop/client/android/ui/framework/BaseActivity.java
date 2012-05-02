@@ -29,6 +29,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,13 +55,16 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		MERGE, SET
 	}
 
-	private static boolean	LOG_ENABLED	= false;
+	protected static final String	BUNDLE_KEY_VISIBLE_DIALOG_ID	= "bundle_key_visible_dialog_id";
+	static String					CHILD_RESULT_CODE				= "childResultCode";
+	protected static final int		DIALOG_ERROR_NETWORK			= 0;
+	private static boolean			LOG_ENABLED						= false;
 
 	public static void showToast(final Context context, final String message) {
 		showToast(context, message, null, Toast.LENGTH_SHORT);
 	}
 
-	public static void showToast(final Context context, final String message, final Drawable drawable, final int duration) {
+	public static Toast showToast(final Context context, final String message, final Drawable drawable, final int duration) {
 		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
 		final View view = inflater.inflate(R.layout.sl_dialog_toast, null);
 		((TextView) view.findViewById(R.id.message)).setText(message);
@@ -71,33 +75,22 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		toast.setDuration(duration);
 		toast.setView(view);
 		toast.show();
+		return toast;
 	}
 
-	private View					_contentView;
-	private ValueStore				_currentScreenValues;
-	private Handler					_handler;
-	private boolean					_isPaused;
-	private boolean					_needsRefresh;
-	private Set<String>				_observedKeys					= null;
-	private int						_refreshFlags;
-	private ValueStore				_screenValuesSnapshot			= null;
-	private final Set<Object>		_spinnerControllers				= new HashSet<Object>();
-	private int						_spinnerSemaphore;
-	private View					_spinnerView;
+	private View				_contentView;
+	private ValueStore			_currentScreenValues;
+	private Handler				_handler;
+	private boolean				_isPaused;
+	private boolean				_needsRefresh;
+	private Set<String>			_observedKeys			= null;
+	private int					_refreshFlags;
+	private ValueStore			_screenValuesSnapshot	= null;
+	private final Set<Object>	_spinnerControllers		= new HashSet<Object>();
+	private int					_spinnerSemaphore;
 
-	protected static final String	BUNDLE_KEY_VISIBLE_DIALOG_ID	= "bundle_key_visible_dialog_id";
-	protected int					_visibleDialogId				= -1;
-
-	@Override
-	public void onDismiss(DialogInterface dialogInterface) {
-		_visibleDialogId = -1;
-	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putInt(BUNDLE_KEY_VISIBLE_DIALOG_ID, _visibleDialogId);
-	}
+	private View				_spinnerView;
+	protected int				_visibleDialogId		= -1;
 
 	public void addObservedKeys(final String... keys) {
 		unobserveKeys();
@@ -115,8 +108,12 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 	}
 
 	protected void displayPrevious() {
-		if (!isPaused()) {
-			ScreenManagerSingleton.get().displayPreviousDescription();
+		displayPrevious(false);
+	}
+
+	protected void displayPrevious(final boolean force) {
+		if (force || !isPaused()) {
+			ScreenManagerSingleton.get().displayPreviousDescription(force);
 		}
 	}
 
@@ -124,9 +121,20 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		ScreenManagerSingleton.get().finishDisplay();
 	}
 
+	protected void finishDisplayWithResult(final int code) {
+		final Intent intent = getIntent();
+		intent.putExtra(CHILD_RESULT_CODE, code);
+		setResult(code, intent);
+		finish(); // will be caught by screen-activity and translated into a finishDisplay
+	}
+
 	public ValueStore getActivityArguments() {
 		final String activityId = getIntent().getStringExtra(ActivityDescription.EXTRA_IDENTIFIER);
-		return ScreenManagerSingleton.get().getActivityDescription(activityId).getArguments();
+		final ActivityDescription ad = ScreenManagerSingleton.get().getActivityDescription(activityId);
+		if (ad == null) {
+			return new ValueStore();
+		}
+		return ad.getArguments();
 	}
 
 	protected ScreenDescription getCurrentScreenDescription() {
@@ -153,6 +161,14 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 			parent = parent.getParent();
 		}
 		return null;
+	}
+
+	protected Activity getTopParent() {
+		Activity parent = this;
+		if (parent.getParent() != null) {
+			parent = parent.getParent();
+		}
+		return parent;
 	}
 
 	protected void hideSpinner() {
@@ -189,7 +205,7 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		if (index != -1) {
 			address = ownString.substring(index);
 		}
-		Log.d("ScoreloopUI", "              > " + getClass().getSimpleName() + "(" + address + ") " + method);
+		Log.d("ScoreloopUI.Framework", "              > " + getClass().getSimpleName() + "(" + address + ") " + method);
 	}
 
 	private void makeScreenValuesSnapshot() {
@@ -231,10 +247,30 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		}
 	}
 
+	/**
+	 * is final to avoid StackOverflowException
+	 * onCreateOptionsMenu in ActivityGroup is called on active Activity
+	 * @see com.scoreloop.client.android.ui.framework.ScreenActivity#onCreateOptionsMenu(android.view.Menu)
+	 */
+	@Override
+	public final boolean onCreateOptionsMenu(final Menu menu) {
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenuForActivityGroup(final Menu menu) {
+		return true;
+	}
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		log("onDestroy");
+	}
+
+	@Override
+	public void onDismiss(final DialogInterface dialogInterface) {
+		_visibleDialogId = -1;
 	}
 
 	@Override
@@ -244,6 +280,21 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 			return true;
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+
+	/**
+	 * is final to avoid StackOverflowException
+	 * onOptionsItemSelected in ActivityGroup is called on active Activity
+	 * @see com.scoreloop.client.android.ui.framework.ScreenActivity#onOptionsItemSelected(android.view.MenuItem)
+	 */
+	@Override
+	public final boolean onOptionsItemSelected(final MenuItem item) {
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public boolean onOptionsItemSelectedForActivityGroup(final MenuItem item) {
+		return false;
 	}
 
 	@Override
@@ -264,6 +315,21 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		}
 	}
 
+	/**
+	 * is final to avoid StackOverflowException
+	 * onPrepareOptionsMenu in ActivityGroup is called on active Activity
+	 * @see com.scoreloop.client.android.ui.framework.ScreenActivity#onCreateOptionsMenu(android.view.Menu)
+	 */
+	@Override
+	public final boolean onPrepareOptionsMenu(final Menu menu) {
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenuForActivityGroup(final Menu menu) {
+		return true;
+	}
+
 	public void onRefresh(final int flags) {
 		// intentionally empty - override in subclass
 	}
@@ -282,6 +348,12 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		observeKeys();
 		updateScreenValues();
 		refreshIfNeeded();
+	}
+
+	@Override
+	protected void onSaveInstanceState(final Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt(BUNDLE_KEY_VISIBLE_DIALOG_ID, _visibleDialogId);
 	}
 
 	protected void onSpinnerShow(final boolean show) {
@@ -308,10 +380,12 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		log("onStop");
 	}
 
+	@Override
 	public void onValueChanged(final ValueStore valueStore, final String key, final Object oldValue, final Object newValue) {
 		// intentionally empty - override in subclass
 	}
 
+	@Override
 	public void onValueSetDirty(final ValueStore valueStore, final String key) {
 		// intentionally empty - override in subclass
 	}
@@ -325,12 +399,13 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		}
 	}
 
+	@Override
 	public void run() {
 		refreshIfNeeded();
 	}
 
 	protected void setContentView(final int resId, final boolean supportSpinner) {
-		View view = getLayoutInflater().inflate(resId, null);
+		final View view = getLayoutInflater().inflate(resId, null);
 		setContentView(view);
 
 		if (supportSpinner) {
@@ -356,13 +431,14 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 		showDialogSafe(res, false);
 	}
 
-	protected void showDialogSafe(final int res, boolean saveDialogState) {
+	protected void showDialogSafe(final int res, final boolean saveDialogState) {
 		if (!_isPaused) {
 			if (saveDialogState) {
 				_visibleDialogId = res;
 			} else {
 				_visibleDialogId = -1;
 			}
+
 			showDialog(res);
 		}
 	}
@@ -402,50 +478,4 @@ public abstract class BaseActivity extends Activity implements Observer, Runnabl
 			newScreenValues.runObserverForKeys(_screenValuesSnapshot, _observedKeys, this);
 		}
 	}
-
-	/**
-	 * is final to avoid StackOverflowException
-	 * onCreateOptionsMenu in ActivityGroup is called on active Activity
-	 * @see com.scoreloop.client.android.ui.framework.ScreenActivity#onCreateOptionsMenu(android.view.Menu)
-	 */
-	@Override
-	public final boolean onCreateOptionsMenu(Menu menu) {
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	/**
-	 * is final to avoid StackOverflowException
-	 * onPrepareOptionsMenu in ActivityGroup is called on active Activity
-	 * @see com.scoreloop.client.android.ui.framework.ScreenActivity#onCreateOptionsMenu(android.view.Menu)
-	 */
-	@Override
-	public final boolean onPrepareOptionsMenu(Menu menu) {
-		return super.onPrepareOptionsMenu(menu);
-	}
-
-	/**
-	 * is final to avoid StackOverflowException
-	 * onOptionsItemSelected in ActivityGroup is called on active Activity
-	 * @see com.scoreloop.client.android.ui.framework.ScreenActivity#onOptionsItemSelected(android.view.MenuItem)
-	 */
-	@Override
-	public final boolean onOptionsItemSelected(MenuItem item) {
-		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenuForActivityGroup(Menu menu) {
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenuForActivityGroup(Menu menu) {
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelectedForActivityGroup(MenuItem item) {
-		return false;
-	}
-
 }

@@ -32,12 +32,15 @@ import android.os.Bundle;
 import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.controller.RequestControllerException;
 import com.scoreloop.client.android.core.controller.RequestControllerObserver;
+import com.scoreloop.client.android.core.controller.TermsOfServiceController;
+import com.scoreloop.client.android.core.controller.TermsOfServiceControllerObserver;
 import com.scoreloop.client.android.core.controller.UserController;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
+import com.scoreloop.client.android.ui.component.base.StandardListItem;
 import com.scoreloop.client.android.ui.component.base.TrackerEvents;
 import com.scoreloop.client.android.ui.framework.BaseDialog;
 import com.scoreloop.client.android.ui.framework.BaseListAdapter;
@@ -48,14 +51,14 @@ import com.scoreloop.client.android.ui.framework.ValueStore;
 public class ProfileSettingsListActivity extends ComponentListActivity<BaseListItem> implements RequestControllerObserver,
 		DialogInterface.OnDismissListener {
 
-    private static final String STATE_RESTOREEMAIL = "restoreEmail";
-    private static final String STATE_ERRORTITLE = "errorTitle";
-    private static final String STATE_ERRORMESSAGE = "errorMessage";
-    private static final String STATE_HINT = "hint";
-    private static final String STATE_LASTREQUESTTYPE = "lastRequestType";
-    private static final String STATE_LASTUPDATEERROR = "lastUpdateError";
+	private static final String	STATE_RESTOREEMAIL		= "restoreEmail";
+	private static final String	STATE_ERRORTITLE		= "errorTitle";
+	private static final String	STATE_ERRORMESSAGE		= "errorMessage";
+	private static final String	STATE_HINT				= "hint";
+	private static final String	STATE_LASTREQUESTTYPE	= "lastRequestType";
+	private static final String	STATE_LASTUPDATEERROR	= "lastUpdateError";
 
-    class UserProfileListAdapter extends BaseListAdapter<BaseListItem> {
+	class UserProfileListAdapter extends BaseListAdapter<BaseListItem> {
 
 		public UserProfileListAdapter(final Context context) {
 			super(context);
@@ -80,9 +83,9 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 	private String			_restoreEmail;
 	private String			_errorTitle;
 	private String			_errorMessage;
-    private String          _hint;
-    private RequestType	_lastRequestType;
-    private boolean		_lastUpdateError	= true;
+	private String			_hint;
+	private RequestType		_lastRequestType;
+	private boolean			_lastUpdateError	= true;
 
 	enum RequestType {
 		USERNAME(Constant.DIALOG_PROFILE_CHANGE_USERNAME), EMAIL(Constant.DIALOG_PROFILE_CHANGE_EMAIL), USERNAME_EMAIL(
@@ -90,7 +93,7 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 
 		private final int	dialogId;
 
-		RequestType(int dialogId) {
+		RequestType(final int dialogId) {
 			this.dialogId = dialogId;
 		}
 
@@ -99,20 +102,20 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 		}
 	}
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(STATE_RESTOREEMAIL, _restoreEmail);
-        outState.putString(STATE_ERRORTITLE, _errorTitle);
-        outState.putString(STATE_ERRORMESSAGE, _errorMessage);
-        outState.putString(STATE_HINT, _hint);
-        if (_lastRequestType != null) {
-            outState.putString(STATE_LASTREQUESTTYPE, _lastRequestType.toString());
-        }
-        outState.putBoolean(STATE_LASTUPDATEERROR, _lastUpdateError);
-    }
+	@Override
+	protected void onSaveInstanceState(final Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString(STATE_RESTOREEMAIL, _restoreEmail);
+		outState.putString(STATE_ERRORTITLE, _errorTitle);
+		outState.putString(STATE_ERRORMESSAGE, _errorMessage);
+		outState.putString(STATE_HINT, _hint);
+		if (_lastRequestType != null) {
+			outState.putString(STATE_LASTREQUESTTYPE, _lastRequestType.toString());
+		}
+		outState.putBoolean(STATE_LASTUPDATEERROR, _lastUpdateError);
+	}
 
-    private void saveUserState() {
+	private void saveUserState() {
 		_restoreEmail = getSessionUser().getEmailAddress();
 	}
 
@@ -120,12 +123,12 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 		getSessionUser().setEmailAddress(_restoreEmail);
 	}
 
-	public void setLastRequestType(RequestType lastRequestType) {
+	public void setLastRequestType(final RequestType lastRequestType) {
 		this._lastRequestType = lastRequestType;
 	}
 
 	@Override
-	protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(final int id) {
 		switch (id) {
 		default:
 			return super.onCreateDialog(id);
@@ -152,13 +155,14 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 		final FieldEditDialog dialog = new FieldEditDialog(this, getString(R.string.sl_change_email), getString(R.string.sl_current),
 				getString(R.string.sl_new), null);
 		dialog.setOnActionListener(new BaseDialog.OnActionListener() {
-			public void onAction(BaseDialog dialog, int actionId) {
+			@Override
+			public void onAction(final BaseDialog dialog, final int actionId) {
 				if (actionId == FieldEditDialog.BUTTON_OK) {
-					FieldEditDialog dlg = (FieldEditDialog) dialog;
-					String newEmail = dlg.getEditText().trim();
+					final FieldEditDialog dlg = (FieldEditDialog) dialog;
+					final String newEmail = dlg.getEditText().trim();
 					if (!isValidEmailFormat(newEmail)) {
-                        _hint = getString(R.string.sl_please_email_valid);
-                        dlg.setHint(_hint);
+						_hint = getString(R.string.sl_please_email_valid);
+						dlg.setHint(_hint);
 						return;
 					} else {
 						updateUser(newEmail, null, RequestType.EMAIL);
@@ -175,19 +179,21 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 		final FieldEditDialog dialog = new FieldEditDialog(this, getString(R.string.sl_merge_account_title), null, null,
 				getString(R.string.sl_merge_account_description));
 		dialog.setOnActionListener(new BaseDialog.OnActionListener() {
-			public void onAction(BaseDialog dialog, int actionId) {
+			@Override
+			public void onAction(final BaseDialog dialog, final int actionId) {
 				if (actionId == FieldEditDialog.BUTTON_OK) {
-					FieldEditDialog dlg = (FieldEditDialog) dialog;
-					String newEmail = dlg.getEditText().trim();
+					final FieldEditDialog dlg = (FieldEditDialog) dialog;
+					final String newEmail = dlg.getEditText().trim();
 					if (!isValidEmailFormat(newEmail)) {
-                        _hint = getString(R.string.sl_please_email_valid);
+						_hint = getString(R.string.sl_please_email_valid);
 						dlg.setHint(_hint);
 						return;
-					} else if (getSessionUser().getEmailAddress() != null && getSessionUser().getEmailAddress().equalsIgnoreCase(newEmail)) {
-                        _hint = getString(R.string.sl_merge_account_email_current);
+					} else if ((getSessionUser().getEmailAddress() != null)
+							&& getSessionUser().getEmailAddress().equalsIgnoreCase(newEmail)) {
+						_hint = getString(R.string.sl_merge_account_email_current);
 						dlg.setHint(_hint);
 						return;
-                    } else {
+					} else {
 						updateUser(newEmail, null, RequestType.MERGE_ACCOUNTS);
 					}
 				}
@@ -203,10 +209,10 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 				getString(R.string.sl_new), null);
 		dialog.setOnActionListener(new BaseDialog.OnActionListener() {
 			@Override
-			public void onAction(BaseDialog dialog, int actionId) {
+			public void onAction(final BaseDialog dialog, final int actionId) {
 				dialog.dismiss();
 				if (actionId == FieldEditDialog.BUTTON_OK) {
-					String newUsername = ((FieldEditDialog) dialog).getEditText().trim();
+					final String newUsername = ((FieldEditDialog) dialog).getEditText().trim();
 					updateUser(null, newUsername, RequestType.USERNAME);
 				}
 			}
@@ -216,23 +222,23 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 	}
 
 	@Override
-	protected void onPrepareDialog(int id, Dialog dialog) {
+	protected void onPrepareDialog(final int id, final Dialog dialog) {
 		switch (id) {
 		case Constant.DIALOG_PROFILE_FIRST_TIME:
-            FirstTimeDialog firstTimeDialog = (FirstTimeDialog) dialog;
-            firstTimeDialog.setHint(_hint);
+			final FirstTimeDialog firstTimeDialog = (FirstTimeDialog) dialog;
+			firstTimeDialog.setHint(_hint);
 			break;
 		case Constant.DIALOG_PROFILE_CHANGE_USERNAME:
-			FieldEditDialog changeUsernameDialog = (FieldEditDialog) dialog;
+			final FieldEditDialog changeUsernameDialog = (FieldEditDialog) dialog;
 			changeUsernameDialog.setCurrentText(getSessionUser().getLogin());
-            changeUsernameDialog.setHint(_hint);
+			changeUsernameDialog.setHint(_hint);
 			// reuse edited username on submit failure
 			if (!(_lastUpdateError && RequestType.USERNAME.equals(_lastRequestType))) {
 				changeUsernameDialog.setEditText(null);
 			}
 			break;
 		case Constant.DIALOG_PROFILE_CHANGE_EMAIL:
-			FieldEditDialog changeEmailDialog = (FieldEditDialog) dialog;
+			final FieldEditDialog changeEmailDialog = (FieldEditDialog) dialog;
 			changeEmailDialog.setHint(_hint);
 			changeEmailDialog.setCurrentText(getSessionUser().getEmailAddress());
 			// reuse edited email address on submit failure
@@ -241,7 +247,7 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 			}
 			break;
 		case Constant.DIALOG_PROFILE_MERGE_ACCOUNTS:
-			FieldEditDialog mergeAccountsDialog = (FieldEditDialog) dialog;
+			final FieldEditDialog mergeAccountsDialog = (FieldEditDialog) dialog;
 			mergeAccountsDialog.setHint(_hint);
 			// reuse edited email address on submit failure
 			if (!(_lastUpdateError && RequestType.MERGE_ACCOUNTS.equals(_lastRequestType))) {
@@ -266,11 +272,12 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 	private Dialog getFirstTimeDialog() {
 		final FirstTimeDialog dialog = new FirstTimeDialog(this, getSessionUser().getLogin());
 		dialog.setOnActionListener(new BaseDialog.OnActionListener() {
-			public void onAction(BaseDialog dialog, int actionId) {
-				FirstTimeDialog dlg = (FirstTimeDialog) dialog;
+			@Override
+			public void onAction(final BaseDialog dialog, final int actionId) {
+				final FirstTimeDialog dlg = (FirstTimeDialog) dialog;
 				if (actionId == FirstTimeDialog.BUTTON_OK) {
-					String newEmail = dlg.getEmailText().trim();
-					String newUsername = dlg.getUsernameText().trim();
+					final String newEmail = dlg.getEmailText().trim();
+					final String newUsername = dlg.getUsernameText().trim();
 					if (!isValidEmailFormat(newEmail)) {
 						dlg.setHint(getString(R.string.sl_please_email_address));
 						return;
@@ -287,22 +294,22 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-        _restoreEmail = savedInstanceState.getString(STATE_RESTOREEMAIL);
-        _errorTitle = savedInstanceState.getString(STATE_ERRORTITLE);
-        _errorMessage = savedInstanceState.getString(STATE_ERRORMESSAGE);
-        _hint = savedInstanceState.getString(STATE_HINT);
-        if (savedInstanceState.containsKey(STATE_LASTREQUESTTYPE)) {
-            _lastRequestType = RequestType.valueOf(savedInstanceState.getString(STATE_LASTREQUESTTYPE));
-        }
-        if (savedInstanceState.containsKey(STATE_LASTUPDATEERROR)) {
-            _lastUpdateError = savedInstanceState.getBoolean(STATE_LASTUPDATEERROR);
-        }
-        }
+		if (savedInstanceState != null) {
+			_restoreEmail = savedInstanceState.getString(STATE_RESTOREEMAIL);
+			_errorTitle = savedInstanceState.getString(STATE_ERRORTITLE);
+			_errorMessage = savedInstanceState.getString(STATE_ERRORMESSAGE);
+			_hint = savedInstanceState.getString(STATE_HINT);
+			if (savedInstanceState.containsKey(STATE_LASTREQUESTTYPE)) {
+				_lastRequestType = RequestType.valueOf(savedInstanceState.getString(STATE_LASTREQUESTTYPE));
+			}
+			if (savedInstanceState.containsKey(STATE_LASTUPDATEERROR)) {
+				_lastUpdateError = savedInstanceState.getBoolean(STATE_LASTUPDATEERROR);
+			}
+		}
 
 		super.onCreate(savedInstanceState);
-		User user = getSessionUser();
-		    _userController = new UserController(this);
+		final User user = getSessionUser();
+		_userController = new UserController(this);
 		_changePictureItem = new ProfileListItem(this, getResources().getDrawable(R.drawable.sl_icon_change_picture),
 				getString(R.string.sl_change_picture), getString(R.string.sl_change_picture_details));
 		_changeUsernameItem = new ProfileListItem(this, getResources().getDrawable(R.drawable.sl_icon_change_username),
@@ -311,18 +318,31 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 				getString(R.string.sl_change_email), user.getEmailAddress());
 		_mergeAccountItem = new ProfileListItem(this, getResources().getDrawable(R.drawable.sl_icon_merge_account),
 				getString(R.string.sl_merge_account_title), getString(R.string.sl_merge_account_subtitle));
-		if (user.getLogin() == null || user.getEmailAddress() == null) {
+		if ((user.getLogin() == null) || (user.getEmailAddress() == null)) {
 			showSpinnerFor(_userController);
 			_userController.loadUser();
 		} else {
 			setListAdapter(new UserProfileListAdapter(this));
 		}
 		setVisibleOptionsMenuAccountSettings(false);
+
+		// allow user to review the ToS he has accepted.
+		final TermsOfServiceController termsOfServiceController = new TermsOfServiceController(getSession(),
+				new TermsOfServiceControllerObserver() {
+					@Override
+					public void termsOfServiceControllerDidFinish(final TermsOfServiceController controller, final Boolean accepted) {
+						// ignored
+					}
+				});
+		if (termsOfServiceController.isTermsOfServiceEnabled()) {
+			showFooter(new StandardListItem<Void>(this, null, getString(R.string.sl_terms_of_service),
+					getString(R.string.sl_terms_of_service_show), null));
+		}
 	}
 
 	@Override
 	public void onListItemClick(final BaseListItem item) {
-        _hint = null;
+		_hint = null;
 		if (item == _changeUsernameItem) {
 			if (getSessionUser().getEmailAddress() == null) {
 				showDialogSafe(Constant.DIALOG_PROFILE_FIRST_TIME, true);
@@ -349,89 +369,89 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 	}
 
 	@Override
-	protected void requestControllerDidFailSafe(RequestController requestController, Exception exception) {
-        hideSpinnerFor(requestController);
-		if (exception instanceof RequestControllerException
+	protected void requestControllerDidFailSafe(final RequestController requestController, final Exception exception) {
+		hideSpinnerFor(requestController);
+		if ((exception instanceof RequestControllerException)
 				&& ((RequestControllerException) exception).hasDetail(RequestControllerException.DETAIL_USER_UPDATE_REQUEST_EMAIL_TAKEN)
 				&& RequestType.MERGE_ACCOUNTS.equals(_lastRequestType)) {
 			// for merge accounts this is the expected success
-            _errorTitle = getString(R.string.sl_merge_account_success_title);
-            _errorMessage = getString(R.string.sl_merge_account_success);
-            showDialogSafe(Constant.DIALOG_PROFILE_MSG, true);
-            _lastUpdateError = false;
-            getTracker().trackEvent(TrackerEvents.CAT_REQUEST, getActionSettings(_lastRequestType), TrackerEvents.LABEL_SUCCESS, 0);
+			_errorTitle = getString(R.string.sl_merge_account_success_title);
+			_errorMessage = getString(R.string.sl_merge_account_success);
+			showDialogSafe(Constant.DIALOG_PROFILE_MSG, true);
+			_lastUpdateError = false;
+			getTracker().trackEvent(TrackerEvents.CAT_REQUEST, getActionSettings(_lastRequestType), TrackerEvents.LABEL_SUCCESS, 0);
 		} else {
 			_lastUpdateError = true;
 			int errorCode = 0;
 			if (exception instanceof RequestControllerException) {
-				RequestControllerException requestException = (RequestControllerException) exception;
-                // errors first, then warnings
+				final RequestControllerException requestException = (RequestControllerException) exception;
+				// errors first, then warnings
 				if (requestException.hasDetail(RequestControllerException.DETAIL_USER_UPDATE_REQUEST_EMAIL_TAKEN)) {
-                    _errorTitle = getString(R.string.sl_error_message_email_already_taken_title);
-                    _errorMessage = getString(R.string.sl_error_message_email_already_taken);
-                    showDialogSafe(Constant.DIALOG_PROFILE_MSG, true);
+					_errorTitle = getString(R.string.sl_error_message_email_already_taken_title);
+					_errorMessage = getString(R.string.sl_error_message_email_already_taken);
+					showDialogSafe(Constant.DIALOG_PROFILE_MSG, true);
 					errorCode = RequestControllerException.DETAIL_USER_UPDATE_REQUEST_EMAIL_TAKEN;
 				} else if (requestException.hasDetail(RequestControllerException.DETAIL_USER_UPDATE_REQUEST_INVALID_EMAIL)) {
 					_hint = getString(R.string.sl_error_message_invalid_email);
 					errorCode = RequestControllerException.DETAIL_USER_UPDATE_REQUEST_INVALID_EMAIL;
-                    showDialogSafe(_lastRequestType.getDialogId(), true);
+					showDialogSafe(_lastRequestType.getDialogId(), true);
 				} else if (requestException.hasDetail(RequestControllerException.DETAIL_USER_UPDATE_REQUEST_INVALID_USERNAME)
 						| requestException.hasDetail(RequestControllerException.DETAIL_USER_UPDATE_REQUEST_USERNAME_TAKEN)
 						| requestException.hasDetail(RequestControllerException.DETAIL_USER_UPDATE_REQUEST_USERNAME_TOO_SHORT)) {
 					_hint = getString(R.string.sl_error_message_username_already_taken);
 					errorCode = RequestControllerException.DETAIL_USER_UPDATE_REQUEST_USERNAME_TAKEN;
-                    showDialogSafe(_lastRequestType.getDialogId(), true);
+					showDialogSafe(_lastRequestType.getDialogId(), true);
 				} else {
-                    super.requestControllerDidFailSafe(requestController, exception);
+					super.requestControllerDidFailSafe(requestController, exception);
 				}
 			} else {
 				super.requestControllerDidFailSafe(requestController, exception);
 			}
 			getTracker().trackEvent(TrackerEvents.CAT_REQUEST, getActionSettings(_lastRequestType), TrackerEvents.LABEL_ERROR, errorCode);
 		}
-        restoreUserState();
+		restoreUserState();
 	}
 
-	private String getActionSettings(RequestType requestType) {
+	private String getActionSettings(final RequestType requestType) {
 		if (RequestType.EMAIL.equals(requestType)) {
 			return TrackerEvents.REQ_CHANGE_EMAIL;
 		} else if (RequestType.USERNAME.equals(requestType)) {
 			return TrackerEvents.REQ_CHANGE_USERNAME;
-        } else if (RequestType.USERNAME_EMAIL.equals(requestType)) {
-            return TrackerEvents.REQ_CHANGE_USERNAME_FIRSTTIME;
-        } else if (RequestType.MERGE_ACCOUNTS.equals(requestType)) {
-            return TrackerEvents.REQ_MERGE_ACCOUNT;
+		} else if (RequestType.USERNAME_EMAIL.equals(requestType)) {
+			return TrackerEvents.REQ_CHANGE_USERNAME_FIRSTTIME;
+		} else if (RequestType.MERGE_ACCOUNTS.equals(requestType)) {
+			return TrackerEvents.REQ_MERGE_ACCOUNT;
 		}
 		return null;
 	}
 
 	@Override
 	public void requestControllerDidReceiveResponseSafe(final RequestController controller) {
-        final ValueStore store = getUserValues();
-        store.putValue(Constant.USER_NAME, getSessionUser().getDisplayName());
-        store.putValue(Constant.USER_IMAGE_URL, getSessionUser().getImageUrl());
-        setListAdapter(new UserProfileListAdapter(this));
-        hideSpinnerFor(controller);
-        setNeedsRefresh();
+		final ValueStore store = getUserValues();
+		store.putValue(Constant.USER_NAME, getSessionUser().getDisplayName());
+		store.putValue(Constant.USER_IMAGE_URL, getSessionUser().getImageUrl());
+		setListAdapter(new UserProfileListAdapter(this));
+		hideSpinnerFor(controller);
+		setNeedsRefresh();
 		if (RequestType.MERGE_ACCOUNTS.equals(_lastRequestType)) {
 			// for merge accounts this is an error response
 			_hint = getString(R.string.sl_merge_account_not_found);
-            _lastUpdateError = true;
-            showDialogSafe(Constant.DIALOG_PROFILE_MERGE_ACCOUNTS, true);
-            getTracker().trackEvent(TrackerEvents.CAT_REQUEST, getActionSettings(_lastRequestType), TrackerEvents.LABEL_ERROR, 0);
+			_lastUpdateError = true;
+			showDialogSafe(Constant.DIALOG_PROFILE_MERGE_ACCOUNTS, true);
+			getTracker().trackEvent(TrackerEvents.CAT_REQUEST, getActionSettings(_lastRequestType), TrackerEvents.LABEL_ERROR, 0);
 		} else if (_lastRequestType != null) {
-                _lastUpdateError = false;
-                getTracker().trackEvent(TrackerEvents.CAT_REQUEST, getActionSettings(_lastRequestType), TrackerEvents.LABEL_SUCCESS, 0);
+			_lastUpdateError = false;
+			getTracker().trackEvent(TrackerEvents.CAT_REQUEST, getActionSettings(_lastRequestType), TrackerEvents.LABEL_SUCCESS, 0);
 		}
 	}
 
-	private boolean isValidEmailFormat(String email) {
-		Pattern pattern = Pattern.compile(".+@.+\\.[a-z]+");
-		Matcher matcher = pattern.matcher(email);
+	private boolean isValidEmailFormat(final String email) {
+		final Pattern pattern = Pattern.compile(".+@.+\\.[a-z]+");
+		final Matcher matcher = pattern.matcher(email);
 		return matcher.matches();
 	}
 
-	private void updateUser(String newEmail, String newUsername, final RequestType requestType) {
+	private void updateUser(final String newEmail, final String newUsername, final RequestType requestType) {
 		saveUserState();
 		final User user = getSessionUser();
 		if (newEmail != null) {
@@ -442,6 +462,7 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 		}
 		setLastRequestType(requestType);
 		getHandler().post(new Runnable() {
+			@Override
 			public void run() {
 				showSpinnerFor(_userController);
 				_userController.setUser(user);
@@ -450,4 +471,15 @@ public class ProfileSettingsListActivity extends ComponentListActivity<BaseListI
 		});
 	}
 
+	@Override
+	protected void onFooterItemClick(final BaseListItem footerItem) {
+		final TermsOfServiceController termsOfServiceController = new TermsOfServiceController(getSession(),
+				new TermsOfServiceControllerObserver() {
+					@Override
+					public void termsOfServiceControllerDidFinish(final TermsOfServiceController controller, final Boolean accepted) {
+						// ignored
+					}
+				});
+		termsOfServiceController.show(getParent());
+	}
 }

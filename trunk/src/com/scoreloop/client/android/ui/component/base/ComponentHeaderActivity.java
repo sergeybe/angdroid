@@ -40,6 +40,7 @@ public abstract class ComponentHeaderActivity extends ComponentActivity implemen
 		return (ImageView) findViewById(R.id.sl_header_image);
 	}
 
+	@Override
 	public void onClick(final View view) {
 		// intentionally empty - override in subclass
 	}
@@ -57,10 +58,11 @@ public abstract class ComponentHeaderActivity extends ComponentActivity implemen
 	protected void setCaption(final String captionText) {
 		if (_caption == null) {
 			final Display display = getWindowManager().getDefaultDisplay();
-			int orientation = display.getOrientation();
-			DisplayMetrics metrics = new DisplayMetrics();
+			final int orientation = display.getOrientation();
+			final DisplayMetrics metrics = new DisplayMetrics();
 			display.getMetrics(metrics);
-			if (metrics.widthPixels > metrics.heightPixels || orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270) {
+			if ((metrics.widthPixels > metrics.heightPixels) || (orientation == Surface.ROTATION_90)
+					|| (orientation == Surface.ROTATION_270)) {
 				_caption = (TextView) findViewById(R.id.sl_header_caption_land);
 			} else {
 				_caption = (TextView) findViewById(R.id.sl_header_caption);

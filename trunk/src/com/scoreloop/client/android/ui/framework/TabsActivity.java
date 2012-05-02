@@ -41,7 +41,7 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 	private ScreenDescription	_screenDescription;
 
 	@Override
-	public boolean onCreateOptionsMenuForActivityGroup(Menu menu) {
+	public boolean onCreateOptionsMenuForActivityGroup(final Menu menu) {
 		final int index = _screenDescription.getSelectedBodyIndex();
 		final Activity bodyActivity = getLocalActivityManager().getActivity(getTabActivityIdentifier(index));
 		if ((bodyActivity != null) && (bodyActivity instanceof OptionsMenuForActivityGroup)) {
@@ -51,7 +51,7 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenuForActivityGroup(Menu menu) {
+	public boolean onPrepareOptionsMenuForActivityGroup(final Menu menu) {
 		final int index = _screenDescription.getSelectedBodyIndex();
 		final Activity bodyActivity = getLocalActivityManager().getActivity(getTabActivityIdentifier(index));
 		if ((bodyActivity != null) && (bodyActivity instanceof OptionsMenuForActivityGroup)) {
@@ -61,7 +61,7 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 	}
 
 	@Override
-	public boolean onOptionsItemSelectedForActivityGroup(MenuItem item) {
+	public boolean onOptionsItemSelectedForActivityGroup(final MenuItem item) {
 		final int index = _screenDescription.getSelectedBodyIndex();
 		final Activity bodyActivity = getLocalActivityManager().getActivity(getTabActivityIdentifier(index));
 		if ((bodyActivity != null) && (bodyActivity instanceof OptionsMenuForActivityGroup)) {
@@ -70,7 +70,7 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 		return false;
 	}
 
-	public boolean isNavigationAllowed(NavigationIntent navigationIntent) {
+	public boolean isNavigationAllowed(final NavigationIntent navigationIntent) {
 		final Activity activity = getLocalActivityManager().getCurrentActivity();
 		if (activity instanceof BaseActivity) {
 			final BaseActivity baseActivity = (BaseActivity) activity;
@@ -79,6 +79,7 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 		return true;
 	}
 
+	@Override
 	public void onClick(final View view) {
 		final TabView tabView = (TabView) view;
 		final int selectedTab = tabView.getSelectedSegment();
@@ -100,6 +101,7 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 		ScreenManagerSingleton.get().displayStoredDescriptionInTabs(this);
 	}
 
+	@Override
 	public void startDescription(final ScreenDescription description) {
 		_screenDescription = description;
 
@@ -114,17 +116,24 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 		final List<ActivityDescription> descriptions = description.getBodyDescriptions();
 		for (int i = 0; i < descriptions.size(); i++) {
 			final ActivityDescription bodyDescription = descriptions.get(i);
-			final TextView tv = (TextView) getLayoutInflater().inflate(R.layout.sl_tab_caption, null);
-			final int height = (int) getResources().getDimension(R.dimen.sl_clickable_height);
-			final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, height, 1);
-			tv.setLayoutParams(lp);
-			tv.setText(bodyDescription.getTabId());
+			final TextView tv = getTabTextView(bodyDescription.getTabId());
+
 			tabView.addView(tv);
 		}
 		tabView.prepareUsage();
 
 		// start selected body
 		startTab(description.getSelectedBodyIndex());
+	}
+
+	private TextView getTabTextView(final int textResId) {
+		final int layoutId = R.layout.sl_tab_caption;
+		final TextView tv = (TextView) getLayoutInflater().inflate(layoutId, null);
+		final int height = (int) getResources().getDimension(R.dimen.sl_clickable_height);
+		final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, height, 1);
+		tv.setLayoutParams(lp);
+		tv.setText(textResId);
+		return tv;
 	}
 
 	private void startTab(final int index) {
@@ -140,7 +149,7 @@ public class TabsActivity extends ActivityGroup implements TabsActivityProtocol,
 		bodyDescription.setEnabledWantsClearTop(false);
 	}
 
-	private String getTabActivityIdentifier(int index) {
+	private String getTabActivityIdentifier(final int index) {
 		return "tab-" + index;
 	}
 }

@@ -39,8 +39,7 @@ public class AchievementHeaderActivity extends ComponentHeaderActivity {
 		setCaption(getGame().getName());
 		setTitle(getString(R.string.sl_achievements));
 
-		addObservedKeys(
-				ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_ACHIEVEMENTS), 
+		addObservedKeys(ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_ACHIEVEMENTS),
 				ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_AWARDS));
 	}
 

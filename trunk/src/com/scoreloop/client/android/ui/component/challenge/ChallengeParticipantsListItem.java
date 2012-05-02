@@ -70,7 +70,7 @@ class ChallengeParticipantsListItem extends BaseListItem {
 		final ImageView contenderIconView = (ImageView) view.findViewById(R.id.contender_icon);
 		final String contenderImageUrl = _contender.getImageUrl();
 		if (contenderImageUrl != null) {
-			Drawable drawable = getDrawableLoading();
+			final Drawable drawable = getDrawableLoading();
 			ImageDownloader.downloadImage(contenderImageUrl, drawable, contenderIconView, null);
 		}
 
@@ -84,7 +84,7 @@ class ChallengeParticipantsListItem extends BaseListItem {
 		if (_contestant != null) {
 			final String contestantImageUrl = _contestant.getImageUrl();
 			if (contestantImageUrl != null) {
-				Drawable drawable = getDrawableLoading();
+				final Drawable drawable = getDrawableLoading();
 				ImageDownloader.downloadImage(contestantImageUrl, drawable, contestantIconView, null);
 			}
 		} else {

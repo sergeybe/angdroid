@@ -66,8 +66,8 @@ class ChallengeSettingsListItem extends BaseListItem {
 
 	protected void prepareView(final View view) {
 		final TextView stake = (TextView) view.findViewById(R.id.stake);
-		stake.setText(String.format(getContext().getResources().getString(R.string.sl_format_stake), StringFormatter.formatMoney(_challenge
-				.getStake(), getComponentActivity().getConfiguration())));
+		stake.setText(String.format(getContext().getResources().getString(R.string.sl_format_stake),
+				StringFormatter.formatMoney(_challenge.getStake(), getComponentActivity().getConfiguration())));
 
 		final TextView mode = (TextView) view.findViewById(R.id.mode);
 		if (getComponentActivity().getGame().hasModes()) {

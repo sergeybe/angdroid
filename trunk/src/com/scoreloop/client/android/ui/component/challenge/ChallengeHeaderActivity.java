@@ -37,7 +37,7 @@ public class ChallengeHeaderActivity extends ComponentHeaderActivity implements 
 	@Override
 	public void onClick(final View view) {
 		if (getSession().isAuthenticated()) {
-			display(getFactory().createChallengePaymentScreenDescription());			
+			display(getFactory().createChallengePaymentScreenDescription());
 		}
 	}
 
@@ -47,21 +47,15 @@ public class ChallengeHeaderActivity extends ComponentHeaderActivity implements 
 
 		setCaption(getGame().getName());
 
-		int headerMode = getActivityArguments().getValue(Constant.CHALLENGE_HEADER_MODE, 0);
-		if (headerMode == Constant.CHALLENGE_HEADER_MODE_INFO) {
-			getImageView().setImageDrawable(getResources().getDrawable(R.drawable.sl_header_icon_challenges));
-			setTitle(getResources().getString(R.string.sl_challenges));
-			showControlIcon(R.drawable.sl_button_add_coins);
-		} else {
-			getImageView().setImageDrawable(getResources().getDrawable(R.drawable.sl_header_icon_add_coins));
-			setTitle(getResources().getString(R.string.sl_add_coins));
-		}
+		getImageView().setImageDrawable(getResources().getDrawable(R.drawable.sl_header_icon_challenges));
+		setTitle(getResources().getString(R.string.sl_challenges));
+		showControlIcon(R.drawable.sl_button_add_coins);
 
 		addObservedKeys(ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.USER_BALANCE));
 	}
 
-	private void showControlIcon(int resId) {
-		ImageView icon= (ImageView)findViewById(R.id.sl_control_icon);
+	private void showControlIcon(final int resId) {
+		final ImageView icon = (ImageView) findViewById(R.id.sl_control_icon);
 		icon.setImageResource(resId);
 		icon.setEnabled(true);
 		icon.setOnClickListener(this);
@@ -70,7 +64,7 @@ public class ChallengeHeaderActivity extends ComponentHeaderActivity implements 
 	@Override
 	public void onStart() {
 		super.onStart();
-		
+
 		getUserValues().setDirty(Constant.USER_BALANCE);
 	}
 

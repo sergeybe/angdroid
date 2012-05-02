@@ -38,7 +38,7 @@ public class ChallengeOpenListItem extends StandardListItem<Challenge> {
 		setSubTitle2(StringFormatter.formatMoney(challenge.getStake(), getComponentActivity().getConfiguration()));
 	}
 
-    @Override
+	@Override
 	protected String getImageUrl() {
 		return getTarget().getContender().getImageUrl();
 	}

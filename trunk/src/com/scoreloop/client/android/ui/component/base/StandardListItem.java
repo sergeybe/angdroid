@@ -21,6 +21,7 @@
 
 package com.scoreloop.client.android.ui.component.base;
 
+import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,17 +39,17 @@ public class StandardListItem<T> extends BaseListItem {
 		public TextView		title;
 		public TextView		subTitle;
 		public TextView		subTitle2;
+		public TextView		subTitle3;
 	}
 
 	private StandardViewHolder	_holder;
-	private String				_subTitel;
+	private String				_subTitle;
 	private String				_subTitle2;
 	private final T				_target;
 
-	public StandardListItem(final ComponentActivity activity, final Drawable drawable, final String title, final String subTitle,
-			final T target) {
+	public StandardListItem(final Activity activity, final Drawable drawable, final String title, final String subTitle, final T target) {
 		super(activity, drawable, title);
-		_subTitel = subTitle;
+		_subTitle = subTitle;
 		_target = target;
 	}
 
@@ -94,15 +95,19 @@ public class StandardListItem<T> extends BaseListItem {
 	}
 
 	public String getSubTitle() {
-		return _subTitel;
+		return _subTitle;
 	}
 
 	public String getSubTitle2() {
 		return _subTitle2;
 	}
 
-	public void setSubTitle2(String subTitle2) {
+	public void setSubTitle2(final String subTitle2) {
 		this._subTitle2 = subTitle2;
+	}
+
+	public void setSubTitle2(final int resId) {
+		setSubTitle2(getContext().getResources().getString(resId));
 	}
 
 	protected int getSubTitleId() {
@@ -146,16 +151,20 @@ public class StandardListItem<T> extends BaseListItem {
 	}
 
 	public void setSubTitle(final String subTitle) {
-		_subTitel = subTitle;
+		_subTitle = subTitle;
+	}
+
+	public void setSubTitle(final int resId) {
+		setSubTitle(getContext().getResources().getString(resId));
 	}
 
 	protected void updateViews(final StandardViewHolder holder) {
 		final String imageUrl = getImageUrl();
 		if (imageUrl != null) {
-			Drawable drawable = getDrawableLoading();
+			final Drawable drawable = getDrawableLoading();
 			ImageDownloader.downloadImage(imageUrl, drawable, holder.icon, getDrawableLoadingError());
 		} else {
-			Drawable drawable = getDrawable();
+			final Drawable drawable = getDrawable();
 			if (drawable != null) {
 				holder.icon.setImageDrawable(drawable);
 			}
@@ -167,15 +176,16 @@ public class StandardListItem<T> extends BaseListItem {
 		}
 		final TextView subTitle2 = holder.subTitle2;
 		if (subTitle2 != null) {
+			subTitle2.setVisibility(getSubTitle2().length() > 0 ? View.VISIBLE : View.GONE);
 			subTitle2.setText(getSubTitle2());
 		}
 	}
 
-    protected Drawable getDrawableLoading() {
-        return getContext().getResources().getDrawable(R.drawable.sl_icon_games_loading);
-    }
+	protected Drawable getDrawableLoading() {
+		return getContext().getResources().getDrawable(R.drawable.sl_icon_games_loading);
+	}
 
-    protected Drawable getDrawableLoadingError() {
-        return null;
-    }
+	protected Drawable getDrawableLoadingError() {
+		return null;
+	}
 }

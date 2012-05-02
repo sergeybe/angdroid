@@ -27,6 +27,7 @@ import android.os.Bundle;
 import com.scoreloop.client.android.core.controller.AchievementsController;
 import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.model.Achievement;
+import com.scoreloop.client.android.core.model.Continuation;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.entry.EntryListItem;
@@ -61,7 +62,7 @@ public class AchievementListActivity extends ComponentListActivity<AchievementLi
 
 	@Override
 	public void onListItemClick(final AchievementListItem item) {
-		if (item.isEnabled() && !PostOverlayActivity.isPosted(getApplicationContext(), item.getTarget())) {
+		if (item.isEnabled()) {
 			final Intent intent = new Intent(this, PostOverlayActivity.class);
 			PostOverlayActivity.setMessageTarget(item.getTarget());
 			startActivity(intent);
@@ -73,8 +74,9 @@ public class AchievementListActivity extends ComponentListActivity<AchievementLi
 		if (isSessionUser()) {
 			showSpinner();
 			final AchievementsEngine engine = getActivityArguments().getValue(Constant.ACHIEVEMENTS_ENGINE);
-			engine.submitAchievements(true, new Runnable() {
-				public void run() {
+			engine.submitAchievements(true, new Continuation<Boolean>() {
+				@Override
+				public void withValue(final Boolean success, final Exception error) {
 					hideSpinner();
 					onAchievements();
 				}

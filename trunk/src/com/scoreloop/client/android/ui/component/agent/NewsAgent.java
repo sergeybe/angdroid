@@ -27,7 +27,7 @@ import java.util.Set;
 
 import com.scoreloop.client.android.core.addon.RSSFeed;
 import com.scoreloop.client.android.core.addon.RSSItem;
-import com.scoreloop.client.android.core.addon.RSSFeed.Continuation;
+import com.scoreloop.client.android.core.model.Continuation;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.framework.ValueStore;
 import com.scoreloop.client.android.ui.framework.ValueStore.ValueSource;
@@ -38,17 +38,20 @@ public class NewsAgent implements ValueSource {
 
 	private RSSFeed					_feed;
 
+	@Override
 	public boolean isRetrieving() {
 		return _feed != null ? _feed.getState() == RSSFeed.State.PENDING : false;
 	}
 
+	@Override
 	public void retrieve(final ValueStore valueStore) {
 		if (_feed == null) {
 			_feed = new RSSFeed(null);
 		}
 		_feed.reloadOnNextRequest();
-		_feed.requestAllItems(new Continuation() {
-			public void withLoadedFeed(final List<RSSItem> feed, final Exception failure) {
+		_feed.requestAllItems(new Continuation<List<RSSItem>>() {
+			@Override
+			public void withValue(final List<RSSItem> feed, final Exception failure) {
 				if (feed == null) {
 					return;
 				}
@@ -66,6 +69,7 @@ public class NewsAgent implements ValueSource {
 		}, false, null);
 	}
 
+	@Override
 	public void supportedKeys(final Set<String> keys) {
 		Collections.addAll(keys, SUPPORTED_KEYS);
 	}

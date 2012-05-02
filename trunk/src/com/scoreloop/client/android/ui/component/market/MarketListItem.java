@@ -42,7 +42,7 @@ public class MarketListItem extends StandardListItem<Void> {
 		super(activity, drawable, title, subTitle, null);
 	}
 
-	public void setCounter(Integer counter) {
+	public void setCounter(final Integer counter) {
 		_counter = counter;
 	}
 
@@ -54,19 +54,18 @@ public class MarketListItem extends StandardListItem<Void> {
 	@Override
 	protected void fillViewHolder(final View view, final StandardViewHolder holder) {
 		super.fillViewHolder(view, holder);
-		MarketViewHolder marketHolder = (MarketViewHolder)holder;
+		final MarketViewHolder marketHolder = (MarketViewHolder) holder;
 		marketHolder.number = (TextView) view.findViewById(R.id.sl_number);
 	}
 
 	@Override
 	protected void updateViews(final StandardViewHolder holder) {
 		super.updateViews(holder);
-		MarketViewHolder marketHolder = (MarketViewHolder)holder;
-		if(marketHolder.number != null) {
-			if(_counter != null) {
+		final MarketViewHolder marketHolder = (MarketViewHolder) holder;
+		if (marketHolder.number != null) {
+			if (_counter != null) {
 				marketHolder.number.setText(_counter.toString());
-			}
-			else {
+			} else {
 				marketHolder.number.setText(null);
 			}
 		}
@@ -81,6 +80,7 @@ public class MarketListItem extends StandardListItem<Void> {
 		_imageUrl = imageUrl;
 	}
 
+	@Override
 	protected int getLayoutId() {
 		return R.layout.sl_list_item_market;
 	}

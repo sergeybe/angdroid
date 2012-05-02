@@ -56,21 +56,20 @@ public class ShortcutView extends SegmentedView {
 		removeAllViews();
 
 		_shortcutDescriptions = shortcutDescriptions;
-		Display display = activity.getWindowManager().getDefaultDisplay(); 
+		final Display display = activity.getWindowManager().getDefaultDisplay();
 		for (final ShortcutDescription shortcutDescription : shortcutDescriptions) {
 			final ViewGroup viewGroup = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.sl_tab_shortcut, null);
-			int margin = (int)getResources().getDimension(R.dimen.sl_margin_shortcut);
-			DisplayMetrics metrics = new DisplayMetrics();
+			final int margin = (int) getResources().getDimension(R.dimen.sl_margin_shortcut);
+			final DisplayMetrics metrics = new DisplayMetrics();
 			display.getMetrics(metrics);
 			LayoutParams lp = null;
-			int rotation = display.getOrientation();
-			if (metrics.widthPixels > metrics.heightPixels || rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_90) {
+			final int rotation = display.getOrientation();
+			if ((metrics.widthPixels > metrics.heightPixels) || (rotation == Surface.ROTATION_270) || (rotation == Surface.ROTATION_90)) {
 				lp = new LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.FILL_PARENT, 0, 1);
 				lp.gravity = Gravity.CENTER;
 				lp.leftMargin = margin;
 				lp.rightMargin = margin;
-			}
-			else {
+			} else {
 				lp = new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1);
 				lp.gravity = Gravity.CENTER;
 				lp.bottomMargin = margin;

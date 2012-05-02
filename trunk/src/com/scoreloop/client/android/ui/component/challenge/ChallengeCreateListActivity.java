@@ -24,7 +24,7 @@ package com.scoreloop.client.android.ui.component.challenge;
 import android.os.Bundle;
 
 import com.scoreloop.client.android.core.controller.ChallengeController;
-import com.scoreloop.client.android.core.controller.ChallengeControllerObserver;
+import com.scoreloop.client.android.core.controller.RequestControllerObserver;
 import com.scoreloop.client.android.core.model.Money;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
@@ -34,30 +34,17 @@ import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StringFormatter;
 import com.scoreloop.client.android.ui.component.challenge.ChallengeControlsListItem.OnControlObserver;
 import com.scoreloop.client.android.ui.framework.BaseDialog;
-import com.scoreloop.client.android.ui.framework.ValueStore;
 import com.scoreloop.client.android.ui.framework.BaseDialog.OnActionListener;
+import com.scoreloop.client.android.ui.framework.ValueStore;
 
-public class ChallengeCreateListActivity extends ChallengeActionListActivity implements ChallengeControllerObserver, OnActionListener, OnControlObserver {
+public class ChallengeCreateListActivity extends ChallengeActionListActivity implements RequestControllerObserver, OnActionListener,
+		OnControlObserver {
 
 	private ChallengeControlsListItem		_challengeControlsListItem;
 	private ChallengeParticipantsListItem	_challengeParticipantsListItem;
 	private ChallengeSettingsEditListItem	_challengeStakeAndModeEditListItem;
 	private User							_contestant;
 	private ValueStore						_opponentValueStore;
-
-	public void challengeControllerDidFailOnInsufficientBalance(final ChallengeController challengeController) {
-		// createChallenge doesn't check the balance; instead it has to rely on the server's response during submit.
-		// in addition there's a check for low balance during stake selection, but edge cases of that check can give a false alarm
-		throw new IllegalStateException("this should not happen - an insufficient balance error occured while creating the challenge");
-	}
-
-	public void challengeControllerDidFailToAcceptChallenge(final ChallengeController challengeController) {
-		throw new IllegalStateException("this should not happen - an accept error occured while creating the challenge");
-	}
-
-	public void challengeControllerDidFailToRejectChallenge(final ChallengeController challengeController) {
-		throw new IllegalStateException("this should not happen - a reject error occured while creating the challenge");
-	}
 
 	@Override
 	CaptionListItem getCaptionListItem() {
@@ -84,11 +71,13 @@ public class ChallengeCreateListActivity extends ChallengeActionListActivity imp
 		return _challengeStakeAndModeEditListItem;
 	}
 
+	@Override
 	public void onAction(final BaseDialog dialog, final int actionId) {
 		dialog.dismiss();
 		displayPrevious();
 	}
 
+	@Override
 	public void onControl1() {
 		if (challengeGamePlayAllowed()) {
 			final Money stake = _challengeStakeAndModeEditListItem.getStake();
@@ -107,6 +96,7 @@ public class ChallengeCreateListActivity extends ChallengeActionListActivity imp
 		}
 	}
 
+	@Override
 	public void onControl2() {
 		throw new IllegalStateException("this should not happen - a button has been clicked that isn't there");
 	}
@@ -123,7 +113,7 @@ public class ChallengeCreateListActivity extends ChallengeActionListActivity imp
 			_opponentValueStore = new ValueStore();
 			_opponentValueStore.putValue(Constant.USER, _contestant);
 			_opponentValueStore.addObserver(Constant.NUMBER_CHALLENGES_WON, this);
-			_opponentValueStore.addValueSources(new UserDetailsAgent());
+			_opponentValueStore.addValueSources(new UserDetailsAgent(this));
 			setNeedsRefresh();
 		}
 

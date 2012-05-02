@@ -34,8 +34,8 @@ public class UserDetailsAgent extends BaseAgent {
 
 	private UserController			_userController;
 
-	public UserDetailsAgent() {
-		super(SUPPORTED_KEYS);
+	public UserDetailsAgent(final Delegate delegate) {
+		super(delegate, SUPPORTED_KEYS);
 	}
 
 	@Override

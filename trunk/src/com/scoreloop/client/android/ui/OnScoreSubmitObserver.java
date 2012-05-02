@@ -30,7 +30,7 @@ package com.scoreloop.client.android.ui;
  *
  * Basic Usage:
  * -# Implement the onScoreSubmit(final int, final Exception) method.
- * -# Set the observer using @link #com.scoreloop.client.android.ui.ScoreloopManager.setOnScoreSubmitObserver(OnScoreSubmitObserver) ScoreloopManager.setOnScoreSubmitObserver(OnScoreSubmitObserver)@endlink.
+ * -# Set the observer using ScoreloopManager.setOnScoreSubmitObserver(OnScoreSubmitObserver).
  *
  */
 public interface OnScoreSubmitObserver {
@@ -88,7 +88,7 @@ public interface OnScoreSubmitObserver {
 	 * - the developer should display a toast notification if required;
 	 * ScoreloopUI does not display a message by default.
 	 * - the developer may wish to open an activity
-	 * to post the score to Facebook, MySpace, or Twitter,
+	 * to post the score to Facebook or Twitter,
 	 * see @link scoreloopui-integratescores Scores and Leaderboards@endlink for more details..
 	 *
 	 * In the case of an unsuccessful response ScoreloopUI will 

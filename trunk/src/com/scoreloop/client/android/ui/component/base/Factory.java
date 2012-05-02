@@ -21,8 +21,12 @@
 
 package com.scoreloop.client.android.ui.component.base;
 
+import java.util.List;
+
 import com.scoreloop.client.android.core.model.Challenge;
 import com.scoreloop.client.android.core.model.Game;
+import com.scoreloop.client.android.core.model.GameItem;
+import com.scoreloop.client.android.core.model.PaymentMethod;
 import com.scoreloop.client.android.core.model.User;
 import com.scoreloop.client.android.ui.framework.ScreenDescription;
 
@@ -38,13 +42,21 @@ public interface Factory {
 
 	ScreenDescription createChallengeScreenDescription(User user);
 
+	ScreenDescription createEntryScreenDescription();
+
 	ScreenDescription createGameDetailScreenDescription(Game game);
+
+	ScreenDescription createGameItemsScreenDescription(int mode, String paymentCurrency, List<String> tags, int viewFlags);
 
 	ScreenDescription createGameScreenDescription(User user, int mode);
 
 	ScreenDescription createMarketScreenDescription(User user);
 
 	ScreenDescription createNewsScreenDescription();
+
+	ScreenDescription createPaymentMethodsScreenDescription(String gameItemId, String paymentCurrency, int viewFlags);
+
+	ScreenDescription createPricesScreenDescription(GameItem gameItem, PaymentMethod paymentMethod, int viewFlags);
 
 	ScreenDescription createProfileSettingsPictureScreenDescription(User user);
 
@@ -57,6 +69,4 @@ public interface Factory {
 	ScreenDescription createUserDetailScreenDescription(User user, Boolean playsSessionGame);
 
 	ScreenDescription createUserScreenDescription(User user);
-
-	ScreenDescription createEntryScreenDescription();
 }

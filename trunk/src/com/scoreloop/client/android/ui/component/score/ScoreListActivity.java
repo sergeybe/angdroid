@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -35,11 +35,11 @@ import android.util.Log;
 
 import com.scoreloop.client.android.core.controller.RankingController;
 import com.scoreloop.client.android.core.controller.RequestController;
+import com.scoreloop.client.android.core.controller.RequestControllerObserver;
 import com.scoreloop.client.android.core.controller.ScoresController;
 import com.scoreloop.client.android.core.model.Ranking;
 import com.scoreloop.client.android.core.model.Score;
 import com.scoreloop.client.android.core.model.SearchList;
-import com.scoreloop.client.android.core.model.Session;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
@@ -54,14 +54,13 @@ import com.scoreloop.client.android.ui.framework.ValueStore;
 import com.scoreloop.client.android.ui.framework.ValueStore.Observer;
 
 public class ScoreListActivity extends ComponentListActivity<ScoreListItem> implements Observer,
-		PagingListAdapter.OnListItemClickListener<ScoreListItem> {
+PagingListAdapter.OnListItemClickListener<ScoreListItem> {
 
 	private static final String	RECENT_TOP_RANK				= "recentTopRank";
 
 	private int					_cachedVerticalCenterOffset	= -1;
 	private int					_highlightedPosition;
 	private PagingDirection		_pagingDirection;
-	private Ranking				_ranking;
 	private RankingController	_rankingController;
 	private ScoresController	_scoresController;
 	private SearchList			_searchList;
@@ -89,7 +88,8 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 		if (_searchList == SearchList.getLocalScoreSearchList()) {
 			return false;
 		}
-		return getSession().isOwnedByUser(score.getUser());
+		final User user = score.getUser();
+		return (user != null) && getSession().isOwnedByUser(user);
 	}
 
 	@Override
@@ -123,6 +123,7 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 		if (footerItem == _submitLocalScoresListItem) {
 			showSpinner();
 			getManager().submitLocalScores(new Runnable() {
+				@Override
 				public void run() {
 					// refresh the UI, this will hide the footer if necessary
 					hideSpinner();
@@ -161,18 +162,19 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 			.setMessage(msg) 
 			.setNegativeButton("OK", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						final Factory factory = getFactory();
-						final User user = item.getTarget().getUser();
+		final Factory factory = getFactory();
+		final User user = item.getTarget().getUser();
 
-						if (getSession().isOwnedByUser(user)) {
-							display(factory.createProfileSettingsScreenDescription(user));
-						} else {
-							display(factory.createUserDetailScreenDescription(user, true));
-						}
-					}
+		if (getSession().isOwnedByUser(user)) {
+			display(factory.createProfileSettingsScreenDescription(user));
+		} else {
+			display(factory.createUserDetailScreenDescription(user, true));
+		}
+	}
 				}).show();
 	}
 
+	@Override
 	public void onPagingListItemClick(final PagingDirection pagingDirection) {
 		setNeedsRefresh(pagingDirection);
 	}
@@ -180,8 +182,8 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 	private void onRanking() {
 		final PagingListAdapter<ScoreListItem> adapter = getPagingListAdapter();
 
-		_ranking = _rankingController.getRanking();
-		final Integer rank = _ranking.getRank();
+		final Ranking ranking = _rankingController.getRanking();
+		final Integer rank = ranking.getRank();
 
 		// update the footer
 		if (rank != null) {
@@ -189,15 +191,15 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 			// if we have a highlighted position, update its ranking and refresh the list
 			if (_highlightedPosition != -1) {
 				final ScoreHighlightedListItem highlightedItem = (ScoreHighlightedListItem) adapter.getContentItem(_highlightedPosition);
-				highlightedItem.setRanking(_ranking);
+				highlightedItem.setRanking(ranking);
 				adapter.notifyDataSetChanged();
 			}
 
 			// otherwise show the score corresponding to the ranking in the footer
 			else {
-				final Score score = _ranking.getScore();
+				final Score score = ranking.getScore();
 				if (score != null) {
-					showFooter(new ScoreHighlightedListItem(this, score, _ranking));
+					showFooter(new ScoreHighlightedListItem(this, score, ranking));
 				}
 			}
 		} else {
@@ -212,11 +214,11 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 	@Override
 	public void onRefresh(final int flags) {
 		showSpinnerFor(_scoresController);
-		if (Session.getCurrentSession().getGame().hasModes()) {
-            _scoresController.setMode(getScreenValues().<Integer> getValue(Constant.MODE));
-        } else {
-            _scoresController.setMode(null);
-        }
+		if (getSession().getGame().hasModes()) {
+			_scoresController.setMode(getScreenValues().<Integer> getValue(Constant.MODE));
+		} else {
+			_scoresController.setMode(null);
+		}
 
 		switch (_pagingDirection) {
 		case PAGE_TO_TOP:
@@ -274,19 +276,30 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 
 		// load/gather additional data
 		if (showsLocalSearchList()) {
+			hideFooter();
+			new ScoresController(new RequestControllerObserver() {
+				@Override
+				public void requestControllerDidFail(final RequestController aRequestController, final Exception anException) {
+				}
 
-			// update the footer
-			if (_scoresController.getLocalScoreToSubmit() != null) {
-				showFooter(_submitLocalScoresListItem);
-			} else {
-				hideFooter();
-			}
+				@Override
+				public void requestControllerDidReceiveResponse(final RequestController aRequestController) {
+					if (aRequestController instanceof ScoresController) {
+						final ScoresController scoresController = (ScoresController) aRequestController;
+						final List<Score> scoreList = scoresController.getScores();
+						if (!scoreList.isEmpty()) {
+							// update the footer
+							showFooter(_submitLocalScoresListItem);
+						}
+					}
+				}
+			}).loadLocalScoresToSubmit();
 
 			// update the scrolling
 			updateScrollPosition();
 		} else {
 			// load the rank for the user
-			final Integer mode = getGame().hasModes() ? (Integer)getScreenValues().getValue(Constant.MODE) : null;
+			final Integer mode = getGame().hasModes() ? (Integer) getScreenValues().getValue(Constant.MODE) : null;
 			_rankingController.loadRankingForUserInGameMode(getUser(), mode);
 		}
 	}
@@ -336,6 +349,7 @@ public class ScoreListActivity extends ComponentListActivity<ScoreListItem> impl
 
 		// if _highlightedPosition is valid, scroll to that position, otherwise to top or bottom (depending on paging direction).
 		getListView().post(new Runnable() {
+			@Override
 			public void run() {
 				final PagingListAdapter<ScoreListItem> adapter = getPagingListAdapter();
 				final ListView listView = getListView();

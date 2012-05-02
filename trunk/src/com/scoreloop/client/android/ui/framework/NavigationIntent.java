@@ -39,8 +39,8 @@ public class NavigationIntent {
 	public void execute() {
 		_runnable.run();
 	}
-	
+
 	public Type getType() {
-		return _type;		
+		return _type;
 	}
 }

@@ -5,4 +5,12 @@
 	<dimen name="sl_margin_small">5dp</dimen>
 	<dimen name="sl_clickable_height">40dp</dimen>
 	<dimen name="sl_margin_shortcut">2dp</dimen>
+	
+	<dimen name="sl_tabs_shadow_radius">0.3px</dimen>
+	<dimen name="sl_tabs_shadow_dx">0px</dimen>
+	<dimen name="sl_tabs_shadow_dy">0.3px</dimen>
+	
+	<dimen name="sl_tabs_shadow_radius_active">0.3px</dimen>
+	<dimen name="sl_tabs_shadow_dx_active">0px</dimen>
+	<dimen name="sl_tabs_shadow_dy_active">0.3px</dimen>
 </resources>

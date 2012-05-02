@@ -31,10 +31,10 @@ import org.angdroid.angband.R;
 
 public class OkCancelDialog extends BaseDialog {
 
-	public static final int			BUTTON_CANCEL	= 1;
-	public static final int			BUTTON_OK		= 0;
+	public static final int	BUTTON_CANCEL	= 1;
+	public static final int	BUTTON_OK		= 0;
 
-    private String title;
+	private String			title;
 
 	public OkCancelDialog(final Context context) {
 		super(context);
@@ -45,12 +45,13 @@ public class OkCancelDialog extends BaseDialog {
 		return R.layout.sl_dialog_ok_cancel;
 	}
 
-    public void setTitle(String title) {
-        this.title = title;
-        refresh();
-    }
+	public void setTitle(final String title) {
+		this.title = title;
+		refresh();
+	}
 
-    public void onClick(final View view) {
+	@Override
+	public void onClick(final View view) {
 		if (_listener == null) {
 			return;
 		}
@@ -71,16 +72,16 @@ public class OkCancelDialog extends BaseDialog {
 		final Button cancelButton = (Button) findViewById(R.id.sl_button_cancel);
 		cancelButton.setOnClickListener(this);
 
-        refresh();
+		refresh();
 	}
 
-    private void refresh() {
-        final TextView tvTitle = (TextView) findViewById(R.id.sl_title);
-        if (title != null) {
-            tvTitle.setText(title);
-            tvTitle.setVisibility(TextView.VISIBLE);
-        } else {
-            tvTitle.setVisibility(TextView.INVISIBLE);
-        }
-    }
+	private void refresh() {
+		final TextView tvTitle = (TextView) findViewById(R.id.sl_title);
+		if (title != null) {
+			tvTitle.setText(title);
+			tvTitle.setVisibility(View.VISIBLE);
+		} else {
+			tvTitle.setVisibility(View.INVISIBLE);
+		}
+	}
 }

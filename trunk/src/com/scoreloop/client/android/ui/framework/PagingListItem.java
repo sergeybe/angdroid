@@ -86,7 +86,7 @@ public class PagingListItem extends BaseListItem {
 		icon.setImageDrawable(getDrawable());
 		final TextView title = (TextView) view.findViewById(R.id.sl_title);
 		title.setText(getTitle());
-		
+
 		return view;
 	}
 

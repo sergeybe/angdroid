@@ -15,11 +15,11 @@ public class Cache<K, V> {
 	private static final int	DEFAULT_HARD_CACHE_CAPACITY	= 100;
 
 	class CacheEntry {
-		private long	_lastAccess;
-		private long	_timeToLive;
-		private V		_value;
+		private long		_lastAccess;
+		private final long	_timeToLive;
+		private final V		_value;
 
-		CacheEntry(V value, long lastAccess, long timeToLive) {
+		CacheEntry(final V value, final long lastAccess, final long timeToLive) {
 			_value = value;
 			_lastAccess = lastAccess;
 			_timeToLive = timeToLive;
@@ -29,7 +29,7 @@ public class Cache<K, V> {
 			return _lastAccess;
 		}
 
-		void setLastAccess(long lastAccess) {
+		void setLastAccess(final long lastAccess) {
 			_lastAccess = lastAccess;
 		}
 
@@ -48,6 +48,7 @@ public class Cache<K, V> {
 	private ConcurrentHashMap<K, SoftReference<CacheEntry>>	_softCache;
 	private Handler											_purgeHandler;
 	private final Runnable									_purger	= new Runnable() {
+																		@Override
 																		public void run() {
 																			purgeCache();
 																		}
@@ -73,7 +74,7 @@ public class Cache<K, V> {
 			private static final long	serialVersionUID	= 1L;
 
 			@Override
-			protected boolean removeEldestEntry(Map.Entry<K, CacheEntry> eldest) {
+			protected boolean removeEldestEntry(final Map.Entry<K, CacheEntry> eldest) {
 				if (size() > _hardCacheCapacity) {
 					// Entries push-out of hard reference cache are transferred to soft reference cache
 					_softCache.put(eldest.getKey(), new SoftReference<CacheEntry>(eldest.getValue()));
@@ -89,12 +90,12 @@ public class Cache<K, V> {
 	}
 
 	public void purgeCache() {
-		long now = System.currentTimeMillis();
-		Set<K> hardKeys = new HashSet<K>(_hardCache.keySet());
+		final long now = System.currentTimeMillis();
+		final Set<K> hardKeys = new HashSet<K>(_hardCache.keySet());
 		_softCache.clear();
-		for (K k : hardKeys) {
-			CacheEntry e = _hardCache.get(k);
-			if (e.getLastAccess() + e.getTimeToLive() < now) {
+		for (final K k : hardKeys) {
+			final CacheEntry e = _hardCache.get(k);
+			if ((e.getTimeToLive() != -1) && ((e.getLastAccess() + e.getTimeToLive()) < now)) {
 				synchronized (_hardCache) {
 					_softCache.put(k, new SoftReference<CacheEntry>(e));
 					_hardCache.remove(k);
@@ -118,21 +119,21 @@ public class Cache<K, V> {
 		}
 	}
 
-	public void put(K key, V value, long timeToLive) {
-		long now = System.currentTimeMillis();
+	public void put(final K key, final V value, final long timeToLive) {
+		final long now = System.currentTimeMillis();
 		synchronized (_hardCache) {
 			_hardCache.put(key, new CacheEntry(value, now, timeToLive));
 		}
 		resetPurgeTimer(timeToLive);
 	}
 
-	public V get(K key) {
+	public V get(final K key) {
 		final CacheEntry cacheEntry = getCacheEntry(key);
 		return cacheEntry != null ? cacheEntry.getValue() : null;
 	}
 
-	public CacheEntry getCacheEntry(K key) {
-		long now = System.currentTimeMillis();
+	public CacheEntry getCacheEntry(final K key) {
+		final long now = System.currentTimeMillis();
 		// try hard cache
 		synchronized (_hardCache) {
 			final CacheEntry e = _hardCache.get(key);
@@ -146,7 +147,7 @@ public class Cache<K, V> {
 		}
 
 		// Then try the soft reference cache
-		SoftReference<CacheEntry> eReference = _softCache.get(key);
+		final SoftReference<CacheEntry> eReference = _softCache.get(key);
 		if (eReference != null) {
 			final CacheEntry e = eReference.get();
 			if (e != null) {

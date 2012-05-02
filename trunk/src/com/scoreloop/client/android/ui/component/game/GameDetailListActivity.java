@@ -71,7 +71,7 @@ public class GameDetailListActivity extends ComponentListActivity<BaseListItem> 
 	}
 
 	@Override
-	public void onRefresh(int flags) {
+	public void onRefresh(final int flags) {
 		super.onRefresh(flags);
 		getBaseListAdapter().notifyDataSetChanged();
 	}

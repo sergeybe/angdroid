@@ -42,8 +42,9 @@
 	<string name="sl_error_message_email_already_taken">If this is your email address please check your inbox to merge your Scoreloop accounts.</string>
 	<string name="sl_error_message_username_already_taken">The username is already in use.\nPlease try another.</string>
 	<string name="sl_error_message_invalid_email">Invalid email format.\nPlease enter a valid email address.</string>
-	<string name="sl_error_message_network">It\'s a bit quiet in here...\nPlease check your connection.</string>
+	<string name="sl_error_message_network">It\'s a bit quiet in here…\nPlease check your connection.</string>
 	<string name="sl_error_message_connect_failed">Can\'t connect to the social network. Did you enter the correct credentials?</string>
+	<string name="sl_external_price">Tap to see price</string>
 	<string name="sl_facebook">Facebook</string>
 	<string name="sl_featured_game_capitalized">FEATURED GAME</string>
 	<string name="sl_find">Find!</string>
@@ -77,8 +78,17 @@
 	<string name="sl_format_unlocked" formatted="false">Unlocked %s</string>
 	<string name="sl_format_welcome_back" formatted="false">Welcome back, %s!</string>
 	<string name="sl_format_connect_failed" formatted="false">Connection to %s failed! Try again.</string>
-	<string name="sl_found_no_user">No new friends found.\nTry to adjust the search!</string>
+	<string name="sl_format_payment_booked" formatted="false">Purchased %s</string>
+	<string name="sl_format_payment_failed" formatted="false">Failed to Purchase %s</string>
+	<string name="sl_format_payment_failed_msg" formatted="false">Failed to Purchase %s: %s</string>
+	<string name="sl_format_payment_canceled" formatted="false">Canceled Purchase of %s</string>
+    <string name="sl_format_payment_pending">Pending Purchase of %s</string>
+    <string name="sl_payment_result_already_purchased">Already purchased</string>
+    <string name="sl_payment_result_no_payment_methods">There are not payment methods available to you.</string>
+    <string name="sl_payment_result_invalid_item">Invalid Game Item</string>
+    <string name="sl_found_no_user">No new friends found.\nTry to adjust the search!</string>
 	<string name="sl_found_too_many_users">Too many user matches.\nTry to refine the search!</string>
+	<string name="sl_free_item">Free</string>
 	<string name="sl_friends">Friends</string>
 	<string name="sl_friends_capitalized">FRIENDS</string>
 	<string name="sl_friends_games">Friends\' Games</string>
@@ -95,7 +105,7 @@
 	<string name="sl_leave_accept_challenge">You are in the process of accepting a challenge.\nDo you really want to leave and drop that challenge?</string>
 	<string name="sl_leave_accept_game_recommendation">You\'re about to recommend \"%1$s\" to %2$s.</string>
 	<string name="sl_leave_accept_game_recommendation_ok">Recommend!</string>
-	<string name="sl_leave_accept_match_buddies">We\'re about to search similar players to match you a friend...</string>
+	<string name="sl_leave_accept_match_buddies">We\'re about to search similar players to match you a friend…</string>
 	<string name="sl_leave_accept_match_buddies_ok">Match!</string>
 	<string name="sl_leave_payment">Leave Payment?</string>
 	<string name="sl_local_leaderboard">Local Leaderboard</string>
@@ -108,7 +118,6 @@
 	<string name="sl_merge_account_success">Please check your inbox to complete the merge or transfer process.</string>
 	<string name="sl_merge_account_not_found">Email not found.\nPlease try another.</string>
 	<string name="sl_merge_account_email_current">This is your current email.\nPlease try another.</string>
-	<string name="sl_myspace">MySpace</string>
 	<string name="sl_my_games">My Games</string>
 	<string name="sl_new">New</string>	
 	<string name="sl_new_challenge">Start New</string>
@@ -129,7 +138,12 @@
 	<string name="sl_ok">OK</string>
 	<string name="sl_one_news_item">1 new Item</string>
 	<string name="sl_open_challenges">Inbox</string>
+	<string name="sl_payment_method">Payment Method</string>
+	<string name="sl_payment_methods">Payment Methods</string>
+	<string name="sl_payment_get_it">Get it</string>
+	<string name="sl_payment_its_free">It is free!</string>
 	<string name="sl_pending">Pending</string>
+	<string name="sl_pending_payment">Pending payment…</string>
 	<string name="sl_playing">Playing</string>
 	<string name="sl_please_email_address">Please provide an email address to register this username.</string>
 	<string name="sl_please_email_valid">Please provide a valid email address.</string>
@@ -137,6 +151,10 @@
 	<string name="sl_popular_games_subtitle">Most played</string>
 	<string name="sl_post">Post!</string>
 	<string name="sl_previous">Previous</string>
+	<string name="sl_prices">Prices</string>
+	<string name="sl_purchase">Purchase</string>	
+	<string name="sl_purchased_item">Purchased</string>
+	<string name="sl_purchasable_item">Buy now!</string>
 	<string name="sl_recommend_sent">Recommendation sent!</string>
 	<string name="sl_register_username">Register Username</string>
 	<string name="sl_reject_challenge">Reject Challenge</string>
@@ -157,9 +175,14 @@
 	<string name="sl_status_success_challenge_lost">You lost the challenge.\nCheck out the details in the challenge history!</string>
 	<string name="sl_status_error_network">We\'re having trouble connecting.</string>
 	<string name="sl_status_error_balance">Your balance is too low to finish this challenge</string>
+	<string name="sl_terms_of_service">Terms Of Service</string>
+	<string name="sl_terms_of_service_show">Show accepted version</string>
 	<string name="sl_top">Top</string>
 	<string name="sl_twentyfour">24 h</string>
 	<string name="sl_twitter">Twitter</string>
+	<string name="sl_unknown_game_item">Unknown Game Item</string>
 	<string name="sl_update">Update</string>
 	<string name="sl_username">Username</string>
+	<string name="sl_shop">Shop</string>
+	<string name="sl_price_from">from</string>
 </resources>

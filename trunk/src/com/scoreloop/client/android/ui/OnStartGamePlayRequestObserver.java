@@ -36,12 +36,12 @@ package com.scoreloop.client.android.ui;
  */
 public interface OnStartGamePlayRequestObserver {
 
-    /**
-     * This method is called when the user starts or accepts 
-     * a challenge. It will normally be implemented
-     * in the game, (that is within the application itself). 
+	/**
+	 * This method is called when the user starts or accepts 
+	 * a challenge. It will normally be implemented
+	 * in the game, (that is within the application itself). 
 	 *
-     * @param mode <a href="http://download.oracle.com/javase/6/docs/api/java/lang/Integer.html">java.lang.Integer</a> corresponding to the challenge mode. This can be @c null. 
-     */	
-	void onStartGamePlayRequest(Integer mode); 
+	 * @param mode <a href="http://download.oracle.com/javase/6/docs/api/java/lang/Integer.html">java.lang.Integer</a> corresponding to the challenge mode. This can be @c null. 
+	 */
+	void onStartGamePlayRequest(Integer mode);
 }

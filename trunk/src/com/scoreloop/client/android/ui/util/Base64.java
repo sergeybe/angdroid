@@ -151,7 +151,7 @@ package com.scoreloop.client.android.ui.util;
 public class Base64 {
 
 	/* ********  P U B L I C   F I E L D S  ******** */
-  /* */
+	/* */
 	/**
 	 * \internal
 	 * A {@link Base64.InputStream} will read data from another
@@ -818,7 +818,7 @@ public class Base64 {
 		if (source == null) {
 			throw new NullPointerException("Cannot decode null source array.");
 		} // end if
-		if ((off < 0) || (off + len > source.length)) {
+		if ((off < 0) || ((off + len) > source.length)) {
 			throw new IllegalArgumentException(String.format("Source array with length %d cannot have offset of %d and process %d bytes.",
 					source.length, off, len));
 		} // end if
@@ -831,7 +831,7 @@ public class Base64 {
 
 		final byte[] DECODABET = getDecodabet(options);
 
-		final int len34 = len * 3 / 4; // Estimate on array size
+		final int len34 = (len * 3) / 4; // Estimate on array size
 		final byte[] outBuff = new byte[len34]; // Upper limit on size of output
 		int outBuffPosn = 0; // Keep track of where we're writing
 
@@ -840,7 +840,7 @@ public class Base64 {
 		int i = 0; // Source array counter
 		byte sbiDecode = 0; // Special value from DECODABET
 
-		for (i = off; i < off + len; i++) { // Loop through source
+		for (i = off; i < (off + len); i++) { // Loop through source
 
 			sbiDecode = DECODABET[source[i] & 0xFF];
 
@@ -910,7 +910,7 @@ public class Base64 {
 		catch (final java.io.UnsupportedEncodingException uee) {
 			bytes = s.getBytes();
 		} // end catch
-		// </change>
+			// </change>
 
 		// Decode
 		bytes = decode(bytes, 0, bytes.length, options);
@@ -1408,7 +1408,7 @@ public class Base64 {
 			throw new IllegalArgumentException("Cannot have length offset: " + len);
 		} // end if: len < 0
 
-		if (off + len > source.length) {
+		if ((off + len) > source.length) {
 			throw new IllegalArgumentException(String.format("Cannot have offset of %d and length of %d with array of length %d", off, len,
 					source.length));
 		} // end if: off < 0
@@ -1462,7 +1462,7 @@ public class Base64 {
 			// Try to determine more precisely how big the array needs to be.
 			// If we get it right, we don't have to do an array copy, and
 			// we save a bunch of memory.
-			int encLen = (len / 3) * 4 + (len % 3 > 0 ? 4 : 0); // Bytes needed for actual encoding
+			int encLen = ((len / 3) * 4) + ((len % 3) > 0 ? 4 : 0); // Bytes needed for actual encoding
 			if (breakLines) {
 				encLen += encLen / MAX_LINE_LENGTH; // Plus extra newline characters
 			}
@@ -1489,7 +1489,7 @@ public class Base64 {
 			} // end if: some padding needed
 
 			// Only resize array if we didn't guess it right.
-			if (e <= outBuff.length - 1) {
+			if (e <= (outBuff.length - 1)) {
 				// If breaking lines and the last byte falls right at
 				// the line length (76 bytes per line), there will be
 				// one extra byte, and the array will need to be resized.
@@ -1555,7 +1555,7 @@ public class Base64 {
 		try {
 			// Set up some useful variables
 			final java.io.File file = new java.io.File(filename);
-			final byte[] buffer = new byte[Math.max((int) (file.length() * 1.4 + 1), 40)]; // Need max() for math on small files (v2.2.1);
+			final byte[] buffer = new byte[Math.max((int) ((file.length() * 1.4) + 1), 40)]; // Need max() for math on small files (v2.2.1);
 			// Need +1 for a few corner cases (v2.3.5)
 			int length = 0;
 			int numBytes = 0;
@@ -1772,11 +1772,11 @@ public class Base64 {
 		if (destination == null) {
 			throw new NullPointerException("Destination array was null.");
 		} // end if
-		if ((srcOffset < 0) || (srcOffset + 3 >= source.length)) {
+		if ((srcOffset < 0) || ((srcOffset + 3) >= source.length)) {
 			throw new IllegalArgumentException(String.format(
 					"Source array with length %d cannot have offset of %d and still process four bytes.", source.length, srcOffset));
 		} // end if
-		if ((destOffset < 0) || (destOffset + 2 >= destination.length)) {
+		if ((destOffset < 0) || ((destOffset + 2) >= destination.length)) {
 			throw new IllegalArgumentException(String.format(
 					"Destination array with length %d cannot have offset of %d and still store three bytes.", destination.length,
 					destOffset));

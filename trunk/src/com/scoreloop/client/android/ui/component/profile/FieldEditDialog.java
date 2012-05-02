@@ -1,3 +1,24 @@
+/*
+ * In derogation of the Scoreloop SDK - License Agreement concluded between
+ * Licensor and Licensee, as defined therein, the following conditions shall
+ * apply for the source code contained below, whereas apart from that the
+ * Scoreloop SDK - License Agreement shall remain unaffected.
+ * 
+ * Copyright: Scoreloop AG, Germany (Licensor)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at 
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.scoreloop.client.android.ui.component.profile;
 
 import android.content.Context;
@@ -41,29 +62,30 @@ public class FieldEditDialog extends BaseDialog {
 		return R.layout.sl_dialog_profile_edit;
 	}
 
+	@Override
 	public void onClick(final View v) {
 		if (_listener != null) {
-            int viewId = v.getId();
-            if (viewId == R.id.sl_button_ok) {
-                _listener.onAction(this, BUTTON_OK);
+			final int viewId = v.getId();
+			if (viewId == R.id.sl_button_ok) {
+				_listener.onAction(this, BUTTON_OK);
 
-            } else if (viewId == R.id.sl_button_cancel) {
-                _listener.onAction(this, BUTTON_CANCEL);
-            }
+			} else if (viewId == R.id.sl_button_cancel) {
+				_listener.onAction(this, BUTTON_CANCEL);
+			}
 		}
 	}
 
-	public void setCurrentText(String currentText) {
+	public void setCurrentText(final String currentText) {
 		this._currentText = currentText;
 		refresh();
 	}
 
-	public void setEditText(String editText) {
+	public void setEditText(final String editText) {
 		_newText = editText;
 		refresh();
 	}
 
-	public void setHint(String text) {
+	public void setHint(final String text) {
 		_hint = text;
 		refresh();
 	}
@@ -81,7 +103,7 @@ public class FieldEditDialog extends BaseDialog {
 			_tfCurrentText.setText(_currentText);
 		}
 		if (_tfHint != null) {
-			_tfHint.setVisibility(TextView.VISIBLE);
+			_tfHint.setVisibility(View.VISIBLE);
 			_tfHint.setText(_hint);
 		}
 	}
@@ -100,21 +122,21 @@ public class FieldEditDialog extends BaseDialog {
 		if (description != null) {
 			tvDescription.setText(description);
 		} else {
-			tvDescription.setVisibility(TextView.INVISIBLE);
+			tvDescription.setVisibility(View.INVISIBLE);
 		}
 		final TextView tvCurrentLabel = (TextView) findViewById(R.id.sl_user_profile_edit_current_label);
 		_tfCurrentText = (TextView) findViewById(R.id.sl_user_profile_edit_current_text);
 		if (_currentLabel != null) {
 			tvCurrentLabel.setText(_currentLabel);
 		} else {
-			tvCurrentLabel.setVisibility(TextView.INVISIBLE);
-			_tfCurrentText.setVisibility(TextView.INVISIBLE);
+			tvCurrentLabel.setVisibility(View.INVISIBLE);
+			_tfCurrentText.setVisibility(View.INVISIBLE);
 		}
 		final TextView tvNewLabel = (TextView) findViewById(R.id.sl_user_profile_edit_new_label);
 		if (_newLabel != null) {
 			tvNewLabel.setText(_newLabel);
 		} else {
-			tvNewLabel.setVisibility(TextView.INVISIBLE);
+			tvNewLabel.setVisibility(View.INVISIBLE);
 		}
 		_tfEditText = (EditText) findViewById(R.id.sl_user_profile_edit_new_text);
 		_tfHint = (TextView) findViewById(R.id.sl_dialog_hint);

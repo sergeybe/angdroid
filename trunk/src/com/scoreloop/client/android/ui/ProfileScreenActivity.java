@@ -45,7 +45,7 @@ public class ProfileScreenActivity extends ScreenActivity {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		final Factory factory = StandardScoreloopManager.getFactory(ScoreloopManagerSingleton.get());
+		final Factory factory = ScoreloopManagerSingleton.getImpl().getFactory();
 		display(factory.createProfileSettingsScreenDescription(null), savedInstanceState);
 	}
 }

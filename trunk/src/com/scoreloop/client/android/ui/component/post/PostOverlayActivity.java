@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -28,7 +28,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
@@ -37,9 +36,9 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.scoreloop.client.android.core.controller.MessageController;
 import com.scoreloop.client.android.core.controller.RequestController;
@@ -48,31 +47,22 @@ import com.scoreloop.client.android.core.controller.RequestControllerObserver;
 import com.scoreloop.client.android.core.controller.SocialProviderController;
 import com.scoreloop.client.android.core.controller.SocialProviderControllerObserver;
 import com.scoreloop.client.android.core.model.Entity;
-import com.scoreloop.client.android.core.model.Session;
 import com.scoreloop.client.android.core.model.SocialProvider;
 import org.angdroid.angband.R;
+import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
 import com.scoreloop.client.android.ui.framework.BaseActivity;
 
 public class PostOverlayActivity extends Activity implements RequestControllerObserver, OnCheckedChangeListener,
-		SocialProviderControllerObserver {
+SocialProviderControllerObserver {
 
-	private static Entity				_messageTarget			= null;
+	private static Entity		_messageTarget			= null;
 
-	private static final int			DIALOG_ERROR_NETWORK	= 100;
-	private static final int			DIALOG_CONNECT_FAILED	= 101;
-	private static final int			DIALOG_PROGRESS			= 102;
-	
+	private static final int	DIALOG_ERROR_NETWORK	= 100;
+	private static final int	DIALOG_CONNECT_FAILED	= 101;
+	private static final int	DIALOG_PROGRESS			= 102;
+
 	public static void setMessageTarget(final Entity messageTarget) {
 		_messageTarget = messageTarget;
-	}
-
-	public static boolean isPosted(final Context context, final Entity messageTarget) {
-		// TODO: implement me
-		return false;
-	}
-
-	public static void setPosted(final Context context, final Entity messageTarget) {
-		// TODO: implement me
 	}
 
 	private final Map<CheckBox, SocialProvider>	_checkboxToProviderMap	= new HashMap<CheckBox, SocialProvider>();
@@ -81,7 +71,7 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 	private Button								_noButton;
 	private Button								_postButton;
 	private final Map<SocialProvider, CheckBox>	_providerToCheckboxMap	= new HashMap<SocialProvider, CheckBox>();
-	private Handler								_handler				= new Handler();
+	private final Handler						_handler				= new Handler();
 
 	private void addCheckbox(final String socialProviderId, final int checkboxId) {
 		final SocialProvider provider = SocialProvider.getSocialProviderForIdentifier(socialProviderId);
@@ -95,7 +85,12 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 		if (block) {
 			showDialog(DIALOG_PROGRESS);
 		} else {
-			dismissDialog(DIALOG_PROGRESS);
+			try {
+				dismissDialog(DIALOG_PROGRESS);
+			} catch (final IllegalArgumentException e) {
+				// developer reported case where dialog was not visible
+				// ignore if dialog is not visible
+			}
 		}
 		final boolean enabled = !block;
 		_postButton.setEnabled(enabled);
@@ -106,7 +101,7 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 		}
 	}
 
-	private Dialog createErrorDialog(int messageResId) {
+	private Dialog createErrorDialog(final int messageResId) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(getString(messageResId));
 		final Dialog dialog = builder.create();
@@ -134,17 +129,20 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 		// intentionally empty
 	}
 
+	@Override
 	public void onCheckedChanged(final CompoundButton button, final boolean isChecked) {
 		if (isChecked) {
 			final CheckBox checkBox = (CheckBox) button;
 			final SocialProvider provider = _checkboxToProviderMap.get(checkBox);
-			if (!provider.isUserConnected(Session.getCurrentSession().getUser())) {
+			if (!provider.isUserConnected(ScoreloopManagerSingleton.get().getSession().getUser())) {
 				blockUI(true);
-				
-				// make the UI more responsive by scheduling the connect in the next run-loop iteration 
-				_handler.post(new Runnable() {					
+
+				// make the UI more responsive by scheduling the connect in the next run-loop iteration
+				_handler.post(new Runnable() {
+					@Override
 					public void run() {
-						final SocialProviderController controller = SocialProviderController.getSocialProviderController(null, PostOverlayActivity.this, provider);
+						final SocialProviderController controller = SocialProviderController.getSocialProviderController(null,
+								PostOverlayActivity.this, provider);
 						controller.connect(PostOverlayActivity.this);
 					}
 				});
@@ -157,9 +155,9 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.sl_post);
 
-        final Entity messageTarget = getMessageTarget();
-        if (messageTarget == null || messageTarget.getIdentifier() == null) {
-            // post overlay is currently skipped in offline mode (no id for score)
+		final Entity messageTarget = getMessageTarget();
+		if ((messageTarget == null) || (messageTarget.getIdentifier() == null)) {
+			// post overlay is currently skipped in offline mode (no id for score)
 			finish();
 			return;
 		}
@@ -172,6 +170,7 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 
 		_noButton = (Button) findViewById(R.id.cancel_button);
 		_noButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(final View v) {
 				finish();
 			}
@@ -181,6 +180,7 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 
 		_postButton = (Button) findViewById(R.id.ok_button);
 		_postButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(final View v) {
 				_messageController.setTarget(getMessageTarget());
 
@@ -200,7 +200,6 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 		});
 
 		addCheckbox(SocialProvider.FACEBOOK_IDENTIFIER, R.id.facebook_checkbox);
-		addCheckbox(SocialProvider.MYSPACE_IDENTIFIER, R.id.myspace_checkbox);
 		addCheckbox(SocialProvider.TWITTER_IDENTIFIER, R.id.twitter_checkbox);
 	}
 
@@ -223,14 +222,15 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 		return false;
 	}
 
+	@Override
 	public void requestControllerDidFail(final RequestController aRequestController, final Exception anException) {
 		if (aRequestController == _messageController) {
 			blockUI(false);
-			for (SocialProvider provider : SocialProvider.getSupportedProviders()) {
+			for (final SocialProvider provider : SocialProvider.getSupportedProviders()) {
 				updateProviderCheckbox(provider);
 			}
 			if (anException instanceof RequestControllerException) {
-				RequestControllerException requestControllerException = (RequestControllerException) anException;
+				final RequestControllerException requestControllerException = (RequestControllerException) anException;
 				if (requestControllerException.getErrorCode() == RequestControllerException.CODE_SOCIAL_PROVIDER_DISCONNECTED) {
 					showDialog(DIALOG_CONNECT_FAILED);
 					return;
@@ -240,40 +240,44 @@ public class PostOverlayActivity extends Activity implements RequestControllerOb
 		}
 	}
 
+	@Override
 	public void requestControllerDidReceiveResponse(final RequestController aRequestController) {
 		if (aRequestController == _messageController) {
 			dismissDialog(DIALOG_PROGRESS);
-			String message = String.format(getResources().getString(R.string.sl_format_posted), getPostText());
+			final String message = String.format(getResources().getString(R.string.sl_format_posted), getPostText());
 			BaseActivity.showToast(this, message);
-			setPosted(getApplicationContext(), getMessageTarget());
 			finish();
 		}
 	}
 
+	@Override
 	public void socialProviderControllerDidCancel(final SocialProviderController controller) {
 		blockUI(false);
 		updateProviderCheckbox(controller.getSocialProvider());
 	}
 
+	@Override
 	public void socialProviderControllerDidEnterInvalidCredentials(final SocialProviderController controller) {
 		blockUI(false);
 		updateProviderCheckbox(controller.getSocialProvider());
 		showDialog(DIALOG_CONNECT_FAILED);
 	}
 
+	@Override
 	public void socialProviderControllerDidFail(final SocialProviderController controller, final Throwable error) {
 		blockUI(false);
 		updateProviderCheckbox(controller.getSocialProvider());
 		showDialog(DIALOG_ERROR_NETWORK);
 	}
 
+	@Override
 	public void socialProviderControllerDidSucceed(final SocialProviderController controller) {
 		blockUI(false);
 		updateProviderCheckbox(controller.getSocialProvider());
 	}
 
 	private void updateProviderCheckbox(final SocialProvider provider) {
-		if (!provider.isUserConnected(Session.getCurrentSession().getUser())) {
+		if (!provider.isUserConnected(ScoreloopManagerSingleton.get().getSession().getUser())) {
 			final CheckBox checkbox = _providerToCheckboxMap.get(provider);
 			checkbox.setChecked(false);
 		}

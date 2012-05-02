@@ -23,6 +23,11 @@ package com.scoreloop.client.android.ui;
 
 import android.content.Context;
 
+import com.scoreloop.client.android.core.model.Challenge;
+import com.scoreloop.client.android.core.model.Score;
+import com.scoreloop.client.android.ui.component.base.Configuration;
+import com.scoreloop.client.android.ui.component.base.Factory;
+
 /**
  * The ScoreloopManagerSingleton class is used to create and retrieve
  * the singleton instance of ScoreloopManager that is shared by all 
@@ -34,7 +39,35 @@ import android.content.Context;
  */
 public class ScoreloopManagerSingleton {
 
-	private static ScoreloopManager	_singleton;
+	public static interface Impl extends ScoreloopManager {
+		void destroy();
+
+		Configuration getConfiguration();
+
+		Factory getFactory();
+
+		Challenge getLastSubmittedChallenge();
+
+		Score getLastSubmittedScore();
+
+		int getLastSubmitStatus();
+
+		void init(Context context, String gameSecret);
+	}
+
+	private static Impl	_singleton;
+
+	/**
+	 * Destroys the SingletonManager for ScoreloopUI.<br/>
+	 * This method should be called from <a href="http://developer.android.com/reference/android/app/Application.html#onTerminate%28%29"> android.app.Application#onTerminate()</a>
+	 * to clean up in the case of running in an emulator. onTerminate() is not called on devices though.
+	 */
+	public static void destroy() {
+		if (_singleton != null) {
+			_singleton.destroy();
+			_singleton = null;
+		}
+	}
 
 	/**
 	 * This method returns the ScoreloopManager instance 
@@ -48,6 +81,10 @@ public class ScoreloopManagerSingleton {
 		return _singleton;
 	}
 
+	static Impl getImpl() {
+		return (Impl) get();
+	}
+
 	/**
 	 * The initializer for ScoreloopUI. This method should:
 	 * - be called from within the Android application class,
@@ -57,11 +94,20 @@ public class ScoreloopManagerSingleton {
 	 * application context. 
 	 * @param gameSecret Your game's secret, which can be retrieved from https://developer.scoreloop.com/
 	 */
-	public static ScoreloopManager init(final Context context, String gameSecret) {
+	public static ScoreloopManager init(final Context context, final String gameSecret) {
 		if (_singleton != null) {
 			throw new IllegalStateException("ScoreloopManagerSingleton.init() can be called only once");
 		}
-		_singleton = new StandardScoreloopManager(context, gameSecret);
+		try {
+			// NOTE: using class-for-name here to prevent the dependency to the higher level manager package!
+			// _singleton = new StandardScoreloopManager();
+			_singleton = (Impl) Class.forName("com.scoreloop.client.android.ui.manager.StandardScoreloopManager").newInstance();
+			_singleton.init(context, gameSecret);
+		} catch (final Exception e) {
+			throw new IllegalStateException("ScoreloopManagerSingleton.init() failed to instantiate ScoreloopManager implementation: "
+					+ e.getLocalizedMessage(), e);
+		}
+
 		return _singleton;
 	}
 
@@ -73,23 +119,11 @@ public class ScoreloopManagerSingleton {
 	 * @param manager A custom ScoreloopManager object. 
 	 * 
 	 */
-	public static ScoreloopManager init(final ScoreloopManager manager) {
+	public static ScoreloopManager init(final Impl manager) {
 		if (_singleton != null) {
 			throw new IllegalStateException("ScoreloopManagerSingleton.init() can be called only once");
 		}
 		_singleton = manager;
 		return _singleton;
 	}
-
-    /**
-     * Destroys the SingletonManager for ScoreloopUI.<br/>
-     * This method should be called from <a href="http://developer.android.com/reference/android/app/Application.html#onTerminate%28%29">  android.app.Application#onTerminate()</a>
-     */
-    public static void destroy() {
-        if (_singleton != null) {
-            _singleton.destroy();
-        }
-        _singleton = null;
-    }
-
 }

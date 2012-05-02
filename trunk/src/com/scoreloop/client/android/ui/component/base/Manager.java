@@ -22,16 +22,19 @@
 package com.scoreloop.client.android.ui.component.base;
 
 import com.scoreloop.client.android.core.model.Challenge;
+import com.scoreloop.client.android.core.model.GameItem;
 
 public interface Manager {
-	
+
 	boolean canStartGamePlay();
-	
+
 	boolean isChallengeOngoing();
 
+	void persistSessionUserName();
+
 	void startGamePlay(Integer mode, Challenge challenge);
-	
+
 	void submitLocalScores(Runnable continuation);
 
-	void persistSessionUserName();
+	int paymentFinished(GameItem gameItem, int code);
 }
