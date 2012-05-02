@@ -53,10 +53,10 @@ public class GameDetailListItem extends BaseListItem {
 		}
 		final TextView detail = (TextView) view.findViewById(R.id.sl_list_item_game_detail_text);
 		String description = _game.getDescription();
-		if(description == null) {
+		if (description == null) {
 			description = _game.getPublisherName();
 		}
-		if(description != null) {
+		if (description != null) {
 			detail.setText(description.replace("\r", ""));
 		}
 		return view;

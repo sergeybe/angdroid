@@ -8,5 +8,11 @@
 	<color name="sl_color_foreground">#454e56</color>
 	<color name="sl_color_scoreloop">#ff379fd0</color>
 	<color name="sl_color_foreground_inverted">#ffffff</color>
+	
+	<color name="sl_color_tabs_text">#FFFFFF</color>
+	<color name="sl_color_tabs_shadow">#000000</color>
+	<color name="sl_color_tabs_text_active">#FFFFFF</color>
+	<color name="sl_color_tabs_shadow_active">#000000</color>
+	
 	<color name="sl_color_divider">#939393</color>
 </resources>

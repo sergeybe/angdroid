@@ -23,6 +23,7 @@ package com.scoreloop.client.android.ui;
 
 import android.os.Bundle;
 
+import com.scoreloop.client.android.ui.component.base.Factory;
 import com.scoreloop.client.android.ui.framework.ScreenActivity;
 
 /**
@@ -46,7 +47,7 @@ public class EntryScreenActivity extends ScreenActivity {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		final StandardScoreloopManager factory = StandardScoreloopManager.getFactory(ScoreloopManagerSingleton.get());
+		final Factory factory = ScoreloopManagerSingleton.getImpl().getFactory();
 		display(factory.createEntryScreenDescription(), savedInstanceState);
 	}
 }

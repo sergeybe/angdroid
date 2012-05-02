@@ -78,7 +78,8 @@ public class UserDetailListActivity extends ComponentListActivity<BaseListItem> 
 	protected BaseListItem getChallengesListItem() {
 		if (_challengesListItem == null) {
 			_challengesListItem = new StandardListItem<Void>(this, getResources().getDrawable(R.drawable.sl_icon_challenges),
-					getString(R.string.sl_format_challenges_title), getString(R.string.sl_format_challenges_subtitle, getUser().getDisplayName()), null);
+					getString(R.string.sl_format_challenges_title), getString(R.string.sl_format_challenges_subtitle, getUser()
+							.getDisplayName()), null);
 		}
 		return _challengesListItem;
 	}
@@ -100,7 +101,7 @@ public class UserDetailListActivity extends ComponentListActivity<BaseListItem> 
 	}
 
 	protected BaseListItem getRecommendListItem() {
-		if (getGame() != null && _recommendListItem == null) {
+		if ((getGame() != null) && (_recommendListItem == null)) {
 			final User user = getUser();
 			final Game game = getGame();
 
@@ -150,10 +151,10 @@ public class UserDetailListActivity extends ComponentListActivity<BaseListItem> 
 	}
 
 	@Override
-	protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(final int id) {
 		switch (id) {
 		case Constant.DIALOG_CONFIRMATION_RECOMMEND_GAME:
-			OkCancelDialog dialog = new OkCancelDialog(this);
+			final OkCancelDialog dialog = new OkCancelDialog(this);
 			dialog.setOnActionListener(this);
 			dialog.setOkButtonText(getResources().getString(R.string.sl_leave_accept_game_recommendation_ok));
 			dialog.setCancelable(true);
@@ -164,7 +165,7 @@ public class UserDetailListActivity extends ComponentListActivity<BaseListItem> 
 	}
 
 	@Override
-	protected void onPrepareDialog(int id, Dialog dialog) {
+	protected void onPrepareDialog(final int id, final Dialog dialog) {
 		switch (id) {
 		case Constant.DIALOG_CONFIRMATION_RECOMMEND_GAME:
 			final String msg = getResources().getString(R.string.sl_leave_accept_game_recommendation, getGame().getName(),
@@ -177,7 +178,7 @@ public class UserDetailListActivity extends ComponentListActivity<BaseListItem> 
 	}
 
 	@Override
-	public void onAction(BaseDialog dialog, int actionId) {
+	public void onAction(final BaseDialog dialog, final int actionId) {
 		dialog.dismiss();
 		if (actionId == OkCancelDialog.BUTTON_OK) {
 			postRecommendation();

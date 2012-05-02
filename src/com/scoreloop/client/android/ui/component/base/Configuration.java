@@ -21,9 +21,7 @@
 
 package com.scoreloop.client.android.ui.component.base;
 
-import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.IllegalFormatException;
 import java.util.Properties;
 
 import android.content.Context;
@@ -36,26 +34,26 @@ import com.scoreloop.client.android.core.model.Client;
 import com.scoreloop.client.android.core.model.Game;
 import com.scoreloop.client.android.core.model.Score;
 import com.scoreloop.client.android.core.model.ScoreFormatter;
-import com.scoreloop.client.android.core.model.Session;
 import com.scoreloop.client.android.core.model.ScoreFormatter.ScoreFormatKey;
+import com.scoreloop.client.android.core.model.Session;
 
 public class Configuration {
 
 	static class ConfigurationException extends IllegalStateException {
-		private static final String	SCORELOOP_UI		= "ScoreloopUI";
 		private static final long	serialVersionUID	= 1L;
 
 		ConfigurationException(final String message) {
 			super(message);
-			Log.e(SCORELOOP_UI, "=====================================================================================");
-			Log.e(SCORELOOP_UI, "scoreloop.properties file verification error. Please resolve any issues first!");
-			Log.e(SCORELOOP_UI, message);
+			Log.e(Constant.LOG_TAG, "=====================================================================================");
+			Log.e(Constant.LOG_TAG, "scoreloop.properties file verification error. Please resolve any issues first!");
+			Log.e(Constant.LOG_TAG, message);
 		}
 	}
 
 	public static enum Feature {
 		ACHIEVEMENT("ui.feature.achievement", false), ADDRESS_BOOK("ui.feature.address_book", true), CHALLENGE("ui.feature.challenge",
-				false), NEWS("ui.feature.news", false);
+				false), NEWS("ui.feature.news", false), PAYMENT("ui.feature.payment", false), PAYMENT_FORTUMO("payment.fortumo", false), PAYMENT_GOOGLEMARKET(
+				"payment.googlemarket", false), PAYMENT_PAYPALX("payment.paypalx", false);
 
 		private boolean	_isEnabled	= true;
 		private String	_propertyName;
@@ -78,25 +76,16 @@ public class Configuration {
 		}
 	}
 
-	private static final String	FORMAT_MONEY_KEY		= "ui.format.money";
-	private static final String	FORMAT_SCORE_RESULT_KEY	= "ui.format.score.result";
-	private static final String	FORMAT_SCORE_LEADERBOARD = "ui.format.score.leaderboard";
-	private static final String	FORMAT_SCORE_CHALLENGES = "ui.format.score.challenges";
-	private static final String	FORMAT_SCORE_SOCIAL_NETWORK_POST = "ui.format.score.socialnetworkpost";
-	private static final String	FORMAT_SCORE_KEY		= "ui.format.score";
-    private static final String	RES_MODES_NAME			= "ui.res.modes.name";
-    private static final String	ACHIVEMENT_INITIAL_SYNC			= "ui.feature.achievement.forceSync";
+	private static final String		ACHIVEMENT_INITIAL_SYNC				= "ui.feature.achievement.forceSync";
+	private static final String		FORMAT_SCORE_CHALLENGES				= "ui.format.score.challenges";
+	private static final String		FORMAT_SCORE_LEADERBOARD			= "ui.format.score.leaderboard";
+	private static final String		FORMAT_SCORE_SOCIAL_NETWORK_POST	= "ui.format.score.socialnetworkpost";
 
-	private int					_modesResId;
-	// NOTE: see for formatting conventions: http://developer.android.com/reference/java/util/Formatter.html
-	private String				_moneyFormat			= "%.2f %s";
-	private String				_scoreResultFormat;
-	private ScoreFormatKey		_leaderboardScoreFormat;
-	private ScoreFormatKey		_challengesScoreFormat;
-	private ScoreFormatKey		_socialNetworkPostScoreFormat;
-	private ScoreFormatter		_scoreFormatter;
-	private String[]			_modesNames;
-	private boolean				_achievementForceInitialSync = true;
+	private boolean					_achievementForceInitialSync		= true;
+	private final ScoreFormatKey	_challengesScoreFormat;
+	private final ScoreFormatKey	_leaderboardScoreFormat;
+	private String[]				_modesNames;
+	private final ScoreFormatKey	_socialNetworkPostScoreFormat;
 
 	public Configuration(final Context context, final Session session) {
 		final Properties properties = Client.getProperties(context);
@@ -114,106 +103,74 @@ public class Configuration {
 			}
 		}
 
-        final String value = properties.getProperty(ACHIVEMENT_INITIAL_SYNC);
-        if (value != null) {
-            _achievementForceInitialSync = verifyBooleanProperty(value.trim(), ACHIVEMENT_INITIAL_SYNC);
-        }
-
-		// read the score formatting properties
-		_scoreResultFormat = properties.getProperty(FORMAT_SCORE_RESULT_KEY);
-		if (_scoreResultFormat != null) {
-			_scoreResultFormat = _scoreResultFormat.trim();
+		final String value = properties.getProperty(ACHIVEMENT_INITIAL_SYNC);
+		if (value != null) {
+			_achievementForceInitialSync = verifyBooleanProperty(value.trim(), ACHIVEMENT_INITIAL_SYNC);
 		}
-		_scoreFormatter = new ScoreFormatter(properties.getProperty(FORMAT_SCORE_KEY));
+
 		_leaderboardScoreFormat = loadScoreFormatProperty(properties, FORMAT_SCORE_LEADERBOARD);
 		_challengesScoreFormat = loadScoreFormatProperty(properties, FORMAT_SCORE_CHALLENGES);
 		_socialNetworkPostScoreFormat = loadScoreFormatProperty(properties, FORMAT_SCORE_SOCIAL_NETWORK_POST);
 
 		game = session.getGame();
-		if (game != null && game.hasModes()) {
-			int minMode = game.getMinMode();
-			int modeCount = game.getModeCount();
-			
+		if ((game != null) && game.hasModes()) {
+			final int minMode = game.getMinMode();
+			final int modeCount = game.getModeCount();
+
 			_modesNames = new String[modeCount];
-			for (int i = minMode; i < minMode + modeCount; i++) {
-	            _modesNames[i] = _scoreFormatter.formatScore(new Score(null, Collections.<String, Object>singletonMap(Game.CONTEXT_KEY_MODE, i)), ScoreFormatKey.ModeOnlyFormat);
+			for (int i = minMode; i < (minMode + modeCount); i++) {
+				_modesNames[i - minMode] = ScoreFormatter.getDefaultScoreFormatter()
+						.formatScore(new Score(null, Collections.<String, Object> singletonMap(Game.CONTEXT_KEY_MODE, i)),
+								ScoreFormatKey.ModeOnlyFormat);
 			}
 		} else {
 			_modesNames = new String[0];
 		}
 
-		_moneyFormat = properties.getProperty(FORMAT_MONEY_KEY, _moneyFormat).trim();
-
-		// read the modes property
-		// this property is deprecated - modes should be defined as part of FORMAT_SCORE_KEY
-		final String modesResName = properties.getProperty(RES_MODES_NAME);
-		if (modesResName != null) {
-			_modesResId = context.getResources().getIdentifier(modesResName.trim(), "array", context.getPackageName());
-			Log.i("test", "Type: " + context.getResources().getResourceTypeName(_modesResId));
+		if (properties.containsKey("ui.format.score")) {
+			throw new ConfigurationException("Property \"ui.format.score\" is no longer supported. Please use \"format.score\".");
 		}
 
-		// read other properties here...
+		if (properties.containsKey("ui.format.money")) {
+			throw new ConfigurationException("Property \"ui.format.money\" is no longer supported. Please use \"format.money\".");
+		}
 
 		// check configuration
 		verifyConfiguration(context, session);
-	}
-
-	/**
-	 * Just for backward compatibility. Modes should be configured in score formatter.
-	 * @see {@link #getModesNames()}
-	 */
-	public int getModesResId() {
-		return _modesResId;
-	}
-
-	public String[] getModesNames() {
-		return _modesNames;
-	}
-
-	public String getMoneyFormat() {
-		return _moneyFormat;
-	}
-
-    public boolean isAchievementForceInitialSync() {
-        return _achievementForceInitialSync;
-    }
-
-    public ScoreFormatKey getLeaderboardScoreFormat() {
-		return _leaderboardScoreFormat;
 	}
 
 	public ScoreFormatKey getChallengesScoreFormat() {
 		return _challengesScoreFormat;
 	}
 
+	public ScoreFormatKey getLeaderboardScoreFormat() {
+		return _leaderboardScoreFormat;
+	}
+
+	public String[] getModesNames() {
+		return _modesNames;
+	}
+
 	public ScoreFormatKey getSocialNetworkPostScoreFormat() {
 		return _socialNetworkPostScoreFormat;
 	}
 
-	/**
-     * used ScoreFormatter with key ui.format.score instead
-     * just for backward compatibility
-     */
-	public String getScoreResultFormat() {
-		return _scoreResultFormat;
-	}
-
-	public ScoreFormatter getScoreFormatter() {
-		return _scoreFormatter;
+	public boolean isAchievementForceInitialSync() {
+		return _achievementForceInitialSync;
 	}
 
 	public boolean isFeatureEnabled(final Feature feature) {
 		return feature.isEnabled();
 	}
 
-	private ScoreFormatKey loadScoreFormatProperty(Properties properties, String propertyName) {
-		String format = properties.getProperty(propertyName);
+	private ScoreFormatKey loadScoreFormatProperty(final Properties properties, final String propertyName) {
+		final String format = properties.getProperty(propertyName);
 		ScoreFormatKey scoreFormatKey = null;
 
 		if (format != null) {
 			scoreFormatKey = ScoreFormatKey.parse(format);
 			if (scoreFormatKey == null) {
-				throw new ConfigurationException("invalid " + propertyName+ " value (unrecognized format key): " + format);
+				throw new ConfigurationException("invalid " + propertyName + " value (unrecognized format key): " + format);
 			}
 		}
 
@@ -233,11 +190,13 @@ public class Configuration {
 	protected void verifyConfiguration(final Context context, final Session session) {
 
 		// check if we have an achievements bundle if achievements are enabled
-		if (Feature.ACHIEVEMENT._isEnabled) {
+		if (isFeatureEnabled(Feature.ACHIEVEMENT)) {
 			final AchievementsController controller = new AchievementsController(new RequestControllerObserver() {
+				@Override
 				public void requestControllerDidFail(final RequestController aRequestController, final Exception anException) {
 				}
 
+				@Override
 				public void requestControllerDidReceiveResponse(final RequestController aRequestController) {
 				}
 			});
@@ -249,32 +208,16 @@ public class Configuration {
 
 		// check that we have a valid modes resource if the game has modes
 		final Game game = session.getGame();
-		if (game != null && game.hasModes()) {
+		if ((game != null) && game.hasModes()) {
 			final int modeCount = game.getModeCount();
-			if (_modesResId == 0) {
-				int minMode = session.getGame().getMinMode();
-				String[] modesNames = _scoreFormatter.getDefinedModesNames(minMode, modeCount);
-				// verify modes from score formatter
-				for (int i = 0; i < modesNames.length; i++) {
-					if (modesNames[i] == null) {
-						throw new ConfigurationException("no name configured for mode " + (minMode + i) + " - check " + FORMAT_SCORE_KEY);
-					}
-				}
-			} else {
-				// kept for backward compatibility
-				final String[] modeStrings = context.getResources().getStringArray(_modesResId);
-				if ((modeStrings == null) || (modeStrings.length != modeCount)) {
-					throw new ConfigurationException("your modes string array must have exactily " + modeCount + " entries!");
+			final int minMode = session.getGame().getMinMode();
+			final String[] modesNames = ScoreFormatter.getDefaultScoreFormatter().getDefinedModesNames(minMode, modeCount);
+			// verify modes from score formatter
+			for (int i = 0; i < modesNames.length; i++) {
+				if (modesNames[i] == null) {
+					throw new ConfigurationException("no name configured for mode " + (minMode + i));
 				}
 			}
-		}
-
-		// check that the money and score formatters are ok
-		try {
-			String.format(_moneyFormat, BigDecimal.ONE, "$");
-		} catch (final IllegalFormatException exception) {
-			throw new ConfigurationException("invalid " + FORMAT_MONEY_KEY
-					+ " value: must contain valid %f and %s specifiers in that order. " + exception.getLocalizedMessage());
 		}
 	}
 }

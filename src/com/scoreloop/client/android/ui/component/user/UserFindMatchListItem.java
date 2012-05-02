@@ -21,14 +21,15 @@
 
 package com.scoreloop.client.android.ui.component.user;
 
+import android.app.Activity;
+
 import org.angdroid.angband.R;
-import com.scoreloop.client.android.ui.component.base.ComponentActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StandardListItem;
 
 public class UserFindMatchListItem extends StandardListItem<Void> {
 
-	public UserFindMatchListItem(final ComponentActivity activity) {
+	public UserFindMatchListItem(final Activity activity) {
 		super(activity, activity.getResources().getDrawable(R.drawable.sl_icon_recommend), activity.getResources().getString(
 				R.string.sl_find_match), null, null);
 	}

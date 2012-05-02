@@ -26,7 +26,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.scoreloop.client.android.core.model.Game;
+import com.scoreloop.client.android.core.model.Session;
 import com.scoreloop.client.android.ui.component.base.Constant;
+import com.scoreloop.client.android.ui.component.base.Factory;
 import com.scoreloop.client.android.ui.framework.ScreenActivity;
 
 /**
@@ -98,19 +100,18 @@ public class LeaderboardsScreenActivity extends ScreenActivity {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		final StandardScoreloopManager manager = StandardScoreloopManager.getFactory(ScoreloopManagerSingleton.get());
 		final Intent intent = getIntent();
 
 		Integer mode = null;
 		if (intent.hasExtra(MODE)) {
 			mode = intent.getIntExtra(MODE, 0);
-			final Game game = manager.getSession().getGame();
+			final Session session = ScoreloopManagerSingleton.getImpl().getSession();
+			final Game game = session.getGame();
 			final Integer minMode = game.getMinMode();
 			final Integer maxMode = game.getMaxMode();
 			if ((minMode != null) && (maxMode != null) && ((mode < minMode) || (mode >= maxMode))) {
-				Log
-						.e("ScoreloopUI", "mode extra parameter on LeaderboardsScreenActivity is out of range [" + minMode + "," + maxMode
-								+ "[");
+				Log.e(Constant.LOG_TAG, "mode extra parameter on LeaderboardsScreenActivity is out of range [" + minMode + "," + maxMode
+						+ "[");
 				finish();
 				return;
 			}
@@ -120,12 +121,13 @@ public class LeaderboardsScreenActivity extends ScreenActivity {
 		if (intent.hasExtra(LEADERBOARD)) {
 			leaderboard = intent.getIntExtra(LEADERBOARD, 0);
 			if ((leaderboard < LEADERBOARD_GLOBAL) || (leaderboard > LEADERBOARD_LOCAL)) {
-				Log.e("ScoreloopUI", "leaderboard extra parameter on LeaderboardsScreenActivity is invalid");
+				Log.e(Constant.LOG_TAG, "leaderboard extra parameter on LeaderboardsScreenActivity is invalid");
 				finish();
 				return;
 			}
 		}
 
-		display(manager.createScoreScreenDescription(null, mode, leaderboard), savedInstanceState);
+		final Factory factory = ScoreloopManagerSingleton.getImpl().getFactory();
+		display(factory.createScoreScreenDescription(null, mode, leaderboard), savedInstanceState);
 	}
 }

@@ -50,14 +50,16 @@ public class GameDetailHeaderActivity extends ComponentHeaderActivity {
 	public void onRefresh(final int flags) {
 		final Button controlButton = (Button) findViewById(R.id.sl_control_button);
 		final Game game = getGame();
-		ImageDownloader.downloadImage(game.getImageUrl(), getResources().getDrawable(R.drawable.sl_icon_games_loading), getImageView(), null);
+		ImageDownloader.downloadImage(game.getImageUrl(), getResources().getDrawable(R.drawable.sl_icon_games_loading), getImageView(),
+				null);
 		setTitle(game.getName());
 		setSubTitle(game.getPublisherName());
 		if (game.getPackageNames() != null) {
 			if (PackageManager.isGameInstalled(this, game)) {
 				controlButton.setText(getString(R.string.sl_launch));
 				controlButton.setOnClickListener(new OnClickListener() {
-					public void onClick(View v) {
+					@Override
+					public void onClick(final View v) {
 						getTracker().trackEvent(TrackerEvents.CAT_NAVI, TrackerEvents.NAVI_HEADER_GAME_LAUNCH, game.getName(), 0);
 						PackageManager.launchGame(GameDetailHeaderActivity.this, game);
 					}
@@ -65,7 +67,8 @@ public class GameDetailHeaderActivity extends ComponentHeaderActivity {
 			} else {
 				controlButton.setText(getString(R.string.sl_get));
 				controlButton.setOnClickListener(new OnClickListener() {
-					public void onClick(View v) {
+					@Override
+					public void onClick(final View v) {
 						getTracker().trackEvent(TrackerEvents.CAT_NAVI, TrackerEvents.NAVI_HEADER_GAME_GET, game.getName(), 0);
 						PackageManager.installGame(GameDetailHeaderActivity.this, game);
 					}

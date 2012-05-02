@@ -31,14 +31,13 @@ import com.scoreloop.client.android.ui.framework.BaseListItem;
 
 public abstract class Constant {
 
+	public static final String	LOG_TAG									= "ScoreloopUI";
+
 	public static final String	ACHIEVEMENTS_ENGINE						= "achievementsEngine";
 	public static final String	NAVIGATION_INTENT						= "navigationIntent";
 	public static final String	NAVIGATION_DIALOG_CONTINUATION			= "navigationDialogContinuation";
 	public static final String	NAVIGATION_ALLOWED						= "navigationAllowed";
 	public static final String	CHALLENGE								= "challenge";
-	public static final String	CHALLENGE_HEADER_MODE					= "challengeHeaderMode";
-	public static final int		CHALLENGE_HEADER_MODE_INFO				= 0;
-	public static final int		CHALLENGE_HEADER_MODE_BUY				= 1;
 	public static final String	CONFIGURATION							= "configuration";
 	public static final String	CONTESTANT								= "contestant";
 	public static final String	FACTORY									= "factory";
@@ -120,6 +119,7 @@ public abstract class Constant {
 	public static final String	MANAGER									= "manager";
 	public static final long	MARKET_REFRESH_TIME						= 300 * 1000;						// 300 secods in milliseconds
 	public static final String	MODE									= "mode";							// should be Integer
+	public static final String	CAPTION_VISIBLE							= "captionVisible";				// Boolean
 	public static final String	NEWS_FEED								= "newsFeed";
 	public static final long	NEWS_FEED_REFRESH_TIME					= 30 * 1000;						// 30 seconds in milliseconds
 	public static final String	NEWS_NUMBER_UNREAD_ITEMS				= "newsNumberUnreadItems";
@@ -144,20 +144,25 @@ public abstract class Constant {
 
 	private static final int	MIN_RANGE_LENGTH						= 10;
 
+	public static final String	GAME_ITEM_ID							= "gameItemId";
+
+	public static final int		PAYMENT_UI_LEAVE						= 0x01;
+	public static final int		PAYMENT_TOAST_SHOW						= 0x10;
+
 	public static void setup() {
 		BaseListAdapter.setViewTypeCount(LIST_ITEM_TYPE_X_COUNT);
 	}
 
-	public static int getOptimalRangeLength(View listView, BaseListItem item) {
-		View itemView = item.getView(null, null);
+	public static int getOptimalRangeLength(final View listView, final BaseListItem item) {
+		final View itemView = item.getView(null, null);
 		itemView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 		int listHeight = listView.getHeight();
 		if (listHeight == 0) {
 			// fallback code if listView was not layed out yet - which is the norm in onCreate but also in onStart :-(
-			Display display = ((WindowManager) listView.getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+			final Display display = ((WindowManager) listView.getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 			listHeight = display.getHeight();
 		}
-		int itemHeight = itemView.getMeasuredHeight();
-		return Math.max(MIN_RANGE_LENGTH, listHeight / itemHeight + 1);
+		final int itemHeight = itemView.getMeasuredHeight();
+		return Math.max(MIN_RANGE_LENGTH, (listHeight / itemHeight) + 1);
 	}
 }

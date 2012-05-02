@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -47,8 +47,9 @@ public class StandardScreenManager implements ScreenManager {
 		}
 
 		ActivityDescription getActivityDescription(final String id) {
-			ActivityDescription description = _screenDescription.getActivityDescription(id);
-			if ((description == null) && (_next != null)) {
+			ActivityDescription description = _screenDescription != null ? _screenDescription.getActivityDescription(id) : null;
+
+			if ((description == null) && (_next != null) && (_next != this)) {
 				description = _next.getActivityDescription(id);
 			}
 			return description;
@@ -70,11 +71,6 @@ public class StandardScreenManager implements ScreenManager {
 	private StackEntry				_stack					= null;
 	private ScreenDescription		_storedDescription		= null;
 
-	@Override
-	public void onShowedTab(ScreenDescription screenDescription) {
-		_delegate.screenManagerWillShowScreenDescription(screenDescription, Delegate.Direction.NONE);
-	}
-
 	protected void applyCurrentDescription(final ScreenDescription referenceDescription, final int anim) {
 		final ScreenDescription screenDescription = getCurrentDescription();
 		final ScreenActivityProtocol screenActivity = getCurrentActivity();
@@ -83,13 +79,14 @@ public class StandardScreenManager implements ScreenManager {
 
 		// apply header
 		final ActivityDescription headerDescription = screenDescription.getHeaderDescription();
-		if (headerDescription == null) {
-			throw new IllegalStateException("we don't currently support screens without a header");
-		}
-		if (referenceDescription != null) {
+		if ((referenceDescription != null) && (headerDescription != null)) {
 			headerDescription.setWantsClearTop(wantsNewActivity(headerDescription, referenceDescription.getHeaderDescription()));
 		}
-		screenActivity.startHeader(headerDescription, anim);
+		if (headerDescription != null) {
+			screenActivity.startHeader(headerDescription, anim);
+		} else {
+			screenActivity.startEmptyHeader();
+		}
 
 		// apply bodies
 		final List<ActivityDescription> bodyDescriptions = screenDescription.getBodyDescriptions();
@@ -116,15 +113,16 @@ public class StandardScreenManager implements ScreenManager {
 
 		// apply shortcuts
 		screenActivity.setShortcuts(screenDescription);
-
 	}
 
+	@Override
 	public void display(final ScreenDescription description) {
 		if (description == null) {
 			return;
 		}
 
-		withNavigationAllowed(NavigationIntent.Type.FORWARD, new Runnable() {
+		withNavigationAllowed(NavigationIntent.Type.FORWARD, false, new Runnable() {
+			@Override
 			public void run() {
 				final ScreenDescription previousDescription = getCurrentDescription();
 				if ((previousDescription != null) && wantsNewScreen(description, previousDescription)) {
@@ -138,17 +136,21 @@ public class StandardScreenManager implements ScreenManager {
 		});
 	}
 
+	@Override
 	public void displayInScreen(final ScreenDescription description, final ScreenActivityProtocol screenActivity,
 			final boolean wantsEmptyStack) {
 		if (wantsEmptyStack) {
+			setFrameworkHooksEnabled(false);
 			doFinishDisplay();
+			setFrameworkHooksEnabled(true);
 		}
 		pushDescriptionAndActivity(description, screenActivity);
 		applyCurrentDescription(getPreviousDescription(), ActivityHelper.ANIM_NEXT);
 	}
 
-	public void displayPreviousDescription() {
-		withNavigationAllowed(NavigationIntent.Type.BACK, new Runnable() {
+	@Override
+	public void displayPreviousDescription(final boolean force) {
+		withNavigationAllowed(NavigationIntent.Type.BACK, force, new Runnable() {
 			@Override
 			public void run() {
 				final StackEntry previousEntry = popEntry();
@@ -165,20 +167,23 @@ public class StandardScreenManager implements ScreenManager {
 		});
 	}
 
+	@Override
 	public void displayReferencedStackEntryInScreen(final int stackEntryReference, final ScreenActivityProtocol newScreenActivity) {
 		// NOTE: no withNavigationAllowed check needed here as this is done by statusbar already
 		// NOTE: currently we only support resumption of top-stack-entry
-
 		// walk stack and replace occurences of oldScreenActivity with newScreenActivity
-		final ScreenActivityProtocol oldScreenActivity = _stack.getScreenActivity();
-		for (StackEntry entry = _stack; entry != null; entry = entry._next) {
-			if (entry.getScreenActivity() == oldScreenActivity) {
-				entry._screenActivity = newScreenActivity;
+		if (_stack != null) {
+			final ScreenActivityProtocol oldScreenActivity = _stack.getScreenActivity();
+			for (StackEntry entry = _stack; entry != null; entry = entry._next) {
+				if (entry.getScreenActivity() == oldScreenActivity) {
+					entry._screenActivity = newScreenActivity;
+				}
 			}
+			applyCurrentDescription(null, ActivityHelper.ANIM_NONE);
 		}
-		applyCurrentDescription(null, ActivityHelper.ANIM_NONE);
 	}
 
+	@Override
 	public void displayStoredDescriptionInScreen(final ScreenActivityProtocol screenActivity) {
 		if (_storedDescription != null) {
 			final ScreenDescription description = _storedDescription;
@@ -187,6 +192,7 @@ public class StandardScreenManager implements ScreenManager {
 		}
 	}
 
+	@Override
 	public void displayStoredDescriptionInTabs(final TabsActivityProtocol tabs) {
 		if (_storedDescription != null) {
 			final ScreenDescription description = _storedDescription;
@@ -195,6 +201,7 @@ public class StandardScreenManager implements ScreenManager {
 		}
 	}
 
+	@Override
 	public void displayWithEmptyStack(final ScreenDescription description) {
 
 		// get description before unwinding stack
@@ -226,31 +233,39 @@ public class StandardScreenManager implements ScreenManager {
 			screenActivity.getActivity().finish();
 		}
 
-		// empty stack and clean other stuff
-		setStack(null);
+		// clean stuff
 		_storedDescription = null;
+		setStack(null);
 	}
 
+	@Override
 	public void finishDisplay() {
-		withNavigationAllowed(NavigationIntent.Type.EXIT, new Runnable() {
+		withNavigationAllowed(NavigationIntent.Type.EXIT, false, new Runnable() {
+			@Override
 			public void run() {
 				doFinishDisplay();
 			}
 		});
 	}
 
+	@Override
 	public ActivityDescription getActivityDescription(final String id) {
-		return _stack.getActivityDescription(id);
+		final StackEntry s = _stack;
+		return s != null ? s.getActivityDescription(id) : null;
 	}
 
 	protected ScreenActivityProtocol getCurrentActivity() {
-		return _stack != null ? _stack.getScreenActivity() : null;
+		final StackEntry s = _stack;
+		return s != null ? s.getScreenActivity() : null;
 	}
 
+	@Override
 	public ScreenDescription getCurrentDescription() {
-		return _stack != null ? _stack.getScreenDescription() : null;
+		final StackEntry s = _stack;
+		return s != null ? s.getScreenDescription() : null;
 	}
 
+	@Override
 	public int getCurrentStackEntryReference() {
 		return StackEntry.getDepth(_stack);
 	}
@@ -310,16 +325,21 @@ public class StandardScreenManager implements ScreenManager {
 	}
 
 	@Override
+	public void onShowedTab(final ScreenDescription screenDescription) {
+		_delegate.screenManagerWillShowScreenDescription(screenDescription, Delegate.Direction.NONE);
+	}
+
+	@Override
 	public void onWillShowOptionsMenu() {
 		_delegate.screenManagerWillShowOptionsMenu();
 	}
 
 	private StackEntry popEntry() {
-		if (_stack == null) {
+		final StackEntry previous = _stack;
+		if (previous == null) {
 			return null;
 		}
-		final StackEntry previous = _stack;
-		setStack(_stack._next);
+		setStack(previous._next);
 		return previous;
 	}
 
@@ -327,6 +347,7 @@ public class StandardScreenManager implements ScreenManager {
 		setStack(new StackEntry(_stack, model, screen));
 	}
 
+	@Override
 	public void setDelegate(final Delegate policy) {
 		_delegate = policy;
 	}
@@ -334,8 +355,6 @@ public class StandardScreenManager implements ScreenManager {
 	private void setFrameworkHooksEnabled(final boolean enabled) {
 		_frameworkHooksEnabled = enabled;
 	}
-
-	// debug only
 
 	private void setStack(final StackEntry entry) {
 		final StackEntry oldStack = _stack;
@@ -371,9 +390,9 @@ public class StandardScreenManager implements ScreenManager {
 		return false;
 	}
 
-	private void withNavigationAllowed(final Type navigationType, final Runnable runnable) {
+	private void withNavigationAllowed(final Type navigationType, final boolean force, final Runnable runnable) {
 		final ScreenActivityProtocol activity = getCurrentActivity();
-		if (activity == null) {
+		if ((activity == null) || force) {
 			runnable.run();
 			return;
 		}

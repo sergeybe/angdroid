@@ -53,15 +53,15 @@ public abstract class ChallengeActionListActivity extends ComponentListActivity<
 	}
 
 	@Override
-	protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(final int id) {
 		switch (id) {
 		case Constant.DIALOG_CHALLENGE_ONGOING:
-			TextButtonDialog dialogOngoing = new TextButtonDialog(this);
+			final TextButtonDialog dialogOngoing = new TextButtonDialog(this);
 			dialogOngoing.setText(getResources().getString(R.string.sl_error_message_challenge_ongoing));
 			dialogOngoing.setOnActionListener(this);
 			return dialogOngoing;
 		case Constant.DIALOG_CHALLENGE_GAME_NOT_READY:
-			TextButtonDialog dialogGameNotReady = new TextButtonDialog(this);
+			final TextButtonDialog dialogGameNotReady = new TextButtonDialog(this);
 			dialogGameNotReady.setText(getResources().getString(R.string.sl_error_message_challenge_game_not_ready));
 			dialogGameNotReady.setOnActionListener(this);
 			return dialogGameNotReady;

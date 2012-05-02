@@ -58,11 +58,11 @@ package com.scoreloop.client.android.ui;
  */
 public interface OnCanStartGamePlayObserver {
 
-    /**
-     * This method is called before the user starts or accepts 
-     * a challenge. It will normally be implemented
-     * in the game, (that is within the application itself). 
-     * @return @c true if the game is ready to start a challenge, otherwise @c false. 
-     */	
-	boolean onCanStartGamePlay(); 
+	/**
+	 * This method is called before the user starts or accepts 
+	 * a challenge. It will normally be implemented
+	 * in the game, (that is within the application itself). 
+	 * @return @c true if the game is ready to start a challenge, otherwise @c false. 
+	 */
+	boolean onCanStartGamePlay();
 }

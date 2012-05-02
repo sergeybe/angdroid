@@ -22,15 +22,15 @@
 package com.scoreloop.client.android.ui.framework;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.AttributeSet;
+import android.widget.TextView;
 
 import org.angdroid.angband.R;
 
 public class TabView extends SegmentedView {
 
-
-	private final int	res2[][]	= new int[][] {
-			{ R.drawable.sl_tab_active, R.drawable.sl_tab_default_left_border },
+	private final int	res2[][]	= new int[][] { { R.drawable.sl_tab_active, R.drawable.sl_tab_default_left_border },
 			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_active } };
 
 	private final int	res3[][]	= new int[][] {
@@ -39,10 +39,14 @@ public class TabView extends SegmentedView {
 			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_active } };
 
 	private final int	res4[][]	= new int[][] {
-			{ R.drawable.sl_tab_active, R.drawable.sl_tab_default_left_border, R.drawable.sl_tab_default_left_border, R.drawable.sl_tab_default_left_border },
-			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_active, R.drawable.sl_tab_default_left_border, R.drawable.sl_tab_default_left_border },
-			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_active, R.drawable.sl_tab_default_left_border },
-			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_active } };
+			{ R.drawable.sl_tab_active, R.drawable.sl_tab_default_left_border, R.drawable.sl_tab_default_left_border,
+			R.drawable.sl_tab_default_left_border },
+			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_active, R.drawable.sl_tab_default_left_border,
+			R.drawable.sl_tab_default_left_border },
+			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_active,
+			R.drawable.sl_tab_default_left_border },
+			{ R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_default_right_border, R.drawable.sl_tab_default_right_border,
+			R.drawable.sl_tab_active } };
 
 	public TabView(final Context context, final AttributeSet attributeSet) {
 		super(context, attributeSet);
@@ -74,13 +78,35 @@ public class TabView extends SegmentedView {
 		int res[][] = null;
 		final int count = getChildCount();
 		switch (count) {
-		default: throw new IllegalStateException("unsupported number of tabs");
-		case 2: res = res2; break;
-		case 3: res = res3; break;
-		case 4: res = res4; break;
+		default:
+			throw new IllegalStateException("unsupported number of tabs");
+		case 2:
+			res = res2;
+			break;
+		case 3:
+			res = res3;
+			break;
+		case 4:
+			res = res4;
+			break;
 		}
 		for (int i = 0; i < count; i++) {
-			getChildAt(i).setBackgroundResource(res[segment][i]);
+			final TextView child = (TextView) getChildAt(i);
+			child.setBackgroundResource(res[segment][i]);
+
+			final Resources r = getResources();
+
+			if (i == segment) {
+				child.setTextColor(r.getColor(R.color.sl_color_tabs_text_active));
+				child.setShadowLayer(r.getDimension(R.dimen.sl_tabs_shadow_radius_active),
+						r.getDimension(R.dimen.sl_tabs_shadow_dx_active), r.getDimension(R.dimen.sl_tabs_shadow_dy_active),
+						r.getColor(R.color.sl_color_tabs_shadow_active));
+			} else {
+				child.setTextColor(r.getColor(R.color.sl_color_tabs_text));
+				child.setShadowLayer(r.getDimension(R.dimen.sl_tabs_shadow_radius), r.getDimension(R.dimen.sl_tabs_shadow_dx),
+						r.getDimension(R.dimen.sl_tabs_shadow_dy), r.getColor(R.color.sl_color_tabs_shadow));
+			}
+
 		}
 	}
 }

@@ -22,8 +22,8 @@
 package com.scoreloop.client.android.ui.component.challenge;
 
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.scoreloop.client.android.core.model.Challenge;
@@ -33,22 +33,20 @@ import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.framework.BaseListItem;
 
 class ChallengeControlsListItem extends BaseListItem {
-	
+
 	interface OnControlObserver {
-		
+
 		void onControl1();
 
 		void onControl2();
 	}
 
-	private final Challenge	_challenge;
-	private boolean			_controlsEnabled;
-	private OnControlObserver _onControlObserver;
+	private final Challenge			_challenge;
+	private final OnControlObserver	_onControlObserver;
 
-	public ChallengeControlsListItem(final ComponentActivity context, final Challenge challenge, OnControlObserver observer) {
+	public ChallengeControlsListItem(final ComponentActivity context, final Challenge challenge, final OnControlObserver observer) {
 		super(context, null, null);
 		_challenge = challenge; // challenge == null ? createChallenge : acceptChallenge
-		_controlsEnabled = true;
 		_onControlObserver = observer;
 	}
 
@@ -74,21 +72,17 @@ class ChallengeControlsListItem extends BaseListItem {
 	protected void prepareView(final View view) {
 		final Button control1 = (Button) view.findViewById(R.id.control1);
 		control1.setOnClickListener(new OnClickListener() {
+			@Override
 			public void onClick(final View v) {
-				if (_controlsEnabled) {
-					_controlsEnabled = false;
-					_onControlObserver.onControl1();
-				}
+				_onControlObserver.onControl1();
 			}
 		});
 
 		final Button control2 = (Button) view.findViewById(R.id.control2);
 		control2.setOnClickListener(new OnClickListener() {
+			@Override
 			public void onClick(final View v) {
-				if (_controlsEnabled) {
-					_controlsEnabled = false;
-					_onControlObserver.onControl2();
-				}
+				_onControlObserver.onControl2();
 			}
 		});
 

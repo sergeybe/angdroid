@@ -30,8 +30,8 @@ import android.widget.LinearLayout;
 public abstract class SegmentedView extends LinearLayout implements OnClickListener {
 
 	private OnClickListener	onSegmentClickListener;
-	protected int			selectedSegment	= -1;
-	public int				oldSelectedSegment = -1;
+	protected int			selectedSegment		= -1;
+	public int				oldSelectedSegment	= -1;
 
 	public SegmentedView(final Context context, final AttributeSet attributeSet) {
 		super(context, attributeSet);
@@ -49,6 +49,7 @@ public abstract class SegmentedView extends LinearLayout implements OnClickListe
 		return selectedSegment != -1 ? getChildAt(selectedSegment) : null;
 	}
 
+	@Override
 	public void onClick(final View view) {
 		final int count = getChildCount();
 		for (int i = 0; i < count; i++) {

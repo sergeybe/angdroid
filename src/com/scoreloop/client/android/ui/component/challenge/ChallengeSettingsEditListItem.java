@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -28,13 +28,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.scoreloop.client.android.core.model.Money;
-import com.scoreloop.client.android.core.model.Session;
 import org.angdroid.angband.R;
+import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
 import com.scoreloop.client.android.ui.component.base.ComponentActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.StringFormatter;
@@ -45,7 +45,7 @@ class ChallengeSettingsEditListItem extends ChallengeSettingsListItem {
 		TextView	stakeText;
 	}
 
-	static private List<Money>	stakes	= Session.getCurrentSession().getChallengeStakes();
+	private final List<Money>	stakes	= ScoreloopManagerSingleton.get().getSession().getChallengeStakes();
 
 	private int					_modePosition;
 	private int					_stakePosition;
@@ -96,23 +96,19 @@ class ChallengeSettingsEditListItem extends ChallengeSettingsListItem {
 		final Spinner modeSelector = (Spinner) view.findViewById(R.id.mode_selector);
 		if (getComponentActivity().getGame().hasModes()) {
 			modeSelector.setVisibility(View.VISIBLE);
-			final ArrayAdapter<?> adapter;
-			
-			// left for backward compatibility
-			if (getComponentActivity().getConfiguration().getModesResId() != 0) {
-				adapter = ArrayAdapter.createFromResource(getContext(), getComponentActivity().getConfiguration().getModesResId(), R.layout.sl_spinner_item);
-			} else {
-				adapter = new ArrayAdapter<String>(getContext(), R.layout.sl_spinner_item, getComponentActivity().getConfiguration().getModesNames());
-			}
+			final ArrayAdapter<?> adapter = new ArrayAdapter<String>(getContext(), R.layout.sl_spinner_item, getComponentActivity()
+					.getConfiguration().getModesNames());
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 			modeSelector.setAdapter(adapter);
 			modeSelector.setSelection(_modePosition);
 			modeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+				@Override
 				public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
 					_modePosition = position;
 				}
 
+				@Override
 				public void onNothingSelected(final AdapterView<?> arg0) {
 				}
 			});
@@ -126,15 +122,18 @@ class ChallengeSettingsEditListItem extends ChallengeSettingsListItem {
 		stakeSelector.setMax(stakes.size() - 1);
 		stakeSelector.setProgress(_stakePosition);
 		stakeSelector.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			@Override
 			public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
 				_stakePosition = progress;
 				final ViewHolder holder = (ViewHolder) seekBar.getTag();
 				updateStakeText(holder.stakeText);
 			}
 
+			@Override
 			public void onStartTrackingTouch(final SeekBar seekBar) {
 			}
 
+			@Override
 			public void onStopTrackingTouch(final SeekBar seekBar) {
 			}
 		});

@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.scoreloop.client.android.core.model.Continuation;
+
 public class ValueStore {
 
 	private static class Node {
@@ -43,10 +45,6 @@ public class ValueStore {
 		void onValueChanged(ValueStore valueStore, String key, Object oldValue, Object newValue);
 
 		void onValueSetDirty(ValueStore valueStore, String key);
-	}
-
-	private static interface ObserverContinuation {
-		void withObserver(Observer observer);
 	}
 
 	public static enum RetrievalMode {
@@ -121,7 +119,7 @@ public class ValueStore {
 		}
 	}
 
-	private void forAllObservers(final String key, final ObserverContinuation continuation) {
+	private void forAllObservers(final String key, final Continuation<Observer> continuation) {
 		final List<WeakReference<Observer>> observers = getObserverMap().get(key);
 		if (observers == null) {
 			return;
@@ -130,7 +128,7 @@ public class ValueStore {
 		for (final WeakReference<Observer> weakObserver : copiedObservers) {
 			final Observer observer = weakObserver.get();
 			if (observer != null) {
-				continuation.withObserver(observer);
+				continuation.withValue(observer, null);
 			} else {
 				observers.remove(weakObserver);
 			}
@@ -205,16 +203,18 @@ public class ValueStore {
 	}
 
 	private void invokeChangedObservers(final String key, final Object oldValue, final Object newValue) {
-		forAllObservers(key, new ObserverContinuation() {
-			public void withObserver(final Observer observer) {
+		forAllObservers(key, new Continuation<Observer>() {
+			@Override
+			public void withValue(final Observer observer, final Exception error) {
 				observer.onValueChanged(ValueStore.this, key, oldValue, newValue);
 			}
 		});
 	}
 
 	private void invokeSetDirtyObservers(final String key) {
-		forAllObservers(key, new ObserverContinuation() {
-			public void withObserver(final Observer observer) {
+		forAllObservers(key, new Continuation<Observer>() {
+			@Override
+			public void withValue(final Observer observer, final Exception error) {
 				observer.onValueSetDirty(ValueStore.this, key);
 			}
 		});
@@ -361,8 +361,8 @@ public class ValueStore {
 			}
 			buffer.append(key);
 			buffer.append("=");
-            final Object value = _values.get(key);
-            buffer.append(value != null ? value.toString() : "NULL");
+			final Object value = _values.get(key);
+			buffer.append(value != null ? value.toString() : "NULL");
 			if (_dates.get(key) == null) {
 				buffer.append("(*)");
 			}

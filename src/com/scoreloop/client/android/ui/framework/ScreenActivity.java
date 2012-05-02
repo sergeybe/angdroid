@@ -30,8 +30,9 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
 
 import org.angdroid.angband.R;
@@ -39,15 +40,16 @@ import org.angdroid.angband.R;
 public class ScreenActivity extends ActivityGroup implements ScreenActivityProtocol, OnClickListener {
 
 	private static final String	REGION_BODY					= "body";
-
 	private static final String	REGION_HEADER				= "header";
 	private static final String	STACK_ENTRY_REFERENCE_KEY	= "stackEntryReference";
-	public static final String	TAG							= "ScoreloopUI";
+
+	private BaseActivity		_bodyActivity;
 
 	public ScreenActivity() {
 		super(false); // passing false here indicates, that we want to have more than one resumed activity per activity-group
 	}
 
+	@Override
 	public void cleanOutSubactivities() {
 		getLocalActivityManager().removeAllActivities();
 	}
@@ -60,17 +62,45 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 	}
 
 	protected void displayPreviousDescription() {
-		ScreenManagerSingleton.get().displayPreviousDescription();
+		ScreenManagerSingleton.get().displayPreviousDescription(false);
 	}
 
 	protected void finishDisplay() {
 		ScreenManagerSingleton.get().finishDisplay();
 	}
 
+	@Override
+	public void finishFromChild(final Activity child) {
+		final Intent childIntent = child.getIntent();
+		if (childIntent.hasExtra(BaseActivity.CHILD_RESULT_CODE)) {
+			setResult(childIntent.getIntExtra(BaseActivity.CHILD_RESULT_CODE, 0), childIntent);
+			finishDisplay();
+		} else {
+			super.finishFromChild(child);
+		}
+	}
+
+	@Override
 	public Activity getActivity() {
 		return this;
 	}
 
+	private Activity getBodyActivity() {
+		if (_bodyActivity != null) {
+			return _bodyActivity;
+		}
+		return getLocalActivityManager().getActivity(REGION_BODY);
+	}
+
+	@Override
+	public Activity getCurrentActivity() {
+		if (_bodyActivity != null) {
+			return _bodyActivity;
+		}
+		return super.getCurrentActivity();
+	}
+
+	@Override
 	public boolean isNavigationAllowed(final NavigationIntent navigationIntent) {
 
 		// NOTE: here and for onCreate/PrepareOptionsMenu: implement a visitor pattern instead to go over all activities.
@@ -80,7 +110,7 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 			final BaseActivity headerActivity = (BaseActivity) activity;
 			navigationAllowed &= headerActivity.isNavigationAllowed(navigationIntent);
 		}
-		activity = getLocalActivityManager().getActivity(REGION_BODY);
+		activity = getBodyActivity();
 		if (activity instanceof BaseActivity) {
 			final BaseActivity bodyActivity = (BaseActivity) activity;
 			navigationAllowed &= bodyActivity.isNavigationAllowed(navigationIntent);
@@ -91,6 +121,7 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 		return navigationAllowed;
 	}
 
+	@Override
 	public void onClick(final View view) {
 		if (view == findViewById(R.id.sl_status_close_button)) {
 			onStatusCloseClick(view);
@@ -120,7 +151,7 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 			final int currentStackEntryReference = ScreenManagerSingleton.get().getCurrentStackEntryReference();
 			if (stackEntryReference != currentStackEntryReference) {
 				// this sould never happen
-				Log.w(TAG, String.format(
+				Log.w("ScoreloopUI.Framework", String.format(
 						"onCreate with savedInstanceState: contains wrong stackEntryReference %s and current stack depth is %s",
 						stackEntryReference, currentStackEntryReference));
 				ScreenManagerSingleton.get().finishDisplay();
@@ -130,15 +161,6 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 
 			}
 		}
-	}
-
-	@Override
-	public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-		if ((keyCode == KeyEvent.KEYCODE_BACK) && (event.getRepeatCount() == 0)) {
-			displayPreviousDescription();
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -157,19 +179,12 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenu(final Menu menu) {
-		// this is called from body activity
-		boolean result = super.onPrepareOptionsMenu(menu);
-		final Activity headerActivity = getLocalActivityManager().getActivity(REGION_HEADER);
-		if ((headerActivity != null) && (headerActivity instanceof OptionsMenuForActivityGroup)) {
-			result |= ((OptionsMenuForActivityGroup) headerActivity).onPrepareOptionsMenuForActivityGroup(menu);
+	public boolean onKeyDown(final int keyCode, final KeyEvent event) {
+		if ((keyCode == KeyEvent.KEYCODE_BACK) && (event.getRepeatCount() == 0)) {
+			displayPreviousDescription();
+			return true;
 		}
-		final Activity bodyActivity = getLocalActivityManager().getActivity(REGION_BODY);
-		if ((bodyActivity != null) && (bodyActivity instanceof OptionsMenuForActivityGroup)) {
-			result |= ((OptionsMenuForActivityGroup) bodyActivity).onPrepareOptionsMenuForActivityGroup(menu);
-		}
-		ScreenManagerSingleton.get().onWillShowOptionsMenu();
-		return result;
+		return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -189,6 +204,41 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 			}
 		}
 		return consumed;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(final Menu menu) {
+		// this is called from body activity
+		boolean result = super.onPrepareOptionsMenu(menu);
+		final Activity headerActivity = getLocalActivityManager().getActivity(REGION_HEADER);
+		if ((headerActivity != null) && (headerActivity instanceof OptionsMenuForActivityGroup)) {
+			result |= ((OptionsMenuForActivityGroup) headerActivity).onPrepareOptionsMenuForActivityGroup(menu);
+		}
+		final Activity bodyActivity = getLocalActivityManager().getActivity(REGION_BODY);
+		if ((bodyActivity != null) && (bodyActivity instanceof OptionsMenuForActivityGroup)) {
+			result |= ((OptionsMenuForActivityGroup) bodyActivity).onPrepareOptionsMenuForActivityGroup(menu);
+		}
+		ScreenManagerSingleton.get().onWillShowOptionsMenu();
+		return result;
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (_bodyActivity != null) {
+			_bodyActivity.onResume();
+		}
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+
+		// if body has configChanges set, then store it here and re-apply in startBody
+		final Activity activity = getBodyActivity();
+		if ((activity != null) && (activity.onRetainNonConfigurationInstance() != null)) {
+			return activity;
+		}
+		return null;
 	}
 
 	@Override
@@ -221,10 +271,19 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 		}
 	}
 
-	private void onStatusCloseClick(final View view) {
+	protected void onStatusCloseClick(final View view) {
 		finishDisplay();
 	}
 
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (_bodyActivity != null) {
+			_bodyActivity.onStop();
+		}
+	}
+
+	@Override
 	public void setShortcuts(final ScreenDescription description) {
 		final ShortcutView shortcutView = (ShortcutView) findViewById(R.id.sl_shortcuts);
 		shortcutView.setDescriptions(this, description.getShortcutDescriptions());
@@ -233,27 +292,53 @@ public class ScreenActivity extends ActivityGroup implements ScreenActivityProto
 		shortcutView.switchToSegment(index);
 	}
 
+	@Override
 	public void startBody(final ActivityDescription description, final int anim) {
+		final Activity activity = (Activity) getLastNonConfigurationInstance();
+		if ((activity != null) && (activity instanceof BaseActivity)) {
+			final View paneView = activity.getWindow().getDecorView();
+			final ViewParent parent = paneView.getParent();
+			if ((parent != null) && (parent instanceof ViewGroup)) {
+				final ViewGroup viewGroup = (ViewGroup) parent;
+				viewGroup.removeView(paneView);
+			}
+			final ViewGroup region = (ViewGroup) findViewById(R.id.sl_body);
+			region.addView(paneView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+			_bodyActivity = (BaseActivity) activity;
+			return;
+		}
 		ActivityHelper.startLocalActivity(this, description.getIntent(), REGION_BODY, R.id.sl_body, anim);
+		_bodyActivity = null;
 	}
 
+	@Override
 	public void startEmptyBody() {
 		final ViewGroup region = (ViewGroup) findViewById(R.id.sl_body);
 		region.removeAllViews();
 	}
 
+	@Override
+	public void startEmptyHeader() {
+		final ViewGroup region = (ViewGroup) findViewById(R.id.sl_header);
+		region.removeAllViews();
+	}
+
+	@Override
 	public void startHeader(final ActivityDescription description, final int anim) {
 		ActivityHelper.startLocalActivity(this, description.getIntent(), REGION_HEADER, R.id.sl_header, anim);
 	}
 
+	@Override
 	public void startNewScreen() {
 		startActivity(new Intent(this, ScreenActivity.class));
 	}
 
+	@Override
 	public void startTabBody(final ScreenDescription description, final int anim) {
 		final Intent intent = new Intent(this, TabsActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP); // we want TabsActivity to receive onNewIntent calls but otherwise reuse them
 		ActivityHelper.startLocalActivity(this, intent, REGION_BODY, R.id.sl_body, anim);
+		_bodyActivity = null;
 	}
 
 }

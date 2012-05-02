@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -28,10 +28,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.scoreloop.client.android.core.model.Challenge;
-import com.scoreloop.client.android.core.model.Session;
-
 import org.angdroid.angband.R;
+
+import com.scoreloop.client.android.core.model.Challenge;
 
 /**
  * You can use this activity to show the result of a game play to the player. Start this activity after receiving an @link com.scoreloop.client.android.ui.OnScoreSubmitObserver.onScoreSubmit() onScoreSubmit() @endlink callback.
@@ -46,9 +45,9 @@ public class ShowResultOverlayActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.sl_result);
 
-		final StandardScoreloopManager manager = StandardScoreloopManager.getFactory(ScoreloopManagerSingleton.get());
+		final ScoreloopManagerSingleton.Impl impl = ScoreloopManagerSingleton.getImpl();
 
-		final int lastStatus = manager.getLastSubmitStatus();
+		final int lastStatus = impl.getLastSubmitStatus();
 
 		String text = "";
 		switch (lastStatus) {
@@ -59,11 +58,11 @@ public class ShowResultOverlayActivity extends Activity {
 			text = getResources().getString(R.string.sl_status_success_local_score);
 			break;
 		case OnScoreSubmitObserver.STATUS_SUCCESS_CHALLENGE:
-			final Challenge challenge = manager.getLastSubmittedChallenge();
+			final Challenge challenge = impl.getLastSubmittedChallenge();
 			if (challenge.isOpen() || challenge.isAssigned()) {
 				text = getResources().getString(R.string.sl_status_success_challenge_created);
 			} else if (challenge.isComplete()) {
-				if (Session.getCurrentSession().getUser().equals(challenge.getWinner())) {
+				if (ScoreloopManagerSingleton.getImpl().getSession().getUser().equals(challenge.getWinner())) {
 					text = getResources().getString(R.string.sl_status_success_challenge_won);
 				} else {
 					text = getResources().getString(R.string.sl_status_success_challenge_lost);
@@ -87,6 +86,7 @@ public class ShowResultOverlayActivity extends Activity {
 		final Button button = (Button) findViewById(R.id.sl_button);
 		button.setOnClickListener(new OnClickListener() {
 
+			@Override
 			public void onClick(final View v) {
 				finish();
 			}

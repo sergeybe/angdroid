@@ -72,6 +72,7 @@ public class AchievementListItem extends StandardListItem<Achievement> {
 		achievementViewHolder.increment = (TextView) view.findViewById(R.id.sl_list_item_achievement_percent);
 	}
 
+	@Override
 	protected int getIconId() {
 		return R.id.sl_list_item_achievement_icon;
 	}
@@ -81,10 +82,12 @@ public class AchievementListItem extends StandardListItem<Achievement> {
 		return R.layout.sl_list_item_achievement;
 	}
 
+	@Override
 	protected int getSubTitle2Id() {
 		return R.id.sl_list_item_achievement_reward;
 	}
 
+	@Override
 	protected int getSubTitleId() {
 		return R.id.sl_list_item_achievement_description;
 	}
@@ -113,14 +116,13 @@ public class AchievementListItem extends StandardListItem<Achievement> {
 		if (isEnabled()) {
 			achievementViewHolder.accessory.setVisibility(View.VISIBLE);
 			achievementViewHolder.subTitle2.setVisibility(View.GONE);
-		}
-		else {
+		} else {
 			achievementViewHolder.accessory.setVisibility(View.INVISIBLE);
-			achievementViewHolder.subTitle2.setVisibility(View.VISIBLE);			
+			achievementViewHolder.subTitle2.setVisibility(View.VISIBLE);
 		}
 
 		final Range range = getTarget().getAward().getCounterRange();
-		if (!getTarget().isAchieved() &&  range.getLength() > 1) {
+		if (!getTarget().isAchieved() && (range.getLength() > 1)) {
 			achievementViewHolder.progress.setVisibility(View.VISIBLE);
 			achievementViewHolder.progress.setMax(range.getLength());
 			achievementViewHolder.progress.setProgress(getTarget().getValue() - range.getLocation());

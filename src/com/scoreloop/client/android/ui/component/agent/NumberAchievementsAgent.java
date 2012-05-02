@@ -33,8 +33,8 @@ public class NumberAchievementsAgent extends BaseAgent {
 
 	private AchievementsController	_achievementsController;
 
-	public NumberAchievementsAgent() {
-		super(SUPPORTED_KEYS);
+	public NumberAchievementsAgent(final Delegate delegate) {
+		super(delegate, SUPPORTED_KEYS);
 	}
 
 	@Override

@@ -24,22 +24,21 @@ package com.scoreloop.client.android.ui.component.achievement;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.os.AsyncTask;
-
 import com.scoreloop.client.android.core.controller.AchievementController;
 import com.scoreloop.client.android.core.controller.AchievementsController;
 import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.controller.RequestControllerObserver;
 import com.scoreloop.client.android.core.model.Achievement;
+import com.scoreloop.client.android.core.model.Continuation;
 
 public class AchievementsEngine implements RequestControllerObserver {
 
-	private AchievementController	_achievementController;
-	private AchievementsController	_achievementsController;
-	private boolean					_isLoading;
-	private boolean					_isSubmitting;
-	private List<Runnable>			_loadContinuations		= new ArrayList<Runnable>();
-	private List<Runnable>			_submitContinuations	= new ArrayList<Runnable>();
+	private AchievementController		_achievementController;
+	private AchievementsController		_achievementsController;
+	private boolean						_isLoading;
+	private boolean						_isSubmitting;
+	private List<Continuation<Boolean>>	_loadContinuations		= new ArrayList<Continuation<Boolean>>();
+	private List<Continuation<Boolean>>	_submitContinuations	= new ArrayList<Continuation<Boolean>>();
 
 	private AchievementController getAchievementController() {
 		if (_achievementController == null) {
@@ -55,88 +54,91 @@ public class AchievementsEngine implements RequestControllerObserver {
 		return _achievementsController;
 	}
 
-	public boolean hadInitialSync() {
-		return getAchievementsController().hadInitialSync();
+	public void checkHadInitialSync(final Continuation<Boolean> contination) {
+		getAchievementsController().checkHadInitialSync(contination);
 	}
 
 	public boolean hasLoadedAchievements() {
 		return getAchievementsController().getAchievements().size() > 0;
 	}
 
-	private void invokeLoadContinuations() {
-		final List<Runnable> continuations = _loadContinuations;
-		_loadContinuations = new ArrayList<Runnable>();
-		for (final Runnable continuation : continuations) {
-			continuation.run();
+	private void invokeLoadContinuations(final Boolean success, final Exception error) {
+		final List<Continuation<Boolean>> continuations = _loadContinuations;
+		_loadContinuations = new ArrayList<Continuation<Boolean>>();
+		for (final Continuation<Boolean> continuation : continuations) {
+			continuation.withValue(success, error);
 		}
 	}
 
-	private void invokeSubmitContinuations() {
-		final List<Runnable> continuations = _submitContinuations;
-		_submitContinuations = new ArrayList<Runnable>();
-		for (final Runnable continuation : continuations) {
-			continuation.run();
+	private void invokeSubmitContinuations(final Boolean success, final Exception error) {
+		final List<Continuation<Boolean>> continuations = _submitContinuations;
+		_submitContinuations = new ArrayList<Continuation<Boolean>>();
+		for (final Continuation<Boolean> continuation : continuations) {
+			continuation.withValue(success, error);
 		}
 	}
 
-	public void loadAchievements(final boolean forceInitialSync, final Runnable continuation) {
-		if (!hasLoadedAchievements() || (forceInitialSync && !hadInitialSync())) {
-			if (continuation != null) {
-				_loadContinuations.add(continuation);
+	public void loadAchievements(final boolean forceInitialSync, final Continuation<Boolean> continuation) {
+		checkHadInitialSync(new Continuation<Boolean>() {
+			@Override
+			public void withValue(final Boolean hadInitialSync, final Exception error) {
+				if (!hasLoadedAchievements() || (forceInitialSync && !hadInitialSync)) {
+					if (continuation != null) {
+						_loadContinuations.add(continuation);
+					}
+					if (!_isLoading) {
+						_isLoading = true;
+						getAchievementsController().setForceInitialSync(forceInitialSync);
+						getAchievementsController().loadAchievements();
+					}
+				} else {
+					if (continuation != null) {
+						continuation.withValue(true, null);
+					}
+				}
 			}
-			if (!_isLoading) {
-				_isLoading = true;
-				getAchievementsController().setForceInitialSync(forceInitialSync);
-				getAchievementsController().loadAchievements();
-			}
-		} else {
-			if (continuation != null) {
-				continuation.run();
-			}
-		}
+		});
+
 	}
 
+	@Override
 	public void requestControllerDidFail(final RequestController aRequestController, final Exception anException) {
 		if (aRequestController == _achievementsController) {
 			_isLoading = false;
-			invokeLoadContinuations();
+			invokeLoadContinuations(false, anException);
 		} else if (aRequestController == _achievementController) {
 			_isSubmitting = false;
-			invokeSubmitContinuations();
+			invokeSubmitContinuations(false, anException);
 		}
 	}
 
+	@Override
 	public void requestControllerDidReceiveResponse(final RequestController aRequestController) {
 		if (aRequestController == _achievementsController) {
 			_isLoading = false;
-			invokeLoadContinuations();
+			invokeLoadContinuations(true, null);
 		} else if (aRequestController == _achievementController) {
 			_isSubmitting = false;
 			submitNextAchievement();
 		}
 	}
 
-	public void submitAchievements(final boolean forceInitialSync, final Runnable continuation) {
-		final AsyncTask<Void, Void, Boolean> loadHasInitialSyncTask = new AsyncTask<Void, Void, Boolean>() {
+	public void submitAchievements(final boolean forceInitialSync, final Continuation<Boolean> continuation) {
+		checkHadInitialSync(new Continuation<Boolean>() {
 			@Override
-			protected Boolean doInBackground(Void... params) {
-				return hadInitialSync();
-			}
-
-			@Override
-			protected void onPostExecute(Boolean hadInitialSync) {
+			public void withValue(final Boolean hadInitialSync, final Exception error) {
 				if (!hasLoadedAchievements() || (!hadInitialSync && forceInitialSync)) {
-					loadAchievements(forceInitialSync, new Runnable() {
-						public void run() {
+					loadAchievements(forceInitialSync, new Continuation<Boolean>() {
+						@Override
+						public void withValue(final Boolean success, final Exception error) {
 							if (hasLoadedAchievements()) {
 								submitAchievements(forceInitialSync, continuation);
 							} else {
 								// in case we had problems loading the achievements, we just run the submit continuations
-								// NOTE: in the future change from Runnable to another interface which allows to pass the failure
 								if (continuation != null) {
 									_submitContinuations.add(continuation);
 								}
-								invokeSubmitContinuations();
+								invokeSubmitContinuations(success, error);
 							}
 						}
 					});
@@ -149,9 +151,7 @@ public class AchievementsEngine implements RequestControllerObserver {
 					}
 				}
 			}
-		};
-		// noinspection unchecked
-		loadHasInitialSyncTask.execute();
+		});
 	}
 
 	private void submitNextAchievement() {
@@ -165,6 +165,6 @@ public class AchievementsEngine implements RequestControllerObserver {
 		}
 
 		// no achievement needs a submission, so invoke continuations
-		invokeSubmitContinuations();
+		invokeSubmitContinuations(true, null);
 	}
 }

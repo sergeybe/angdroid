@@ -35,6 +35,8 @@ public interface ScreenActivityProtocol {
 
 	void startBody(ActivityDescription description, int anim);
 
+	void startEmptyHeader();
+
 	void startEmptyBody();
 
 	void startHeader(ActivityDescription description, int anim);

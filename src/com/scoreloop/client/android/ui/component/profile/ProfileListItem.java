@@ -29,7 +29,7 @@ import com.scoreloop.client.android.ui.component.base.StandardListItem;
 
 public class ProfileListItem extends StandardListItem<Void> {
 
-	public ProfileListItem(ComponentActivity activity, Drawable drawable, String title, String subTitle) {
+	public ProfileListItem(final ComponentActivity activity, final Drawable drawable, final String title, final String subTitle) {
 		super(activity, drawable, title, subTitle, null);
 	}
 

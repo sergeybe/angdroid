@@ -1,3 +1,24 @@
+/*
+ * In derogation of the Scoreloop SDK - License Agreement concluded between
+ * Licensor and Licensee, as defined therein, the following conditions shall
+ * apply for the source code contained below, whereas apart from that the
+ * Scoreloop SDK - License Agreement shall remain unaffected.
+ * 
+ * Copyright: Scoreloop AG, Germany (Licensor)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.scoreloop.client.android.ui.component.agent;
 
 import java.util.ArrayList;
@@ -8,45 +29,45 @@ import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.controller.RequestControllerException;
 import com.scoreloop.client.android.core.controller.RequestControllerObserver;
 import com.scoreloop.client.android.core.controller.UserController;
-import com.scoreloop.client.android.core.model.Session;
+import com.scoreloop.client.android.core.model.Continuation;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
+import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.framework.BaseActivity;
 import com.scoreloop.client.android.ui.framework.ValueStore;
 
 public class ManageBuddiesTask implements RequestControllerObserver {
 
-	public static interface ManageBuddiesContinuation {
-		void withAddedOrRemovedBuddies(int count);
-	};
-
 	private enum Mode {
 		ADD, REMOVE
 	}
 
-	public static void addBuddies(final BaseActivity activity, final List<User> users, final ValueStore valueStore, final ManageBuddiesContinuation continuation) {
+	public static void addBuddies(final BaseActivity activity, final List<User> users, final ValueStore valueStore,
+			final Continuation<Integer> continuation) {
 		new ManageBuddiesTask(activity, Mode.ADD, users, valueStore, continuation);
 	}
 
-	public static void addBuddy(final BaseActivity activity, final User user, final ValueStore valueStore, final ManageBuddiesContinuation continuation) {
+	public static void addBuddy(final BaseActivity activity, final User user, final ValueStore valueStore,
+			final Continuation<Integer> continuation) {
 		new ManageBuddiesTask(activity, Mode.ADD, Collections.singletonList(user), valueStore, continuation);
 	}
 
-	public static void removeBuddy(final BaseActivity activity, final User user, final ValueStore valueStore, final ManageBuddiesContinuation continuation) {
+	public static void removeBuddy(final BaseActivity activity, final User user, final ValueStore valueStore,
+			final Continuation<Integer> continuation) {
 		new ManageBuddiesTask(activity, Mode.REMOVE, Collections.singletonList(user), valueStore, continuation);
 	}
 
-	private final BaseActivity				_activity;
-	private final ManageBuddiesContinuation	_continuation;
-	private final UserController			_controller;
-	private int								_count;
-	private final Mode						_mode;
-	private final ValueStore				_sessionUserValues;
-	private final List<User>				_users	= new ArrayList<User>();
+	private final BaseActivity			_activity;
+	private final Continuation<Integer>	_continuation;
+	private final UserController		_controller;
+	private int							_count;
+	private final Mode					_mode;
+	private final ValueStore			_sessionUserValues;
+	private final List<User>			_users	= new ArrayList<User>();
 
 	private ManageBuddiesTask(final BaseActivity activity, final Mode mode, final List<User> users, final ValueStore valueStore,
-			final ManageBuddiesContinuation continuation) {
+			final Continuation<Integer> continuation) {
 		_activity = activity;
 		_mode = mode;
 		_users.addAll(users);
@@ -68,7 +89,7 @@ public class ManageBuddiesTask implements RequestControllerObserver {
 	}
 
 	private void processNextOrFinish() {
-		final User sessionUser = Session.getCurrentSession().getUser();
+		final User sessionUser = ScoreloopManagerSingleton.get().getSession().getUser();
 		final List<User> sessionUserBuddies = sessionUser.getBuddyUsers();
 		User user;
 		do {
@@ -102,24 +123,27 @@ public class ManageBuddiesTask implements RequestControllerObserver {
 		_sessionUserValues.setAllDirty();
 
 		if (_continuation != null) {
-			_continuation.withAddedOrRemovedBuddies(_count);
+			_continuation.withValue(_count, null);
 		}
 	}
 
+	@Override
 	public void requestControllerDidFail(final RequestController aRequestController, final Exception anException) {
 		// just work on remainder users
-		if(anException instanceof RequestControllerException) {
-			RequestControllerException exception = (RequestControllerException) anException;
-			int code = exception.getErrorCode();
-			switch(_mode) {
+		if (anException instanceof RequestControllerException) {
+			final RequestControllerException exception = (RequestControllerException) anException;
+			final int code = exception.getErrorCode();
+			switch (_mode) {
 			case ADD:
 				if (code == RequestControllerException.CODE_BUDDY_ADD_REQUEST_ALREADY_ADDED) {
-					_activity.showToast(String.format(_activity.getString(R.string.sl_format_friend_already_added), _controller.getUser().getDisplayName()));
+					_activity.showToast(String.format(_activity.getString(R.string.sl_format_friend_already_added), _controller.getUser()
+							.getDisplayName()));
 				}
 				break;
 			case REMOVE:
 				if (code == RequestControllerException.CODE_BUDDY_REMOVE_REQUEST_ALREADY_REMOVED) {
-					_activity.showToast(String.format(_activity.getString(R.string.sl_format_friend_already_removed), _controller.getUser().getDisplayName()));
+					_activity.showToast(String.format(_activity.getString(R.string.sl_format_friend_already_removed), _controller.getUser()
+							.getDisplayName()));
 				}
 				break;
 			}
@@ -127,6 +151,7 @@ public class ManageBuddiesTask implements RequestControllerObserver {
 		processNextOrFinish();
 	}
 
+	@Override
 	public void requestControllerDidReceiveResponse(final RequestController aRequestController) {
 		++_count;
 		processNextOrFinish();

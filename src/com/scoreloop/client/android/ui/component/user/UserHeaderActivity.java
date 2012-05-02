@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -34,10 +34,10 @@ import android.widget.TextView;
 
 import com.scoreloop.client.android.core.controller.MessageController;
 import com.scoreloop.client.android.core.controller.RequestController;
+import com.scoreloop.client.android.core.model.Continuation;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask;
-import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask.ManageBuddiesContinuation;
 import com.scoreloop.client.android.ui.component.base.ComponentHeaderActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
 import com.scoreloop.client.android.ui.component.base.TrackerEvents;
@@ -67,6 +67,10 @@ public class UserHeaderActivity extends ComponentHeaderActivity implements OnCli
 		return value != null ? value.toString() : "";
 	}
 
+	protected Drawable getDrawableLoading() {
+		return getResources().getDrawable(R.drawable.sl_icon_games_loading);
+	}
+
 	private ImageView hideControlIcon() {
 		final ImageView icon = (ImageView) findViewById(R.id.sl_control_icon);
 		icon.setImageDrawable(null);
@@ -86,9 +90,10 @@ public class UserHeaderActivity extends ComponentHeaderActivity implements OnCli
 			display(getFactory().createProfileSettingsScreenDescription(user));
 		} else if (_mode == ControlMode.BUDDY) {
 			disableAddRemoveBuddiesControl();
-			ManageBuddiesTask.addBuddy(this, user, getSessionUserValues(), new ManageBuddiesContinuation() {
-				public void withAddedOrRemovedBuddies(final int count) {
-					if (!isPaused()) {
+			ManageBuddiesTask.addBuddy(this, user, getSessionUserValues(), new Continuation<Integer>() {
+				@Override
+				public void withValue(final Integer count, final Exception error) {
+					if (!isPaused() && (count != null)) {
 						showToast(String.format(getString(R.string.sl_format_added_as_friend), user.getDisplayName()));
 					}
 				}
@@ -126,7 +131,7 @@ public class UserHeaderActivity extends ComponentHeaderActivity implements OnCli
 	public boolean onCreateOptionsMenuForActivityGroup(final Menu menu) {
 		super.onCreateOptionsMenuForActivityGroup(menu);
 		menu.add(Menu.NONE, MENU_REMOVE_BUDDY, Menu.NONE, R.string.sl_remove_friend).setIcon(R.drawable.sl_icon_remove_friend);
-		if (!isSessionUser()) {
+		if (!isSessionUser() && (getGame() != null)) {
 			menu.add(Menu.NONE, MENU_FLAG_INAPPROPRIATE, Menu.NONE, R.string.sl_abuse_report_title).setIcon(
 					R.drawable.sl_icon_flag_inappropriate);
 		}
@@ -139,9 +144,10 @@ public class UserHeaderActivity extends ComponentHeaderActivity implements OnCli
 		case MENU_REMOVE_BUDDY:
 			disableAddRemoveBuddiesControl();
 			final User user = getUser();
-			ManageBuddiesTask.removeBuddy(this, user, getSessionUserValues(), new ManageBuddiesContinuation() {
-				public void withAddedOrRemovedBuddies(final int count) {
-					if (!isPaused()) {
+			ManageBuddiesTask.removeBuddy(this, user, getSessionUserValues(), new Continuation<Integer>() {
+				@Override
+				public void withValue(final Integer count, final Exception error) {
+					if (!isPaused() && (count != null)) {
 						showToast(String.format(getString(R.string.sl_format_removed_as_friend), user.getDisplayName()));
 					}
 				}
@@ -191,15 +197,20 @@ public class UserHeaderActivity extends ComponentHeaderActivity implements OnCli
 	}
 
 	private void postAbuseReport() {
-		_messageController = new MessageController(getRequestControllerObserver());
+		final User u = getUser();
 
-		_messageController.setTarget(getUser());
-		_messageController.setMessageType(MessageController.TYPE_ABUSE_REPORT);
-		_messageController.setText("Inappropriate user in ScoreloopUI");
-		_messageController.addReceiverWithUsers(MessageController.RECEIVER_SYSTEM);
+		if (u != null && u.getIdentifier() != null) {
 
-		if (_messageController.isSubmitAllowed()) {
-			_messageController.submitMessage();
+			_messageController = new MessageController(getRequestControllerObserver());
+
+			_messageController.setTarget(getUser());
+			_messageController.setMessageType(MessageController.TYPE_ABUSE_REPORT);
+			_messageController.setText("Inappropriate user in ScoreloopUI");
+			_messageController.addReceiverWithUsers(MessageController.RECEIVER_SYSTEM);
+
+			if (_messageController.isSubmitAllowed()) {
+				_messageController.submitMessage();
+			}
 		}
 	}
 
@@ -245,7 +256,7 @@ public class UserHeaderActivity extends ComponentHeaderActivity implements OnCli
 		if (buddyUsers == null) {
 			return;
 		}
-		if (getUser() != getSessionUser() && !buddyUsers.contains(getUser())) {
+		if ((getUser() != getSessionUser()) && !buddyUsers.contains(getUser())) {
 			showControlIcon(R.drawable.sl_button_add_friend, false);
 			_canRemoveBuddy = false;
 		} else {
@@ -254,16 +265,12 @@ public class UserHeaderActivity extends ComponentHeaderActivity implements OnCli
 		}
 	}
 
-	protected Drawable getDrawableLoading() {
-		return getResources().getDrawable(R.drawable.sl_icon_games_loading);
-	}
-
 	private void updateUI() {
 		final ValueStore store = getUserValues();
-        String imageUrl = store.<String> getValue(Constant.USER_IMAGE_URL);
-        if (imageUrl == null) {
-            imageUrl = store.<User> getValue(Constant.USER).getImageUrl();
-        }
+		String imageUrl = store.<String> getValue(Constant.USER_IMAGE_URL);
+		if (imageUrl == null) {
+			imageUrl = store.<User> getValue(Constant.USER).getImageUrl();
+		}
 		if (imageUrl != null) {
 			ImageDownloader.downloadImage(imageUrl, getDrawableLoading(), getImageView(), null);
 		} else if (getUser().getIdentifier() == null) {

@@ -202,5 +202,9 @@
 		<item name="android:windowFrame">@null</item>
 		<item name="android:windowContentOverlay">@null</item>
 	</style>
+	
+	<style name="BokuModal" parent="@android:style/Theme.Dialog">
+		<item name="android:windowNoTitle">true</item>
+	</style>
 
 </resources>

@@ -120,8 +120,8 @@ public class PagingListAdapter<T extends BaseListItem> extends BaseListAdapter<B
 
 				pagingListener.onPagingListItemClick(pagingItem.getPagingDirection());
 			} else {
-			    _listItemClickListener.onListItemClick(item);
-            }
+				_listItemClickListener.onListItemClick(item);
+			}
 		}
 	}
 }

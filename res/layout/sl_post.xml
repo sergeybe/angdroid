@@ -33,14 +33,7 @@
 			android:text="@string/sl_facebook"
 			style="@style/sl_text_normal_normal"
 			android:button="@drawable/sl_checkbox_selector"/>
-			
-		<CheckBox android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/myspace_checkbox"
-			android:text="@string/sl_myspace"
-			style="@style/sl_text_normal_normal"
-			android:button="@drawable/sl_checkbox_selector"/>
-			
+						
 		<CheckBox android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:id="@+id/twitter_checkbox"

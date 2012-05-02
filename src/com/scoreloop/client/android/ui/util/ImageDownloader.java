@@ -16,17 +16,17 @@
 
 package com.scoreloop.client.android.ui.util;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -78,7 +78,8 @@ public class ImageDownloader {
 	 * @param imageView The ImageView to bind the downloaded image to.
 	 * @param errorDrawable The drawable which is displayed if an error occurred while downloading
 	 */
-	public static void downloadImage(String url, Drawable loadingDrawable, ImageView imageView, Drawable errorDrawable) {
+	public static void downloadImage(final String url, final Drawable loadingDrawable, final ImageView imageView,
+			final Drawable errorDrawable) {
 		downloadImage(url, loadingDrawable, imageView, errorDrawable, null);
 	}
 
@@ -93,8 +94,8 @@ public class ImageDownloader {
 	 * @param errorDrawable The drawable which is displayed if an error occurred while downloading
 	 * @param imageDownloaderCallback callback when image download has finished
 	 */
-	public static void downloadImage(String url, Drawable loadingDrawable, ImageView imageView, Drawable errorDrawable,
-			ImageDownloaderCallback imageDownloaderCallback) {
+	public static void downloadImage(final String url, final Drawable loadingDrawable, final ImageView imageView,
+			final Drawable errorDrawable, final ImageDownloaderCallback imageDownloaderCallback) {
 		if (url == null) {
 			return;
 		}
@@ -106,7 +107,7 @@ public class ImageDownloader {
 		} else {
 			cancelPotentialDownload(url, imageView);
 			final Bitmap bitmap = cacheEntry.getValue();
-			if (bitmap == null && errorDrawable != null) {
+			if ((bitmap == null) && (errorDrawable != null)) {
 				imageView.setImageDrawable(errorDrawable);
 			} else {
 				imageView.setImageBitmap(bitmap);
@@ -118,12 +119,14 @@ public class ImageDownloader {
 	 * Same as download but the image is always downloaded and the memory cache is not used.
 	 * Kept private at the moment as its interest is not clear.
 	 */
-	private void forceDownload(String url, Drawable drawable, ImageView imageView, Drawable errorDrawable,
-			ImageDownloaderCallback imageDownloaderCallback, long timeToLive) {
+	private void forceDownload(final String url, final Drawable drawable, final ImageView imageView, final Drawable errorDrawable,
+			final ImageDownloaderCallback imageDownloaderCallback, final long timeToLive) {
 		if (cancelPotentialDownload(url, imageView)) {
-			BitmapDownloaderTask task = new BitmapDownloaderTask(imageView, errorDrawable, imageDownloaderCallback, timeToLive);
-			DownloadedDrawable downloadedDrawable = new DownloadedDrawable(drawable, task);
-			imageView.setImageDrawable(downloadedDrawable);
+			final BitmapDownloaderTask task = new BitmapDownloaderTask(imageView, errorDrawable, imageDownloaderCallback, timeToLive);
+			if(drawable != null) {
+				final DownloadedDrawable downloadedDrawable = new DownloadedDrawable(drawable, task);
+				imageView.setImageDrawable(downloadedDrawable);
+			}
 			task.execute(url);
 		}
 	}
@@ -134,11 +137,11 @@ public class ImageDownloader {
 	 * Returns false if the download in progress deals with the same url. The download is not
 	 * stopped in that case.
 	 */
-	private static boolean cancelPotentialDownload(String url, ImageView imageView) {
-		BitmapDownloaderTask bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
+	private static boolean cancelPotentialDownload(final String url, final ImageView imageView) {
+		final BitmapDownloaderTask bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
 
 		if (bitmapDownloaderTask != null) {
-			String bitmapUrl = bitmapDownloaderTask.url;
+			final String bitmapUrl = bitmapDownloaderTask.url;
 			if ((bitmapUrl == null) || (!bitmapUrl.equals(url))) {
 				bitmapDownloaderTask.cancel(true);
 			} else {
@@ -154,28 +157,26 @@ public class ImageDownloader {
 	 * @return Retrieve the currently active download task (if any) associated with this imageView.
 	 * null if there is no such task.
 	 */
-	private static BitmapDownloaderTask getBitmapDownloaderTask(ImageView imageView) {
+	private static BitmapDownloaderTask getBitmapDownloaderTask(final ImageView imageView) {
 		if (imageView != null) {
-			Drawable drawable = imageView.getDrawable();
+			final Drawable drawable = imageView.getDrawable();
 			if (drawable instanceof DownloadedDrawable) {
-				DownloadedDrawable downloadedDrawable = (DownloadedDrawable) drawable;
+				final DownloadedDrawable downloadedDrawable = (DownloadedDrawable) drawable;
 				return downloadedDrawable.getBitmapDownloaderTask();
 			}
 		}
 		return null;
 	}
 
-	BitmapResult downloadBitmapHttp(String url) {
+	BitmapResult downloadBitmapHttp(final String url) {
 		// Requires API Level 8: AndroidHttpClient is not allowed to be used from the main thread
 		// final HttpClient client = (mode == Mode.NO_ASYNC_TASK) ? new DefaultHttpClient() :
 		// AndroidHttpClient.newInstance("Android");
 		final HttpClient client = new DefaultHttpClient();
 		final HttpGet getRequest = new HttpGet(url);
 
-		// todo implement HttpCacheStorage for caching of redirects
-
 		try {
-			HttpResponse response = client.execute(getRequest);
+			final HttpResponse response = client.execute(getRequest);
 			final int statusCode = response.getStatusLine().getStatusCode();
 
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
@@ -199,11 +200,11 @@ public class ImageDownloader {
 					entity.consumeContent();
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			getRequest.abort();
-		} catch (IllegalStateException e) {
+		} catch (final IllegalStateException e) {
 			getRequest.abort();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			getRequest.abort();
 		} // finally {
 			// Requires API Level 8
@@ -214,7 +215,7 @@ public class ImageDownloader {
 		return BitmapResult.createError();
 	}
 
-	BitmapResult downloadBitmap(Context context, String url, long timeToLive) {
+	BitmapResult downloadBitmap(final Context context, final String url, final long timeToLive) {
 		BitmapResult bitmapResult = LocalImageStorage.get().getBitmap(context, url, timeToLive);
 		if (bitmapResult == null) {
 			bitmapResult = downloadBitmapHttp(url);
@@ -229,17 +230,17 @@ public class ImageDownloader {
 	 * An InputStream that skips the exact number of bytes provided, unless it reaches EOF.
 	 */
 	static class FlushedInputStream extends FilterInputStream {
-		public FlushedInputStream(InputStream inputStream) {
+		public FlushedInputStream(final InputStream inputStream) {
 			super(inputStream);
 		}
 
 		@Override
-		public long skip(long n) throws IOException {
+		public long skip(final long n) throws IOException {
 			long totalBytesSkipped = 0L;
 			while (totalBytesSkipped < n) {
 				long bytesSkipped = in.skip(n - totalBytesSkipped);
 				if (bytesSkipped == 0L) {
-					int b = read();
+					final int b = read();
 					if (b < 0) {
 						break; // we reached EOF
 					} else {
@@ -263,8 +264,8 @@ public class ImageDownloader {
 		private final ImageDownloaderCallback	imageDownloaderCallback;
 		private final long						timeToLive;
 
-		public BitmapDownloaderTask(ImageView imageView, Drawable errorDrawable, ImageDownloaderCallback imageDownloaderCallback,
-				long timeToLive) {
+		public BitmapDownloaderTask(final ImageView imageView, final Drawable errorDrawable,
+				final ImageDownloaderCallback imageDownloaderCallback, final long timeToLive) {
 			imageViewReference = new WeakReference<ImageView>(imageView);
 			this.errorDrawable = errorDrawable;
 			this.imageDownloaderCallback = imageDownloaderCallback;
@@ -275,8 +276,8 @@ public class ImageDownloader {
 		 * Actual download method.
 		 */
 		@Override
-		protected BitmapResult doInBackground(String... params) {
-			ImageView imageView = imageViewReference.get();
+		protected BitmapResult doInBackground(final String... params) {
+			final ImageView imageView = imageViewReference.get();
 
 			url = params[0];
 
@@ -290,27 +291,27 @@ public class ImageDownloader {
 		 * Once the image is downloaded, associates it to the imageView
 		 */
 		@Override
-		protected void onPostExecute(BitmapResult bitmapResult) {
-			final Bitmap bitmap = isCancelled() || bitmapResult == null ? null : bitmapResult.getBitmap();
+		protected void onPostExecute(final BitmapResult bitmapResult) {
+			final Bitmap bitmap = isCancelled() || (bitmapResult == null) ? null : bitmapResult.getBitmap();
 
-			if (bitmapResult != null && bitmapResult.isCachable()) {
+			if ((bitmapResult != null) && bitmapResult.isCachable()) {
 				addBitmapToCache(url, bitmap, timeToLive);
 			}
 
 			if (imageViewReference != null) {
-				ImageView imageView = imageViewReference.get();
-				BitmapDownloaderTask bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
+				final ImageView imageView = imageViewReference.get();
+				final BitmapDownloaderTask bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
 				// Change bitmap only if this process is still associated with it
 				// Or if we don't use any bitmap to task association (NO_DOWNLOADED_DRAWABLE mode)
 				if (this == bitmapDownloaderTask) {
-					if (bitmap == null && errorDrawable != null) {
+					if ((bitmap == null) && (errorDrawable != null)) {
 						imageView.setImageDrawable(errorDrawable);
 					} else {
 						imageView.setImageBitmap(bitmap);
 					}
 				}
 			}
-			if (bitmapResult != null && bitmapResult.isNotFound() && imageDownloaderCallback != null) {
+			if ((bitmapResult != null) && bitmapResult.isNotFound() && (imageDownloaderCallback != null)) {
 				imageDownloaderCallback.onNotFound();
 			}
 		}
@@ -319,7 +320,7 @@ public class ImageDownloader {
 	static class DownloadedDrawable extends BitmapDrawable {
 		private final WeakReference<BitmapDownloaderTask>	bitmapDownloaderTaskReference;
 
-		public DownloadedDrawable(Drawable drawable, BitmapDownloaderTask bitmapDownloaderTask) {
+		public DownloadedDrawable(final Drawable drawable, final BitmapDownloaderTask bitmapDownloaderTask) {
 			super(((BitmapDrawable) drawable).getBitmap());
 			bitmapDownloaderTaskReference = new WeakReference<BitmapDownloaderTask>(bitmapDownloaderTask);
 		}
@@ -333,7 +334,7 @@ public class ImageDownloader {
 	 * Adds this bitmap to the cache.
 	 * @param bitmap The newly downloaded bitmap.
 	 */
-	private void addBitmapToCache(String url, Bitmap bitmap, long timeToLive) {
+	private void addBitmapToCache(final String url, final Bitmap bitmap, final long timeToLive) {
 		_cache.put(url, bitmap, timeToLive);
 	}
 
@@ -354,12 +355,12 @@ public class ImageDownloader {
 		private final Bitmap	bitmap;
 		private final Status	status;
 
-		BitmapResult(Bitmap bitmap) {
+		BitmapResult(final Bitmap bitmap) {
 			this.bitmap = bitmap;
 			this.status = ImageDownloader.BitmapResult.Status.OK;
 		}
 
-		BitmapResult(Bitmap bitmap, Status status) {
+		BitmapResult(final Bitmap bitmap, final Status status) {
 			this.bitmap = bitmap;
 			this.status = status;
 		}

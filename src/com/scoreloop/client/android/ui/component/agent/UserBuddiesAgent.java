@@ -33,8 +33,8 @@ public class UserBuddiesAgent extends BaseAgent {
 
 	private UserController			_userController;
 
-	public UserBuddiesAgent() {
-		super(SUPPORTED_KEYS);
+	public UserBuddiesAgent(final Delegate delegate) {
+		super(delegate, SUPPORTED_KEYS);
 	}
 
 	@Override

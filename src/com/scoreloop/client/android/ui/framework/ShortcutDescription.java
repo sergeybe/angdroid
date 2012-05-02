@@ -73,9 +73,9 @@ public class ShortcutDescription {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + _activeImageId;
-		result = prime * result + _imageId;
-		result = prime * result + _textId;
+		result = (prime * result) + _activeImageId;
+		result = (prime * result) + _imageId;
+		result = (prime * result) + _textId;
 		return result;
 	}
 }

@@ -31,11 +31,11 @@ import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.controller.RequestControllerObserver;
 import com.scoreloop.client.android.core.controller.UserController;
 import com.scoreloop.client.android.core.controller.UsersController;
+import com.scoreloop.client.android.core.model.Continuation;
 import com.scoreloop.client.android.core.model.Game;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask;
-import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask.ManageBuddiesContinuation;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Constant;
@@ -84,7 +84,7 @@ public class UserListActivity extends ComponentListActivity<BaseListItem> implem
 
 	private BaseListItem getMatchBuddiesListItem() {
 		if (_matchBuddyListItem == null) {
-			_matchBuddyListItem = new UserFindMatchListItem(this);
+			_matchBuddyListItem = new UserFindMatchListItem(getTopParent());
 		}
 		return _matchBuddyListItem;
 	}
@@ -97,12 +97,37 @@ public class UserListActivity extends ComponentListActivity<BaseListItem> implem
 	}
 
 	@Override
+	public void onAction(final BaseDialog dialog, final int actionId) {
+		dialog.dismiss();
+		if (actionId == OkCancelDialog.BUTTON_OK) {
+			setNeedsRefresh(RequestType.LOAD_RECOMMENDATIONS.ordinal(), RefreshMode.SET);
+			refreshIfNeeded();
+		}
+	}
+
+	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setListAdapter(new BaseListAdapter<BaseListItem>(this));
 		_userController = new UserController(this);
 		_usersController = new UsersController(this);
 		addObservedKeys(ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_BUDDIES));
+	}
+
+	@Override
+	protected Dialog onCreateDialog(final int id) {
+		switch (id) {
+		case Constant.DIALOG_CONFIRMATION_MATCH_BUDDIES:
+			final OkCancelDialog dialog = new OkCancelDialog(getTopParent());
+			dialog.setText(getResources().getString(R.string.sl_leave_accept_match_buddies));
+			dialog.setOkButtonText(getResources().getString(R.string.sl_leave_accept_match_buddies_ok));
+			dialog.setOnActionListener(this);
+			dialog.setCancelable(true);
+			dialog.setOnDismissListener(this);
+			return dialog;
+		default:
+			return super.onCreateDialog(id);
+		}
 	}
 
 	@Override
@@ -117,31 +142,6 @@ public class UserListActivity extends ComponentListActivity<BaseListItem> implem
 		} else if (item instanceof UserListItem) {
 			final UserListItem userListItem = (UserListItem) item;
 			display(getFactory().createUserDetailScreenDescription(userListItem.getTarget(), userListItem.playsSessionGame()));
-		}
-	}
-
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case Constant.DIALOG_CONFIRMATION_MATCH_BUDDIES:
-			OkCancelDialog dialog = new OkCancelDialog(this);
-			dialog.setText(getResources().getString(R.string.sl_leave_accept_match_buddies));
-			dialog.setOkButtonText(getResources().getString(R.string.sl_leave_accept_match_buddies_ok));
-			dialog.setOnActionListener(this);
-			dialog.setCancelable(true);
-			dialog.setOnDismissListener(this);
-			return dialog;
-		default:
-			return super.onCreateDialog(id);
-		}
-	}
-
-	@Override
-	public void onAction(BaseDialog dialog, int actionId) {
-		dialog.dismiss();
-		if (actionId == OkCancelDialog.BUTTON_OK) {
-			setNeedsRefresh(RequestType.LOAD_RECOMMENDATIONS.ordinal(), RefreshMode.SET);
-			refreshIfNeeded();
 		}
 	}
 
@@ -201,7 +201,7 @@ public class UserListActivity extends ComponentListActivity<BaseListItem> implem
 					_buddies = new ArrayList<User>(_buddies);
 				}
 			}
-			if ((getGame() == null || _buddiesPlaying != null) && (_buddies != null)) {
+			if (((getGame() == null) || (_buddiesPlaying != null)) && (_buddies != null)) {
 				if (getGame() != null) {
 					for (final User buddyPlaying : _buddiesPlaying) {
 						for (int i = 0; i < _buddies.size(); i++) {
@@ -223,11 +223,12 @@ public class UserListActivity extends ComponentListActivity<BaseListItem> implem
 				final List<User> users = _usersController.getUsers();
 				if (users.size() > 0) {
 					showSpinner();
-					ManageBuddiesTask.addBuddy(this, users.get(0), getSessionUserValues(), new ManageBuddiesContinuation() {
-						public void withAddedOrRemovedBuddies(final int count) {
+					ManageBuddiesTask.addBuddy(this, users.get(0), getSessionUserValues(), new Continuation<Integer>() {
+						@Override
+						public void withValue(final Integer count, final Exception error) {
 							hideSpinner();
 							setNeedsRefresh(RequestType.LOAD_BUDDIES.ordinal(), RefreshMode.SET);
-							if (!isPaused()) {
+							if (!isPaused() && (count != null)) {
 								showToast(getResources().getString(R.string.sl_format_one_friend_added));
 							}
 						}
@@ -250,7 +251,7 @@ public class UserListActivity extends ComponentListActivity<BaseListItem> implem
 
 		boolean hasBuddies = false;
 		final int otherBuddiesCount = _buddies.size();
-		if (getGame() != null && _buddiesPlaying.size() > 0) {
+		if ((getGame() != null) && (_buddiesPlaying.size() > 0)) {
 			adapter.add(new CaptionListItem(this, null, String.format(getString(R.string.sl_format_friends_playing), getGame().getName())));
 			addUsers(adapter, _buddiesPlaying, true, _showSeeMore && (otherBuddiesCount > 0));
 			hasBuddies = true;

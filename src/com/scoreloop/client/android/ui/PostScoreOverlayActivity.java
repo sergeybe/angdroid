@@ -23,6 +23,7 @@ package com.scoreloop.client.android.ui;
 
 import com.scoreloop.client.android.core.model.Entity;
 import com.scoreloop.client.android.core.model.Score;
+import com.scoreloop.client.android.ui.component.base.Configuration;
 import com.scoreloop.client.android.ui.component.base.StringFormatter;
 import com.scoreloop.client.android.ui.component.post.PostOverlayActivity;
 
@@ -44,20 +45,20 @@ public class PostScoreOverlayActivity extends PostOverlayActivity {
 
 	@Override
 	protected Entity getMessageTarget() {
-		final StandardScoreloopManager manager = StandardScoreloopManager.getFactory(ScoreloopManagerSingleton.get());
-		Entity target = manager.getLastSubmittedChallenge();
-		if (target == null || target.getIdentifier() == null) {
-			target = manager.getLastSubmittedScore();
+		final ScoreloopManagerSingleton.Impl impl = ScoreloopManagerSingleton.getImpl();
+		Entity target = impl.getLastSubmittedChallenge();
+		if ((target == null) || (target.getIdentifier() == null)) {
+			target = impl.getLastSubmittedScore();
 		}
 		return target;
 	}
 
 	@Override
 	protected String getPostText() {
-		final StandardScoreloopManager manager = StandardScoreloopManager.getFactory(ScoreloopManagerSingleton.get());
 		final Entity target = getMessageTarget();
 		if (target instanceof Score) {
-			return "Score: " + StringFormatter.formatSocialNetworkPostScore((Score) target, manager.getConfiguration());
+			final Configuration configuration = ScoreloopManagerSingleton.getImpl().getConfiguration();
+			return "Score: " + StringFormatter.formatSocialNetworkPostScore((Score) target, configuration);
 		} else {
 			return "Challenge";
 		}

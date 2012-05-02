@@ -36,11 +36,11 @@ import com.scoreloop.client.android.core.controller.RequestController;
 import com.scoreloop.client.android.core.controller.SocialProviderController;
 import com.scoreloop.client.android.core.controller.SocialProviderControllerObserver;
 import com.scoreloop.client.android.core.controller.UsersController;
+import com.scoreloop.client.android.core.model.Continuation;
 import com.scoreloop.client.android.core.model.SocialProvider;
 import com.scoreloop.client.android.core.model.User;
 import org.angdroid.angband.R;
 import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask;
-import com.scoreloop.client.android.ui.component.agent.ManageBuddiesTask.ManageBuddiesContinuation;
 import com.scoreloop.client.android.ui.component.base.CaptionListItem;
 import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
 import com.scoreloop.client.android.ui.component.base.Configuration;
@@ -58,6 +58,7 @@ public class UserAddBuddyListActivity extends ComponentListActivity<BaseListItem
 			super(context, style);
 		}
 
+		@Override
 		public void onClick(final View v) {
 			if (v.getId() == R.id.button_ok) {
 				dismiss();
@@ -76,10 +77,10 @@ public class UserAddBuddyListActivity extends ComponentListActivity<BaseListItem
 		}
 	}
 
-    private final Object		_addressBookTarget	= new Object();
-	private final Object		_loginTarget		= new Object();
+	private final Object	_addressBookTarget	= new Object();
+	private final Object	_loginTarget		= new Object();
 
-	private UsersController		usersSearchController;
+	private UsersController	usersSearchController;
 
 	private void handleDialogClick(final String login) {
 		showSpinnerFor(usersSearchController);
@@ -105,8 +106,6 @@ public class UserAddBuddyListActivity extends ComponentListActivity<BaseListItem
 				SocialProvider.getSocialProviderForIdentifier(SocialProvider.FACEBOOK_IDENTIFIER)));
 		adapter.add(new UserAddBuddyListItem(this, res.getDrawable(R.drawable.sl_icon_twitter), getString(R.string.sl_twitter),
 				SocialProvider.getSocialProviderForIdentifier(SocialProvider.TWITTER_IDENTIFIER)));
-		adapter.add(new UserAddBuddyListItem(this, res.getDrawable(R.drawable.sl_icon_myspace), getString(R.string.sl_myspace),
-				SocialProvider.getSocialProviderForIdentifier(SocialProvider.MYSPACE_IDENTIFIER)));
 		if (configuration.isFeatureEnabled(Configuration.Feature.ADDRESS_BOOK)) {
 			adapter.add(new UserAddBuddyListItem(this, res.getDrawable(R.drawable.sl_icon_addressbook), getString(R.string.sl_addressbook),
 					_addressBookTarget));
@@ -118,10 +117,10 @@ public class UserAddBuddyListActivity extends ComponentListActivity<BaseListItem
 	@Override
 	protected Dialog onCreateDialog(final int id) {
 		switch (id) {
-            case Constant.DIALOG_ADD_FRIEND_LOGIN:
-                final LoginDialog loginDialog = new LoginDialog(this, R.style.sl_dialog);
-                loginDialog.setOnDismissListener(this);
-                return loginDialog;
+		case Constant.DIALOG_ADD_FRIEND_LOGIN:
+			final LoginDialog loginDialog = new LoginDialog(this, R.style.sl_dialog);
+			loginDialog.setOnDismissListener(this);
+			return loginDialog;
 		default:
 			return super.onCreateDialog(id);
 		}
@@ -166,10 +165,11 @@ public class UserAddBuddyListActivity extends ComponentListActivity<BaseListItem
 				showToast(getResources().getString(R.string.sl_found_no_user));
 			} else {
 				showSpinner();
-				ManageBuddiesTask.addBuddies(this, users, getSessionUserValues(), new ManageBuddiesContinuation() {
-					public void withAddedOrRemovedBuddies(final int addedBuddies) {
+				ManageBuddiesTask.addBuddies(this, users, getSessionUserValues(), new Continuation<Integer>() {
+					@Override
+					public void withValue(final Integer addedBuddies, final Exception error) {
 						hideSpinner();
-						if (!isPaused()) {
+						if (!isPaused() && (addedBuddies != null)) {
 							switch (addedBuddies) {
 							case 0:
 								showToast(getResources().getString(R.string.sl_found_no_user));
@@ -188,17 +188,21 @@ public class UserAddBuddyListActivity extends ComponentListActivity<BaseListItem
 		}
 	}
 
+	@Override
 	public void socialProviderControllerDidCancel(final SocialProviderController controller) {
 	}
 
+	@Override
 	public void socialProviderControllerDidEnterInvalidCredentials(final SocialProviderController controller) {
 		showDialogSafe(Constant.DIALOG_ERROR_NETWORK);
 	}
 
+	@Override
 	public void socialProviderControllerDidFail(final SocialProviderController controller, final Throwable error) {
 		showDialogSafe(Constant.DIALOG_ERROR_NETWORK);
 	}
 
+	@Override
 	public void socialProviderControllerDidSucceed(final SocialProviderController socialProviderController) {
 		final SocialProvider socialProvider = socialProviderController.getSocialProvider();
 		if (socialProvider.isUserConnected(getSessionUser())) {

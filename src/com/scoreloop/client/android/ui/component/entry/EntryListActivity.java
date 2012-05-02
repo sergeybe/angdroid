@@ -25,8 +25,16 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 
+import com.scoreloop.client.android.ui.GameItemsScreenActivity;
 import org.angdroid.angband.R;
-import com.scoreloop.client.android.ui.component.base.*;
+import com.scoreloop.client.android.ui.component.base.CaptionListItem;
+import com.scoreloop.client.android.ui.component.base.ComponentListActivity;
+import com.scoreloop.client.android.ui.component.base.Configuration;
+import com.scoreloop.client.android.ui.component.base.Constant;
+import com.scoreloop.client.android.ui.component.base.Factory;
+import com.scoreloop.client.android.ui.component.base.PackageManager;
+import com.scoreloop.client.android.ui.component.base.StandardListItem;
+import com.scoreloop.client.android.ui.component.base.StringFormatter;
 import com.scoreloop.client.android.ui.framework.BaseListAdapter;
 import com.scoreloop.client.android.ui.framework.BaseListItem;
 import com.scoreloop.client.android.ui.framework.ValueStore;
@@ -41,23 +49,28 @@ public class EntryListActivity extends ComponentListActivity<BaseListItem> {
 			final Configuration configuration = getConfiguration();
 
 			add(new CaptionListItem(context, null, getGame().getName()));
-			leaderboardsItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_leaderboards), context
-					.getString(R.string.sl_leaderboards), null);
+			leaderboardsItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_leaderboards),
+					context.getString(R.string.sl_leaderboards), null);
 			add(leaderboardsItem);
 			if (configuration.isFeatureEnabled(Configuration.Feature.ACHIEVEMENT)) {
-				achievementsItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_achievements), context
-						.getString(R.string.sl_achievements), null);
+				achievementsItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_achievements),
+						context.getString(R.string.sl_achievements), null);
 				add(achievementsItem);
 			}
 			if (configuration.isFeatureEnabled(Configuration.Feature.CHALLENGE)) {
-				challengesItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_challenges), context
-						.getString(R.string.sl_challenges), null);
+				challengesItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_challenges),
+						context.getString(R.string.sl_challenges), null);
 				add(challengesItem);
 			}
 			if (configuration.isFeatureEnabled(Configuration.Feature.NEWS)) {
-				newsItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_news_closed), context
-						.getString(R.string.sl_news), null);
+				newsItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_news_closed),
+						context.getString(R.string.sl_news), null);
 				add(newsItem);
+			}
+			if (configuration.isFeatureEnabled(Configuration.Feature.PAYMENT)) {
+				shopItem = new EntryListItem(EntryListActivity.this, res.getDrawable(R.drawable.sl_icon_shop),
+						context.getString(R.string.sl_shop), null);
+				add(shopItem);
 			}
 		}
 	}
@@ -66,6 +79,7 @@ public class EntryListActivity extends ComponentListActivity<BaseListItem> {
 	private EntryListItem	challengesItem;
 	private EntryListItem	leaderboardsItem;
 	private EntryListItem	newsItem;
+	private EntryListItem	shopItem;
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -73,9 +87,8 @@ public class EntryListActivity extends ComponentListActivity<BaseListItem> {
 
 		setListAdapter(new EntryListAdapter(this));
 
-		addObservedKeys(
-				ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_ACHIEVEMENTS), 
-				ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_CHALLENGES_WON), 
+		addObservedKeys(ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_ACHIEVEMENTS),
+				ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NUMBER_CHALLENGES_WON),
 				ValueStore.concatenateKeys(Constant.USER_VALUES, Constant.NEWS_NUMBER_UNREAD_ITEMS));
 	}
 
@@ -90,6 +103,8 @@ public class EntryListActivity extends ComponentListActivity<BaseListItem> {
 			display(factory.createAchievementScreenDescription(getUser()));
 		} else if (item == newsItem) {
 			display(factory.createNewsScreenDescription());
+		} else if (item == shopItem) {
+			display(factory.createGameItemsScreenDescription(GameItemsScreenActivity.MODE_GAME_ITEM, null, null, 0));
 		}
 	}
 
@@ -123,21 +138,20 @@ public class EntryListActivity extends ComponentListActivity<BaseListItem> {
 		}
 	}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        hideFooter();
-        if (!PackageManager.isScoreloopAppInstalled(this)) {
-            showFooter(new StandardListItem<Void>(this, getResources().getDrawable(R.drawable.sl_icon_scoreloop),
-                    getString(R.string.sl_slapp_title), getString(R.string.sl_slapp_subtitle), null));
-        }
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		hideFooter();
+		if (!PackageManager.isScoreloopAppInstalled(this)) {
+			showFooter(new StandardListItem<Void>(this, getResources().getDrawable(R.drawable.sl_icon_scoreloop),
+					getString(R.string.sl_slapp_title), getString(R.string.sl_slapp_subtitle), null));
+		}
+	}
 
-    @Override
-    protected void onFooterItemClick(final BaseListItem footerItem) {
-        hideFooter();
-        PackageManager.installScoreloopApp(this);
-    }
-
+	@Override
+	protected void onFooterItemClick(final BaseListItem footerItem) {
+		hideFooter();
+		PackageManager.installScoreloopApp(this);
+	}
 
 }

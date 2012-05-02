@@ -31,11 +31,11 @@ public class LocalImageStorage {
 		return isStorageWritable() || Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY);
 	}
 
-	private File getCacheDir(Context context) {
+	private File getCacheDir(final Context context) {
 		File cacheDir = null;
-		File storageDir = Environment.getExternalStorageDirectory();
+		final File storageDir = Environment.getExternalStorageDirectory();
 		if (storageDir != null) {
-			File tmp = new File(storageDir, "/Android/data/" + context.getPackageName() + "/cache/scoreloop");
+			final File tmp = new File(storageDir, "/Android/data/" + context.getPackageName() + "/cache/scoreloop");
 			if ((tmp.exists() && tmp.isDirectory()) || tmp.mkdirs()) {
 				cacheDir = tmp;
 			}
@@ -43,12 +43,12 @@ public class LocalImageStorage {
 		return cacheDir;
 	}
 
-	public void purge(Context context, long timeToLive) {
+	public void purge(final Context context, final long timeToLive) {
 		if (isStorageWritable()) {
-			File cacheDir = getCacheDir(context);
+			final File cacheDir = getCacheDir(context);
 			if (cacheDir != null) {
-				File[] files = cacheDir.listFiles();
-				for (File file : files) {
+				final File[] files = cacheDir.listFiles();
+				for (final File file : files) {
 					if (file.isFile() && !isValid(timeToLive, file)) {
 						deleteQuietly(file);
 					}
@@ -63,38 +63,42 @@ public class LocalImageStorage {
 	 * @param context
 	 */
 	public void tryPurge(final Context context) {
-		SharedPreferences pref = context.getSharedPreferences("localStorage", 0);
-		String lastPurgeKey = "lastPurge";
-		long lastPurge = pref.getLong(lastPurgeKey, -1);
+		final SharedPreferences pref = context.getSharedPreferences("localStorage", 0);
+		final String lastPurgeKey = "lastPurge";
+		final long lastPurge = pref.getLong(lastPurgeKey, -1);
 		if (Math.abs(System.currentTimeMillis() - lastPurge) > ONE_DAY) {
-			pref.edit().putLong(lastPurgeKey, System.currentTimeMillis()).commit();
-			purge(context, 7 * ONE_DAY);
+			try {
+				pref.edit().putLong(lastPurgeKey, System.currentTimeMillis()).commit();
+				purge(context, 7 * ONE_DAY);
+			} catch (final Exception e) {
+				// retry later...
+			}
 		}
 	}
 
-	private static void deleteQuietly(File file) {
+	private static void deleteQuietly(final File file) {
 		try {
 			file.delete();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// to nothing
 		}
 	}
 
-	private File getCacheFile(Context context, String url) {
+	private File getCacheFile(final Context context, final String url) {
 		File cacheFile = null;
-		File cacheDir = getCacheDir(context);
+		final File cacheDir = getCacheDir(context);
 		if (cacheDir != null) {
-			String fileName = Base64.encodeBytes(url.getBytes());
+			final String fileName = Base64.encodeBytes(url.getBytes());
 			cacheFile = new File(cacheDir, fileName);
 		}
 		return cacheFile;
 	}
 
-	public ImageDownloader.BitmapResult getBitmap(Context context, String url, long timeToLive) {
+	public ImageDownloader.BitmapResult getBitmap(final Context context, final String url, final long timeToLive) {
 		if (isStorageReadable()) {
-			File cacheFile = getCacheFile(context, url);
-			if (cacheFile != null && cacheFile.exists() && cacheFile.canRead()) {
-				boolean valid = isValid(timeToLive, cacheFile);
+			final File cacheFile = getCacheFile(context, url);
+			if ((cacheFile != null) && cacheFile.exists() && cacheFile.canRead()) {
+				final boolean valid = isValid(timeToLive, cacheFile);
 				if (valid) {
 					if (cacheFile.length() == 0) {
 						return ImageDownloader.BitmapResult.createNotFound();
@@ -109,47 +113,47 @@ public class LocalImageStorage {
 		return null;
 	}
 
-	private boolean isValid(long timeToLive, File cacheFile) {
-		long lastModified = cacheFile.lastModified();
+	private boolean isValid(final long timeToLive, final File cacheFile) {
+		final long lastModified = cacheFile.lastModified();
 		final long lived = System.currentTimeMillis() - lastModified;
-		return timeToLive == -1 || lived <= timeToLive;
+		return (timeToLive == -1) || (lived <= timeToLive);
 	}
 
-	public boolean putBitmap(Context context, String url, Bitmap bitmap) {
+	public boolean putBitmap(final Context context, final String url, final Bitmap bitmap) {
 		return putBitmap(context, url, new ImageDownloader.BitmapResult(bitmap));
 	}
 
-	public boolean putBitmap(Context context, String url, ImageDownloader.BitmapResult bitmapResult) {
+	public boolean putBitmap(final Context context, final String url, final ImageDownloader.BitmapResult bitmapResult) {
 		if (isStorageWritable()) {
-			File cacheFile = getCacheFile(context, url);
+			final File cacheFile = getCacheFile(context, url);
 			try {
 				if (bitmapResult.isNotFound()) {
 					cacheFile.createNewFile();
 					return true;
 				} else {
-					FileOutputStream os = new FileOutputStream(cacheFile);
+					final FileOutputStream os = new FileOutputStream(cacheFile);
 					bitmapResult.getBitmap().compress(Bitmap.CompressFormat.PNG, 90, os);
 					os.close();
 					return true;
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// ignore
 			}
 		}
 		return false;
 	}
 
-	public File putStream(Context context, String url, InputStream in) {
+	public File putStream(final Context context, final String url, final InputStream in) {
 		if (isStorageWritable()) {
-			File file = getCacheFile(context, url);
+			final File file = getCacheFile(context, url);
 
 			FileOutputStream out = null;
 			try {
 				out = new FileOutputStream(file);
 
 				// this is storage overwritten on each iteration with bytes
-				int bufferSize = 1024;
-				byte[] buffer = new byte[bufferSize];
+				final int bufferSize = 1024;
+				final byte[] buffer = new byte[bufferSize];
 
 				// we need to know how may bytes were read to write them to the byteBuffer
 				int len = 0;
@@ -157,13 +161,14 @@ public class LocalImageStorage {
 					out.write(buffer, 0, len);
 				}
 				return file;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// ignore
 			} finally {
 				try {
-					if (out != null)
+					if (out != null) {
 						out.close();
-				} catch (IOException e) {
+					}
+				} catch (final IOException e) {
 				}
 			}
 		}

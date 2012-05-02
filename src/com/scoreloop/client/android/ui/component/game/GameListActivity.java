@@ -47,13 +47,15 @@ public class GameListActivity extends ComponentListActivity<GameListItem> implem
 	private GamesController	_gamesController;
 	private int				_mode;
 	private PagingDirection	_pagingDirection;
+	private Boolean			_captionVisible;
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setListAdapter(new PagingListAdapter<BaseListItem>(this, 1));
 		_mode = getActivityArguments().<Integer> getValue(Constant.MODE);
+		_captionVisible = getActivityArguments().<Boolean> getValue(Constant.CAPTION_VISIBLE);
+		setListAdapter(new PagingListAdapter<BaseListItem>(this, isCaptionVisible() ? 1 : 0));
 
 		final int optimalRangeLength = Constant.getOptimalRangeLength(getListView(), new StandardListItem<GameListItem>(this, null,
 				"title", "subtitle", null));
@@ -69,6 +71,10 @@ public class GameListActivity extends ComponentListActivity<GameListItem> implem
 	private void setNeedsRefresh(final PagingDirection pagingDirection) {
 		_pagingDirection = pagingDirection;
 		setNeedsRefresh();
+	}
+
+	private boolean isCaptionVisible() {
+		return _captionVisible != null ? _captionVisible : true;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -100,7 +106,9 @@ public class GameListActivity extends ComponentListActivity<GameListItem> implem
 			id = R.string.sl_games;
 			break;
 		}
-		adapter.add(new CaptionListItem(this, null, getString(id)));
+		if (isCaptionVisible()) {
+			adapter.add(new CaptionListItem(this, null, getString(id)));
+		}
 
 		// fill adapter with games
 		for (final Game game : games) {
@@ -117,6 +125,7 @@ public class GameListActivity extends ComponentListActivity<GameListItem> implem
 			// for setSelection() to have any effect, according to a google developer, it should be called through a view.post()
 			final ListView listView = getListView();
 			listView.post(new Runnable() {
+				@Override
 				public void run() {
 					if (_pagingDirection == PagingDirection.PAGE_TO_TOP) {
 						listView.setSelection(0);

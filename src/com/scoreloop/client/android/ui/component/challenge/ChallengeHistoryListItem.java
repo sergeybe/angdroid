@@ -98,8 +98,8 @@ public class ChallengeHistoryListItem extends BaseListItem {
 			final String prize) {
 		holder.icon.setImageDrawable(drawable != null ? drawable : getContext().getResources().getDrawable(R.drawable.sl_icon_challenges));
 		holder.contenderName.setText(_challenge.getContender().getDisplayName());
-		holder.contenderScore
-				.setText(StringFormatter.formatChallengesScore(_challenge.getContenderScore(), getComponentActivity().getConfiguration()));
+		holder.contenderScore.setText(StringFormatter.formatChallengesScore(_challenge.getContenderScore(), getComponentActivity()
+				.getConfiguration()));
 		holder.contestantName.setText(contestantName != null ? contestantName : _challenge.getContestant().getDisplayName());
 		holder.contestantScore.setText(contestantScore != null ? contestantScore : getContext().getResources().getString(
 				R.string.sl_pending));

@@ -8,7 +8,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
- * of the License at 
+ * of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -40,12 +40,12 @@ import com.scoreloop.client.android.ui.framework.BaseListItem;
 import com.scoreloop.client.android.ui.framework.ScreenDescription;
 
 public abstract class ComponentListActivity<T extends BaseListItem> extends ComponentActivity implements OnClickListener,
-		OnItemClickListener, OnListItemClickListener<T> {
+OnItemClickListener, OnListItemClickListener<T> {
 
 	private BaseListItem	_footerItem;
 	protected boolean		_isVisibleOptionsMenuAccountSettings	= true;
 
-	public void setVisibleOptionsMenuAccountSettings(boolean isVisibleOptionsMenuProfileSettings) {
+	public void setVisibleOptionsMenuAccountSettings(final boolean isVisibleOptionsMenuProfileSettings) {
 		this._isVisibleOptionsMenuAccountSettings = isVisibleOptionsMenuProfileSettings;
 	}
 
@@ -70,6 +70,7 @@ public abstract class ComponentListActivity<T extends BaseListItem> extends Comp
 		}
 	}
 
+	@Override
 	public void onClick(final View view) {
 		if (_footerItem != null) {
 			onFooterItemClick(_footerItem);
@@ -89,14 +90,16 @@ public abstract class ComponentListActivity<T extends BaseListItem> extends Comp
 		// intentionally empty - should be overridden in subclass
 	}
 
+	@Override
 	public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-        final BaseListAdapter<T> baseListAdapter = getBaseListAdapter();
-        final T item = baseListAdapter.getItem(position);
-        if (item.isEnabled()) {
-            baseListAdapter.onItemClick(parent, view, position, id);
-        }
+		final BaseListAdapter<T> baseListAdapter = getBaseListAdapter();
+		final T item = baseListAdapter.getItem(position);
+		if (item.isEnabled()) {
+			baseListAdapter.onItemClick(parent, view, position, id);
+		}
 	}
 
+	@Override
 	public void onListItemClick(final T item) {
 		// intentionally empty - should be overridden in subclass
 	}
@@ -121,14 +124,14 @@ public abstract class ComponentListActivity<T extends BaseListItem> extends Comp
 	}
 
 	@Override
-	public boolean onCreateOptionsMenuForActivityGroup(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public boolean onCreateOptionsMenuForActivityGroup(final Menu menu) {
+		final MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.sl_options_menu, menu);
 		return super.onCreateOptionsMenuForActivityGroup(menu);
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenuForActivityGroup(Menu menu) {
+	public boolean onPrepareOptionsMenuForActivityGroup(final Menu menu) {
 		final MenuItem item = menu.findItem(R.id.sl_item_account_settings);
 		if (item != null) {
 			item.setVisible(_isVisibleOptionsMenuAccountSettings);
@@ -137,15 +140,14 @@ public abstract class ComponentListActivity<T extends BaseListItem> extends Comp
 	}
 
 	@Override
-	public boolean onOptionsItemSelectedForActivityGroup(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.sl_item_account_settings) {
-            getTracker().trackEvent(TrackerEvents.CAT_NAVI, TrackerEvents.NAVI_OM_ACCOUNT_SETTINGS, null, 0);
-            final ScreenDescription profileSettingsScreenDescription = getFactory()
-                    .createProfileSettingsScreenDescription(getSessionUser());
-            display(profileSettingsScreenDescription);
-            return true;
-        }
+	public boolean onOptionsItemSelectedForActivityGroup(final MenuItem item) {
+		if (item.getItemId() == R.id.sl_item_account_settings) {
+			getTracker().trackEvent(TrackerEvents.CAT_NAVI, TrackerEvents.NAVI_OM_ACCOUNT_SETTINGS, null, 0);
+			final ScreenDescription profileSettingsScreenDescription = getFactory()
+					.createProfileSettingsScreenDescription(getSessionUser());
+			display(profileSettingsScreenDescription);
+			return true;
+		}
 		return super.onOptionsItemSelectedForActivityGroup(item);
 	}
 

@@ -37,10 +37,10 @@ public abstract class BaseDialog extends Dialog implements View.OnClickListener 
 	}
 
 	protected OnActionListener	_listener;
-    private String				_text;
-    private String				_okButtonText;
-    private TextView			_textView;
-    private Button  			_okButton;
+	private String				_text;
+	private String				_okButtonText;
+	private TextView			_textView;
+	private Button				_okButton;
 	private Object				_target;
 
 	protected BaseDialog(final Context context) {
@@ -57,7 +57,7 @@ public abstract class BaseDialog extends Dialog implements View.OnClickListener 
 		setContentView(getContentViewLayoutId());
 
 		_textView = ((TextView) findViewById(R.id.sl_text));
-        _okButton = (Button)findViewById(R.id.sl_button_ok);
+		_okButton = (Button) findViewById(R.id.sl_button_ok);
 		refresh();
 	}
 
@@ -70,27 +70,26 @@ public abstract class BaseDialog extends Dialog implements View.OnClickListener 
 		refresh();
 	}
 
-    public void setOkButtonText(String okButtonText) {
-        _okButtonText = okButtonText;
-        refresh();
-    }
-
+	public void setOkButtonText(final String okButtonText) {
+		_okButtonText = okButtonText;
+		refresh();
+	}
 
 	private void refresh() {
-        if (_textView != null) {
-            _textView.setText(_text);
-        }
-        if (_textView != null && _okButtonText != null) {
-            _okButton.setText(_okButtonText);
-        }
+		if (_textView != null) {
+			_textView.setText(_text);
+		}
+		if ((_textView != null) && (_okButtonText != null)) {
+			_okButton.setText(_okButtonText);
+		}
 	}
-	
-	public void setTarget(Object target) {
+
+	public void setTarget(final Object target) {
 		_target = target;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T> T getTarget() {
-		return (T)_target;		
+		return (T) _target;
 	}
 }

@@ -32,7 +32,7 @@ public abstract class BaseListItem {
 	private final Context			_context;
 	private Drawable				_drawable;
 	private final LayoutInflater	_layoutInflater;
-	private String			_title;
+	private String					_title;
 
 	public BaseListItem(final Context context, final Drawable drawable, final String title) {
 		_context = context;
@@ -53,11 +53,11 @@ public abstract class BaseListItem {
 		return _layoutInflater;
 	}
 
-    public void setTitle(String title) {
-        this._title = title;
-    }
+	public void setTitle(final String title) {
+		this._title = title;
+	}
 
-    public String getTitle() {
+	public String getTitle() {
 		return _title;
 	}
 
