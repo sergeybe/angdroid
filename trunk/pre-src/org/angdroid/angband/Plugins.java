@@ -60,6 +60,41 @@ final public class Plugins {
 		}
 	}
 
+	public static int getKeyEnter(Plugin p) {
+		switch (p) {
+		case Angband: return 0x9C;
+		default: return '\r';
+		}
+	}
+
+	public static int getKeyTab(Plugin p) {
+		switch (p) {
+		case Angband: return 0x9D;
+		default: return '\t';
+		}
+	}
+
+	public static int getKeyDelete(Plugin p) {
+		switch (p) {
+		case Angband: return 0x9E;
+		default: return 0x7F;
+		}
+	}
+
+	public static int getKeyBackspace(Plugin p) {
+		switch (p) {
+		case Angband: return 0x9F;
+		default: return '\b';
+		}
+	}
+
+	public static int getKeyEsc(Plugin p) {
+		switch (p) {
+		case Angband: return 0xE000;
+		default: return 0x1B;
+		}
+	}
+
 	public static ZipInputStream getPluginZip(int plugin) {
 		InputStream is = null;
 		if (plugin == Plugin.Angband.getId())

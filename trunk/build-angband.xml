@@ -62,8 +62,10 @@
     <target name="plugin-src">
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="angband"/>
-	    <property name="src.url.base" value="http://rephial.org/downloads/3.3"/>
-	    <property name="src.url.file" value="angband-v3.3.2.tar.gz"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="angband-angband-v3.4-dev-667-gbbf3621.tar.gz"/>
+	    <!-- <property name="src.url.base" value="http://rephial.org/downloads/3.3"/> -->
+	    <!-- <property name="src.url.file" value="angband-v3.3.2.tar.gz"/> -->
 		<property name="extract.command" value="tar" />
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />

@@ -1,6 +1,6 @@
-diff -Nru --strip-trailing-cr angband-3.2.0/src/h-basic.h angband-3.2.0-android/src/h-basic.h
---- angband-3.2.0/src/h-basic.h	2010-12-24 05:13:59.000000000 -0800
-+++ angband-3.2.0-android/src/h-basic.h	2010-12-24 10:48:31.450482000 -0800
+diff -Nru --strip-trailing-cr angband-nightly/src/h-basic.h angband-nightly-android/src/h-basic.h
+--- angband-nightly/src/h-basic.h	2011-02-25 12:12:23.000000000 -0800
++++ angband-nightly-android/src/h-basic.h	2011-02-24 23:07:59.000000000 -0800
 @@ -64,7 +64,7 @@
   * Basically, SET_UID should *only* be set for "Unix" machines.
   */
@@ -10,3 +10,28 @@ diff -Nru --strip-trailing-cr angband-3.2.0/src/h-basic.h angband-3.2.0-android/
  # define SET_UID
  
  /* Without autoconf, turn on some things */
+Files extsrc.orig/.git/index and extsrc/.git/index differ
+diff -Nru --strip-trailing-cr extsrc.orig/src/spells1.c extsrc/src/spells1.c
+--- extsrc.orig/src/spells1.c	2011-10-11 12:01:03.361884400 -0700
++++ extsrc/src/spells1.c	2011-10-11 12:03:58.785192500 -0700
+@@ -536,7 +536,7 @@
+ 	/* Decide on output char */
+ 	if (use_graphics == GRAPHICS_NONE) {
+ 		/* ASCII is simple */
+-		wchar_t chars[] = L"*|/-\\";
++		wchar_t *chars = L"*|/-\\";
+ 
+ 		*c = chars[motion];
+ 		*a = spell_color(typ);
+diff -Nru --strip-trailing-cr angband-nightly/lib/user/borg.txt angband-nightly-android/lib/user/borg.txt
+--- angband-nightly/lib/user/borg.txt	2011-10-11 12:01:03.361884400 -0700
++++ angband-nightly-android/lib/user/borg.txt	2011-10-11 12:03:58.785192500 -0700
+@@ -201,7 +201,7 @@
+ # to slow the borg down use the following variable.  The formula is:
+ # base_game_delay_factor^2 + borg_delay_factor^2.
+ 
+-borg_delay_factor = 9
++borg_delay_factor = 0
+ 
+ 
+ # Money Scumming
