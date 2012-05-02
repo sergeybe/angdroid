@@ -47,11 +47,11 @@ static jmethodID NativeWrapper_curs_set;
 static jmethodID NativeWrapper_flushinp;
 static jmethodID NativeWrapper_getcury;
 static jmethodID NativeWrapper_getcurx;
-#ifdef ANGDROID_NIGHTLY
+// #ifdef ANGDROID_NIGHTLY
 static jmethodID NativeWrapper_wctomb;
 static jmethodID NativeWrapper_mbstowcs;
 static jmethodID NativeWrapper_wcstombs;
-#endif
+// #endif
 static jmethodID NativeWrapper_score_start;
 static jmethodID NativeWrapper_score_detail;
 static jmethodID NativeWrapper_score_submit;
@@ -399,7 +399,7 @@ void angdroid_warn(const char* msg) {
 }
 
 
-#if defined(ANGDROID_NIGHTLY)
+// #if defined(ANGDROID_NIGHTLY)
 
 int wctomb(char *pmb, wchar_t character) {
 	// LOGD("begin wctomb (c)");
@@ -457,7 +457,7 @@ size_t wcstombs(wchar_t *mbstr, const char *wcstr, size_t max) {
 	return res;
 }
 
-#endif
+// #endif
 
 void android_score_start() {
   JAVA_CALL(NativeWrapper_score_start);
@@ -528,11 +528,11 @@ JNIEXPORT void JNICALL angdroid_gameStart
 	NativeWrapper_mvwinch = JAVA_METHOD("mvwinch", "(III)I");
 	NativeWrapper_curs_set = JAVA_METHOD("curs_set", "(I)V");
 	NativeWrapper_flushinp = JAVA_METHOD("flushinp", "()V");
-#ifdef ANGDROID_NIGHTLY
+// #ifdef ANGDROID_NIGHTLY
 	NativeWrapper_wctomb = JAVA_METHOD("wctomb", "([BB)I");
 	NativeWrapper_mbstowcs = JAVA_METHOD("mbstowcs", "([B[BI)I");
 	NativeWrapper_wcstombs = JAVA_METHOD("wcstombs", "([B[BI)I");
-#endif
+// #endif
 	NativeWrapper_score_start = JAVA_METHOD("score_start", "()V");
 	NativeWrapper_score_detail = JAVA_METHOD("score_detail", "([B[B)V");
 	NativeWrapper_score_submit = JAVA_METHOD("score_submit", "([B[B)V");

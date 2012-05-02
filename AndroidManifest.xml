@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="org.angdroid.angband" android:versionCode="29"
-	android:versionName="3.3.2.4"
+	package="org.angdroid.angband" android:versionCode="30"
+	android:versionName="3.4.b1"
 	android:installLocation="auto">
 
 	<application android:icon="@drawable/icon" 
@@ -66,10 +66,21 @@
 			</intent-filter>
 		</activity>
 
+		<!-- Defining the ScoreloopCore activities -->
+		<activity android:name="com.scoreloop.client.android.core.ui.ProxyActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" android:configChanges="orientation|keyboard|keyboardHidden|screenSize|smallestScreenSize"/>
+		<!-- Note: you may need to add more entries here for the payment methods you want to use. -->
+		
 		<!-- Defining the ScoreloopUI activities -->
-
 		<activity android:name="com.scoreloop.client.android.ui.EntryScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
 		<activity android:name="com.scoreloop.client.android.ui.ShowResultOverlayActivity" android:theme="@style/sl_dialog"/>
+
+		<activity android:name="com.scoreloop.client.android.ui.PostScoreOverlayActivity"/>
+		<activity android:name="com.scoreloop.client.android.ui.BuddiesScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		<activity android:name="com.scoreloop.client.android.ui.BuddiesScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		<activity android:name="com.scoreloop.client.android.ui.SocialMarketScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		<activity android:name="com.scoreloop.client.android.ui.SocialMarketScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		<activity android:name="com.scoreloop.client.android.ui.ProfileScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+		<activity android:name="com.scoreloop.client.android.ui.ProfileScreenActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
 
 		<activity android:name="com.scoreloop.client.android.ui.component.market.MarketHeaderActivity"/>
 		<activity android:name="com.scoreloop.client.android.ui.component.market.MarketListActivity"/>
@@ -97,6 +108,5 @@
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 </manifest>

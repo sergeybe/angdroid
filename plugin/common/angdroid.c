@@ -711,7 +711,9 @@ static void term_data_link(int i)
 	/* Initialize the term */
 	term_init(t, 80, 24, 256);
 
+#if defined(ANGDROID_NIGHTLY) || defined(ANGDROID_ANGBAND_PLUGIN)
 	t->complex_input = TRUE;
+#endif
 
 	/* Choose "soft" or "hard" cursor XXX XXX XXX */
 	/* A "soft" cursor must be explicitly "drawn" by the program */
@@ -758,9 +760,6 @@ static void term_data_link(int i)
 	t->curs_hook = Term_curs_and;
 	t->wipe_hook = Term_wipe_and;
 	t->text_hook = Term_text_and;
-#if defined(ANGDROID_ANGBAND_PLUGIN) && !defined(ANGDROID_NIGHTLY)
-	t->xchar_hook = Term_xchar_and;
-#endif
 #if !defined(ANGDROID_TOME_PLUGIN) && !defined(ANGDROID_STEAM_PLUGIN)
 	t->pict_hook = Term_pict_and;
 #endif
