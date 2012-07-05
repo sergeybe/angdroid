@@ -220,7 +220,7 @@ public class KeyBuffer {
 		boolean char_mod = false;
 		if (event != null) {
 			//ch = event.getUnicodeChar(meta);
-			ch = event.getUnicodeChar();
+			ch = event.getUnicodeChar(event.getModifiers()|meta);
 			char_mod = (ch > 32 && ch < 127);
 		}
 		int key_code = char_mod ? ch : keyCode;
