@@ -219,12 +219,14 @@ public class KeyBuffer {
 		int ch = 0;
 		boolean char_mod = false;
 		if (event != null) {
-			ch = event.getUnicodeChar(meta);
+			//ch = event.getUnicodeChar(meta);
+			ch = event.getUnicodeChar();
 			char_mod = (ch > 32 && ch < 127);
 		}
 		int key_code = char_mod ? ch : keyCode;
 
 		String keyAssign = KeyMap.stringValue(key_code, alt_mod, char_mod);		
+		Log.d("Angband", "keyAssign="+keyAssign);
 		KeyMap map = Preferences.getKeyMapper().findKeyMapByAssign(keyAssign);
 		return map;
 	}
