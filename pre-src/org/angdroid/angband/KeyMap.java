@@ -79,8 +79,11 @@ public class KeyMap {
 		if (key_code == 0) 
 			return "";
 
-		else if (char_mod) 
+		else if (char_mod) {
+			if (key_code >= 'A' && key_code <= 'Z')
+				key_code = key_code + 'a' - 'A';
 			return "C"+(char)key_code;
+		}
 
 		// ignore alt modifier for these...
 		else if (key_code == KeyEvent.KEYCODE_ALT_LEFT 
