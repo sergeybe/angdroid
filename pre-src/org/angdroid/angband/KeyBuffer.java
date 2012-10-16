@@ -209,7 +209,7 @@ public class KeyBuffer {
 
 	private KeyMap getKeyMapFromKeyCode(int keyCode, KeyEvent event)
 	{
-		int meta=0;
+		int meta=0, event_modifiers=0;
 		if(alt_mod) {
 			meta |= KeyEvent.META_ALT_ON;
 			meta |= KeyEvent.META_ALT_LEFT_ON;
@@ -220,7 +220,10 @@ public class KeyBuffer {
 		boolean char_mod = false;
 		if (event != null) {
 			//ch = event.getUnicodeChar(meta);
-			ch = event.getUnicodeChar(event.getModifiers()|meta);
+			if (android.os.Build.VERSION.SDK_INT >= 13) {
+				event_modifiers = event.getModifiers();
+			}
+			ch = event.getUnicodeChar(event_modifiers|meta);
 			char_mod = (ch > 32 && ch < 127);
 		}
 		int key_code = char_mod ? ch : keyCode;

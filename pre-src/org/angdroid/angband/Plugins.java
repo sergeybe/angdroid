@@ -26,7 +26,7 @@ final public class Plugins {
 
 	public static String getFilesDir(Plugin p) {
 		switch (p) {
-		case Angband: return "angband";
+		case Angband: return "angband340";
 		case Angband306: return "306";
 		default: return p.toString().toLowerCase();
 		}
@@ -120,7 +120,7 @@ final public class Plugins {
 		switch (p) {
 		case Angband: 
 			return Environment.getExternalStorageDirectory()
-				+ "/Android/data/org.angdroid.angband/files/libangband320/save";
+				+ "/Android/data/org.angdroid.angband/files/libangband/save";
 		default: return "";
 		}		
 	}
