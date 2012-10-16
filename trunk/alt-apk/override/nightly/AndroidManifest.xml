@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="org.angdroid.nightly" android:versionCode="1"
-	android:versionName="3.3.X"
+	android:versionName="3.4.X"
 	android:installLocation="auto">
 
 	<application android:icon="@drawable/icon" 
