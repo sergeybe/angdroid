@@ -48,7 +48,7 @@ public class AngbandKeyboard implements OnKeyboardActionListener
 		char c = 0;
 		if(primaryCode == Keyboard.KEYCODE_DELETE)
 		{
-			c = 8;
+			c = 0x9F;
 		}
 		else if(primaryCode == Keyboard.KEYCODE_SHIFT)
 		{
