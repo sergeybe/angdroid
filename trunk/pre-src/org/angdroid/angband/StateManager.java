@@ -118,10 +118,17 @@ public class StateManager {
 	public void resetKeyBuffer() {
 		this.keyBuffer = new KeyBuffer(this);
 	}
+
 	public void addKey(int k) {
-		if (this.keyBuffer != null)
+		if (this.keyBuffer == null) {
+			return;
+		} else if (k == 0x9C) {
+			this.keyBuffer.add(getKeyEnter());
+		} else {
 			this.keyBuffer.add(k);
+		}
 	}
+
 	public int getKey(int v) {
 		if (this.keyBuffer != null)
 			return keyBuffer.get(v);

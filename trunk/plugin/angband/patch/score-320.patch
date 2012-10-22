@@ -18,3 +18,14 @@
  	}
  
  	/* Success */
+--- extsrc/src/config.h.orig	2012-10-17 15:02:32.836215353 -0700
++++ extsrc/src/config.h	2012-10-17 15:02:53.044214756 -0700
+@@ -97,7 +97,7 @@
+ #define ALLOW_BORG
+ 
+ /* Allow borgs to yield "high scores"? */
+-#define SCORE_BORGS
++/* #define SCORE_BORGS */
+ 
+ 
+ /*
