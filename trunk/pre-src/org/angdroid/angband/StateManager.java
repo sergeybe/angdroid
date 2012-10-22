@@ -124,6 +124,8 @@ public class StateManager {
 			return;
 		} else if (k == 0x9C) {
 			this.keyBuffer.add(getKeyEnter());
+		} else if (k == 0x9F) {
+			this.keyBuffer.add(getKeyBackspace());
 		} else if (k == 0xE000) {
 			this.keyBuffer.add(getKeyEsc());
 		} else {
