@@ -184,20 +184,20 @@ public class TermView extends View implements OnGestureListener {
 		int maxWidth = display.getWidth();
 		int maxHeight = display.getHeight();
 
-		//Log.d("Angband","isHighRes "+maxHeight+","+maxWidth +","+ (Math.max(maxWidth,maxHeight)>480));		
+		//Log.d("Angband","isHighRes "+maxHeight+","+maxWidth +","+ (Math.max(maxWidth,maxHeight)>480));
 		return Math.max(maxWidth,maxHeight)>480;
 	}
 
 	private void setFontSizeLegacy() {
-		font_text_size = 12;
-		char_height = 12;
+		font_text_size = 13;
+		char_height = 13;
 		char_width = 6;
 		setFontSize(font_text_size);
 	}
 
 	private void setFontFace() {
 		if ( !isHighRes() ) {
-			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x12.ttf");
+			tfTiny = Typeface.createFromAsset(getResources().getAssets(), "6x13.ttf");
 			fore.setTypeface(tfTiny);
 		}
 		else {
