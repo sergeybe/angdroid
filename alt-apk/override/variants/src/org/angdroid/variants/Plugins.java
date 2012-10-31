@@ -57,6 +57,30 @@ final public class Plugins {
 		}
 	}
 
+	public static int getKeyEnter(Plugin p) {
+		return '\r';
+	}
+
+	public static int getKeyTab(Plugin p) {
+		return '\t';
+	}
+
+	public static int getKeyDelete(Plugin p) {
+		return 0x7F;
+	}
+
+	public static int getKeyBackspace(Plugin p) {
+		return '\b';
+	}
+
+	public static int getKeyEsc(Plugin p) {
+		return 0x1B;
+	}
+
+	public static int getKeyQuitAndSave(Plugin p) {
+		return 0x18;
+	}
+
 	public static ZipInputStream getPluginZip(int plugin) {
 		InputStream is = null;
 

@@ -66,6 +66,10 @@ final public class Plugins {
 		return 0xE000;
 	}
 
+	public static int getKeyQuitAndSave(Plugin p) {
+		return 0x18;
+	}
+
 	public static ZipInputStream getPluginZip(int plugin) {
 		InputStream is = null;
 
