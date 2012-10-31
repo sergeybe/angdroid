@@ -95,6 +95,10 @@ final public class Plugins {
 		}
 	}
 
+	public static int getKeyQuitAndSave(Plugin p) {
+		return 0x18;
+	}
+
 	public static ZipInputStream getPluginZip(int plugin) {
 		InputStream is = null;
 		if (plugin == Plugin.Angband.getId())

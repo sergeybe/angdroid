@@ -101,6 +101,9 @@ public class StateManager {
 	public int getKeyEsc() {
 		return Plugins.getKeyEsc(currentPlugin);
 	}
+	public int getKeyQuitAndSave() {
+		return Plugins.getKeyQuitAndSave(currentPlugin);
+	}
 	public int getKeyTab() {
 		return Plugins.getKeyTab(currentPlugin);
 	}

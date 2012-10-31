@@ -198,9 +198,9 @@ public class KeyBuffer {
 		if (signal_game_exit) {
 			//Log.d("Angband", "getch.exit game sequence");
 			switch((quit_key_seq++)%4) {
-			case 0: return 27; // Esc
+			case 0: return state.getKeyEsc(); // Esc
 			case 1: return 0; 
-			case 2: return 24; // Ctrl-X (Quit)
+			case 2: return state.getKeyQuitAndSave(); // Ctrl-X (Quit)
 			case 3: return 0; 
 			}
 		}
