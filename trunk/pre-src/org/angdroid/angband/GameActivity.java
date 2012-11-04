@@ -44,9 +44,6 @@ import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.Message;
 
-import org.angdroid.angband.ActivityKeys;
-import com.flurry.android.FlurryAgent;
-
 public class GameActivity extends Activity {
 
 	public static StateManager state = null;
@@ -104,7 +101,7 @@ public class GameActivity extends Activity {
 			}
 		};
 
-		startFlurry();
+		StatPublisher.start(this);
 
 		rebuildViews();
 	}
@@ -113,7 +110,7 @@ public class GameActivity extends Activity {
 	public void onStop() {
 		super.onStop();
 
-		stopFlurry();
+		StatPublisher.stop(this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -317,13 +314,5 @@ public class GameActivity extends Activity {
 
 	public StateManager getStateManager() { 
 		return state;
-	}
-
-	private void startFlurry() {
-		FlurryAgent.onStartSession(this, ActivityKeys.FlurryKey);
-	}
-
-	private void stopFlurry() {
-		FlurryAgent.onEndSession(this);
 	}
 }
