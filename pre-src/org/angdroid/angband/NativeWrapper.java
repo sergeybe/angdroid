@@ -1,14 +1,6 @@
 package org.angdroid.angband;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import android.os.Handler;
-import android.os.Message;
-import android.view.KeyEvent;
 import java.util.Formatter;
-import java.util.HashMap;
-import com.scoreloop.client.android.core.model.Score;
-
 import android.util.Log;
 	
 public class NativeWrapper {
@@ -418,39 +410,38 @@ public class NativeWrapper {
 	    return -1;
     }
 
-    Score myComplexScore;
-    HashMap scoreMap = null;
+    ScoreContainer curScore;
 
     public void score_submit(final byte[] score, final byte[] level) {
-	Double myscore=0.0;
-	int mylevel=0;
-	try {
-	    String strScore = new String(score, "UTF-8");
-	    String strLevel = new String(level, "UTF-8");
-	    // Log.d("Angband","score = \"" + strScore + "\"");
-	    myscore = Double.parseDouble(strScore.trim());
-	    mylevel = Integer.parseInt(strLevel.trim());
-	} catch(java.io.UnsupportedEncodingException e) {
-	    Log.d("Angband","score: " + e);
-	}
-	myComplexScore = new Score(new Double(myscore), scoreMap);
-	myComplexScore.setLevel(mylevel);
-	state.handler.sendMessage(state.handler.obtainMessage(AngbandDialog.Action.Score.ordinal(), 0,0,myComplexScore));
+		if (curScore == null) curScore = new ScoreContainer();
+		curScore.score = 0.0;
+		curScore.level = 0;
+		try {
+			String strScore = new String(score, "UTF-8");
+			String strLevel = new String(level, "UTF-8");
+			//Log.d("Angband","score = \"" + strScore + "\"");
+
+			curScore.score = Double.parseDouble(strScore.trim());
+			curScore.level = Integer.parseInt(strLevel.trim());
+		} catch(java.io.UnsupportedEncodingException e) {
+			Log.d("Angband","score: " + e);
+		}
+		state.handler.sendMessage(state.handler.obtainMessage(AngbandDialog.Action.Score.ordinal(), 0, 0, curScore));
     }
 
     public void score_start() {
-	scoreMap = new HashMap();
+	    curScore = new ScoreContainer();
     }
 
     public void score_detail(final byte[] name, final byte[] value) {
-	try {
-	    String strName = new String(name, "UTF-8");
-	    String strValue = new String(value, "UTF-8");
-	    // Log.d("Angband","score detail: \"" + strName + "\" = \"" +
-	    // 	  strValue + "\"");
-	    scoreMap.put(strName, strValue.trim());
-	} catch(java.io.UnsupportedEncodingException e) {
-	    Log.d("Angband","score: " + e);
-	}
+		try {
+			String strName = new String(name, "UTF-8");
+			String strValue = new String(value, "UTF-8");
+			// Log.d("Angband","score detail: \"" + strName + "\" = \"" +
+			// 	  strValue + "\"");
+			curScore.map.put(strName, strValue.trim());
+		} catch(java.io.UnsupportedEncodingException e) {
+			Log.d("Angband","score: " + e);
+		}
     }
 }

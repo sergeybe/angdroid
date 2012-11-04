@@ -6,16 +6,12 @@ import android.app.ProgressDialog;
 import android.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
-import android.content.pm.PackageManager;
-import java.util.HashMap;
-import java.util.Iterator;
-import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
-import com.scoreloop.client.android.core.model.Score;
 
 public class AngbandDialog {
 	private GameActivity activity;
 	private StateManager state;
 	private ProgressDialog progressDialog = null;
+	private ScorePublisher score = null;
 
 	public enum Action {
 			OpenContextMenu
@@ -36,6 +32,7 @@ public class AngbandDialog {
 	AngbandDialog(GameActivity a, StateManager s) {
 		activity = a;
 		state = s;
+		score = new ScorePublisher(activity);
 	}
 
 	public void HandleMessage(Message msg) {
@@ -64,25 +61,7 @@ public class AngbandDialog {
 			Toast.makeText(activity, (String)msg.obj, Toast.LENGTH_SHORT).show();			
 			break;
 		case Score:
-			String versionName = "unknown";
-			try {
-				versionName = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0 ).versionName;
-			} catch(PackageManager.NameNotFoundException e) {
-				Log.d("Angband","error getting version" + e);
-			}
-			Score sc = (Score)msg.obj;
-			HashMap ctx = (HashMap)sc.getContext();
-			ctx.put("version", versionName);
-
-			// Iterator itr = ctx.keySet().iterator();
-			// while(itr.hasNext()) {
-			//     String key = (String)itr.next();
-			//     Log.d("Angband", key + " = \"" + ctx.get(key) +
-			// 	  "\"");
-			// }
-			
-			sc.setContext(ctx);
-			ScoreloopManagerSingleton.get().onGamePlayEnded((Score)msg.obj, false);
+			score.Publish((ScoreContainer)msg.obj);
 			break;
 		}
 	}
@@ -123,4 +102,13 @@ public class AngbandDialog {
 		return 0;
 	}
 
+	public void ShowScoreEntry()
+	{
+		score.ShowEntry();
+	}
+
+	public void ShowScoreLeaderboards()
+	{
+		score.ShowLeaderboards();
+	}
 }

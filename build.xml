@@ -12,6 +12,7 @@
 
     <target name="angband-debug" depends="angband-copy,angband-debug-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-debug" />
+	  <antcall target="dropbox"/>
     </target>
     <target name="angband-beta" depends="angband-copy,angband-debug-override">
 	  <ant inheritAll="true" dir="." antfile="build-angband.xml" target="angband-release" />
@@ -250,5 +251,12 @@
 		<fileset dir="./alt-apk/override/nightly-debug" />
 	  </copy>
     </target>
+
+    <condition property="is.dropbox.set">
+	  <isset property="dropbox-location" />
+    </condition>
+    <target name="dropbox" if="is.dropbox.set">
+	  <copy file="${dropbox-target}" todir="${dropbox-location}"/>
+	</target>
 
 </project>
