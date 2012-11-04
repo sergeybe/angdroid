@@ -46,13 +46,8 @@ import android.os.Message;
 
 import org.angdroid.angband.ActivityKeys;
 import com.flurry.android.FlurryAgent;
-import com.scoreloop.client.android.ui.EntryScreenActivity;
-import com.scoreloop.client.android.ui.LeaderboardsScreenActivity;
-import com.scoreloop.client.android.ui.ShowResultOverlayActivity;
-import com.scoreloop.client.android.ui.OnScoreSubmitObserver;
-import com.scoreloop.client.android.ui.ScoreloopManagerSingleton;
 
-public class GameActivity extends Activity implements OnScoreSubmitObserver {
+public class GameActivity extends Activity {
 
 	public static StateManager state = null;
 	private AngbandDialog dialog = null;
@@ -94,14 +89,13 @@ public class GameActivity extends Activity implements OnScoreSubmitObserver {
 			state = new StateManager();
 		}
 
-		ScoreloopManagerSingleton.get().setOnScoreSubmitObserver(this);
+		if (dialog == null) dialog = new AngbandDialog(this,state);
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
 
-		if (dialog == null) dialog = new AngbandDialog(this,state);
 		final AngbandDialog ad = dialog;
 		handler = new Handler() {
 			@Override
@@ -142,14 +136,10 @@ public class GameActivity extends Activity implements OnScoreSubmitObserver {
 			startActivity(intent);
 			break;
 		case '3':
-			intent = new Intent(this, EntryScreenActivity.class);
-			startActivity(intent);
+			dialog.ShowScoreEntry();
 			break;
 		case '4':
-			intent = new Intent(this, LeaderboardsScreenActivity.class);
-			intent.putExtra(LeaderboardsScreenActivity.LEADERBOARD,
-					LeaderboardsScreenActivity.LEADERBOARD_LOCAL);
-			startActivity(intent);
+			dialog.ShowScoreLeaderboards();
 			break;
 		case '5':
 			finish();
@@ -336,13 +326,4 @@ public class GameActivity extends Activity implements OnScoreSubmitObserver {
 	private void stopFlurry() {
 		FlurryAgent.onEndSession(this);
 	}
-
-    //The class implements OnScoreSubmitObserver and so must implement this callback
-       @Override
-	   public void onScoreSubmit(final int status, final Exception error) {
-
-           //Calls the ShowResultOverlayActivity. Make sure you have modified the
-	   //AndroidManifest.xml to reference this overlay class.
-	   startActivity(new Intent(this, ShowResultOverlayActivity.class));
-       }
 }

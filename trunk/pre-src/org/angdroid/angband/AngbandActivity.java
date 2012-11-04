@@ -70,16 +70,16 @@ public class AngbandActivity extends Activity {
 			public void handleMessage(Message msg) {
 				switch(msg.what) {
 				case 0:
-					Log.d("Angband", "handler show progress");	
+					//Log.d("Angband", "handler show progress");	
 					progressDialog = ProgressDialog.show(splash, "Angband", "Installing files...", true);
 					break;
 				case 1:
-					Log.d("Angband", "handler dismiss progress");	
+					//Log.d("Angband", "handler dismiss progress");	
 					if (progressDialog != null) progressDialog.dismiss();
 					progressDialog = null;
 					break;
 				case 2:
-					Log.d("Angband", "handler fatal error");	
+					//Log.d("Angband", "handler fatal error");	
 					new AlertDialog.Builder(splash) 
 						.setTitle("Angband") 
 						.setMessage((String)msg.obj) 
