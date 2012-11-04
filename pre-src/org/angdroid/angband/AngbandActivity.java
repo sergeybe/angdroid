@@ -35,9 +35,6 @@ import android.app.AlertDialog;
 import android.os.Message;
 import android.os.Handler;
 
-import org.angdroid.angband.ActivityKeys;
-import com.flurry.android.FlurryAgent;
-
 public class AngbandActivity extends Activity {
 
 	protected boolean active = true;
@@ -99,13 +96,13 @@ public class AngbandActivity extends Activity {
 	@Override
 	public void onStop() {
 		super.onStop();
-		stopFlurry();
+		StatPublisher.stop(this);
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
-		startFlurry();
+		StatPublisher.start(this);
 	}
 
 	public synchronized void checkInstall() {
@@ -160,13 +157,5 @@ public class AngbandActivity extends Activity {
 			active = false;
 		}
 		return true;
-	}
-
-	private void startFlurry() {
-		FlurryAgent.onStartSession(this, ActivityKeys.FlurryKey);
-	}
-
-	private void stopFlurry() {
-		FlurryAgent.onEndSession(this);
 	}
 }
