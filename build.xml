@@ -32,6 +32,7 @@
     </target>
     <target name="nightly-debug" depends="nightly-copy,nightly-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/nightly" antfile="build-nightly.xml" target="nightly-debug" />
+	  <antcall target="dropbox"/>
     </target>
     <target name="nightly-plugin-src" depends="nightly-copy,nightly-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/nightly" antfile="build-nightly.xml" target="plugin-src" />
@@ -42,6 +43,7 @@
     </target>
     <target name="classics-debug" depends="classics-copy,classics-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="classics-debug" />
+	  <antcall target="dropbox"/>
     </target>
     <target name="classics-release" depends="classics-copy,classics-release-override">
 	  <ant inheritAll="true" dir="./alt-apk/classics" antfile="build-classics.xml" target="classics-release" />
@@ -52,6 +54,7 @@
 
     <target name="variants-debug" depends="variants-copy,variants-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-debug" />
+	  <antcall target="dropbox"/>
     </target>
     <target name="variants-beta" depends="variants-copy,variants-debug-override">
 	  <ant inheritAll="true" dir="./alt-apk/variants" antfile="build-variants.xml" target="variants-release" />
