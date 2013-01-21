@@ -691,6 +691,15 @@ diff -Nru --strip-trailing-cr mor552cs/src/misc3.c mor552cs-android/src/misc3.c
  #endif
  
  static char *stat_names[] = { "STR : ", "INT : ", "WIS : ",
+@@ -148,7 +154,7 @@
+ 	    }
+ 	}
+       while ((must_be_small) 
+-	     && (set_large(&object_list[sorted_objects[i]])));
++			 && (set_large((inven_type*)&object_list[sorted_objects[i]])));
+     }
+   return(i);
+ }
 @@ -1439,7 +1445,7 @@
  
  
