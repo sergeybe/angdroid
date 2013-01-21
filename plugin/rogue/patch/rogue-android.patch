@@ -17,6 +17,33 @@ diff -Nru --strip-trailing-cr rogue210-source/src/init.c rogue210-source-android
  
  player_init()
  {
+@@ -178,7 +180,7 @@
+ 	obj = alloc_object();		/* initial weapons */
+ 	obj->what_is = WEAPON;
+ 	obj->which_kind = MACE;
+-	obj->damage = "2d3";
++	strcpy(obj->damage,"2d3");
+ 	obj->hit_enchant = obj->d_enchant = 1;
+ 	obj->identified = 1;
+ 	(void) add_to_pack(obj, &rogue.pack, 1);
+@@ -187,7 +189,7 @@
+ 	obj = alloc_object();
+ 	obj->what_is = WEAPON;
+ 	obj->which_kind = BOW;
+-	obj->damage = "1d2";
++	strcpy(obj->damage,"1d2");
+ 	obj->hit_enchant = 1;
+ 	obj->d_enchant = 0;
+ 	obj->identified = 1;
+@@ -197,7 +199,7 @@
+ 	obj->what_is = WEAPON;
+ 	obj->which_kind = ARROW;
+ 	obj->quantity = get_rand(25, 35);
+-	obj->damage = "1d2";
++	strcpy(obj->damage,"1d2");
+ 	obj->hit_enchant = 0;
+ 	obj->d_enchant = 0;
+ 	obj->identified = 1;
 @@ -230,6 +232,10 @@
  
  stop_window()
@@ -55,14 +82,22 @@ diff -Nru --strip-trailing-cr rogue210-source/src/invent.c rogue210-source-andro
  	'h',		"h \033     left",
  	'w',		"w       wield a weapon",
  	'j',		"j \031     down",
-@@ -176,6 +193,7 @@
+@@ -176,11 +193,12 @@
  	'b',		"b End   down & left",
  	'c',		"c       call object",
  	'n',		"n PgDn  down & right",
+-	(char)NULL,	"<SHIFT><dir>: run that way",
 +#endif
- 	(char)NULL,	"<SHIFT><dir>: run that way",
++	'\0',	"<SHIFT><dir>: run that way",
  	')',		")       print current weapon",
- 	(char)NULL,	"<CTRL><dir>: run till adjacent",
+-	(char)NULL,	"<CTRL><dir>: run till adjacent",
++	'\0',	"<CTRL><dir>: run till adjacent",
+ 	']',		"]       print current armor",
+-	(char)NULL,	"<SCROLL LOCK>: Fast Play mode",
++	'\0',	"<SCROLL LOCK>: Fast Play mode",
+ 	'=',		"=       print current rings",
+ 	't',		"t<dir>  throw something",
+ 	'\001',		"^A      print Hp-raise average",
 @@ -191,11 +209,15 @@
  	'\022',		"^R      redraw screen",
  	'\020',		"^P      repeat last message",
@@ -107,6 +142,86 @@ diff -Nru --strip-trailing-cr rogue210-source/src/main.c rogue210-source-android
          
  		play_level();		
  		free_stuff(&level_objects);
+diff -Nru --strip-trailing-cr rogue210-source/src/object.c rogue210-source-android/src/object.c
+--- rogue210-source/src/object.c	2004-02-14 08:42:32.000000000 -0800
++++ rogue210-source-android/src/object.c	2013-01-19 14:41:46.040468000 -0800
+@@ -74,20 +74,20 @@
+ };
+ 
+ struct id id_potions[POTIONS] = {
+-{100, "blue \0                           ", "of increase strength ", 0},
+-{250, "red \0                            ", "of restore strength ", 0},
+-{100, "green \0                          ", "of healing ", 0},
+-{200, "grey \0                           ", "of extra healing ", 0},
+- {10, "brown \0                          ", "of poison ", 0},
+-{300, "clear \0                          ", "of raise level ", 0},
+- {10, "pink \0                           ", "of blindness ", 0},
+- {25, "white \0                          ", "of hallucination ", 0},
+-{100, "purple \0                         ", "of detect monster ", 0},
+-{100, "black \0                          ", "of detect things ", 0},
+- {10, "yellow \0                         ", "of confusion ", 0},
+- {80, "plaid \0                          ", "of levitation ", 0},
+-{150, "burgundy \0                       ", "of haste self ", 0},
+-{145, "beige \0                          ", "of see invisible ", 0}
++{100, "blue @                           ", "of increase strength ", 0},
++{250, "red @                            ", "of restore strength ", 0},
++{100, "green @                          ", "of healing ", 0},
++{200, "grey @                           ", "of extra healing ", 0},
++ {10, "brown @                          ", "of poison ", 0},
++{300, "clear @                          ", "of raise level ", 0},
++ {10, "pink @                           ", "of blindness ", 0},
++ {25, "white @                          ", "of hallucination ", 0},
++{100, "purple @                         ", "of detect monster ", 0},
++{100, "black @                          ", "of detect things ", 0},
++ {10, "yellow @                         ", "of confusion ", 0},
++ {80, "plaid @                          ", "of levitation ", 0},
++{150, "burgundy @                       ", "of haste self ", 0},
++{145, "beige @                          ", "of see invisible ", 0}
+ };
+ 
+ 
+@@ -533,25 +533,25 @@
+ 	switch(obj->which_kind) {
+ 	case BOW:
+ 	case DART:
+-		obj->damage = "1d1";
++		strcpy(obj->damage,"1d1");
+ 		break;
+ 	case ARROW:
+-		obj->damage = "1d2";
++		strcpy(obj->damage,"1d2");
+ 		break;
+ 	case DAGGER:
+-		obj->damage = "1d3";
++		strcpy(obj->damage,"1d3");
+ 		break;
+ 	case SHURIKEN:
+-		obj->damage = "1d4";
++		strcpy(obj->damage,"1d4");
+ 		break;
+ 	case MACE:
+-		obj->damage = "2d3";
++		strcpy(obj->damage,"2d3");
+ 		break;
+ 	case LONG_SWORD:
+-		obj->damage = "3d4";
++		strcpy(obj->damage,"3d4");
+ 		break;
+ 	case TWO_HANDED_SWORD:
+-		obj->damage = "4d5";
++		strcpy(obj->damage,"4d5");
+ 		break;
+ 	}
+ }
+@@ -637,7 +637,7 @@
+ 	obj->picked_up = obj->is_cursed = 0;
+ 	obj->in_use_flags = NOT_USED;
+ 	obj->identified = UNIDENTIFIED;
+-	obj->damage = "1d1";
++	strcpy(obj->damage,"1d1");
+ 	return(obj);
+ }
+ 
 diff -Nru --strip-trailing-cr rogue210-source/src/pack.c rogue210-source-android/src/pack.c
 --- rogue210-source/src/pack.c	2004-02-18 20:40:00.000000000 -0800
 +++ rogue210-source-android/src/pack.c	2011-02-12 14:44:31.000000000 -0800
@@ -233,6 +348,15 @@ diff -Nru --strip-trailing-cr rogue210-source/src/rogue.h rogue210-source-androi
  #define MAX_TITLE_LENGTH 30
  #define MAXSYLLABLES 40
  #define MAX_METAL 14
+@@ -278,7 +293,7 @@
+ 
+ struct obj {				/* comment is monster meaning */
+ 	unsigned long m_flags;	/* monster flags */
+-	char *damage;			/* damage it does */
++	char damage[10];		/* damage it does */
+ 	short quantity;			/* hit points to kill */
+ 	short ichar;			/* 'A' is for aquatar */
+ 	short kill_exp;			/* exp for killing it */
 @@ -486,7 +501,11 @@
  #define MOVED 0
  #define MOVE_FAILED -1

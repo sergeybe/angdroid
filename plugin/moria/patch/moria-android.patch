@@ -848,6 +848,18 @@ diff -Nru --strip-trailing-cr mor552cs/src/prayer.c mor552cs-android/src/prayer.
  
  /* Pray like HELL.					-RAK-	*/
  void pray()
+diff -Nru --strip-trailing-cr mor552cs/src/recall.c mor552cs-android/src/recall.c
+--- mor552cs/src/recall.c	2002-08-13 12:27:00.000000000 -0700
++++ mor552cs-android/src/recall.c	2013-01-21 11:31:12.447314000 -0800
+@@ -115,7 +115,7 @@
+   "bright light",
+   "rock remover" };
+ 
+-static vtype roffbuf;		/* Line buffer. */
++static char roffbuf[80];		/* Line buffer. */
+ static char *roffp;		/* Pointer into line buffer. */
+ static int roffpline;		/* Place to print line now being loaded. */
+ 
 diff -Nru --strip-trailing-cr mor552cs/src/save.c mor552cs-android/src/save.c
 --- mor552cs/src/save.c	2002-08-25 23:45:44.000000000 -0700
 +++ mor552cs-android/src/save.c	2011-02-12 14:44:31.000000000 -0800
