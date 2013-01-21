@@ -317,7 +317,11 @@ void initGame(void) {
 	for(i = 0; i<POTIONS; i++) {
 		ptr = (char*)malloc(strlen(id_potions[i].title)+1);
 		strcpy(ptr,id_potions[i].title);
-		id_potions[i].title = ptr;
+
+		char* ptr2 = strchr(ptr,'@');
+		if (ptr2) *ptr2 = '\0';
+
+		id_potions[i].title = ptr;		
 	}
 	for(i = 0; i<SCROLS; i++) {
 		ptr = (char*)malloc(strlen(id_scrolls[i].title)+1);
