@@ -26,7 +26,7 @@ final public class Plugins {
 
 	public static String getFilesDir(Plugin p) {
 		switch (p) {
-		case Plugin.Rogue:
+		case Rogue:
 			return "rogue2";
 		default: 
 			return p.toString().toLowerCase();
