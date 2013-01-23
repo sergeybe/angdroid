@@ -168,10 +168,11 @@ public class TermView extends View implements OnGestureListener {
 		}
 		else {
 			font_text_size = 6;
+			boolean success = false;
 			do {
 				font_text_size += 1;
-				setFontSize(font_text_size, false);		
-			} while (char_width*Preferences.cols <= maxWidth);
+				success = setFontSize(font_text_size, false);		
+			} while (success && char_width*Preferences.cols <= maxWidth);
 
 			font_text_size -= 1;
 			setFontSize(font_text_size);
@@ -215,15 +216,15 @@ public class TermView extends View implements OnGestureListener {
 		setFontSize(font_text_size-1);
 	}
 
-	private void setFontSize(int size) {
-		setFontSize(size,true);
+	private boolean setFontSize(int size) {
+		return setFontSize(size,true);
 	}
-	private void setFontSize(int size, boolean persist) {
+	private boolean setFontSize(int size, boolean persist) {
 		
 		setFontFace();
 
-		if (size < 6) size = 6;
-		else if (size > 48) size = 48;
+		if (size < 6) {size = 6; return false;}
+		else if (size > 64) {size = 64; return false;}
 
 		font_text_size = size;
 
@@ -239,6 +240,7 @@ public class TermView extends View implements OnGestureListener {
 		char_height = (int)Math.ceil(fore.getFontSpacing()); 
 		char_width = (int)fore.measureText("X", 0, 1);	
 		//Log.d("Angband","setSizeFont "+fore.measureText("X", 0, 1));
+		return true;
 	}
 
 	@Override
@@ -266,7 +268,7 @@ public class TermView extends View implements OnGestureListener {
 		//Log.d("Angband","onMeasure "+canvas_width+","+canvas_height+";"+width+","+height);
 	}
 
-	@Override
+	@Override 
 	public boolean onTouchEvent(MotionEvent me) {
 		return gesture.onTouchEvent(me);
 	}
