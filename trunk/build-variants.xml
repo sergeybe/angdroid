@@ -25,11 +25,14 @@
 	    <property name="plugin.name" value="steam"/>
 	    <property name="pluginzip.name" value="steam"/>
 	</ant>
-<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
+	    <property name="plugin.name" value="sil"/>
+	    <property name="pluginzip.name" value="sil"/>
+	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-resources">
 	    <property name="plugin.name" value="npp"/>
+	    <property name="pluginzip.name" value="npp"/>
 	</ant>
--->
     </target>
 
     <target name="-post-compile">
@@ -52,20 +55,23 @@
 	    <property name="plugin.name" value="steam"/>
 	    <property name="pluginlib.name" value="steam"/>
 	  </ant>
-<!--
+	  <ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
+	    <property name="plugin.name" value="sil"/>
+	    <property name="pluginlib.name" value="sil"/>
+	  </ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="plugin-lib">
 	    <property name="plugin.name" value="npp"/>
+	    <property name="pluginlib.name" value="npp"/>
 	</ant>
--->
     </target>
 
     <condition property="is.exist.libs">
 	  	<and>
 			<available file="plugin/tome/extsrc/lib" type="dir" />	  
 			<available file="plugin/sang/extsrc/lib" type="dir" />	  
-<!--
+			<available file="plugin/steam/extsrc/lib" type="dir" />	  
+			<available file="plugin/sil/extsrc/lib" type="dir" />	  
 			<available file="plugin/npp/extsrc/lib" type="dir" />	  
--->
 		</and>
     </condition>
 	<target name="check-plugin-src" unless="is.exist.libs">
@@ -98,16 +104,43 @@
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
-<!--
 	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
+	    <property name="plugin.name" value="sil"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="sil-111-src.tar.gz"/>
+		<property name="extract.command" value="tar" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
+	</ant>
+
+	<property name="npp.file" value="npp-6.1.0beta2-src"/>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-src">
 	    <property name="plugin.name" value="npp"/>
 	    <property name="src.url.base" value="http://download.nppangband.org"/>
-	    <property name="src.url.file" value="npp-0.5.1-src-beta2.zip"/>
+	    <property name="src.url.file" value="${npp.file}.zip"/>
 		<property name="extract.command" value="unzip" />
 		<property name="extract.arg1" value="-q" />
+		<property name="extract.arg1" value="-o" />
 		<property name="extract.arg2" value="-d." />		
 	</ant>
--->
+	<!-- some hacking to fix the zip paths for npp -->
+	<exec executable="cp" 
+		  failonerror="true"
+		  dir="plugin/npp/extsrc/${npp.file}">
+		<arg value="-r"/>
+		<arg value="--remove-destination"/>
+	    <arg value="." />
+		<arg value=".."/>
+	</exec>
+	<exec executable="rm" 
+		  failonerror="true"
+		  dir="plugin/npp/extsrc">
+		<arg value="-rf"/>
+	    <arg value="${npp.file}" />
+	</exec>
+	<ant inheritAll="true" antfile="plugin/build.xml" target="patch-plugin-src">
+	    <property name="plugin.name" value="npp"/>
+	</ant>
     </target>
 <!--
     ************************************************************************
@@ -130,11 +163,12 @@
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="steam"/>
 	</ant>
-<!--
+	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
+	    <property name="plugin.name" value="sil"/>
+	</ant>
 	<ant inheritAll="true" antfile="plugin/build.xml" target="clean">
 	    <property name="plugin.name" value="npp"/>
 	</ant>
--->
     </target>
 
     <target name="clean" depends="clean-plugins">

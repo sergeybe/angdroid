@@ -7,25 +7,22 @@
       <item>ToME 2.3.5</item>
       <item>Sangband 1.0.0 lf3</item>
       <item>Steamband 0.4.1f</item>
-<!--
-      <item>NPPAngband 0.5.1 beta2</item>
--->
+      <item>Sil 1.1.1</item>
+      <item>NPPAngband 6.1.0 beta2</item>
     </string-array>
     <string-array name="gamePluginNames">
       <item>tome</item>
       <item>sang</item>
       <item>steam</item>
-<!--
+      <item>sil</item>
       <item>npp</item>
--->
     </string-array>
     <string-array name="gamePlugins">
       <item>0</item>
       <item>1</item>
       <item>2</item>
-<!--
-      <item>2</item>
--->
+	  <item>3</item> 
+      <item>4</item>
     </string-array>
 
     <string name="version">0.0.0.1</string>
