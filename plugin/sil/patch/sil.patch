@@ -1,0 +1,343 @@
+Binary files sil-111-source/sil-111-src.tar.gz and sil-111-source-android/sil-111-src.tar.gz differ
+diff -Nru --strip-trailing-cr sil-111-source/src/birth.c sil-111-source-android/src/birth.c
+--- sil-111-source/src/birth.c	2012-12-19 03:58:13.000000000 -0800
++++ sil-111-source-android/src/birth.c	2013-01-26 21:40:38.802703000 -0800
+@@ -856,7 +856,7 @@
+ 		hide_cursor = FALSE;
+ 
+ 		/* Exit the game */
+-		if ((c == 'Q') || (c == 'q'))	quit(NULL);
++		if ((c == 'Q') || (c == 'q') || (c == KTRL('X')))	quit(NULL);
+ 
+ 		/* Hack - go back */
+ 		if ((c == ESCAPE)|| (c == '4')) return (INVALID_CHOICE);
+diff -Nru --strip-trailing-cr sil-111-source/src/config.h sil-111-source-android/src/config.h
+--- sil-111-source/src/config.h	2010-02-21 13:05:02.000000000 -0800
++++ sil-111-source-android/src/config.h	2013-01-26 21:40:38.802703000 -0800
+@@ -281,6 +281,16 @@
+ 
+ #endif
+ 
++/*
++ * Hack -- Android stuff
++ */
++#ifdef USE_AND
++
++/* Do not handle signals */
++# undef HANDLE_SIGNALS
++
++#endif
++
+ 
+ /*
+  * OPTION: Set the "default" path to the angband "lib" directory.
+diff -Nru --strip-trailing-cr sil-111-source/src/dungeon.c sil-111-source-android/src/dungeon.c
+--- sil-111-source/src/dungeon.c	2013-01-01 06:02:02.000000000 -0800
++++ sil-111-source-android/src/dungeon.c	2013-01-28 20:09:57.844028023 -0800
+@@ -2800,8 +2800,10 @@
+ 	if (!load_player())
+ 	{
+ 		/* Oops */
++#ifndef USE_AND
+ 		character_icky--;
+ 		return;
++#endif
+ 	////	quit("broken savefile");
+ 	}
+ 
+diff -Nru --strip-trailing-cr sil-111-source/src/files.c sil-111-source-android/src/files.c
+--- sil-111-source/src/files.c	2012-09-02 09:56:35.000000000 -0700
++++ sil-111-source-android/src/files.c	2013-01-26 21:40:38.802703000 -0800
+@@ -3057,6 +3057,7 @@
+ 	}
+ 
+ 
++#ifndef USE_AND
+ 	/* Pick savefile name if needed */
+ 	if (sf)
+ 	{
+@@ -3078,6 +3079,7 @@
+ 		/* Build the filename */
+ 		path_build(savefile, sizeof(savefile), ANGBAND_DIR_SAVE, temp);
+ 	}
++#endif /* USE_AND */
+ }
+ 
+ /*
+@@ -3100,11 +3102,11 @@
+ 	Term_putstr(QUESTION_COL, INSTRUCT_ROW + 1, -1, TERM_SLATE,
+ 				"Enter accept name");
+ 	Term_putstr(QUESTION_COL, INSTRUCT_ROW + 2, -1, TERM_SLATE,
+-				"  Tab random name");
++				"    * random name");
+ 	
+ 	/* Hack - highlight the key names */
+ 	Term_putstr(QUESTION_COL, INSTRUCT_ROW + 1, - 1, TERM_L_WHITE, "Enter");
+-	Term_putstr(QUESTION_COL + 2, INSTRUCT_ROW + 2, - 1, TERM_L_WHITE, "Tab");
++	Term_putstr(QUESTION_COL + 2, INSTRUCT_ROW + 2, - 1, TERM_L_WHITE, "  *");
+ 
+ 	/* Special Prompt? */
+ 	if (character_dungeon)
+@@ -4712,7 +4714,7 @@
+ 		return (7);
+ 	}
+ 
+-	if ((ch == 'h') || (ch == 'q') || (ch == 'Q'))
++	if ((ch == 'h') || (ch == 'q') || (ch == 'Q') || (ch == KTRL('X')))
+ 	{
+ 		*highlight = 8;
+ 		return (8);
+diff -Nru --strip-trailing-cr sil-111-source/src/h-config.h sil-111-source-android/src/h-config.h
+--- sil-111-source/src/h-config.h	2012-08-14 14:27:16.000000000 -0700
++++ sil-111-source-android/src/h-config.h	2013-01-26 21:40:38.806703000 -0800
+@@ -201,7 +201,7 @@
+ 
+ #if !defined(MACINTOSH) && !defined(WINDOWS) && \
+     !defined(MSDOS) && !defined(USE_EMX) && \
+-    !defined(AMIGA) && !defined(RISCOS) && !defined(VM)
++    !defined(AMIGA) && !defined(RISCOS) && !defined(VM) && !defined(USE_AND)
+ # define SET_UID
+ #endif
+ 
+diff -Nru --strip-trailing-cr sil-111-source/src/init2.c sil-111-source-android/src/init2.c
+--- sil-111-source/src/init2.c	2012-04-09 02:05:47.000000000 -0700
++++ sil-111-source-android/src/init2.c	2013-01-28 20:11:51.348027504 -0800
+@@ -195,6 +195,7 @@
+ 	strcpy(tail, "script");
+ 	ANGBAND_DIR_SCRIPT = string_make(path);
+ 	
++	strcpy(tail, "");
+ #endif /* VM */
+ 	
+ 	
+@@ -1027,9 +1028,13 @@
+ 	(void)WIPE(p_ptr, player_type);
+ 				
+ 	// clear some additional things
++#ifndef USE_AND
+ 	savefile[0] = '\0';
++#endif
+ 	playerturn = 0;
++#ifndef USE_AND
+ 	op_ptr->full_name[0] = '\0';
++#endif
+ 
+ 	// clear the terms
+ 	for (i = 0; i < ANGBAND_TERM_MAX; i++)
+@@ -1164,7 +1169,7 @@
+ 	if (init_flavor_info()) quit("Cannot initialize flavors");
+ 	if (init_e_info()) quit("Cannot initialize special items");
+ 	
+-	
++	Rand_quick = TRUE;	
+ }
+ 
+ 
+@@ -1809,9 +1814,8 @@
+ 
+ 	Term_putstr(15, 17, 60, TERM_L_DARK, "________________________________________");
+ 	Term_putstr(20, 19, 25, (*highlight == 1) ? TERM_L_BLUE : TERM_WHITE, "a) Tutorial");
+-	Term_putstr(20, 20, 25, (*highlight == 2) ? TERM_L_BLUE : TERM_WHITE, "b) New character");
+-	Term_putstr(20, 21, 25, (*highlight == 3) ? TERM_L_BLUE : TERM_WHITE, "c) Open saved character");
+-	Term_putstr(20, 22, 25, (*highlight == 4) ? TERM_L_BLUE : TERM_WHITE, "d) Quit");
++	Term_putstr(20, 20, 25, (*highlight == 2) ? TERM_L_BLUE : TERM_WHITE, "b) Enter dungeon");
++	Term_putstr(20, 21, 25, (*highlight == 3) ? TERM_L_BLUE : TERM_WHITE, "c) Quit");
+ 
+ 	/* Flush the prompt */
+ 	Term_fresh();
+@@ -1831,26 +1835,20 @@
+ 		return (1);
+ 	}
+ 	
+-	/* New */
+-	if ((ch == 'b') || (ch == 'N') || (ch == 'n'))
++	/* Enter */
++	if ((ch == 'b') || (ch == 'E') || (ch == 'e'))
+ 	{
+ 		*highlight = 2;
+ 		return (2);
+ 	}
+ 
+-	/* Open */
+-	if ((ch == 'c') || (ch == 'O') || (ch == 'o'))
++	/* Quit */
++	if ((ch == 'c') || (ch == 'Q') || (ch == 'q') || (ch == KTRL('X')))
+ 	{
+ 		*highlight = 3;
+ 		return (3);
+ 	}
+ 
+-	/* Quit  */
+-	if ((ch == 'd') || (ch == 'Q') || (ch == 'q'))
+-	{
+-		return (4);
+-	}
+-	
+ 	/* Choose current  */
+ 	if ((ch == '\r') || (ch == '\n') || (ch == ' '))
+ 	{
+@@ -1858,13 +1856,13 @@
+ 	}
+ 
+ 	/* Prev item */
+-	if (ch == '8')
++	if (ch == '8' || ch == 'k')
+ 	{
+ 		if (*highlight > 1) (*highlight)--;
+ 	}
+ 
+ 	/* Next item */
+-	if (ch == '2')
++	if (ch == '2' || ch == 'j')
+ 	{
+ 		if (*highlight < 4) (*highlight)++;
+ 	}
+diff -Nru --strip-trailing-cr sil-111-source/src/main.c sil-111-source-android/src/main.c
+--- sil-111-source/src/main.c	2012-03-10 04:35:48.000000000 -0800
++++ sil-111-source-android/src/main.c	2013-01-28 20:13:49.120026890 -0800
+@@ -9,7 +9,7 @@
+  */
+ 
+ #include "angband.h"
+-
++#include "curses.h"
+ 
+ /*
+  * Some machines have a "main()" function in their "main-xxx.c" file,
+@@ -374,6 +374,10 @@
+ 
+ 	bool args = TRUE;
+ 
++#ifdef USE_AND
++	bool quit_selected = FALSE;
++	game_in_progress = FALSE;
++#endif
+ 
+ 	/* Save the "program name" XXX XXX XXX */
+ 	argv0 = argv[0];
+@@ -395,10 +399,10 @@
+ 
+ #endif /* SET_UID */
+ 
+-
++#ifndef USE_AND
+ 	/* Get the file paths */
+ 	init_stuff();
+-
++#endif
+ 
+ #ifdef SET_UID
+ 
+@@ -618,7 +622,7 @@
+ 	/* Process the player name */
+ 	////process_player_name(TRUE);
+ 
+-
++#ifndef USE_AND
+ 	/* Install "quit" hook */
+ 	quit_aux = quit_hook;
+ 
+@@ -639,6 +643,7 @@
+ 
+ 	/* Make sure we have a display! */
+ 	if (!done) quit("Unable to prepare any 'display module' (such as 'x11' or 'gcu')!");
++#endif /* USE_AND */
+ 
+ 	/* Catch nasty signals */
+ 	signals_init();
+@@ -663,7 +668,7 @@
+ 		{
+ 			int choice = 0;
+ 			int highlight = 1;
+-			char buf[80];
++			char buf[1080];
+ 			
+ 			if (p_ptr->is_dead) highlight = 4;
+ 			
+@@ -681,9 +686,10 @@
+ 						break;
+ 					case 2:
+ 						game_in_progress = TRUE;
+-						new_game = TRUE;
++						new_game = FALSE;
+ 						break;
+ 					case 3:
++#ifndef USE_AND
+ 						game_in_progress = TRUE;
+ 						new_game = FALSE;
+ 						
+@@ -714,11 +720,21 @@
+ 					case 4:
+ 						cleanup_angband();
+ 						quit(NULL);
++#else
++						quit_selected = TRUE;
++#endif
+ 						break;
+ 				}
++#ifdef USE_AND
++				if (quit_selected) break;
++#endif
+ 			}
+ 		}
+-		
++
++#ifdef USE_AND
++		if (quit_selected) break;
++#endif
++
+ 		/* Handle pending events (most notably update) and flush input */
+ 		Term_flush();
+ 		
+@@ -727,9 +743,14 @@
+ 		 * even handler as appropriate
+ 		 */
+ 		play_game(new_game);
+-		
++
+ 		// rerun the first initialization routine
++#ifdef USE_AND
++		extern void init_android_stuff(void);
++		init_android_stuff();
++#else
+ 		init_stuff();
++#endif
+ 		
+ 		// do some more between-games initialization
+ 		re_init_some_things();
+@@ -741,8 +762,10 @@
+ 	/* Free resources */
+ 	cleanup_angband();
+ 
++#ifndef USE_AND
+ 	/* Quit */
+ 	quit(NULL);
++#endif
+ 
+ 	/* Exit */
+ 	return (0);
+diff -Nru --strip-trailing-cr sil-111-source/src/util.c sil-111-source-android/src/util.c
+--- sil-111-source/src/util.c	2012-06-10 04:27:34.000000000 -0700
++++ sil-111-source-android/src/util.c	2013-01-28 20:14:03.820026604 -0800
+@@ -624,8 +624,11 @@
+ #else
+ 
+ 	/* Create the file, fail if exists, write-only, binary */
++#ifdef USE_AND
++	fd = open(buf, O_CREAT | O_WRONLY | O_BINARY, mode);
++#else
+ 	fd = open(buf, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, mode);
+-
++#endif /* USE_AND */
+ #endif
+ 
+ #if defined(MAC_MPW) || defined(MACH_O_CARBON)
+@@ -3709,7 +3712,7 @@
+ 				break;
+ 			}
+ 			
+-			case '\t':
++			case '*':
+ 			{
+ 				/*get the random name, display for approval. */
+ 				make_random_name(buf, len);

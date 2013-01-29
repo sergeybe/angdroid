@@ -6,8 +6,7 @@ import java.io.InputStream;
 
 final public class Plugins {
 	public enum Plugin {
-		ToME(0), Sangband(1), Steamband(2);
-		//NPP(?);
+		ToME(0), Sangband(1), Steamband(2), Sil(3), NPP(4);
 
 		private int id;
 
@@ -90,8 +89,10 @@ final public class Plugins {
 			is = Preferences.getResources().openRawResource(R.raw.zipsang);
 		else if (plugin == Plugin.Steamband.getId())
 			is = Preferences.getResources().openRawResource(R.raw.zipsteam);
-		//else if (plugin == Plugin.NPP.getId())
-		//	is = Preferences.getResources().openRawResource(R.raw.zipnpp);
+		else if (plugin == Plugin.Sil.getId())
+			is = Preferences.getResources().openRawResource(R.raw.zipsil);
+		else if (plugin == Plugin.NPP.getId())
+			is = Preferences.getResources().openRawResource(R.raw.zipnpp);
 
 		return new ZipInputStream(is);
 	}
@@ -103,8 +104,10 @@ final public class Plugins {
 			is = Preferences.getResources().openRawResource(R.raw.crcsang);
 		else if (plugin == Plugin.Steamband.getId())
 			is = Preferences.getResources().openRawResource(R.raw.crcsteam);
-		//else if (plugin == Plugin.NPP.getId())
-		//	is = Preferences.getResources().openRawResource(R.raw.crcnpp);
+		else if (plugin == Plugin.Sil.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crcsil);
+		else if (plugin == Plugin.NPP.getId())
+			is = Preferences.getResources().openRawResource(R.raw.crcnpp);
 		return new Scanner(is).useDelimiter("\\A").next().trim();
 	}
 
@@ -117,5 +120,4 @@ final public class Plugins {
 	public static String getStartBorgSequence() {
 		return "";
 	}
-
 }

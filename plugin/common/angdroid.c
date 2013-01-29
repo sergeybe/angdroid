@@ -1023,7 +1023,11 @@ int queryInt(const char* argv0) {
 #if defined (ANGDROID_ANGBAND_PLUGIN) 
 		if (op_ptr && OPT(rogue_like_commands)) result=1;
 #else
+#if defined (ANGDROID_SIL_PLUGIN) 
+		if (op_ptr && op_ptr->opt[OPT_hjkl_movement]) result=1;
+#else
 		if (rogue_like_commands) result=1;
+#endif
 #endif
 	}
 	else {
@@ -1077,6 +1081,12 @@ void angdroid_main() {
 	pause_line(Term->hgt - 1);
 	play_game(FALSE);
 	//cleanup_angband(); todo
+#endif 
+
+#if defined (ANGDROID_SIL_PLUGIN)
+	char *a = "sil";
+	char *args[2] = {a,NULL}; 
+	main(1,args);
 #endif 
 
 	LOGD("angdroid_main exit normally");
