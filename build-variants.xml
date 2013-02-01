@@ -112,34 +112,13 @@
 		<property name="extract.arg1" value="--strip-components=1" />
 		<property name="extract.arg2" value="-xzf" />
 	</ant>
-
-	<property name="npp.file" value="npp-6.1.0beta2-src"/>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="get-src">
+	<ant inheritAll="true" antfile="plugin/build.xml" target="get-patch-plugin-src">
 	    <property name="plugin.name" value="npp"/>
-	    <property name="src.url.base" value="http://download.nppangband.org"/>
-	    <property name="src.url.file" value="${npp.file}.zip"/>
-		<property name="extract.command" value="unzip" />
-		<property name="extract.arg1" value="-q" />
-		<property name="extract.arg1" value="-o" />
-		<property name="extract.arg2" value="-d." />		
-	</ant>
-	<!-- some hacking to fix the zip paths for npp -->
-	<exec executable="cp" 
-		  failonerror="true"
-		  dir="plugin/npp/extsrc/${npp.file}">
-		<arg value="-r"/>
-		<arg value="--remove-destination"/>
-	    <arg value="." />
-		<arg value=".."/>
-	</exec>
-	<exec executable="rm" 
-		  failonerror="true"
-		  dir="plugin/npp/extsrc">
-		<arg value="-rf"/>
-	    <arg value="${npp.file}" />
-	</exec>
-	<ant inheritAll="true" antfile="plugin/build.xml" target="patch-plugin-src">
-	    <property name="plugin.name" value="npp"/>
+	    <property name="src.url.base" value="http://angdroid.googlecode.com/files"/>
+	    <property name="src.url.file" value="npp-6.1.0beta2-src.tar.gz"/>
+		<property name="extract.command" value="tar" />
+		<property name="extract.arg1" value="--strip-components=1" />
+		<property name="extract.arg2" value="-xzf" />
 	</ant>
     </target>
 <!--

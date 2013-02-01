@@ -298,6 +298,12 @@ static errr Term_xtra_and(int n, int v)
 #ifdef ANGDROID_SANGBAND_PLUGIN
 					do_cmd_save_game(TRUE);
 #endif
+#ifdef ANGDROID_SIL_PLUGIN
+					do_cmd_save_game();
+#endif
+#ifdef ANGDROID_NPP_PLUGIN
+					save_game();
+#endif
 #ifdef ANGDROID_ANGBAND_PLUGIN
 					extern void save_game(void);
 					save_game();
@@ -873,10 +879,9 @@ static void and_sound(int v)
  * This function is used to keep the "path" variable off the stack.
  */
 
-
-static void init_stuff()
+void init_android_stuff(void)
 {
-	LOGD("angdroid.init_stuff");
+	LOGD("angdroid.init_android_stuff");
 
 	/* Prepare the path XXX XXX XXX */
 	/* This must in some way prepare the "path" variable */
@@ -996,7 +1001,7 @@ void initGame ()
 	ANGBAND_SYS = "and";
 
 	/* Initialize some stuff */
-	init_stuff();
+	init_android_stuff();
 
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 	/* Set up the command hook */
@@ -1005,8 +1010,10 @@ void initGame ()
 	LOGD("init_display()");
 	init_display();
 #else
+#ifndef ANDROID_SIL_PLUGIN
 	LOGD("init_angband()");
 	init_angband();
+#endif
 #endif /* ANGDROID_ANGBAND_PLUGIN */
 }
 
@@ -1092,3 +1099,5 @@ void angdroid_main() {
 	LOGD("angdroid_main exit normally");
 	quit(NULL);
 }
+
+
