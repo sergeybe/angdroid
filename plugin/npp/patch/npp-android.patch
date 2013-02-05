@@ -6,8 +6,8 @@ diff -Nru --strip-trailing-cr npp-6.1.0beta2-src/src/death.c npp-6.1.0beta2-src-
  		if (c.key == ESCAPE || cursor == (menu->count -1))
  		{
 -			if (get_check("Do you want to quit? "))
-+			char opts[4]; sprintf(opts,"yn%c",KTRL('X'));
-+			if (get_char("Do you want to quit? ", opts, 3, 'n'))
++			char opts[4],ch;sprintf(opts,"yn%c",KTRL('X'));ch=get_char("Do you want to quit? ", opts, 3, 'n');
++			if (ch == 'y' || ch == KTRL('X'))
  				break;
  		}
  		else if (c.type == EVT_SELECT && death_actions[cursor].action)
