@@ -915,8 +915,12 @@ void init_android_stuff(void)
 	strnfmt(temp, sizeof(temp), "%s", android_savefile);
 	path_build(savefile, sizeof(savefile), ANGBAND_DIR_SAVE, temp);
 
+#ifdef ANGDROID_NIGHTLY
+	savefile_set_name(android_savefile);
+#else
 	extern void process_player_name(bool sf);
 	process_player_name(FALSE);
+#endif
 
 #if defined (ANGDROID_ANGBAND_PLUGIN) || defined (ANGDROID_NPP_PLUGIN)
 #ifdef USE_SOUND
