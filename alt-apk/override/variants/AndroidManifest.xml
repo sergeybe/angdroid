@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="org.angdroid.variants" android:versionCode="7"
-	android:versionName="2.3.5.7"
+	package="org.angdroid.variants" android:versionCode="8"
+	android:versionName="2.3.5.8"
 	android:installLocation="auto">
 
 	<application android:icon="@drawable/icon" 

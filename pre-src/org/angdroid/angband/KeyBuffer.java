@@ -221,7 +221,7 @@ public class KeyBuffer {
 		if (event != null) {
 			//ch = event.getUnicodeChar(meta);
 			if (android.os.Build.VERSION.SDK_INT >= 13) {
-				event_modifiers = event.getModifiers();
+			    event_modifiers = event.getModifiers() & ~(KeyEvent.META_CTRL_ON|KeyEvent.META_CTRL_LEFT_ON|KeyEvent.META_CTRL_RIGHT_ON);
 			}
 			ch = event.getUnicodeChar(event_modifiers|meta);
 			char_mod = (ch > 32 && ch < 127);
