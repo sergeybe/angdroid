@@ -637,13 +637,22 @@ static errr Term_wipe_and(int x, int y, int n)
  * the "always_text" flag is set, if this flag is not set, all the
  * "black" text will be handled by the "Term_wipe_and()" hook.
  */
+#ifdef ANGDROID_NIGHTLY
+static errr Term_text_and(int x, int y, int n, int a, const wchar_t *cp)
+#else
 static errr Term_text_and(int x, int y, int n, byte a, const char *cp)
+#endif
 {
 	term_data *td = (term_data*)(Term->data);
 
 	move(y, x);
 	attrset(a);
+#ifdef ANGDROID_NIGHTLY
+	// todo: addnwstr(n, cp);
 	addnstr(n, cp);
+#else
+	addnstr(n, cp);
+#endif
 
 	/* Success */
 	return 0;
@@ -675,8 +684,13 @@ static errr Term_text_and(int x, int y, int n, byte a, const char *cp)
  * This function is only used if one of the "higher_pict" and/or
  * "always_pict" flags are set.
  */
+#ifdef ANGDROID_NIGHTLY
+static errr Term_pict_and(int x, int y, int n, const int *ap, const wchar_t *cp, 
+						  const int *tap, const wchar_t *tcp)
+#else
 static errr Term_pict_and(int x, int y, int n, const byte *ap, const char *cp,
                           const byte *tap, const char *tcp)
+#endif
 {
 	term_data *td = (term_data*)(Term->data);
 
