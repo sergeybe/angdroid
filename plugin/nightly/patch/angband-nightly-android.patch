@@ -5,15 +5,15 @@ diff -Nru --strip-trailing-cr angband-nightly/src/buildid.h angband-nightly-andr
  # define XSTR(x) STR(x)
  # define VERSION_STRING XSTR(BUILD_ID)
  #else
--# define VERSION_STRING "3.5-dev"
-+# define VERSION_STRING "3.5-dev built " __DATE__ " " __TIME__
+-# define VERSION_STRING "3.5.0"
++# define VERSION_STRING "3.5.0 built " __DATE__ " " __TIME__
  #endif
  
  extern const char *buildid;
 diff -Nru --strip-trailing-cr extsrc.orig/src/spells1.c extsrc/src/spells1.c
 --- extsrc.orig/src/spells1.c	2011-10-11 12:01:03.361884400 -0700
 +++ extsrc/src/spells1.c	2011-10-11 12:03:58.785192500 -0700
-@@ -536,7 +536,7 @@
+@@ -534,7 +534,7 @@
  	/* Decide on output char */
  	if (use_graphics == GRAPHICS_NONE) {
  		/* ASCII is simple */

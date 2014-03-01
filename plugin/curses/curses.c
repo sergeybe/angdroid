@@ -380,7 +380,7 @@ int noise() {
 
 void angdroid_quit(const char* msg) {
 	if (msg) {
-		LOGE(msg);
+		LOGE("%s",msg);
 		JAVA_CALL(NativeWrapper_fatal, (*env)->NewStringUTF(env, msg));
 	}
 
@@ -393,7 +393,7 @@ void angdroid_quit(const char* msg) {
 
 void angdroid_warn(const char* msg) {
 	if (msg) {
-		LOGW(msg);
+		LOGW("%s",msg);
 		JAVA_CALL(NativeWrapper_warn, (*env)->NewStringUTF(env, msg));
 	}
 }
@@ -424,7 +424,7 @@ size_t mbstowcs(wchar_t *wcstr, const char *mbstr, size_t max) {
 	//  LOGD("mbs = |%s|", mbstr);
 	int res = JAVA_CALL_INT(NativeWrapper_mbstowcs, wcstr_a, mbstr_a, max);
 	if(wcstr) {
-	  (*env)->GetByteArrayRegion(env, wcstr_a, 0, res, wcstr);
+		(*env)->GetByteArrayRegion(env, wcstr_a, 0, res, (jbyte*)wcstr);
 	  if(res < max) {
 	    wcstr[res] = 0;
 	  }
@@ -446,7 +446,7 @@ size_t wcstombs(wchar_t *mbstr, const char *wcstr, size_t max) {
 	//  LOGD("wcs = |%s|", wcstr);
 	int res = JAVA_CALL_INT(NativeWrapper_wcstombs, mbstr_a, wcstr_a, max);
 	if(mbstr) {
-	  (*env)->GetByteArrayRegion(env, mbstr_a, 0, res, mbstr);
+	  (*env)->GetByteArrayRegion(env, mbstr_a, 0, res, (jbyte*)mbstr);
 	  if(res < max) {
 	    mbstr[res] = 0;
 	  }
