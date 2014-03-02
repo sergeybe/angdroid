@@ -648,8 +648,7 @@ static errr Term_text_and(int x, int y, int n, byte a, const char *cp)
 	move(y, x);
 	attrset(a);
 #ifdef ANGDROID_NIGHTLY
-	// todo: addnwstr(n, cp);
-	addnstr(n, cp);
+	addnwstr(n, cp);
 #else
 	addnstr(n, cp);
 #endif

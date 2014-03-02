@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <wchar.h>
 #include "curses.h"
 
 #define JAVA_CALL(...) ((*env)->CallVoidMethod(env, NativeWrapperObj, __VA_ARGS__))
@@ -79,6 +81,10 @@ int addch(const char a){
 	addnstr(1,&a);
 	return 0;
 }
+int addwch(const wchar_t a){
+	addnwstr(1,&a);
+	return 0;
+}
 int delch(){
 	int x,y;
 	getyx(stdscr, y, x);
@@ -91,18 +97,33 @@ int waddch(WINDOW *w, const char a){
 	waddnstr(w,1,&a);
 	return 0;
 }
+int waddwch(WINDOW *w, const wchar_t a){
+	waddnwstr(w,1,&a);
+	return 0;
+}
 
 int addstr(const char *s){
 	addnstr(strlen(s), s);
+	return 0;
+}
+int addwstr(const wchar_t *s){
+	addnwstr(wcslen(s), s);
 	return 0;
 }
 int waddstr(WINDOW * w, const char *s){
 	waddnstr(w,strlen(s), s);
 	return 0;
 }
+int waddwstr(WINDOW * w, const wchar_t *s){
+	waddnwstr(w,wcslen(s), s);
+	return 0;
+}
 
 int addnstr(int n, const char *s) {
 	waddnstr(stdscr, n, s);
+}
+int addnwstr(int n, const wchar_t *s) {
+	waddnwstr(stdscr, n, s);
 }
 
 int waddnstr(WINDOW* w, int n, const char *s) {
@@ -112,6 +133,24 @@ int waddnstr(WINDOW* w, int n, const char *s) {
 	LOGC("curses.waddnstr %d %d %c",w->w,n,s[0]);
 	JAVA_CALL(NativeWrapper_waddnstr, w->w, n, array);
 	(*env)->DeleteLocalRef(env, array);
+	return 0;
+}
+
+int waddnwstr(WINDOW* w, int n, const wchar_t *ws) {	
+	wchar_t* wbuf = malloc(sizeof(wchar_t)*(n+1));
+	memcpy(wbuf,ws,sizeof(wchar_t)*n);
+	wbuf[n]=0;
+
+	size_t len = wcstombs((char*)NULL, wbuf, (size_t)32000);
+	char* s = malloc(len+1);
+
+	wcstombs(s, wbuf, len+1);
+
+	free(wbuf);
+
+	waddnstr(w, n, s);
+
+	free(s);
 	return 0;
 }
 
@@ -132,11 +171,20 @@ int mvaddch(int y, int x, const char a){
 	addch(a);
 	return 0;
 }
+int mvaddwch(int y, int x, const wchar_t a){
+	move(y,x);
+	addwch(a);
+	return 0;
+}
 
 int mvwaddch(WINDOW * w,int y, int x, const char a){
 	wmove(w,y,x);
 	waddch(w,a);
 	return 0;
+}
+int mvwaddwch(WINDOW * w,int y, int x, const wchar_t a){
+	wmove(w,y,x);
+	waddwch(w,a);
 }
 
 int mvwaddstr(WINDOW* w,int y, int x, const char *s){
@@ -144,10 +192,19 @@ int mvwaddstr(WINDOW* w,int y, int x, const char *s){
 	waddstr(w,s);
 	return 0;
 }
+int mvwaddwstr(WINDOW* w,int y, int x, const wchar_t *s){
+	wmove(w,y,x);
+	waddwstr(w,s);
+	return 0;
+}
 int mvaddstr(int y, int x, const char *s){
 	move(y,x);
 	addstr(s);
 	return 0;
+}
+int mvaddwstr(int y, int x, const wchar_t *s){
+	move(y,x);
+	addwstr(s);
 }
 
 int hline(const char a, int n){
@@ -400,7 +457,7 @@ void angdroid_warn(const char* msg) {
 
 
 // #if defined(ANGDROID_NIGHTLY)
-
+/* retired wchar functions below in favor of CrystaX Android NDK
 int wctomb(char *pmb, wchar_t character) {
 	// LOGD("begin wctomb (c)");
 	jbyteArray pmb_a = (*env)->NewByteArray(env, 4);
@@ -435,14 +492,14 @@ size_t mbstowcs(wchar_t *wcstr, const char *mbstr, size_t max) {
 	return res;
 }
 
-size_t wcstombs(wchar_t *mbstr, const char *wcstr, size_t max) {
+size_t wcstombs(char *mbstr, const wchar_t *wcstr, size_t max) {
 	//  LOGD("begin wcstombs (%s,%d)", wcstr, max);
 	jbyteArray mbstr_a = (*env)->NewByteArray(env, max);
 	if (mbstr_a == NULL) angdroid_quit("wcstombs: Out of memory");
-	int wclen = strlen(wcstr);
+	int wclen = wcslen(wcstr);
 	jbyteArray wcstr_a = (*env)->NewByteArray(env, wclen);
 	if (wcstr_a == NULL) angdroid_quit("wcstombs: Out of memory");
-	(*env)->SetByteArrayRegion(env, wcstr_a, 0, wclen, wcstr);
+	(*env)->SetByteArrayRegion(env, wcstr_a, 0, wclen, (jbyte*)wcstr);
 	//  LOGD("wcs = |%s|", wcstr);
 	int res = JAVA_CALL_INT(NativeWrapper_wcstombs, mbstr_a, wcstr_a, max);
 	if(mbstr) {
@@ -456,7 +513,7 @@ size_t wcstombs(wchar_t *mbstr, const char *wcstr, size_t max) {
 	//  LOGD("end wcstombs (c)");
 	return res;
 }
-
+*/
 // #endif
 
 void android_score_start() {
